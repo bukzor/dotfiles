@@ -1,0 +1,23 @@
+
+\u0020 =  
+  ! " # $ % & ' ( 
+\u0029 = )
+) * + , - . / 0 1 
+\u0032 = 2
+2 3 4 5 6 7 8 9 : 
+\u003B = ;
+; < = > ? @ A B C 
+\u0044 = D
+D E F G H I J K L 
+\u004D = M
+M N O P Q R S T U 
+\u0056 = V
+V W X Y Z [ \ ] ^ 
+\u005F = _
+_ ` a b c d e f g 
+\u0068 = h
+h i j k l m n o p 
+\u0071 = q
+q r s t u v w x y 
+\u007A = z
+z { | } ~

@@ -1,0 +1,71 @@
+eth1      Scan completed :
+          Cell 01 - Address: 00:14:1C:AD:59:A0
+                    ESSID:"UIUCnet"
+                    Protocol:IEEE 802.11g
+                    Mode:Managed
+                    Frequency:2.412 GHz (Channel 1)
+                    Quality:0/100  Signal level:-50 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 6 Mb/s; 9 Mb/s
+                              11 Mb/s; 12 Mb/s; 18 Mb/s; 24 Mb/s; 36 Mb/s
+                              48 Mb/s; 54 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+          Cell 02 - Address: 00:13:C4:CE:71:00
+                    ESSID:"UIUCnet"
+                    Protocol:IEEE 802.11g
+                    Mode:Managed
+                    Frequency:2.437 GHz (Channel 6)
+                    Quality:0/100  Signal level:-77 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 6 Mb/s; 9 Mb/s
+                              11 Mb/s; 12 Mb/s; 18 Mb/s; 24 Mb/s; 36 Mb/s
+                              48 Mb/s; 54 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+          Cell 03 - Address: 00:14:1C:AD:5B:D0
+                    ESSID:"UIUCnet"
+                    Protocol:IEEE 802.11g
+                    Mode:Managed
+                    Frequency:2.462 GHz (Channel 11)
+                    Quality:0/100  Signal level:-79 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 6 Mb/s; 9 Mb/s
+                              11 Mb/s; 12 Mb/s; 18 Mb/s; 24 Mb/s; 36 Mb/s
+                              48 Mb/s; 54 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+          Cell 04 - Address: 00:14:1C:AD:59:40
+                    ESSID:"UIUCnet"
+                    Protocol:IEEE 802.11g
+                    Mode:Managed
+                    Frequency:2.462 GHz (Channel 11)
+                    Quality:0/100  Signal level:-98 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 6 Mb/s; 9 Mb/s
+                              11 Mb/s; 12 Mb/s; 18 Mb/s; 24 Mb/s; 36 Mb/s
+                              48 Mb/s; 54 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+          Cell 05 - Address: 00:13:C4:3D:6A:D0
+                    ESSID:"UIUCnet"
+                    Protocol:IEEE 802.11a
+                    Mode:Managed
+                    Frequency:5.22 GHz
+                    Quality:0/100  Signal level:-60 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:6 Mb/s; 9 Mb/s; 12 Mb/s; 18 Mb/s; 24 Mb/s
+                              36 Mb/s; 48 Mb/s; 54 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+          Cell 06 - Address: 00:0D:88:A0:DA:E3
+                    ESSID:"planets"
+                    Protocol:IEEE 802.11b
+                    Mode:Managed
+                    Frequency:2.422 GHz (Channel 3)
+                    Quality:0/100  Signal level:-41 dBm  Noise level:-256 dBm
+                    Encryption key:off
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 11 Mb/s
+                    Extra:bcn_int=100
+                    Extra:atim=0
+
