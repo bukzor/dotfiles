@@ -2,11 +2,12 @@
 import os
 
 def rand():
-	"""a random string"""
+	"""rand () -> a random string
+this can be converted to a floating point number"""
 	return str(os.times()[4])
 
 def run(command, errors = True):
-	"""run commands errors=True
+	"""run(commands, errors=True)
 	runs a command, and exits on error (blocking)
 	prints command output to terminal
 	'command' is the command to run
@@ -30,24 +31,31 @@ def run(command, errors = True):
 		return ret
 
 def doc(obj):
-	#print out all the documentation for a certain object
-	print obj,":",
+	"""doc(object)
+prettyprint all the documentation for an object, as well as all the objects it contains"""
+
+	s = repr(obj) + " : "
 	if callable(obj):
-		print "function"
+		s += " function"
 	else:
-		print type(obj)
-	print obj.__doc__
-	print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+		s +=  repr(type(obj))
+	s += "\n"
+	s +=  obj.__doc__
+	s +=  "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 
 	for x in dir(obj):
-		print x,":",
-		x = getattr(obj, x)
-		if callable(x):
-			print "function"
-			print x.__doc__
-		else:
-			print type(x)
-			print x
-		print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+		if x[:2] != "__":
+			s +=  x + " : "
+			x = getattr(obj, x)
+			if callable(x):
+					s +=  "function\n"
+					s +=  x.__doc__
+			else:
+					s +=  repr(type(x))
+					s += "\n"
+					s +=  str(x)
+			s +=  "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+	return s
+
 
 #run("svn add /home/golemon/emsvn.remote/*")
