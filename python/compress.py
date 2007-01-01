@@ -53,5 +53,5 @@ substitution:
 
 NOTE: "symbol" must be a string not found in the original,
 	and must not be accidentally generated during compression:
-""
+"""
 
