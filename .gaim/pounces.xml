@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<pounces version='1.0'>
+ <pounce ui='gtk-gaim'>
+  <account protocol='prpl-oscar'>bukzor</account>
+  <pouncee>ezelle13</pouncee>
+  <events>
+   <event type='sign-on'/>
+   <event type='away'/>
+   <event type='return-from-away'/>
+   <event type='return-from-idle'/>
+   <event type='start-typing'/>
+  </events>
+  <actions>
+   <action type='popup-notify'/>
+  </actions>
+  <save/>
+ </pounce>
+</pounces>
