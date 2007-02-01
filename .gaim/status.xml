@@ -17,6 +17,10 @@
 		<state>away</state>
 		<message>@home&lt;br&gt;&lt;br&gt;this weather sucks</message>
 	</status>
+	<status name="oh ya">
+		<state>away</state>
+		<message>Oh ya... love me do.</message>
+	</status>
 	<status name="shower">
 		<state>away</state>
 		<message>showertime</message>

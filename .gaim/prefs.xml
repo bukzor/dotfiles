@@ -289,7 +289,7 @@
 				<pref name='show_offline_buddies' type='bool' value='0' />
 				<pref name='show_warning_level' type='bool' value='1' />
 				<pref name='sort_type' type='string' value='alphabetical' />
-				<pref name='x' type='int' value='978' />
+				<pref name='x' type='int' value='1025' />
 				<pref name='y' type='int' value='0' />
 				<pref name='width' type='int' value='247' />
 				<pref name='height' type='int' value='709' />
@@ -333,8 +333,8 @@
 				</pref>
 				<pref name='im'>
 					<pref name='animate_buddy_icons' type='bool' value='1' />
-					<pref name='default_width' type='int' value='470' />
-					<pref name='default_height' type='int' value='328' />
+					<pref name='default_width' type='int' value='550' />
+					<pref name='default_height' type='int' value='255' />
 					<pref name='entry_height' type='int' value='68' />
 					<pref name='raise_on_events' type='bool' value='0' />
 					<pref name='show_buddy_icons' type='bool' value='1' />

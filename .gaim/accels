@@ -62,6 +62,7 @@
 ; (gtk_accel_path "<main>/Conversation/sep0" "")
 ; (gtk_accel_path "<GaimMain>/Tools/Account Actions/Format Screen Name..." "")
 ; (gtk_accel_path "<GaimMain>/Tools/File Transfers" "")
+; (gtk_accel_path "<GaimMain>/Tools/Account Actions/No actions available" "")
 ; (gtk_accel_path "<GaimMain>/Tools/Account Actions/Change Password..." "")
 ; (gtk_accel_path "<GaimMain>/Tools/Away/New Away Message" "")
 ; (gtk_accel_path "<main>/Conversation/Send File..." "")

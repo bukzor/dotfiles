@@ -6,14 +6,6 @@
 			<setting name="collapsed" type="bool">0</setting>
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
-					<name>ezelle13</name>
-					<alias>Elizabeth</alias>
-					<setting name="buddy_icon" type="string">63b5dd9c</setting>
-					<setting name="icon_checksum" type="string">021bc9c51656a540516c2ed04bafc003</setting>
-				</buddy>
-			</contact>
-			<contact>
-				<buddy account="bukzor" proto="prpl-oscar">
 					<name>Infidel19</name>
 					<setting name="buddy_icon" type="string">3de35e75</setting>
 					<setting name="icon_checksum" type="string">8c00995145ba9cc2ce8df41282ab7cbe</setting>
@@ -58,7 +50,7 @@
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>Whitey601</name>
 					<alias>ben</alias>
-					<setting name="buddy_icon" type="string">41d1cb21</setting>
+					<setting name="buddy_icon" type="string">ed719d51</setting>
 					<setting name="icon_checksum" type="string">5261242e29fc2337d5a3effe3f6b8cff</setting>
 					<setting name="last_seen" type="int">1166809670</setting>
 				</buddy>
@@ -477,7 +469,7 @@
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>DonDiscounto</name>
 					<alias>Jake</alias>
-					<setting name="buddy_icon" type="string">dd66950f</setting>
+					<setting name="buddy_icon" type="string">af9aef32</setting>
 					<setting name="icon_checksum" type="string">49c492521006e536c62fb4c85dc49747</setting>
 					<setting name="last_seen" type="int">1166776271</setting>
 				</buddy>
@@ -508,6 +500,14 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>msmarycha</name>
+				</buddy>
+			</contact>
+			<contact>
+				<buddy account="bukzor" proto="prpl-oscar">
+					<name>ezelle13</name>
+					<alias>Elizabeth</alias>
+					<setting name="buddy_icon" type="string">63b5dd9c</setting>
+					<setting name="icon_checksum" type="string">021bc9c51656a540516c2ed04bafc003</setting>
 				</buddy>
 			</contact>
 			<contact>
