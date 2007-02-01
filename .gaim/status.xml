@@ -37,6 +37,10 @@
 		<state>away</state>
 		<message>Swell&lt;br&gt;=D</message>
 	</status>
+	<status name="tard">
+		<state>away</state>
+		<message>TARD-STRENGTH  ACTIVATE &lt;i&gt;!!!&lt;/i&gt;</message>
+	</status>
 	<status name="zug">
 		<state>away</state>
 		<message>&lt;br&gt;Well, thanks!</message>
