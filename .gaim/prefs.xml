@@ -333,7 +333,7 @@
 				</pref>
 				<pref name='im'>
 					<pref name='animate_buddy_icons' type='bool' value='1' />
-					<pref name='default_width' type='int' value='550' />
+					<pref name='default_width' type='int' value='619' />
 					<pref name='default_height' type='int' value='255' />
 					<pref name='entry_height' type='int' value='68' />
 					<pref name='raise_on_events' type='bool' value='0' />

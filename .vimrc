@@ -6,8 +6,9 @@ set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 12
 set number
 set hlsearch
 
-set expandtab
-set tabstop=4
+"simulate 4-space tabbing with spaces
+set smarttab
+set softtabstop=4
 set shiftwidth=4
 
 set autoindent

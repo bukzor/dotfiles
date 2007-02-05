@@ -1,30 +1,42 @@
 1.15.07
-DONE:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODAY:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-goto McKinley:
-	get appointment with MD
-deposit money
-Grad school app:
-	get derek to finish recommendation
-fix class schedule:
-	finish paperwork on independent study (Seth Hutchinson)
-	add Vlad's ECE512 (ask about not attending Friday meetings)
+WORK OUT
+fix up resume
+take resume to career center
 
-WORK OUT ASSHAT
-clean up house
-	sweep
+ECE486:
+    Readings for Control Systems
+    Prelab: Monday 5pm
+    Lab report: Wednesday 3:30
+    HW due: Friday 10am
+ECE395:
+    Figure out pins for analog circuit
+    Finish PCB
+
+CS431:
+    HW due: Friday 12, SC4120
+ECE497:
+    start moving raptor to hovercraft
+HoTDeC:
+    fix segfaults in vision client
+    fix top detection jitter
+			    
+    
+
+
 
 TOMORROW:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+call Dell RE harddrive and battery
 
 THIS WEEK:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-call Dell RE harddrive and battery
+Engineering EXPO: Friday 9am-4pm
 
 
 THIS MONTH:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Buy:
-	workout clothes x7
-	watch
+    workout clothes x7
+    watch
 set up backup system on bukzor
 install GTD system on bukzor
 
@@ -34,6 +46,11 @@ wxWidgets + wxGL + python
 move python to different repository
 make main repository hold my home directory files (.vimrc etc)
 
+DONE:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+get appointment with MD
+deposit money
+get derek to finish recommendation
+finish paperwork on independent study (Seth Hutchinson)
 
 
 Questions:
@@ -43,29 +60,28 @@ Do i need a toiletries/gym bag?
 
 
 daily routine:
-	All times are "at the latest." Bonus points for earliness.
-	 800:	wake up, teeth, meds, shave
-	 830:		gym
-	 930:		shower, get dressed (@ gym)
-	1000:	get out, class, work
-	 600:	do hw, administrative bs, get ready for next day, pack gym bag
-	 800:	free time 
-	1200:	sleep
+    All times are "at the latest." Bonus points for earliness.
+     8AM:	wake up, teeth, meds, shave
+     830:		gym
+     930:		shower, get dressed (@ gym)
+    10AM:	get out, class, work
+     6PM:	do hw, administrative bs, get ready for next day, pack gym bag
+     8PM:	free time 
+    12PM:	sleep
 
 Exercize (one hour per day):
-	Strength training 3 days/week:
-		1. chest/back:
-		2. shoulders/legs:
-		3. biceps/triceps:
+    Strength training 3 days/week:
+    	1. chest/back:
+    	2. shoulders/legs:
+    	3. biceps/triceps:
 
-	Stretch 3days/week (10-12 mins after 5 min cardio)
+    Stretch 3days/week (10-12 mins after 5 min cardio)
 
-	abdominal every day:
-		situps
-		leg raises
+    abdominal every day:
+	situps
+	leg raises
 
-	cardio every day (30 mins):
-		treadmill
-		row
-		cycle
-
+    cardio every day (30 mins):
+	treadmill
+	row
+	cycle

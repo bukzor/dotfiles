@@ -41,14 +41,14 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>vquiellte</name>
-					<setting name="buddy_icon" type="string">4d418283</setting>
+					<setting name="buddy_icon" type="string">4aa53447</setting>
 					<setting name="icon_checksum" type="string">0201e068c0</setting>
 					<setting name="last_seen" type="int">1166424455</setting>
 				</buddy>
 			</contact>
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
-					<name>Whitey601</name>
+					<name>whitey601</name>
 					<alias>ben</alias>
 					<setting name="buddy_icon" type="string">ed719d51</setting>
 					<setting name="icon_checksum" type="string">5261242e29fc2337d5a3effe3f6b8cff</setting>
@@ -143,7 +143,7 @@
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>VLAMi5</name>
 					<alias>Vlad</alias>
-					<setting name="buddy_icon" type="string">37940fb3</setting>
+					<setting name="buddy_icon" type="string">cd3590c6</setting>
 					<setting name="icon_checksum" type="string">fc09f40fe2a0ecd71e64070099511421</setting>
 					<setting name="last_seen" type="int">1166827898</setting>
 				</buddy>
@@ -228,7 +228,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>hava232</name>
-					<setting name="buddy_icon" type="string">605f38f3</setting>
+					<setting name="buddy_icon" type="string">f2cdf48c</setting>
 					<setting name="icon_checksum" type="string">2b00001d1b</setting>
 					<setting name="last_seen" type="int">1166809860</setting>
 				</buddy>
@@ -276,7 +276,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>StillStrungatz</name>
-					<setting name="buddy_icon" type="string">992f6a33</setting>
+					<setting name="buddy_icon" type="string">2a220839</setting>
 					<setting name="icon_checksum" type="string">0201e068c0</setting>
 					<setting name="last_seen" type="int">1166428210</setting>
 				</buddy>
@@ -311,7 +311,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>genie 4456</name>
-					<setting name="buddy_icon" type="string">e87e7d31</setting>
+					<setting name="buddy_icon" type="string">2b487322</setting>
 					<setting name="icon_checksum" type="string">b6b80aab45a95ae7711470633f8d3a8f</setting>
 					<setting name="last_seen" type="int">1166765742</setting>
 				</buddy>
@@ -346,7 +346,7 @@
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>fairy259</name>
 					<alias>Sarah</alias>
-					<setting name="buddy_icon" type="string">8727ec45</setting>
+					<setting name="buddy_icon" type="string">b7550bde</setting>
 					<setting name="icon_checksum" type="string">e7e4b05617e46e089d69cc7f989fe795</setting>
 					<setting name="last_seen" type="int">1166795693</setting>
 				</buddy>
@@ -370,7 +370,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>acidicsweets</name>
-					<setting name="buddy_icon" type="string">4adf1c6e</setting>
+					<setting name="buddy_icon" type="string">113b2d1</setting>
 					<setting name="icon_checksum" type="string">92ee80a49476b8ec8243af3d8b17a1a6</setting>
 					<setting name="last_seen" type="int">1166845467</setting>
 				</buddy>
@@ -388,7 +388,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>BusterJDog84</name>
-					<setting name="buddy_icon" type="string">71769ee3</setting>
+					<setting name="buddy_icon" type="string">95dd3cac</setting>
 					<setting name="icon_checksum" type="string">6bed880dd28d2bf18f73c7a338aa0d02</setting>
 					<setting name="last_seen" type="int">1166806683</setting>
 				</buddy>
@@ -658,7 +658,7 @@
 			<contact>
 				<buddy account="bukzor" proto="prpl-oscar">
 					<name>DeBKrY</name>
-					<setting name="buddy_icon" type="string">84c6ad8</setting>
+					<setting name="buddy_icon" type="string">a6bc1af4</setting>
 					<setting name="icon_checksum" type="string">0201e068c0</setting>
 					<setting name="last_seen" type="int">1166478141</setting>
 				</buddy>
