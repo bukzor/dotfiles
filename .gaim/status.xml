@@ -9,6 +9,10 @@
 		<state>away</state>
 		<message>Ultra-bored.&lt;br&gt;Call me:&lt;br&gt;480 272 1153</message>
 	</status>
+	<status name="cold">
+		<state>away</state>
+		<message>ARRRG &lt;i&gt;!! &lt;/i&gt; Too cold!</message>
+	</status>
 	<status name="get out">
 		<state>away</state>
 		<message>must...&lt;br&gt;get out of...&lt;br&gt;here.</message>
@@ -51,7 +55,7 @@
 	</status>
 	<status name="zug">
 		<state>away</state>
-		<message>&lt;br&gt;Well, thanks!</message>
+		<message>...I hate you, winter.</message>
 	</status>
 	<status name="Auto-Cached">
 		<state>away</state>
