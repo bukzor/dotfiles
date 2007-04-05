@@ -1,0 +1,7 @@
+#!/bin/sh
+kill -9 `pidof c:\\\\windows\\\\system32\\\\explorer.exe` `pidof C:\\\\EVE\\\\bin\\\\ExeFile.exe`
+sleep 1
+wine ~/.wine/drive_c/EVE/eve.exe > /dev/null 2>&1 &
+sleep 15
+renice 18 `pidof wineserver`
+renice 17 `pidof C:\\\\EVE\\\\bin\\\\ExeFile.exe`

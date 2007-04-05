@@ -1,0 +1,2 @@
+#!/bin/bash
+wine ~/bin/.utorrent.exe
