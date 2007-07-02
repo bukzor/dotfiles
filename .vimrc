@@ -15,4 +15,9 @@ set autoindent
 set smartindent
 set cindent
 
+"quick buffer switching with TAB
+map <TAB> :bn<CR>
+map <S-TAB> :bp<CR>
+
+
 au BufReadPost SCons* set syntax=python

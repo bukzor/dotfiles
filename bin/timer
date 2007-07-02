@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ "$1" = "" ]; then
+    file="time"
+else
+    file="$1"
+fi
+
+s=0
+m=0
+h=0
+while(:);do
+    echo "$h:$m:$s" > $file
+    sleep 1
+    s=$(( $s + 1 ))
+    if [ $s -eq 60 ]; then
+	s=0
+	m=$(( $m + 1 ))
+	sync
+    fi
+
+    if [ $m -eq 60 ]; then
+	m=0
+	h=$(( $h + 1 ))
+    fi
+	
+done

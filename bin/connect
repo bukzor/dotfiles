@@ -1,4 +1,5 @@
 #!/bin/sh
+wifi="eth1"
 
 #default to '707cal'
 if [ "$@" ]; then
@@ -9,15 +10,15 @@ fi
 
 #bring it down
 if [ "$net" = "707cal" ]; then
-	sudo ifdown eth1
+	sudo ifdown $wifi
 else
-	sudo dhclient -r eth1
+	sudo ifdown $wifi
 fi
 
 #set to correct ESSID
 echo -n "Connecting to network \"$net\"."
-while ! iwconfig eth1 | grep "$net"; do
-	sudo iwconfig eth1 essid "$net"
+while ! iwconfig $wifi | grep "$net"; do
+	sudo iwconfig $wifi essid "$net"
 	echo -n "."
 	sleep 4
 done
@@ -25,8 +26,11 @@ echo
 
 #bring it up
 if [ "$net" = "707cal" ]; then
-	sudo ifup eth1
+#while route del defualt; do :; done
+	sudo ifconfig $wifi 192.168.1.103
+	sudo route add -net 192.168.1.0 netmask 255.255.255.0 dev $wifi
+	sudo route add default gateway 192.168.1.1
 else
-	sudo dhclient eth1
+	sudo ifup $wifi
 fi
 

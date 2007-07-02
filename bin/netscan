@@ -3,7 +3,7 @@ import commands
 import os
 import sys
 from math import log
-
+wifi = "eth1"
 
 def checkroot():
     if (os.getuid() != 0):
@@ -47,7 +47,7 @@ class net:
 
 
 checkroot();
-iwl = commands.getoutput("sudo iwlist eth1 scan | grep \"ESSID\\|Signal\\|key\"")
+iwl = commands.getoutput("sudo iwlist %s scan | grep \"ESSID\\|Signal\\|key\"" % wifi)
 iwl = iwl.split("\n")
 	
 netlist = []
