@@ -13,7 +13,6 @@ set shiftwidth=4
 
 set autoindent
 set smartindent
-set cindent
 
 "quick buffer switching with TAB
 map <TAB> :bn<CR>
