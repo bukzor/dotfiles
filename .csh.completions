@@ -1,6 +1,7 @@
 #!/bin/tcsh 
 #http://www.math.ias.edu/doc/tcsh-6.13/complete.tcsh
 #http://hea-www.harvard.edu/~fine/Tech/tcsh.html
+#http://www.opensource.apple.com/darwinsource/Current/tcsh-46/tcsh/complete.tcsh
 
   # directories
   complete cd 'C/*/d/'
@@ -12,6 +13,7 @@
   # but without appending a space (note the extra slash with no
   # append character specified)
   complete kill 'c/-/S/' 'p/1/(-)//'
+  complete killall 'c/-/S/' 'p/0/(-)//' ''
 
   # use available commands as arguments for which, where, and man
   complete which 'p/1/c/'
