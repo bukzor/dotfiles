@@ -19,4 +19,6 @@ alias boom 'setenv MYTREE BOOM; setenv ENV boom; proj_env';
 alias newflow 'cd ~/wc/tools/aticad/1.0/flow/TileBuilder/metrics/'
 alias oldflow 'cd ~/wc/tools/aticad/1.0/src/metrics/'
 
+source ~/.csh.completions
+
 reprompt
