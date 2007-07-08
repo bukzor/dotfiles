@@ -1,4 +1,8 @@
-source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
+set cpd_cshrc=/tools/aticad/1.0/src/sysadmin/cpd.cshrc
+if ( -e $sys_cshrc ) then
+    source $sys_cshrc
+endif
+unset cpd_cshrc
 
 if ($term == "xterm" || $term == "vt100" \
     || $term == "vt102" || $term !~ "con*") then
