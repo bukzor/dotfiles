@@ -15,13 +15,39 @@ if ($term == "xterm" || $term == "vt100" \
         bindkey "\e[8~" end-of-line        # End rxvt
 endif
 
-setenv MYTREE '^_^'
-alias reprompt 'set prompt="$MYTREE %%%T %c2 %h%#"'
-alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_tools; setenv ROOT ~/trees/tools; setenv MYTREE TOOLS; reprompt'
-alias boom 'setenv MYTREE BOOM; setenv ENV boom; proj_env';
 
-alias newflow 'cd ~/wc/tools/aticad/1.0/flow/TileBuilder/metrics/'
-alias oldflow 'cd ~/wc/tools/aticad/1.0/src/metrics/'
+#tricky stuff to get vnc hostname in prompt
+set vnchost=`vncconfig -get desktop | sed "s/ .*//"`
+if `echo $vnchost | sed "s/:.*//"` == `hostname` then
+    setenv host $vnchost
+else
+    setenv host `hostname`
+endif
+
+#environment prompts
+setenv MYTREE '-' #indicates current p4 tree
+setenv MYPROJ '-' #indicates last setproj
+setenv MYENV '-'  #indicates other misc stuff
+#environment aliases
+alias localroot 'setenv PATH /user/golemon/bin:$PATH'
+#alias localroot 'setenv PYTHONPATH /user/bgolemon/lib/python:$PYTHONPATH; setenv PATH /user/golemon/bin:$PATH'
+alias reprompt 'set prompt="$MYENV/$MYPROJ/$MYTREE %n@$host %d:%t %c2%#"; localroot'
+alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_tools; setenv ROOT ~/trees/tools; setenv MYTREE TOOLS; reprompt'
+alias sivcad 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT sivcad; setenv ROOT /tools; setenv MYTREE SIVCAD; reprompt'
+alias boom 'setproj boom; setenv MYPROJ BOOM; reprompt';
+alias test 'setenv MYSQL_NOTOUCH "TRUE"; setenv MYENV TEST; reprompt';
+alias notest 'unsetenv MYSQLNOTOUCH; setenv MYENV -; reprompt'
+
+#shortcuts
+alias grep 'grep --color'
+alias ls 'ls --color'
+alias startvnc 'vncserver -geometry 2500x1000'
+alias login 'source ~/.cshrc'
+setenv newflow ~/wc/tools/aticad/1.0/flow/TileBuilder/metrics
+setenv oldflow ~/wc/tools/aticad/1.0/src/metrics
+
+#default environment
+test; boom; tools;
 
 source ~/.csh.completions
 
