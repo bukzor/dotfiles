@@ -1,6 +1,6 @@
 set cpd_cshrc=/tools/aticad/1.0/src/sysadmin/cpd.cshrc
-if ( -e $sys_cshrc ) then
-    source $sys_cshrc
+if ( -e $cpd_cshrc ) then
+    source $cpd_cshrc
 endif
 unset cpd_cshrc
 
