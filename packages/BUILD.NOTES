@@ -1,0 +1,6 @@
+subversion (without root):
+download dependencies package
+module purge (to get non-retarded gcc)
+./configure --prefix=/user/bgolemon/ --with-pic --without-apxs
+make 
+make install
