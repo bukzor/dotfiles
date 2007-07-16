@@ -38,7 +38,7 @@ alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_t
 alias sivcad 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT sivcad; setenv ROOT /tools; setenv MYTREE SIVCAD; reprompt'
 alias boom 'setproj boom; setenv MYPROJ BOOM; reprompt;';
 alias test 'setenv MYSQL_NOTOUCH "TRUE"; setenv MYENV TEST; reprompt;';
-alias notest 'unsetenv MYSQLNOTOUCH; setenv MYENV -; reprompt;'
+alias notest 'unsetenv MYSQL_NOTOUCH; setenv MYENV -; reprompt;'
 
 
 #lets me install things to my homedir
@@ -62,7 +62,7 @@ alias ls 'ls-F'
 alias grep 'grep --color'
 alias login 'source ~/.cshrc'
 alias lt "ls -lthr --time-style=+'[%D %r]'"
-alias la "ls -lah --time-style=+'[%D %r]'"
+alias la "ls -lAh --time-style=+'[%D %r]'"
 alias ll "ls -lh --time-style=+'[%D %r]'"
 alias lS "ls -lShr --time-style=+'[%D %r]'"
 
@@ -72,9 +72,9 @@ setenv oldflow ~/wc/tools/aticad/1.0/src/metrics
 setenv rootflow /tools/aticad/1.0
 if ( $?physDir == 1 ) then
     alias testdir $physDir/tiles/routed/vmt
+endif
 
 #default environment
-test
 boom
 tools
 echo "Be Happy!"

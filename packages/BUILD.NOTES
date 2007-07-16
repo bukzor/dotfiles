@@ -4,3 +4,14 @@ module purge (to get non-retarded gcc)
 ./configure --prefix=/user/bgolemon/ --with-pic --without-apxs
 make 
 make install
+
+QT (withouth root):
+module purge
+make confclean && make clean
+./configure -prefix /user/bgolemon/ -L/usr/X11R6/lib64/
+(not yet working)
+/user/bgolemon/packages/qt-x11-free-3.3.8/bin/uic: relocation error: /user/bgolemon/packages/qt-x11-free-3.3.8/bin/uic: undefined symbol: _ZNK7QString3argExii
+
+VIM (with python builtin):
+./configure --enable-pythoninterp --prefix=/user/bgolemon/ 
+
