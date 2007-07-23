@@ -44,57 +44,6 @@ au BufWinEnter * silent! loadview
 "scons files are written in python
 au BufReadPost SCons* set syntax=python
 
-"disable capslock
-lnoremap a A
-lnoremap b B
-lnoremap c C
-lnoremap d D
-lnoremap e E
-lnoremap f F
-lnoremap g G
-lnoremap h H
-lnoremap i I
-lnoremap j J
-lnoremap k K
-lnoremap l L
-lnoremap m M
-lnoremap n N
-lnoremap o O
-lnoremap p P
-lnoremap q Q
-lnoremap r R
-lnoremap s S
-lnoremap t T
-lnoremap u U
-lnoremap v V
-lnoremap w W
-lnoremap x X
-lnoremap y Y
-lnoremap z Z
+"python files shouldn't use tabs
+au BufReadPost *.py set expandtab|retab
 
-lnoremap A a
-lnoremap B b
-lnoremap C c
-lnoremap D d
-lnoremap E e
-lnoremap F f
-lnoremap G g
-lnoremap H h
-lnoremap I i
-lnoremap J j
-lnoremap K k
-lnoremap L l
-lnoremap M m
-lnoremap N n
-lnoremap O o
-lnoremap P p
-lnoremap Q q
-lnoremap R r
-lnoremap S s
-lnoremap T t
-lnoremap U u
-lnoremap V v
-lnoremap W w
-lnoremap X x
-lnoremap Y y
-lnoremap Z z 

@@ -9,24 +9,25 @@ unset cpd_cshrc
 #fix bad keyboard stuff
 if ($term == "xterm" || $term == "vt100" \
     || $term == "vt102" || $term !~ "con*") then
-        # bind keypad keys for console, vt100, vt102, xterm
-        bindkey "\e[1~" beginning-of-line  # Home
-        bindkey "\e[7~" beginning-of-line  # Home rxvt
-        bindkey "\e[2~" overwrite-mode     # Ins
-        bindkey "\e[3~" delete-char        # Delete
-        bindkey "\e[4~" end-of-line        # End
-        bindkey "\e[8~" end-of-line        # End rxvt
+	# bind keypad keys for console, vt100, vt102, xterm
+	bindkey "\e[1~" beginning-of-line  # Home
+	bindkey "\e[7~" beginning-of-line  # Home rxvt
+	bindkey "\e[2~" overwrite-mode	   # Ins
+	bindkey "\e[3~" delete-char	   # Delete
+	bindkey "\e[4~" end-of-line	   # End
+	bindkey "\e[8~" end-of-line	   # End rxvt
 endif
 
 
 #tricky stuff to get vnc hostname in prompt
-set vnchost=`vncconfig -get desktop | sed "s/ .*//"`
-if `echo $vnchost | sed "s/:.*//"` == `hostname` then
-    setenv host $vnchost
-else
-    setenv host `hostname`
+setenv host `hostname`
+if (-X vncconfig ) then
+    set vnchost=`vncconfig -get desktop | sed "s/ .*//"`
+    if `echo $vnchost | sed "s/:.*//"` == $host then
+	setenv host $vnchost
+    endif
+    unset vnchost
 endif
-unset vnchost
 
 #environment prompts
 setenv MYTREE '-' #indicates current p4 tree
@@ -47,10 +48,10 @@ if (-x ~/bin/envv ) then
 endif
 
 if { which envv >& /dev/null } then
-    alias localroot 'eval `envv add PYTHONPATH  ~/python`; \
-                    eval `envv add PATH    ~/bin 1`;\
-                    eval `envv add MANPATH ~/man 1`;\
-                    eval `envv add LD_LIBRARY_PATH ~/lib 1`'
+    alias localroot 'eval `envv add PYTHONPATH	~/python`; \
+		    eval `envv add PATH    ~/bin 1`;\
+		    eval `envv add MANPATH ~/man 1`;\
+		    eval `envv add LD_LIBRARY_PATH ~/lib 1`'
 else
     alias localroot ""
 endif
