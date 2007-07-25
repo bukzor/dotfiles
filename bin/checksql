@@ -1,7 +1,14 @@
-#!/bin/tcsh
-set x=1
-while ! { mysqladmin processlist -u metricsu -pUM.ic4% > /tmp/bgolemon.chksql }
+#!/bin/bash
+x=1
+while ! mysqladmin processlist -v -u metricsu -pUM.ic4% > /tmp/bgolemon.chksql ; do
     sleep 1
-end
-cat /tmp/bgolemon.chksql | sort -t "|" -k 7 -n -r | head -n 50
+done
+
+
+if [  $1 = "-nolock" ]; then
+    cat /tmp/bgolemon.chksql | grep -v Locked | grep Query | sort -t "|" -k 7 -n -r | head -n 50
+else
+    cat /tmp/bgolemon.chksql | grep Query | sort -t "|" -k 7 -n -r | head -n 50
+fi
 rm /tmp/bgolemon.chksql
+echo $1

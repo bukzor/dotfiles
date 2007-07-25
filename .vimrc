@@ -1,7 +1,5 @@
 syntax on
-set background=dark
-colorscheme delek
-hi Normal ctermfg=white ctermbg=black
+colorscheme evening
 set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 12
 
 set number
