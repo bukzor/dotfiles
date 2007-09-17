@@ -15,3 +15,6 @@ make confclean && make clean
 VIM (with python builtin):
 ./configure --enable-pythoninterp --prefix=/user/bgolemon/ 
 
+PYTHON (32 bit on 64 bit machine):
+setenv CFLAGS -m32
+./configure --prefix=/user/bgolemon/packages/python32-sj && make && make install
