@@ -4,6 +4,7 @@ set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 12
 
 set number
 set hlsearch
+set incsearch
 
 "simulate 4-space tabbing with spaces
 set smarttab
@@ -26,6 +27,8 @@ map ; "
 "quick buffer switching with TAB
 map <TAB> :bn<CR>
 map <S-TAB> :bp<CR>
+
+set hidden
 
 "make folds open and close like 'aptitude'
 map [ zo

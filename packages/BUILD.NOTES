@@ -1,20 +1,79 @@
-subversion (without root):
+subversion (without root):=======================================================
 download dependencies package
 module purge (to get non-retarded gcc)
 ./configure --prefix=/user/bgolemon/ --with-pic --without-apxs
 make 
 make install
 
-QT (withouth root):
+QT (withouth root):==============================================================
 module purge
 make confclean && make clean
 ./configure -prefix /user/bgolemon/ -L/usr/X11R6/lib64/
 (not yet working)
 /user/bgolemon/packages/qt-x11-free-3.3.8/bin/uic: relocation error: /user/bgolemon/packages/qt-x11-free-3.3.8/bin/uic: undefined symbol: _ZNK7QString3argExii
 
-VIM (with python builtin):
+
+GraphViz=========================================================================
+
+kcachegrind======================================================================
+(install GraphViz first)
+(download from http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindDownload)
+
+(apply following patch:)
+--- kcachegrind/callgraphview.cpp
+@@ -952,7 +952,7 @@
+ // PannerView
+ //
+ PannerView::PannerView(QWidget * parent, const char * name)
+-  : QCanvasView(parent, name, WNoAutoErase | WStaticContents)
++  : QCanvasView(parent, name, WRepaintNoErase | WResizeNoErase | WStaticContents)
+ {
+   _movingZoomRect = false;
+--- kcachegrind/callgraphview.cpp
+
+ln -s /usr/share/apps/ksgmltools2/customization/dtd doc/en/dtd
+module purge
+./configure --prefix=/home/bgolemon --enable-libsuffix=64 --with-qt-libraries=/usr/lib64/qt-3.1/lib/
+make && make install
+
+
+
+VIM (with python builtin):========================================================
 ./configure --enable-pythoninterp --prefix=/user/bgolemon/ 
 
-PYTHON (32 bit on 64 bit machine):
+PYTHON (32 bit on 64 bit machine):===============================================
 setenv CFLAGS -m32
 ./configure --prefix=/user/bgolemon/packages/python32-sj && make && make install
+
+PERL (64 bit)=====================================================================
+module purge
+./configure  --prefix="/tools/aticad/1.0/external/perl64-5.6.2/" 
+vim ./config.sh
+    change all of '/usr/local/' to '/tools/aticad/1.0/external/perl64-5.6.2/'
+make && make install
+
+perl -MCPAN -eshell
+install somemodule
+^D
+
+download Tk800.025
+
+setproj boom
+perl Makefile.PL
+vim Makefile
+OTHERLDFLAGS = -L/usr/X11R6/lib64/
+module purge
+make && make install
+
+
+ZLIB===============================================================================
+module purge
+setenv CFLAGS ' -fPIC '
+./configure --prefix=/home/bgolemon
+make && make install
+
+PYTHON2.5==========================================================================
+(do zlib first)
+module purge
+./configure --prefix=/home/bgolemon
+make && make install

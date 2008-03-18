@@ -109,7 +109,7 @@
   complete sysctl 'n/*/`sysctl -Na`/'
 
   # p4
-  set p4cmds=(add branch branches commands change changes client clients \
+  set p4cmds=(add annotate branch branches commands change changes client clients \
       counter counters delete depot depots describe diff diff2 \
       edit filelog files fix fixes fstat group groups have help \
       info integrate integrated job jobs jobspec label labels \
