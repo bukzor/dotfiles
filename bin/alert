@@ -4,6 +4,6 @@ if [ $@ ]; then
 else
     cmd="echo \"It's Done!\"; bash"
 fi
-xterm -e bash -c "$cmd"
+xterm -fg White -bg Red -e bash -c "$cmd"
 
 # vim: syntax=sh

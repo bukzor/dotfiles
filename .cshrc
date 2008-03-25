@@ -1,13 +1,13 @@
 #NON-INTERACTIVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ($?term == 0) then
     #source Gilles' stuff
-    source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
+    source $ATICAD_DISK/src/sysadmin/cpd.cshrc
 
     #tcsh likes to print to stderr after long commands...
     #try this: 'set time=0'
     unset time
 
-    setproj boom
+    module load aticad 
     exit 0
 endif
 
@@ -17,7 +17,7 @@ endif
 setenv save_term $term
 setenv term "BEGterm" #prevent Gilles from clobbering my terminal title
 #source Gilles' stuff
-source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
+source $ATICAD_DISK/src/sysadmin/cpd.cshrc
 setenv term $save_term
 
 
@@ -37,10 +37,10 @@ endif
 
 
 #tricky stuff to get vnc hostname in prompt
-setenv hostname `hostname`
-#setenv DISPLAY `echo $DISPLAY | sed -e "s/^\(localhost\)\?:/${hostname}:/"`
-if ($?DISPLAY == 0) then
-    set DISPLAY=$hostname
+setenv hostname `basename $HOST .ca.atitech.com`
+if ($?DISPLAY == 1) then
+    set display=`echo $DISPLAY | sed -e "s/localhost//" -e "s/\.0//"`
+    setenv hostname $hostname$display
 endif
 
 #command shortcuts
@@ -71,13 +71,19 @@ endif
 #environment prompts
 setenv MYTREE '-' #indicates current p4 tree
 setenv MYPROJ '-' #indicates last setproj
+
 #environment aliases
-alias reprompt 'set prompt="$MYPROJ-$MYTREE> [%n@$DISPLAY] [%d %t]  %~%#"; localroot'
+alias reprompt 'set prompt="$MYPROJ-$MYTREE> [%n@$hostname] [%d %t]  %~%#"; localroot'
 alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_tools; setenv ROOT ~/trees/tools; setenv MYTREE TOOLS; reprompt'
 alias sivcad 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT sivcad; setenv ROOT /tools; setenv MYTREE SIVCAD; reprompt'
+
+#various project environments
 alias boom 'setproj boom; setenv MYPROJ BOOM; reprompt;';
 alias mario 'setproj mario; setenv MYPROJ MARIO; reprompt;';
-alias cdmario 'cd /proj/mario/sa11/tiles/rel_4.2/'
+alias walden 'setproj walden; setenv MYPROJ WALDEN; reprompt;';
+alias luigi 'setproj luigi; setenv MYPROJ LUIGI; reprompt;';
+alias cypress 'setproj cypress; setenv MYPROJ CYPRESS; reprompt;';
+alias kong 'setproj kong; setenv MYPROJ KONG; reprompt;';
 
 alias pthuge 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=85000]" pt_shell'
 alias ptbig 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=46000]" pt_shell'
@@ -102,10 +108,18 @@ else
 endif
 
 #default environment
-mario
+if ( "$SITE" == "sj" ) then
+    kong
+else if ( "$SITE" == "cvd" ) then
+    walden
+else if ( "$SITE" == "hyd" ) then
+    luigi
+endif
+
 tools
 #echo "Be Happy!"
 
 #nice tab-completion stuff
 source ~/.csh.completions
 
+# vim: syntax=tcsh

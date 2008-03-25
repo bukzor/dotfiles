@@ -1,36 +1,12 @@
 #!/usr/bin/env python
 
-from MySQLdb import connect
-from _mysql_exceptions import OperationalError
 from time import sleep
 
 max_query_len = 900
 
-def do_connect():
-    global cursor
-    cursor = connect(\
-	host="pdsql.ca.atitech.com", \
-	port=3306, user="root", \
-	passwd="4sVc!2Oa").cursor()
 
-cursor = None
-pretty = 0
-while cursor == None:
-    from sys import stderr
-    try:
-	do_connect()
-    except OperationalError, err:
-	if err.args[0] == 1040:
-	    if pretty == 0:
-		stderr.write("Too many connections. Retrying...")
-		pretty = 1
-	    else:
-		stderr.write(".")
-	    sleep(1)
-	else:
-	    raise
-    
-
+from CPD_SQL_connection import Cursor
+cursor = Cursor(host="pdsql.ca.atitech.com", port=3306, user="metricsu", passwd="UM.ic4%", db="ati_metrics")
     
 
 class SQLprocess:
