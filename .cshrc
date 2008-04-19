@@ -1,7 +1,7 @@
 #NON-INTERACTIVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ($?term == 0) then
     #source Gilles' stuff
-    source $ATICAD_DISK/src/sysadmin/cpd.cshrc
+    source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
 
     #tcsh likes to print to stderr after long commands...
     #try this: 'set time=0'
@@ -17,7 +17,7 @@ endif
 setenv save_term $term
 setenv term "BEGterm" #prevent Gilles from clobbering my terminal title
 #source Gilles' stuff
-source $ATICAD_DISK/src/sysadmin/cpd.cshrc
+source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
 setenv term $save_term
 
 
@@ -47,6 +47,7 @@ endif
 set color=""
 setenv EDITOR vim
 setenv P4EDITOR vim
+setenv P4DIFF tkdiff
 alias ls 'ls-F'
 alias grep 'grep --color'
 alias login 'source ~/.cshrc'
@@ -102,6 +103,7 @@ if { which envv >& /dev/null } then
 		    eval `envv add PYTHONPATH	~/lib/python2.4/site-packages/`; \
 		    eval `envv add PATH    ~/bin 1`;\
 		    eval `envv add MANPATH /tools/lsf/6.1/man`;\
+		    eval `envv add MANPATH ~/man`;\
 		    eval `envv add LD_LIBRARY_PATH ~/lib`;
 else
     alias localroot ""
