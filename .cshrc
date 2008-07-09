@@ -45,9 +45,9 @@ endif
 
 #command shortcuts
 set color=""
+setenv savehist "5000 merge"
 setenv EDITOR vim
 setenv P4EDITOR vim
-setenv P4DIFF tkdiff
 alias ls 'ls-F'
 alias grep 'grep --color'
 alias login 'source ~/.cshrc'
@@ -58,6 +58,7 @@ alias lS "ls -lShr --time-style=+'[%D %r]'"
 alias sql_metrics "mysql -D ati_metrics -u metricsu -pUM.ic4%"
 alias sql_sb2     "mysql -D sharedbook_auth -u SBapache -pwobble!"
 alias sql_root    "mysql -u root -p4sVc\\!2Oa"
+alias easy_install "easy_install --always-unzip"
 
 #directories
 setenv newflow /home/bgolemon/wc/tools/aticad/1.0/flow/TileBuilder/metrics/scripts
@@ -79,43 +80,44 @@ alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_t
 alias sivcad 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT sivcad; setenv ROOT /tools; setenv MYTREE SIVCAD; reprompt'
 
 #various project environments
-alias boom 'setproj boom; setenv MYPROJ BOOM; reprompt;';
-alias mario 'setproj mario; setenv MYPROJ MARIO; reprompt;';
-alias walden 'setproj walden; setenv MYPROJ WALDEN; reprompt;';
-alias luigi 'setproj luigi; setenv MYPROJ LUIGI; reprompt;';
-alias cypress 'setproj cypress; setenv MYPROJ CYPRESS; reprompt;';
-alias kong 'setproj kong; setenv MYPROJ KONG; reprompt;';
+alias boom	'setproj boom;	  setenv MYPROJ BOOM;	  reprompt;'
+alias mario	'setproj mario;	  setenv MYPROJ MARIO;    reprompt;'
+alias walden	'setproj walden;  setenv MYPROJ WALDEN;   reprompt;'
+alias luigi	'setproj luigi;	  setenv MYPROJ LUIGI;    reprompt;'
+alias cypress	'setproj cypress; setenv MYPROJ CYPRESS;  reprompt;'
+alias kong	'setproj kong;	  setenv MYPROJ KONG;	  reprompt;'
+alias cpd 'eval "module purge;	  setenv MYPROJ CPD;	  reprompt; `/tool/pandora/bin/modulecmd tcsh avail aticad`"'
+alias testSO 'py.test -D mysql://tester:@pdsql/test'
 
-alias pthuge 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=85000]" pt_shell'
-alias ptbig 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=46000]" pt_shell'
-alias ptmed 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=14000]" pt_shell'
-alias ptsmall 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=6000]" pt_shell'
-alias ptscan 'ptver; title "Primetime: $cwd"; bsub -Ip -q fc_timing_96G -R "rusage[pt=1:mem=22000]" pt_shell'
-alias ptver 'module switch primetime primetime/2007.06-SP3'
 
 #lets me install things to my homedir
 if (-x ~/bin/envv ) then
     alias envv ~/bin/envv
 endif
 if { which envv >& /dev/null } then
-    alias localroot eval `envv add PYTHONPATH	~/python`; \
-		    eval `envv add PYTHONPATH	~/lib/python/`; \
-		    eval `envv add PYTHONPATH	~/lib/python2.4/site-packages/`; \
-		    eval `envv add PATH    ~/bin 1`;\
-		    eval `envv add MANPATH /tools/lsf/6.1/man`;\
-		    eval `envv add MANPATH ~/man`;\
-		    eval `envv add LD_LIBRARY_PATH ~/lib`;
+    alias localroot '\
+eval `envv add MANPATH		/tools/lsf/6.1/man		`;\
+eval `envv add PYTHONPATH	~/python			`;\
+eval `envv add PYTHONPATH	~/lib/python/			`;\
+eval `envv add PYTHONPATH	~/lib/python2.4/site-packages/  `;\
+eval `envv add PYTHONPATH	~/wc/tools/aticad/1.0/mod/	`;\
+eval `envv add PATH		~/bin				`;\
+eval `envv add CPATH		~/include/			`;\
+eval `envv add MANPATH		~/man				`;\
+eval `envv add LIBRARY_PATH	~/lib				`;'
 else
     alias localroot ""
 endif
 
 #default environment
 if ( "$SITE" == "sj" ) then
-    kong
+    cypress
 else if ( "$SITE" == "cvd" ) then
     walden
 else if ( "$SITE" == "hyd" ) then
     luigi
+else
+    cpd
 endif
 
 tools

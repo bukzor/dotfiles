@@ -6,7 +6,7 @@ max_query_len = 900
 
 
 from CPD_SQL_connection import Cursor
-cursor = Cursor(host="pdsql.ca.atitech.com", port=3306, user="root", passwd="4sVc!2Oa", db="ati_metrics")
+cursor = Cursor(host="svcpdweb1.ca.atitech.com", port=3306, user="root", passwd="4sVc!2Oa", db="ati_metrics")
 
 class SQLprocess:
     def __init__(self, id, user, host, db, mode, time, state, query):
