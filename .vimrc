@@ -1,8 +1,6 @@
 syntax on
 colorscheme evening
-set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 12
 
-set number
 set hlsearch
 set incsearch
 
@@ -27,7 +25,7 @@ map ; "
 "quick buffer switching with TAB
 map <TAB> :bn<CR>
 map <S-TAB> :bp<CR>
-
+"let me tab, even with edits
 set hidden
 
 "make folds open and close like 'aptitude'
@@ -37,10 +35,6 @@ map ] zc
 "make up and down work like a normal editor
 map j gj
 map k gk
-
-"save foldings automatically, suppress errors
-au BufWinLeave,BufWrite * silent! mkview
-au BufWinEnter * silent! loadview
 
 "scons files are written in python
 au BufReadPost SCons* set syntax=python
