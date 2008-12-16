@@ -38,8 +38,9 @@ endif
 
 #tricky stuff to get vnc hostname in prompt
 setenv hostname `basename $HOST .ca.atitech.com`
+setenv hostname `basename $HOST .amd.com`
 if ($?DISPLAY == 1) then
-    set display=`echo $DISPLAY | sed -e "s/localhost//" -e "s/\.0//"`
+    set display=`echo $DISPLAY | sed -re "s/localhost|$HOST|$hostname//" -e "s/\.0//"`
     setenv hostname $hostname$display
 endif
 
@@ -89,6 +90,10 @@ alias kong	'setproj kong;	  setenv MYPROJ KONG;	  reprompt;'
 alias cpd 'eval "module purge;	  setenv MYPROJ CPD;	  reprompt; `/tool/pandora/bin/modulecmd tcsh avail aticad`"'
 alias testSO 'py.test -D mysql://tester:@pdsql/test'
 
+alias sshcvd "ssh ltis588"
+alias sshhyd "ssh lhlogin4"
+alias findcvd 'ypcat hosts | grep "\<ltis" | awk '"'"'{print $2}'"'"' | xargs --replace bash -c "(rsh {} echo {} &) < /dev/null  &"'
+
 
 #lets me install things to my homedir
 if (-x ~/bin/envv ) then
@@ -101,7 +106,7 @@ eval `envv add PYTHONPATH	~/python			`;\
 eval `envv add PYTHONPATH	~/lib/python/			`;\
 eval `envv add PYTHONPATH	~/lib/python2.4/site-packages/  `;\
 eval `envv add PYTHONPATH	~/wc/tools/aticad/1.0/mod/	`;\
-eval `envv add PATH		~/bin				`;\
+eval `envv add PATH		~/bin		1		`;\
 eval `envv add CPATH		~/include/			`;\
 eval `envv add MANPATH		~/man				`;\
 eval `envv add LIBRARY_PATH	~/lib				`;'
