@@ -1,48 +1,25 @@
-#NON-INTERACTIVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if ($?term == 0) then
-    #source Gilles' stuff
-    source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
-
-    #tcsh likes to print to stderr after long commands...
-    #try this: 'set time=0'
-    unset time
-
-    module load aticad 
-    exit 0
-endif
-
-
-#INTERACTIVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-setenv save_term $term
-setenv term "BEGterm" #prevent Gilles from clobbering my terminal title
+#ALWAYS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #source Gilles' stuff
-source /tools/aticad/1.0/src/sysadmin/cpd.cshrc
-setenv term $save_term
+setenv MINIMALIST 1
+source /tool/aticad/1.0/src/sysadmin/cpd.cshrc
+module load aticad/1.2
 
 
+if ($INTERACTIVE == 0) exit 0
+#INTERACTIVE SETTINGS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-#fix bad keyboard stuff
-if ($term == "xterm" || $term == "vt100" \
-|| $term == "vt102" || $term !~ "con*") then
-    # bind keypad keys for console, vt100, vt102, xterm
-    bindkey "\e[1~" beginning-of-line  # Home
-    bindkey "\e[7~" beginning-of-line  # Home rxvt
-    bindkey "\e[2~" overwrite-mode	   # Ins
-    bindkey "\e[3~" delete-char	   # Delete
-    bindkey "\e[4~" end-of-line	   # End
-    bindkey "\e[8~" end-of-line	   # End rxvt
-endif
-
+#unmap CTRL-S and CTRL-Q
+stty -ixon -ixoff
 
 #tricky stuff to get vnc hostname in prompt
-setenv hostname `basename $HOST .ca.atitech.com`
-setenv hostname `basename $HOST .amd.com`
+setenv hostname $HOST
 if ($?DISPLAY == 1) then
     set display=`echo $DISPLAY | sed -re "s/localhost|$HOST|$hostname//" -e "s/\.0//"`
     setenv hostname $hostname$display
 endif
+setenv hostname `echo $hostname | sed -re "s/\.ca\.atitech\.com|\.amd\.com//g"`
+
+set prompt="$ATICAD_PLATFORM> [%n@$hostname] [%d %t] %c02/ %?%# "
 
 #command shortcuts
 set color=""
@@ -56,77 +33,44 @@ alias lt "ls -lthr --time-style=+'[%D %r]'"
 alias la "ls -lAh --time-style=+'[%D %r]'"
 alias ll "ls -lh --time-style=+'[%D %r]'"
 alias lS "ls -lShr --time-style=+'[%D %r]'"
-alias sql_metrics "mysql -D ati_metrics -u metricsu -pUM.ic4%"
-alias sql_sb2     "mysql -D sharedbook_auth -u SBapache -pwobble!"
-alias sql_root    "mysql -u root -p4sVc\\!2Oa"
+alias sql_metrics "ssh -t pdsql mysql -D ati_metrics -u metricsu -pUM.ic4%"
+alias sql_sb2     "ssh -t svcpdweb2 mysql -D sharedbook_auth -u SBapache -pwobble!"
+alias sql_root    "ssh -t pdsql mysql -u root -p4sVc\\\\!2Oa"
 alias easy_install "easy_install --always-unzip"
+alias newpy 'cp /home/bgolemon/python/blank_template.py'
+alias lslogin 'lsload -R "select[interactive&&type=RHEL4_64]order[r15m]" | grep -v unavail'
 
 #directories
-setenv newflow /home/bgolemon/wc/tools/aticad/1.0/flow/TileBuilder/metrics/scripts
-setenv fct /proj/mario-pd9/fctiming/
-setenv oldflow /home/bgolemon/wc/tools/aticad/1.0/src/metrics
-setenv rootflow /tools/aticad/1.0/flow/TileBuilder/metrics/scripts
-if ( $?physDir == 1 ) then
-    alias testdir $physDir/tiles/routed/vmt
-endif
+setenv metrics /home/bgolemon/tool/aticad/1.0/flow/TileBuilder/metrics
+setenv reorg /home/bgolemon/tool/aticad/1.0/flow/TileBuilder/metrics.reorg
+setenv fct /proj/mario-pd9/fctiming
+setenv src /home/bgolemon/tool/aticad/1.0/src
+setenv packages /proj/fcfp2-archive-nobackup/bgolemon/packages
+setenv rootflow /tool/aticad/1.0/flow/TileBuilder/metrics/scripts
 
-
-#environment prompts
-setenv MYTREE '-' #indicates current p4 tree
-setenv MYPROJ '-' #indicates last setproj
-
-#environment aliases
-alias reprompt 'set prompt="$MYPROJ-$MYTREE> [%n@$hostname] [%d %t]  %~%#"; localroot'
-alias tools 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT bgolemon_tools; setenv ROOT ~/trees/tools; setenv MYTREE TOOLS; reprompt'
-alias sivcad 'setenv P4PORT terra.ca.atitech.com:1666; setenv P4CLIENT sivcad; setenv ROOT /tools; setenv MYTREE SIVCAD; reprompt'
-
-#various project environments
-alias boom	'setproj boom;	  setenv MYPROJ BOOM;	  reprompt;'
-alias mario	'setproj mario;	  setenv MYPROJ MARIO;    reprompt;'
-alias walden	'setproj walden;  setenv MYPROJ WALDEN;   reprompt;'
-alias luigi	'setproj luigi;	  setenv MYPROJ LUIGI;    reprompt;'
-alias cypress	'setproj cypress; setenv MYPROJ CYPRESS;  reprompt;'
-alias kong	'setproj kong;	  setenv MYPROJ KONG;	  reprompt;'
-alias cpd 'eval "module purge;	  setenv MYPROJ CPD;	  reprompt; `/tool/pandora/bin/modulecmd tcsh avail aticad`"'
+#commands I don't want to remember
 alias testSO 'py.test -D mysql://tester:@pdsql/test'
+alias cronpd 'ssh cronpd@svvcron02.amd.com'
 
-alias sshcvd "ssh ltis588"
-alias sshhyd "ssh lhlogin4"
+#site-specific machines
+alias sshcvd "ssh mkdcgar01"
+alias sshhyd "ssh lhlogin10"
 alias findcvd 'ypcat hosts | grep "\<ltis" | awk '"'"'{print $2}'"'"' | xargs --replace bash -c "(rsh {} echo {} &) < /dev/null  &"'
 
-
 #lets me install things to my homedir
-if (-x ~/bin/envv ) then
-    alias envv ~/bin/envv
-endif
-if { which envv >& /dev/null } then
-    alias localroot '\
-eval `envv add MANPATH		/tools/lsf/6.1/man		`;\
-eval `envv add PYTHONPATH	~/python			`;\
-eval `envv add PYTHONPATH	~/lib/python/			`;\
-eval `envv add PYTHONPATH	~/lib/python2.4/site-packages/  `;\
-eval `envv add PYTHONPATH	~/wc/tools/aticad/1.0/mod/	`;\
-eval `envv add PATH		~/bin		1		`;\
-eval `envv add CPATH		~/include/			`;\
-eval `envv add MANPATH		~/man				`;\
-eval `envv add LIBRARY_PATH	~/lib				`;'
-else
-    alias localroot ""
-endif
+envv add PYTHONPATH      ~/python
+envv add PYTHONPATH      ~/lib/python
+envv add PYTHONPATH      ~/lib/python2.4/site-packages
+envv add PYTHONPATH      ~/tool/aticad/1.0/mod
+envv add PATH            ~/bin
+envv add CPATH           ~/include
+envv add MANPATH         ~/man
+envv add LIBRARY_PATH    ~/lib
 
-#default environment
-if ( "$SITE" == "sj" ) then
-    cypress
-else if ( "$SITE" == "cvd" ) then
-    walden
-else if ( "$SITE" == "hyd" ) then
-    luigi
-else
-    cpd
-endif
+alias svn ~/bin/svn
 
-tools
-#echo "Be Happy!"
+setenv P4PORT terra.ca.atitech.com:1666
+setenv P4CLIENT bgolemon_tools
 
 #nice tab-completion stuff
 source ~/.csh.completions
