@@ -117,11 +117,10 @@
     "replace <CTRL-I> (also known as <TAB>) with <CTRL-P>
     noremap <C-P> <C-I>
 
-    "python files shouldn't use tabs
-    au BufReadPost *.py retab
+    "replace <CTRL-V> with <CTRL-B>
+    inoremap <C-B> <C-V>
 
-    "highlight lines over the width limit
-    "highlight OverLength ctermbg=DarkRed guibg=#444444
-    "match OverLength /\%81v.\+/
+    "python files shouldn't use tabs
+    au BufReadPost *.py retab!
 
 " }
