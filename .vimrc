@@ -43,11 +43,11 @@
     noremap <c-a> ggVG
     imap <c-a> <esc><c-a>
     "ctrl+C to copy
-    map <c-c> y
+    map <c-c> "+y
     "ctrl+V to paste
-    map <c-v> gP
-    imap <c-v> <c-o>gP
-    vmap <c-v> P
+    map <c-v> "+gP
+    imap <c-v> <c-o>"+gP
+    vmap <c-v> "+P
     "ctrl+Y to redo
     map <c-y> <c-r>
     imap <c-y> <c-o><c-r>
@@ -58,7 +58,6 @@
     "ctrl+Q to save/quit
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
-
 " }
 
 " common typos {
@@ -77,7 +76,7 @@
     set visualbell
 
     "cd to the file you're editing
-    set autochdir "vim 7.0
+    "set autochdir "vim 7.0
 
     "quick buffer switching with TAB, even with edited files
     set hidden
@@ -101,26 +100,20 @@
 " }
 
 " visual-mode usability {
-    "sticky shifting in visual mode
-    vnoremap < <gv
-    vnoremap > >gv
-
     "don't clobber the buffer when pasting in visual mode
     vmap P p
     vnoremap p "_dP
 " }
 
 "nonstandard, personal preferences {
-    "escape insert mode with just 'jj'
-    inoremap jj <Esc>
-
     "replace <CTRL-I> (also known as <TAB>) with <CTRL-P>
     noremap <C-P> <C-I>
 
     "replace <CTRL-V> with <CTRL-B>
-    inoremap <C-B> <C-V>
+    noremap <C-B> <C-V>
 
     "python files shouldn't use tabs
+    "FIXME: this should only affect the python buffer
     au BufReadPost *.py retab!
 
 " }
