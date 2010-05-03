@@ -1,2 +1,2 @@
 #!/bin/bash
-wine "/home/golemon/.wine/drive_c/Program Files/Ventrilo/Ventrilo.exe"
+aoss wine /home/golemon/.wine/drive_c/Program\ Files/Ventrilo/Ventrilo.exe

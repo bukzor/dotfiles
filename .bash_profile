@@ -11,11 +11,3 @@ if [ -f ~/.bashrc ]; then
     . ~/.bashrc
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d ~/bin ] ; then
-    PATH="${PATH}":~/bin
-fi
-# set PATH so it includes user's private python if it exists
-if [ -d ~/python ] ; then
-    PATH="${PATH}":~/python
-fi
