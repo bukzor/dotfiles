@@ -59,6 +59,9 @@ esac
 #    . ~/.bash_aliases
 #fi
 
+alias amd='ssh bgolemon@svdcelk204'
+
+
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
     eval "`dircolors -b`"
