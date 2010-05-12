@@ -8315,7 +8315,8 @@ if [ -d $BASH_COMPLETION_DIR -a -r $BASH_COMPLETION_DIR -a \
      -x $BASH_COMPLETION_DIR ]; then
 	for i in $BASH_COMPLETION_DIR/*; do
 		[[ ${i##*/} != @(*~|*.bak|*.swp|\#*\#|*.dpkg*|.rpm*) ]] &&
-			[ \( -f $i -o -h $i \) -a -r $i ] && . $i
+			[ \( -f $i -o -h $i \) -a -r $i ] && 
+                        . $i 2>/dev/null
 	done
 fi
 unset i
@@ -8330,3 +8331,4 @@ unset UNAME RELEASE default dirnames filenames have nospace bashdefault \
 ###  Local Variables:
 ###  mode: shell-script
 ###  End:
+###  vim: syntax=sh

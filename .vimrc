@@ -82,6 +82,10 @@
     set hidden
     nmap <TAB> :bn<CR>
     nmap <S-TAB> :bp<CR>
+
+    "set extra option directly in files
+    "example: "vim: syntax=vim"
+    set modeline
 " }
 
 
