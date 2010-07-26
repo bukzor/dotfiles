@@ -114,7 +114,7 @@
     noremap <C-P> <C-I>
 
     "replace <CTRL-V> with <CTRL-B>
-    noremap <C-B> <C-V>
+    inoremap <C-B> <C-V>
 
     "python files shouldn't use tabs
     "FIXME: this should only affect the python buffer
