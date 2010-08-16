@@ -1,4 +1,5 @@
 #ALWAYS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#trivial comment
 #source Gilles' stuff
 setenv MINIMALIST 1
 source /tool/aticad/1.0/src/sysadmin/cpd.cshrc
