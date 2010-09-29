@@ -1,0 +1,5 @@
+#!/bin/bash
+
+xterm -geom 25x4 -T "$PROJECT@$SITE" -e bash -c "watch -n5 --differences=cumulative checkjobs" &
+
+# vim:syntax=sh
