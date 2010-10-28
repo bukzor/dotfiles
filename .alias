@@ -7,7 +7,9 @@ setenv EDITOR vim
 setenv P4EDITOR vim
 alias ls 'ls-F'
 alias grep 'grep --color'
+alias zgrep 'grep --color=always'
 alias login 'source ~/.cshrc'
+alias l lt
 alias lt "ls -lthr --time-style=+'[%D %r]'"
 alias la "ls -lAh --time-style=+'[%D %r]'"
 alias ll "ls -lh --time-style=+'[%D %r]'"
@@ -32,6 +34,7 @@ setenv src      $aticad/src
 setenv sysadmin $src/sysadmin
 setenv misc     $src/misc
 setenv web      $src/webapps
+setenv trend    $web/CPDtrends
 setenv fctiming $web/fctiming
 setenv volusage $web/volusage
 setenv metrics  $tb/metrics
@@ -39,16 +42,12 @@ setenv util     $tb/util
 setenv packages /proj/fcfp2-archive-nobackup/bgolemon/packages
 setenv rootflow /tool/aticad/1.0/flow/TileBuilder/metrics/scripts
 
-
-setenv P4PORT terra.ca.atitech.com:1666
-setenv P4CLIENT bgolemon_tools
-
-#nice tab-completion stuff
-source ~/.csh.completions
-
-
 #lets me install things to my homedir
 envv add PATH            ~/bin
 envv add CPATH           ~/include
 envv add MANPATH         ~/man
 envv add LIBRARY_PATH    ~/lib
+
+#nice tab-completion stuff
+source ~/.csh.completions
+

@@ -86,6 +86,14 @@
     "set extra option directly in files
     "example: "vim: syntax=vim"
     set modeline
+
+    "don't clobber the buffer when pasting in visual mode
+    vmap P p
+    vnoremap p "_dP
+
+    "reformat XML quickly
+    nmap =x :%s/> *</>\r</g<enter>=G=gg<c-o><c-o>
+
 " }
 
 
@@ -101,12 +109,6 @@
     filetype on       
     filetype indent on
     filetype plugin on
-" }
-
-" visual-mode usability {
-    "don't clobber the buffer when pasting in visual mode
-    vmap P p
-    vnoremap p "_dP
 " }
 
 "nonstandard, personal preferences {
