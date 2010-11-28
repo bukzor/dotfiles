@@ -1,10 +1,12 @@
-#!/bin/bash
 if [[ "$@" ]]; then
-    cmd="echo \"$@\"; bash"
+    string="$@"
 else
-    cmd="echo \"It's Done!\"; bash"
+    string="It's Done!"
 fi
 
-xterm -fg White -bg Red -e bash -c "$cmd"
+#make (reasonably) shell safe
+string=`echo $string | sed -re 's/([^A-Z0-9 ])/\\\\\\1/g'`
+
+xterm  -geometry 30x4 -xrm '*hold:1' -fg White -bg Red -e bash -c "echo $string" &
 
 # vim: syntax=sh
