@@ -3,8 +3,6 @@
 # the files are located in the bash-doc package.
 
 # the default umask is set in /etc/login.defs
-#umask 022
-xset -b b off
 
 # include .bashrc if it exists
 if [ -f ~/.bashrc ]; then
