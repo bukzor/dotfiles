@@ -3,22 +3,19 @@ import commands
 import os
 import sys
 from math import log
-wifi = "eth1"
-
-def checkroot():
-    if (os.getuid() != 0):
-	print "You are not superuser. UID =", os.getuid()
-	if os.spawnlp(os.P_WAIT, "sudo", "sudo", "true"):#get root permissions
-	    sys.exit(-1)
+wifi = "wlan0"
 
 class net:
-    def __init__(self, essid = "", dB = -200, crypt = "on"):
+    def __init__(self, essid, dB, quality, crypt):
 	self.essid = essid
-	try:
-	    self.signal = log(93.+dB) / .03
-	except:
-	    self.signal = 0
-	self.dB = dB
+        self.dB = int(dB)
+        self.quality = quality
+        try:
+            self.signal1 = log(93.+self.dB) / .03
+        except ValueError:
+            self.signal1 = 0
+        self.signal2 = 300 * eval(quality) - 55
+        self.signal = (self.signal1 + self.signal2) / 2
 	self.crypt = crypt
 	if(crypt == "on"):
 	    self.locked = "locked"
@@ -26,12 +23,12 @@ class net:
 	    self.locked = "unlocked"
 
     def __str__(self):
-	return "%s:\t%i%% (%idB)\t%s" \
-	    % (self.essid, self.signal, self.dB, self.locked)
+	return "%-20s %3i%% (%idB %s) %20s" \
+	    % (self.essid, self.signal, self.dB, self.quality, self.locked)
 
     def __cmp__(self, other):
 	if not isinstance(other, net):
-	    raise TypeError("Cannot compare 'net' to '" + str(type(other)) + "'")
+	    raise TypeError("Cannot compare 'net' to %r" % type(other).__name__)
 
 	if self.crypt == other.crypt:
 	    if self.signal > other.signal:
@@ -46,19 +43,33 @@ class net:
 	    return -1
 
 
-checkroot();
-iwl = commands.getoutput("sudo iwlist %s scan | grep \"ESSID\\|Signal\\|key\"" % wifi)
-iwl = iwl.split("\n")
+from subprocess import Popen, PIPE
+iwl = Popen(["sudo", "iwlist", wifi, "scan"], stdout=PIPE)
 	
 netlist = []
-for x in xrange(0,len(iwl),3):
+
+essid = quality = signal = crypt = None
+for line in iwl.stdout:
+    if "ESSID:" in line:
+        essid = line.split('ESSID:')[-1].strip()
+    if "Signal" in line:
+        data = line.split("=")[1:]
+        quality = data[0].split()[0]
+        signal  = data[1].split()[0]
+    if "Encryption" in line:
+        crypt = line.split(":")[-1].strip()
+    if essid and quality and signal and crypt:
+	netlist.append( net(essid, signal, quality, crypt) )
+        essid = quality = signal = crypt = None
+
+        
+if False:
 	print iwl[x]
 	print iwl[x+1]
 	print iwl[x+2]
-	essid =  iwl[x].split(":")[1]
-	signal =  iwl[x+1].split(":")[2].split()[0]
+	essid =  iwl[x+2].split(":")[1]
+	signal =  iwl[x+1].split()[0]
 	crypt =  iwl[x+2].split(":")[1]
-	netlist.append( net(essid, int(signal), crypt) )
 
 """
 essid = "test"
