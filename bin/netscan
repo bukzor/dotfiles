@@ -49,12 +49,18 @@ iwl = Popen(["sudo", "iwlist", wifi, "scan"], stdout=PIPE)
 netlist = []
 
 essid = quality = signal = crypt = None
+divider = '='
 for line in iwl.stdout:
     if "ESSID:" in line:
         essid = line.split('ESSID:')[-1].strip()
     if "Signal" in line:
-        data = line.split("=")[1:]
-        quality = data[0].split()[0]
+        data = line.split(divider)[1:]
+        try:
+            quality = data[0].split()[0]
+        except IndexError:
+            divider = ':'
+            data = line.split(divider)[1:]
+            quality = data[0].split()[0]
         signal  = data[1].split()[0]
     if "Encryption" in line:
         crypt = line.split(":")[-1].strip()
