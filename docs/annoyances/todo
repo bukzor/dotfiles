@@ -1,0 +1,29 @@
+shift-tab doesn't work under screen
+middle-click not working in vim+screen
+	vim, ctrl-z, highlight, fg, middle-click
+
+vim fuzzy file open
+	sudo apt-get install ruby ruby1.8-dev rake
+	mkdir -p ~/.vim/autoload ~/.vim/bundle 
+	curl 'www.vim.org/scripts/download_script.php?src_id=16224' \ 
+	  > ~/.vim/autoload/pathogen.vim
+	cd ~/.vim
+	git clone git://git.wincent.com/command-t.git bundle/command-t
+	cd ~/.vim/bundle/command-t
+ 	rake make
+
+
+	currently this segfaults :( see: https://wincent.com/issues/1741
+		
+
+   
+
+git completion hooks take too damn long
+
+jslint broken
+yui-compressor git hooks for .js files
+
+gnome-terminal 256 colors
+tmux normal scrolling -- mouse wheel, page-up
+
+remap mac keyboard keys to be normal

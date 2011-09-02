@@ -1,0 +1,21 @@
+#
+# a listing of installed packages, and why
+#
+
+basics:
+	aptitude
+	gvim
+	gm-notify
+	tkdiff
+	
+kernel build/install:
+	* doc: https://wiki.ubuntu.com/KernelTeam/GitKernelBuild
+	git-core
+	kernel-package
+	libncurses5-dev
+
+	CONCURRENCY_LEVEL=`getconf _NPROCESSORS_ONLN` fakeroot make-kpkg --initrd --append-to-version=-custom kernel_image kernel_headers modules_image
+
+	
+	
+

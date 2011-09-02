@@ -1,0 +1,12 @@
+colors:
+	they key is to enable 256-color mode
+	test at: http://frexx.de/xterm-256-notes/data/256colors2.pl
+	in PuTTY:
+		Settings -> Window -> Colours -> Allow xterm 256-color mode
+		Settings -> Connection -> Data -> Terminal string -> xterm-256color
+		(make sure the settings are saved into a profile)
+	in ~/.tmux.conf:
+		set-option -g default-terminal screen-256color
+	vim will read $TERM to understand this automatically. to check: :set t_Co
+
+	gnome-terminal ??

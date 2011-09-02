@@ -1,15 +1,16 @@
 "display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    colorscheme desert      "you might want to change this to your taste
+    colorscheme evening     "change to taste. try: desert
 
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
     set ruler showcmd       "give line, column, and command in the status line
     set laststatus=2        "always show the status line
                             "make filename-completion more terminal-like
-    set wildmode=list:longest           
+    set wildmode=longest:full
+    set wildmenu            "a menu for resolving ambiguous tab-completion
                             "files we never want to edit 
-    set wildignore=*.pyc,*.swp,.*.bak,.*.tmp            
+    set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp            
 
     set incsearch           "search as you type
     set hlsearch            "highlight the search
@@ -18,9 +19,14 @@
 " }
 
 " movement options {
+    "enable mouse in normal, visual, help, prompt modes
+    "I skip insert/command modes because it prevents proper middle-click pasting
+    "TODO: can we get paste to work even with mouse enabled?
+    set mouse=nvrh
+
     "move around more like a normal editor
-    noremap j gj
-    noremap k gk
+    nnoremap j gj
+    nnoremap k gk
     set whichwrap=b,s,h,l,<,>,[,]
     set backspace=indent,eol,start
 
@@ -61,6 +67,8 @@
 " }
 
 " common typos {
+    "mapping a sequence starting with ':' causes a pause whenever : is typed
+    "if that's too annoying, remove these
     nmap :Q :q
     nmap q: :q
     nmap Q: :q
@@ -68,8 +76,18 @@
     nmap :WQ :wq
 " }
 
+" multiple files {
+    " be smarter about multiple buffers / vim instances
+    "quick buffer switching with TAB, even with edited files
+    set hidden
+    nmap <TAB> :bn<CR>
+    nmap <S-TAB> :bp<CR>
+    set autoread            "auto-reload files, if there's no conflict
+    set shortmess+=IA       "no intro message, no swap-file message
+" }
+
 " general usability {
-    "never use Ex mode
+    "never use Ex mode -- I never *mean* to press this
     nmap Q <ESC>            
 
     "turn off the annoying "ding!"
@@ -77,11 +95,6 @@
 
     "cd to the file you're editing
     "set autochdir "vim 7.0
-
-    "quick buffer switching with TAB, even with edited files
-    set hidden
-    nmap <TAB> :bn<CR>
-    nmap <S-TAB> :bp<CR>
 
     "set extra option directly in files
     "example: "vim: syntax=vim"
@@ -103,7 +116,7 @@
     set shiftround                      "always use a multiple of 4 for indents
     set smarttab                        "backspace to remove space-indents
     set autoindent                      "auto-indent for code blocks
-    "set smartindent                    "too many problems with this
+    "NOT: smartindent                   "it does stupid things with comments
 
     "smart indenting by filetype, better than smartindent
     filetype on       
@@ -111,15 +124,24 @@
     filetype plugin on
 " }
 
+"extra filetypes {
+    au BufNewFile,BufRead *.js.tmpl set filetype=javascript
+    au BufNewFile,BufRead *.css.tmpl set filetype=css
+"}
+
 "nonstandard, personal preferences {
-    "replace <CTRL-I> (also known as <TAB>) with <CTRL-P>
+    "replacement for CTRL-I, also known as <tab>
     noremap <C-P> <C-I>
 
     "replace <CTRL-V> with <CTRL-B>
     inoremap <C-B> <C-V>
 
-    "python files shouldn't use tabs
-    "FIXME: this should only affect the python buffer
-    au BufReadPost *.py retab!
-
+    "make vimdiff behave like tkdiff
+    if &diff
+            "vimdiff mode
+            noremap n ]cz.
+            noremap p [cz.
+            noremap q :qall<cr>
+            noremap r :e!<cr>
+    endif
 " }

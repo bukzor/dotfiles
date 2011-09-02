@@ -1,0 +1,8 @@
+
+fix pf
+	ignores too many files: -path "*template*"
+	doesn't work with -A
+
+testify
+	should be able to take a filename
+	simply catch ImportError, then try mangling the string

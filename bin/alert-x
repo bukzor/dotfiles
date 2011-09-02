@@ -1,0 +1,14 @@
+if [[ "$@" ]]; then
+    string="$@"
+else
+    string="It's Done!"
+fi
+
+#make (reasonably) shell safe
+string=`echo $string | sed -re 's/([^A-Z0-9 ])/\\\\\\1/g'`
+
+xterm  -title alert -geometry 30x4 -xrm '*hold:1' \
+        -fg White -bg Red -e bash -c "echo $string" \
+        &
+
+# vim: syntax=sh
