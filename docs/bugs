@@ -1,0 +1,18 @@
+
+#22034: Show sharing links after editing a review
+	there's a three and two column version of this page
+	basically remove the two-column version
+
+#22049: Review FIlter Shared has Broken Paging
+	fix the count of pages
+	make sure pagination is same as biz_details
+
+#20447: Follow Link Broken
+	biz_details and user_details show the modern way
+
+#9114: No test coverage for user_details_review_search
+	
+
+#12998: Inconsistency in saved locations usage
+	Investigate if zip code is used for search, or not
+

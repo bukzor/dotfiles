@@ -1,0 +1,21 @@
+
+no wireless: https://wiki.ubuntu.com/KernelTeam/GitKernelBuild
+
+
+disable touchpad when using mouse:
+	/etc/gdm/PreSession/Default
+	xauth merge /var/run/gdm/auth-for-*/database
+
+	/etc/udev/rules.d/61-touchpad.rules 
+	#
+	# run:
+	#   udevadm test --action=add /sys/devices/platform/i8042/serio1/input/input6/mouse1
+	# or similar to test the following rules
+	#
+
+	# disable PS/2 touchpad on DISPLAY :0 if a mouse is added to the system
+	ACTION=="add",    SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/var/run/gdm/auth-for-gdm-*/database DISPLAY=:0 synclient TouchpadOff=1'"
+
+	# enable PS/2 touchpad on DISPLAY :0 if a mouse is removed from the system
+	ACTION=="remove", SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/var/run/gdm/auth-for-gdm-*/database DISPLAY=:0 synclient TouchpadOff=0'"
+
