@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+
+from time import sleep
+
+max_query_len = 900
+
+
+from CPD_SQL_connection import Cursor
+cursor = Cursor(host="svcpdweb1.ca.atitech.com", port=3306, user="killer", passwd="killemall!")
+
+class SQLprocess:
+    def __init__(self, id, user, host, db, mode, time, state, query):
+	if not state: state = ""
+	self.id = id
+	self.user = user
+	self.host = host
+	self.db = db
+	self.mode = mode
+	self.time = time
+	self.state = state
+
+	if not query:
+	    self.query = ""
+	elif len(query) > max_query_len:
+	    self.query = query[:max_query_len] + "..."
+	else:
+	    self.query = query
+    def __cmp__ (self, other):
+	return cmp(int(other), self.time)
+    def __int__ (self):
+	return self.time
+    def __str__ (self):
+	return "% 5s\t| % 10s | % 32s | %s | % 5s | % 4s | % 7s | %s"\
+	    % (self.id, self.user, self.host, self.db, self.mode, self.time, \
+		self.state, self.query)
+
+showcmd = 'show full processlist'
+cursor.execute(showcmd)
+
+#init
+
+
+pslist=[]
+for row in cursor.fetchall():
+    s = SQLprocess(*row)
+    if s.query and s.query != showcmd: pslist.append(SQLprocess(*row))
+pslist.sort()
+
+
+oldest = 0
+minute = 0
+locked = []
+waiting = []
+running = []
+for x in pslist:
+    if x.time > 60: minute += 1
+
+    if "WAIT" in x.state.upper():
+	waiting.append(x)
+	continue
+    elif x.mode == 'Sleep':
+	continue
+
+    if x.time > oldest: oldest = x.time
+
+    if "LOCK" in x.state.upper():
+	locked.append(x)
+    else:
+	running.append(x)
+   
+
+print "\nLOCKED:"
+for x in reversed(locked[:10]): print x
+print "\nWAITING:"
+for x in reversed(waiting[:10]): print x
+print "\nRUNNING:"
+for x in reversed(running[:10]): print x
+
+
+
+print "\n%i queries.." % len(pslist)
+print "Oldest query (not waiting) is %i seconds." % oldest
+if not len(pslist):
+    print "No queries are older than a minute."
+else:
+    print "%s queries are older than a minute. (%s%%)" % (minute, 100*minute/len(pslist))
+print "%i running, %i locked, %i waiting" % (len(running), len(locked), len(waiting))
+
