@@ -1,70 +1,147 @@
-set nocompatible        " Use Vim defaults (much better than vi!)
-"mouse=ic prevents proper middle-click pasting in insert/command modes
-set mouse=vrhn
+"display options {
+    syntax on               "syntax coloring is a first-cut debugging tool
+    colorscheme evening     "change to taste. try: desert
 
-"search
-set incsearch
-set hlsearch
-set ignorecase
-set smartcase
-set showcmd
-set wrap
+    set wrap                "wrap long lines
+    set scrolloff=3         "keep three lines visible above and below
+    set ruler showcmd       "give line, column, and command in the status line
+    set laststatus=2        "always show the status line
+                            "make filename-completion more terminal-like
+    set wildmode=longest:full
+    set wildmenu            "a menu for resolving ambiguous tab-completion
+                            "files we never want to edit 
+    set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp            
 
-" os x backspace fix
-set backspace=indent,eol,start
+    set incsearch           "search as you type
+    set hlsearch            "highlight the search
+    set ignorecase          "ignore case
+    set smartcase           " ...unless the search uses uppercase letters
+" }
 
-colorscheme desert
-syntax on             " Enable syntax highlighting
-filetype on           " Enable filetype detection
-filetype indent on    " Enable filetype-specific indenting
-filetype plugin on    " Enable filetype-specific plugins
-set autoindent
-"NOT: smartindent -- it does stupid things with comments
+" movement options {
+    "enable mouse in normal, visual, help, prompt modes
+    "I skip insert/command modes because it prevents proper middle-click pasting
+    "TODO: can we get paste to work even with mouse enabled?
+    set mouse=nvrh
 
-" be smarter about multiple buffers / vim instances
-set hidden
-set autoread
-set shortmess+=IA
+    "move around more like a normal editor
+    nnoremap j gj
+    nnoremap k gk
+    set whichwrap=b,s,h,l,<,>,[,]
+    set backspace=indent,eol,start
 
-" Free cursor
-set whichwrap=b,s,h,l,<,>,[,]
+    "bindings for the 'old' up and down
+    noremap gj j
+    noremap gk k
 
-" better tab-completion
-set wildmode=longest:full
-set wildmenu
+    " space / shift-space scroll in normal mode, like a web browser
+    noremap <S-space> <C-b>
+    noremap <space> <C-f>
+" }
 
-set laststatus=2
-set scrolloff=2
+"windows-style mappings {
+    "ctrl+S to save. 
+    "NOTE: put this in ~/.cshrc for it to work properly in terminal vim:
+    "       stty -ixon -ixoff
+    map <c-s> :update<cr>
+    imap <c-s> <c-o><c-s>
+    "ctrl+A to select all
+    noremap <c-a> ggVG
+    imap <c-a> <esc><c-a>
+    "ctrl+C to copy
+    map <c-c> "+y
+    "ctrl+V to paste
+    map <c-v> "+gP
+    imap <c-v> <c-o>"+gP
+    vmap <c-v> "+P
+    "ctrl+Y to redo
+    map <c-y> <c-r>
+    imap <c-y> <c-o><c-r>
+    imap <c-r> <c-o><c-r>
+    "ctrl+Z to undo 
+    "map <c-z> u            "this clobbers UNIX ctrl+z to background vim
+    imap <c-z> <c-o>u
+    "ctrl+Q to save/quit
+    map <c-q> :update\|q<cr>
+    imap <c-q> <c-o><c-q>
+" }
 
-" override those annoying commands I always mistype
-:command W w
-:command WQ wq
-:command Wq wq
-:command Q q
-:command QW q
-:command Qw q
+" common typos {
+    "mapping a sequence starting with ':' causes a pause whenever : is typed
+    "if that's too annoying, remove these
+    nmap :Q :q
+    nmap q: :q
+    nmap Q: :q
+    nmap :W :w
+    nmap :WQ :wq
+" }
 
-" Always gj, gk
-nnoremap j gj
-nnoremap k gk
+" multiple files {
+    " be smarter about multiple buffers / vim instances
+    "quick buffer switching with TAB, even with edited files
+    set hidden
+    nmap <TAB> :bn<CR>
+    nmap <S-TAB> :bp<CR>
+    set autoread            "auto-reload files, if there's no conflict
+    set shortmess+=IA       "no intro message, no swap-file message
+" }
 
-nmap <tab> :bn<cr>
-nmap <s-tab> :bp<cr>
-"replacement for CTRL-I, also known as <tab>
-nnoremap <C-P> <C-I>
+" general usability {
+    "never use Ex mode -- I never *mean* to press this
+    nmap Q <ESC>            
 
-"I never *mean* to press this
-nmap Q q 
+    "turn off the annoying "ding!"
+    set visualbell
+
+    "cd to the file you're editing
+    "set autochdir "vim 7.0
+
+    "set extra option directly in files
+    "example: "vim: syntax=vim"
+    set modeline
+
+    "don't clobber the buffer when pasting in visual mode
+    vmap P p
+    vnoremap p "_dP
+
+    "reformat XML quickly
+    nmap =x :%s/> *</>\r</g<enter>=G=gg<c-o><c-o>
+
+" }
 
 
-if &diff
-	"vimdiff mode
-	noremap n ]cz.
-	noremap p [cz.
-	noremap q :qall<cr>
-	noremap r :e!<cr>
-endif
+"indentation options {
+    set expandtab                       "use spaces, not tabs
+    set softtabstop=4 shiftwidth=4      "4-space indents
+    set shiftround                      "always use a multiple of 4 for indents
+    set smarttab                        "backspace to remove space-indents
+    set autoindent                      "auto-indent for code blocks
+    "NOT: smartindent                   "it does stupid things with comments
 
+    "smart indenting by filetype, better than smartindent
+    filetype on       
+    filetype indent on
+    filetype plugin on
+" }
 
-au BufNewFile,BufRead *.js.tmpl set filetype=javascript
-au BufNewFile,BufRead *.css.tmpl set filetype=css
+"extra filetypes {
+    au BufNewFile,BufRead *.js.tmpl set filetype=javascript
+    au BufNewFile,BufRead *.css.tmpl set filetype=css
+"}
+
+"nonstandard, personal preferences {
+    "replacement for CTRL-I, also known as <tab>
+    noremap <C-P> <C-I>
+
+    "replace <CTRL-V> with <CTRL-B>
+    inoremap <C-B> <C-V>
+
+    "make vimdiff behave like tkdiff
+    if &diff
+            "vimdiff mode
+            noremap n ]cz.
+            noremap p [cz.
+            noremap q :qall<cr>
+            noremap r :e!<cr>
+    endif
+" }
