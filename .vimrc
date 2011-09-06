@@ -144,4 +144,15 @@
             noremap q :qall<cr>
             noremap r :e!<cr>
     endif
+
+    "if we don't have gui support, then CSApprox won't work.
+    if !has('gui')
+        let g:CSApprox_verbose_level = 0 "don't complain
+        colorscheme murphy2             "fall back to pre-compiled color scheme
+    endif
+    
+    "vim plugin handling with pathogen:
+    "       http://www.vim.org/scripts/script.php?script_id=2332
+    call pathogen#infect()  "load the bundles
+    Helptags                "plus any bundled help
 " }
