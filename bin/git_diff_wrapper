@@ -1,0 +1,5 @@
+#!/bin/sh
+
+tkdiff "$2" "$5"
+exit 0
+
