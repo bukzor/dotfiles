@@ -7,7 +7,8 @@ set lines=24
 if has('gui_win32')
     set guifont=Terminal:h9
 else
-    set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 11
+    set guifont=Liberation\ Mono\ Bold\ 12
+    "set guifont=Bitstream\ Vera\ Sans\ Mono\ Bold\ 11
 endif
 
 "numbering

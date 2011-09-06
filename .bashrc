@@ -29,18 +29,19 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+if [ "$COLORTERM" == "gnome-terminal" ]; then
+    export TERM=xterm-256color
+fi
+
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-xterm-color)
+*-col*|*-256col*)
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
     ;;
 *)
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
-
-# Comment in the above and uncomment this below for a color prompt
-#PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
@@ -56,11 +57,15 @@ esac
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-#if [ -f ~/.bash_aliases ]; then
-#    . ~/.bash_aliases
-#fi
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
 
-alias amd='ssh bgolemon@svdcelk204'
+#because I've used csh for too long
+function setenv() {
+    export=`echo "$@" | sed 's/ /="/; s/^/export /; s/$/"/'`
+    eval "$export"
+}
 
 
 # enable color support of ls and also add handy aliases
@@ -84,7 +89,7 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
-if [ -f bash_completion ]; then
-    . bash_completion
+if [ -f ~/.bash_completion ]; then
+    . ~/.bash_completion
 fi
 

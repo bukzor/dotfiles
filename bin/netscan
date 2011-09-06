@@ -3,7 +3,12 @@ import commands
 import os
 import sys
 from math import log
+
 wifi = "wlan0"
+for line in open('/proc/net/wireless'):
+    if ':' in line:
+        wifi = line.split(':')[0].strip()
+        break
 
 class net:
     def __init__(self, essid, dB, quality, crypt):
