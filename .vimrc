@@ -1,6 +1,6 @@
 "display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    colorscheme evening     "change to taste. try: desert
+    colorscheme murphy      "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
@@ -148,7 +148,7 @@
     "if we don't have gui support, then CSApprox won't work.
     if !has('gui')
         let g:CSApprox_verbose_level = 0 "don't complain
-        colorscheme murphy2             "fall back to pre-compiled color scheme
+        colorscheme murphy2              "fall back to pre-compiled color scheme
     endif
     
     "vim plugin handling with pathogen:
