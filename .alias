@@ -1,0 +1,53 @@
+#command shortcuts
+set color
+set nobeep
+set visiblebell
+setenv savehist "5000 merge"
+setenv EDITOR vim
+setenv P4EDITOR vim
+alias ls 'ls-F'
+alias grep 'grep --color'
+alias zgrep 'grep --color=always'
+alias login 'source ~/.cshrc'
+alias l lt
+alias lt "ls -lthr --time-style=+'[%D %r]'"
+alias la "ls -lAh --time-style=+'[%D %r]'"
+alias ll "ls -lh --time-style=+'[%D %r]'"
+alias lS "ls -lShr --time-style=+'[%D %r]'"
+alias sql_metrics2 "ssh -t root@pdsql4 nice --20 mysql --defaults-file=/tool/aticad/1.0/src/mysql-config/public/metrics2.cnf"
+alias sql_metrics1 "ssh -t root@pdsql nice --20 mysql --defaults-file=/tool/aticad/1.0/src/mysql-config/public/metrics1.cnf"
+alias sql_sb2     "ssh -t root@svcpdweb2 nice --20 mysql -D sharedbook_auth -u SBapache -pwobble!"
+alias sql_root    "ssh -t root@pdsql nice --20 mysql -u root -p4sVc\\\\!2Oa"
+alias sql_volusage 'ssh -t pdsql2 mysql -utbvurw -pWe\\\$7End -Dvolusage2'
+alias easy_install "easy_install --always-unzip"
+alias newpy 'cp /home/bgolemon/python/blank_template.py'
+alias lslogin 'lsload -R "select[interactive&&(type==RHEL4_64||type==RHEL5_64)]order[r15m]"'
+alias svn ~/bin/svn
+
+#finger saver: common directories
+setenv aticad   ~/tool/aticad/1.0
+setenv mod      $aticad/mod
+setenv bin      $aticad/bin
+setenv lib      $aticad/lib
+setenv tb       $aticad/flow/TileBuilder
+setenv src      $aticad/src
+setenv sysadmin $src/sysadmin
+setenv misc     $src/misc
+setenv web      $src/webapps
+setenv trend    $web/CPDtrends
+setenv fctiming $web/fctiming
+setenv volusage $web/volusage
+setenv metrics  $tb/metrics
+setenv util     $tb/util
+setenv packages /proj/fcfp2-archive-nobackup/bgolemon/packages
+setenv rootflow /tool/aticad/1.0/flow/TileBuilder/metrics/scripts
+
+#lets me install things to my homedir
+envv add PATH            ~/bin
+envv add CPATH           ~/include
+envv add MANPATH         ~/man
+envv add LIBRARY_PATH    ~/lib
+
+#nice tab-completion stuff
+source ~/.csh.completions
+

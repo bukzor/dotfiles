@@ -1,0 +1,14 @@
+#!/bin/bash --norc
+
+# print a certain column from the input
+
+if [[ "$1" -eq "$1" ]] 2>/dev/null; then
+	SEP=" "
+else
+	SEP="$1"
+	shift
+fi
+ARGS="${@/#/$}"
+ARGS="${ARGS// /\"$SEP\"}"
+ARGS='{print '"$ARGS"'}'
+exec awk -F"$SEP" "$ARGS"

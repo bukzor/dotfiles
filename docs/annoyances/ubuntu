@@ -1,0 +1,39 @@
+screen:
+	just use tmux instead
+	mouse-wheel scroll in screen
+
+
+fuse users:
+	gives permission-denied due to not understanding uid mapping
+
+	fusermount -u dev
+	sshfs -o idmap=user $USER@dev6:/nail/home/buck ~/dev
+
+dual monitor:
+	--- /etc/X11/xorg.conf.2011-08-09	2011-08-09 16:59:28.707009051 -0700
+	+++ /etc/X11/xorg.conf	2011-08-09 17:44:44.567010255 -0700
+	@@ -2,6 +2,9 @@
+	 Section "Screen"
+		Identifier	"Default Screen"
+		DefaultDepth	24
+	+	SubSection "Display"
+	+                Virtual 3360 1200 
+	+        EndSubSection
+	 EndSection
+	 
+	 Section "Module"
+
+primary monitor:
+	xrandr --prop | grep " connected" 
+	xrandr --output LVDS --primary
+	vim .config/monitors.xml
+
+grub menu:
+	see /etc/default/grub
+
+mac fn keys:
+	# make function keys "normal" unless fn button is pressed
+	echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode
+	echo options hid_apple fnmode=2 | sudo tee -a /etc/modprobe.d/hid_apple.conf
+	sudo update-initramfs -u
+

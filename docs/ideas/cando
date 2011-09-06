@@ -1,0 +1,21 @@
+add user name to trac last-edit message, in top-right corner.
+
+make yelp/ad/config_category.py:selectivity_for_cat_id sparse:
+	95% of values are 1.0
+	2/3 of production usages are .get(id, 1.0)
+
+change tabs to spaces in python
+	against all known coding guidelines
+	Makes it harder to open-source, since "people would laugh" if they see it.
+		https://trac.yelpcorp.com/wiki/PythonStyleGuidelines
+	our files get negative scores (out of ten) in pylint mainly because of this,
+		obscuring real issues
+	there are workarounds, but the _real_ fix is to change
+
+
+whotobug should give email, skip gone people (/bin/nologin)
+
+
+fix config/level.py to have static defaults, importable to config/custom.py
+	currently, custom.py is evaluated before level.py, even though level.py has values that'd we'd like to use in custom.py
+	

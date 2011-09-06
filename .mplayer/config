@@ -1,0 +1,10 @@
+# Write your default config options here!
+
+
+vo=xv,
+fs=yes
+zoom=yes
+monitoraspect=1.6
+#ac=ffmp3,
+#ao=alsa,
+

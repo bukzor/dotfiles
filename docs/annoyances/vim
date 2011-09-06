@@ -1,0 +1,5 @@
+vim css syntax for *.css.tmpl
+	au BufNewFile,BufRead *.js.tmpl set filetype=javascript
+	au BufNewFile,BufRead *.css.tmpl set filetype=css
+	
+
