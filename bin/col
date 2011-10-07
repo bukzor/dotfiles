@@ -2,7 +2,9 @@
 
 # print a certain column from the input
 
-if [[ "$1" -eq "$1" ]] 2>/dev/null; then
+[[ $(($1)) == "$1" ]] 2>/dev/null
+if [[ $? == 0 ]]; then
+	#first argument is integer
 	SEP=" "
 else
 	SEP="$1"

@@ -1,5 +1,5 @@
 colors:
-	they key is to enable 256-color mode
+	the key is to enable 256-color mode
 	test at: http://frexx.de/xterm-256-notes/data/256colors2.pl
 	in PuTTY:
 		Settings -> Window -> Colours -> Allow xterm 256-color mode
@@ -9,4 +9,6 @@ colors:
 		set-option -g default-terminal screen-256color
 	vim will read $TERM to understand this automatically. to check: :set t_Co
 
-	gnome-terminal ??
+	gnome-terminal:
+		Edit -> Profile Preferences -> Title and Command -> Custom Command
+			sh -c 'TERM=xterm-256color bash'

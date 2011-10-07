@@ -4,7 +4,7 @@
 
 # set PATH so it includes user's private bin if it exists
 if [ -d ~/bin ] ; then
-    export PATH="${PATH}":~/bin
+    export PATH=~/bin:"${PATH}"
 fi
 
 # If not running interactively, don't do anything

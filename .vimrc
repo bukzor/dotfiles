@@ -111,8 +111,13 @@
 
 
 "indentation options {
-    set expandtab                       "use spaces, not tabs
-    set softtabstop=4 shiftwidth=4      "4-space indents
+    "TODO: conditional for @work
+    "set expandtab                       "use spaces, not tabs
+    "set softtabstop=4 shiftwidth=4      "4-space indents
+    set noexpandtab
+    set tabstop=4
+    set shiftwidth=4
+
     set shiftround                      "always use a multiple of 4 for indents
     set smarttab                        "backspace to remove space-indents
     set autoindent                      "auto-indent for code blocks

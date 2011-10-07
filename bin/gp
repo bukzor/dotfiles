@@ -1,2 +1,4 @@
 #!/bin/sh
-exec find -name "*.py" 2>/dev/null | xargs -n50 -P20 grep --color "$@"
+
+exec yelp_finder -name "*.py" -print0 2> /dev/null | xargs -0 -n50 -P20 grep --color "$@"
+

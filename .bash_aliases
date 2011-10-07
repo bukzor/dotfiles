@@ -1,4 +1,5 @@
 alias ssh-dev="ssh -ttA dev06 tmux attach"
+alias tmux-env='eval `~/bin/tmux-env`'
 
 #because I've used csh for too long
 function setenv() {
@@ -26,6 +27,7 @@ alias l='ls -CF'
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
 
 if [[ -e /nail/scripts/aliases.sh ]]; then
 	. /nail/scripts/aliases.sh
