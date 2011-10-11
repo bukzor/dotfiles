@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 
 network='irc.yelpcorp.com'
 port=6697
