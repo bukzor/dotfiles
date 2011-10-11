@@ -17,7 +17,7 @@ import socket, ssl
 irc = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 irc = ssl.wrap_socket(irc)
 irc.connect( (network, port) )
-irc.send( 'PASS regulat0rz\r\n' )
+irc.send( 'PASS thunderb1rd\r\n' )
 irc.send( 'NICK %s-bot\r\n' % user )
 irc.send( 'USER %(user)s-bot %(user)s-bot %(user)s-bot :%(user)s\'s alert bot\r\n' % dict(user=user))
 

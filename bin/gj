@@ -1,3 +1,4 @@
 #!/bin/sh
 
-exec find \( -name build -or -name locale -or -name "www-pkg-*" \) -prune -or -type f -print0 2> /dev/null | xargs -0 -n50 -P20 grep --color "$@"
+exec yelp_finder -print0 2> /dev/null | xargs -0 -n50 -P20 grep --color "$@"
+

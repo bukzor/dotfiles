@@ -1,0 +1,16 @@
+#!/bin/sh
+
+exec find \
+    \( \
+        -name build -or -name locale -or -name "www-pkg-*" -or \
+        -name 'sandbox-*' -or -name '.git' -or -name 'logs' \
+    \) -prune -or \
+    -type f \
+    -not -name "*.py[co]" -not -name "*.sw[nop]" -not -name '*.dblite' \
+    -not \( \( \
+            -path './templates/*' -or -path './admin_templates/*' -or \
+            -path './biz_templates/*' -or -path './yelp_spam/templates/*' \
+    \) -name '*.py' \) \
+    "$@"
+
+
