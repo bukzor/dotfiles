@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sshfs -o idmap=user $USER@dev6:/nail/home/buck ~/dev

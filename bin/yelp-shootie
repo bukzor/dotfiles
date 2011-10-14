@@ -1,0 +1,24 @@
+#!/bin/bash
+
+key=3fccbb451a02430aa2d4d32e671878bf
+
+e=1
+if [ -z "$1" ]; then
+    msg="$( basename "$0" ) invoked without argument"
+else
+    if [ -s "$1" ]; then
+        url=$( curl -T "$1" http://yelp-shootie.appspot.com/put/$key )
+        if [ -n "$url" ]; then
+            echo "$url" | xsel --clipboard --input
+            msg="uploaded to yelp shootie, URL on clipboard"
+            e=0
+        else
+            msg="failed to upload"
+        fi
+    else
+        msg="$1 does not exist"
+    fi
+fi
+
+notify-send -i "$1" --expire-time=5000 "$msg"
+exit $e
