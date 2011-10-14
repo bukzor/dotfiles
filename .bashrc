@@ -41,6 +41,8 @@ fi
 
 if [ "$COLORTERM" == "gnome-terminal" ]; then
     export TERM=xterm-256color
+elif [ "$TERM" == "xterm" ]; then
+    export TERM=xterm-256color
 fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
