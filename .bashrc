@@ -10,6 +10,12 @@ fi
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+#MY PREFERENCES ==============================================================
+export EDITOR VISUAL GIT_EDITOR
+EDITOR=vim
+VISUAL=$EDITOR
+GIT_EDITOR=$EDITOR
+
 # don't put duplicate lines in the history. See bash(1) for more options
 # ... or force ignoredups and ignorespace
 HISTCONTROL=erasedups:ignorespace
