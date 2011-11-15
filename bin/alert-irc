@@ -6,7 +6,7 @@ bufsize = 2**11 # unrealIRCd seems to use 2k buffers
 verbose = False #TODO: optionalize
 
 import os
-user = os.environ['LOGNAME']
+user = os.environ['USER']
 
 import sys
 message = ' '.join(sys.argv[1:])

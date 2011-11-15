@@ -3,8 +3,11 @@ no wireless: https://wiki.ubuntu.com/KernelTeam/GitKernelBuild
 
 
 disable touchpad when using mouse:
-	/etc/gdm/PreSession/Default
-	xauth merge /var/run/gdm/auth-for-*/database
+	/etc/gdm/PreSession/Default:
+		XAUTHORITY=/root/.Xauthority xauth merge /var/run/lightdm/root/:0
+
+	In oneiric, they've switched to lightdm. Possible solution:
+		https://launchpadlibrarian.net/77865141/add-scripting-hooks.patch
 
 	/etc/udev/rules.d/61-touchpad.rules 
 	#
@@ -14,8 +17,8 @@ disable touchpad when using mouse:
 	#
 
 	# disable PS/2 touchpad on DISPLAY :0 if a mouse is added to the system
-	ACTION=="add",    SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/var/run/gdm/auth-for-gdm-*/database DISPLAY=:0 synclient TouchpadOff=1'"
+	ACTION=="add",    SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/root/.Xauthority DISPLAY=:0 synclient TouchpadOff=1'"
 
 	# enable PS/2 touchpad on DISPLAY :0 if a mouse is removed from the system
-	ACTION=="remove", SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/var/run/gdm/auth-for-gdm-*/database DISPLAY=:0 synclient TouchpadOff=0'"
+	ACTION=="remove", SUBSYSTEM=="input", ENV{ID_INPUT_MOUSE}=="1", RUN+="/bin/sh -c 'XAUTHORITY=/root/.Xauthority DISPLAY=:0 synclient TouchpadOff=0'"
 
