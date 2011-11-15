@@ -28,6 +28,8 @@ while data:
 		sys.stdout.write(data)
 	if data.startswith( 'PING' ):
 		msg = 'PONG ' + data.split() [ 1 ] + '\r\n'
+		if verbose:
+			sys.stdout.write( msg )
 		irc.send( msg )
 		#TODO: enable sending to a different user
 		irc.send( 'PRIVMSG %s :%s\r\n' % (user, message) )
