@@ -30,8 +30,11 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 
 if [[ -e /nail/scripts/aliases.sh ]]; then
+	# work-specific stuff
 	. /nail/scripts/aliases.sh
 	PATH="$PATH:$BT/tools:$BT/aws/bin"
+	alias activate="source /etc/profile; source ~/mypy/bin/activate"
+	activate
 fi
 
 # vim:syntax=sh:
