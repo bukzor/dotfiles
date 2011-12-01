@@ -7,10 +7,7 @@ exec find \
     \) -prune -or \
     -type f \
     -not -name "*.py[co]" -not -name "*.sw[nop]" -not -name '*.dblite' \
-    -not \( \( \
-            -path './templates/*' -or -path './admin_templates/*' -or \
-            -path './biz_templates/*' -or -path './yelp_spam/templates/*' \
-    \) -name '*.py' \) \
+    -not \( -path './*templates/*' -name '*.py' \) \
     "$@"
 
 
