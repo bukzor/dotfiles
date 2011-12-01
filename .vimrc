@@ -144,10 +144,10 @@
     "make vimdiff behave like tkdiff
     if &diff
             "vimdiff mode
-            noremap n ]cz.
-            noremap p [cz.
-            noremap q :qall<cr>
-            noremap r :e!<cr>
+            nnoremap n ]cz.
+            nnoremap p [cz.
+            nnoremap q :qall<cr>
+            nnoremap r :e!<cr>
     endif
 
     "if we don't have gui support, then CSApprox won't work.
