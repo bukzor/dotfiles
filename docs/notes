@@ -1,0 +1,18 @@
+
+
+How to make multiple yelp dev hosts / urls
+(02:12:58 PM) evan: https://trac.yelpcorp.com/wiki/BuildPlaygroundConfiguration
+(02:13:05 PM) evan: pgbuild --yelpcode
+
+
+MRjob command line:
+
+	( time python batch/mr_admin_metric_hits.py --ec2-instance-type=c1.xlarge --num-ec2-instances=10 --runner=emr 's3://yelp-sorted-logs/logs/sorted_ranger/2011/0[6789]/*/*.gz' | tee tmp/logs/mrjob.output > /dev/tty ) |& tee tmp/logs/mrjob.err
+
+	spot-check:
+	( time python batch/mr_admin_metric_hits.py --ec2-instance-type=c1.xlarge --num-ec2-instances=6 --runner=emr 's3://yelp-sorted-logs/logs/sorted_ranger/2011/06/30/*.gz' | tee tmp/logs/mrjob.spotcheck.3.output > /dev/tty ) |& tee tmp/logs/mrjob.spotcheck.3.err
+
+	simple:
+	( time python batch/mr_nosite.py --runner=emr 's3://yelp-sorted-logs/logs/sorted_ranger/2011/09/27/part-00200.gz' | tee tmp/logs/mrjob.nosite.output > /dev/tty ) |& tee tmp/logs/mrjob.nosite.err
+
+
