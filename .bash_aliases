@@ -1,5 +1,9 @@
-alias ssh-dev="ssh -ttA dev06 tmux attach"
+#!/not/executable/bash
+
 alias tmux-env='eval `~/bin/tmux-env`'
+function ssh-dev() {
+	ssh -ttA dev06 tmux attach $( test -z "$1" || echo -t ) "$1" 
+}
 
 #because I've used csh for too long
 function setenv() {
