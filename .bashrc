@@ -39,18 +39,21 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-if [ "$COLORTERM" == "gnome-terminal" ]; then
-    export TERM=xterm-256color
-elif [ "$TERM" == "xterm" ]; then
+if [ "$TERM" == "xterm" ] && [ "$COLORTERM" == "gnome-terminal" ]; then
     export TERM=xterm-256color
 fi
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-*-col*|*-256col*)
+*-256col*)
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    ;;
+*-col*)
+    echo LOW COLOR TERM: $TERM
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
     ;;
 *)
+    echo NO COLOR TERM: $TERM
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
