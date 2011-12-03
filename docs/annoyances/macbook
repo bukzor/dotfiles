@@ -1,13 +1,22 @@
 
-no wireless: https://wiki.ubuntu.com/KernelTeam/GitKernelBuild
+no wireless:
+	# The driver for MacBookPro8,2 was released in kernel 3.2-rc3+
+	# Use `sudo dmidecode --string system-product-name` to check your version
+	http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.2-rc3-oneiric/
+	http://kernel.ubuntu.com/~kernel-ppa/mainline/daily/2011-11-29-oneiric/
+	sudo dpkg -i linux-image-3.2.*.deb
+
 
 
 disable touchpad when using mouse:
-	/etc/gdm/PreSession/Default:
-		XAUTHORITY=/root/.Xauthority xauth merge /var/run/lightdm/root/:0
+	# In oneiric, they've switched to lightdm. Possible solution:
+	# 	https://launchpadlibrarian.net/77865141/add-scripting-hooks.patch
+	# For now, just make sure gdm is your display manager:
+	sudo dpkg-reconfigure gdm
 
-	In oneiric, they've switched to lightdm. Possible solution:
-		https://launchpadlibrarian.net/77865141/add-scripting-hooks.patch
+	# make gdm give the root-user access to your X display
+	/etc/gdm/PreSession/Default:
+		XAUTHORITY=/root/.Xauthority xauth merge /var/run/gdm/auth-for-*/database
 
 	/etc/udev/rules.d/61-touchpad.rules 
 	#
