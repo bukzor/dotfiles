@@ -1,4 +1,5 @@
 "display options {
+"
     syntax on               "syntax coloring is a first-cut debugging tool
     colorscheme murphy      "change to taste. try `desert' or `evening'
 
@@ -70,10 +71,20 @@
     "mapping a sequence starting with ':' causes a pause whenever : is typed
     "if that's too annoying, remove these
     nmap :Q :q
-    nmap q: :q
-    nmap Q: :q
     nmap :W :w
     nmap :WQ :wq
+	nmap Q: :q
+
+	" this one causes a pause whenever you use q
+	" nmap q: :q
+
+    "never use Ex mode -- I never *mean* to press it
+    nnoremap Q <ESC>            
+
+	"never use F1 -- I'm reaching for escape
+	noremap  <F1> <ESC>
+	noremap! <F1> <ESC>
+	lnoremap <F1> <ESC>
 " }
 
 " multiple files {
@@ -84,12 +95,15 @@
     nmap <S-TAB> :bp<CR>
     set autoread            "auto-reload files, if there's no conflict
     set shortmess+=IA       "no intro message, no swap-file message
+
+	"window switching
+	nnoremap <C-J> <C-W>j
+	nnoremap <C-K> <C-W>k
+	nnoremap <C-H> <C-W>h
+	nnoremap <C-L> <C-W>l
 " }
 
 " general usability {
-    "never use Ex mode -- I never *mean* to press this
-    nmap Q <ESC>            
-
     "turn off the annoying "ding!"
     set visualbell
 
@@ -106,9 +120,7 @@
 
     "reformat XML quickly
     nmap =x :%s/> *</>\r</g<enter>=G=gg<c-o><c-o>
-
 " }
-
 
 "indentation options {
     "TODO: conditional for @work
@@ -132,7 +144,20 @@
 "extra filetypes {
     au BufNewFile,BufRead *.js.tmpl set filetype=javascript
     au BufNewFile,BufRead *.css.tmpl set filetype=css
-"}
+" }
+
+"bindings for vimdiff {
+    if &diff
+			"next match
+            nnoremap m ]cz.
+			"previous match
+            nnoremap M [cz.
+			"refresh the diff
+            nnoremap R :w\|set nodiff\|set diff<cr>
+			"quit, both panes
+            nnoremap q :qall<cr>
+    endif
+" }
 
 "nonstandard, personal preferences {
     "replacement for CTRL-I, also known as <tab>
@@ -140,15 +165,6 @@
 
     "replace <CTRL-V> with <CTRL-B>
     inoremap <C-B> <C-V>
-
-    "make vimdiff behave like tkdiff
-    if &diff
-            "vimdiff mode
-            nnoremap n ]cz.
-            nnoremap p [cz.
-            nnoremap q :qall<cr>
-            nnoremap r :e!<cr>
-    endif
 
     "if we don't have gui support, then CSApprox won't work.
     if !has('gui')
