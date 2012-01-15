@@ -198,10 +198,11 @@ function! s:CSApproxSnapshotAll()
     " Make an approximately gvim-equivalent snapshot of all currently installed color schemes.
     let sep = pathogen#separator()
     for dir in pathogen#split(&rtp)
-        for s:colorfile in filter(pathogen#glob(dir.sep.'colors'.sep.'*.vim'), '!matchstr(v:val,"-approx\\.vim")&&filereadable(v:val)')
+        for s:colorfile in filter(pathogen#glob(dir.sep.'colors'.sep.'*.vim'), 'empty(matchstr(v:val,"-approx.vim"))&&filereadable(v:val)')
             let s:scheme = substitute(s:colorfile, '.*'.sep, '', 0)[:-5]
+            echo 'SCHEME: '.s:scheme." FILE: ".s:colorfile
             execute 'colorscheme' s:scheme
-            execute 'CSApproxSnapshot' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
+            execute 'CSApproxSnapshot!' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
         endfor
     endfor
 endfunction
