@@ -1,8 +1,8 @@
 "display options {
-"
     syntax on               "syntax coloring is a first-cut debugging tool
     colorscheme murphy      "change to taste. try `desert' or `evening'
 
+    set cursorline          "higlight my current line
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
     set ruler showcmd       "give line, column, and command in the status line
@@ -34,10 +34,6 @@
     "bindings for the 'old' up and down
     noremap gj j
     noremap gk k
-
-    " space / shift-space scroll in normal mode, like a web browser
-    noremap <S-space> <C-b>
-    noremap <space> <C-f>
 " }
 
 "windows-style mappings {
@@ -96,11 +92,12 @@
     set autoread            "auto-reload files, if there's no conflict
     set shortmess+=IA       "no intro message, no swap-file message
 
-	"window switching
-	nnoremap <C-J> <C-W>j
-	nnoremap <C-K> <C-W>k
-	nnoremap <C-H> <C-W>h
-	nnoremap <C-L> <C-W>l
+    "window switching
+    nnoremap <C-J> <C-W>j
+    nnoremap <C-K> <C-W>k
+    nnoremap <C-H> <C-W>h
+    nnoremap <C-L> <C-W>l
+    nnoremap <C-Q> <C-W>q
 " }
 
 " general usability {
@@ -124,11 +121,8 @@
 
 "indentation options {
     "TODO: conditional for @work
-    "set expandtab                       "use spaces, not tabs
-    "set softtabstop=4 shiftwidth=4      "4-space indents
-    set noexpandtab
-    set tabstop=4
-    set shiftwidth=4
+    set expandtab                       "use spaces, not tabs
+    set softtabstop=4 shiftwidth=4      "4-space indents
 
     set shiftround                      "always use a multiple of 4 for indents
     set smarttab                        "backspace to remove space-indents
@@ -144,18 +138,19 @@
 "extra filetypes {
     au BufNewFile,BufRead *.js.tmpl set filetype=javascript
     au BufNewFile,BufRead *.css.tmpl set filetype=css
+    au BufNewFile,BufRead *.pxi set filetype=pyrex
 " }
 
 "bindings for vimdiff {
     if &diff
-			"next match
-            nnoremap m ]cz.
-			"previous match
-            nnoremap M [cz.
-			"refresh the diff
-            nnoremap R :w\|set nodiff\|set diff<cr>
-			"quit, both panes
-            nnoremap q :qall<cr>
+        "next match
+        nnoremap m ]cz.
+        "previous match
+        nnoremap M [cz.
+        "refresh the diff
+        nnoremap R :w\|set nodiff\|set diff<cr>
+        "quit, both panes
+        nnoremap q :qall<cr>
     endif
 " }
 
@@ -177,3 +172,14 @@
     call pathogen#infect()  "load the bundles
     Helptags                "plus any bundled help
 " }
+
+" Location-specific settings.
+" {
+    if filereadable("/nail/scripts/aliases.sh")
+        " At work!
+        set noexpandtab
+        set tabstop=4
+    endif
+" }
+
+" vim:expandtab
