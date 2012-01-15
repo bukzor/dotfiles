@@ -1,0 +1,7 @@
+import pudb; pudb.set_trace()
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
+# vim: ft=python

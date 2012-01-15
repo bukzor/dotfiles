@@ -1,0 +1,15 @@
+
+	from profilestats import profile
+	logging_suffix = request.path.strip('/').replace('/', '-')
+	return profile(
+			report_dir='/nail/home/buck/.pgconf-buck-security/logs', suffix=logging_suffix
+	)(
+			execute_request_profiled
+	)(
+			request, response, initialize_logic
+	)
+
+def execute_request_profiled(request, response, initialize_logic=True):
+
+python ~/gprof2dot.py -f pstats /home/buck/dev/.pgconf-buck-security/logs/profilestats.la.prof | dot -Tpng -o ~/Desktop/home.logged-in-host.png
+
