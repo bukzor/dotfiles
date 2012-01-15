@@ -1,4 +1,4 @@
-"display options {
+" display options {
     syntax on               "syntax coloring is a first-cut debugging tool
     colorscheme murphy      "change to taste. try `desert' or `evening'
 
@@ -10,8 +10,8 @@
                             "make filename-completion more terminal-like
     set wildmode=longest:full
     set wildmenu            "a menu for resolving ambiguous tab-completion
-                            "files we never want to edit 
-    set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp            
+                            "files we never want to edit
+    set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
 
     set incsearch           "search as you type
     set hlsearch            "highlight the search
@@ -36,8 +36,8 @@
     noremap gk k
 " }
 
-"windows-style mappings {
-    "ctrl+S to save. 
+" windows-style mappings {
+    "ctrl+S to save.
     "NOTE: put this in ~/.cshrc for it to work properly in terminal vim:
     "       stty -ixon -ixoff
     map <c-s> :update<cr>
@@ -47,20 +47,23 @@
     imap <c-a> <esc><c-a>
     "ctrl+C to copy
     map <c-c> "+y
-    "ctrl+V to paste
-    map <c-v> "+gP
-    imap <c-v> <c-o>"+gP
-    vmap <c-v> "+P
     "ctrl+Y to redo
     map <c-y> <c-r>
     imap <c-y> <c-o><c-r>
     imap <c-r> <c-o><c-r>
-    "ctrl+Z to undo 
+    "ctrl+Z to undo
     "map <c-z> u            "this clobbers UNIX ctrl+z to background vim
     imap <c-z> <c-o>u
     "ctrl+Q to save/quit
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
+    "ctrl+V to paste
+    map <c-v> "+gP
+    imap <c-v> <c-o>"+gP
+    vmap <c-v> "+P
+
+    "replace <CTRL-V> with <CTRL-B>
+    inoremap <c-b> <c-v>
 " }
 
 " common typos {
@@ -69,18 +72,18 @@
     nmap :Q :q
     nmap :W :w
     nmap :WQ :wq
-	nmap Q: :q
+    nmap Q: :q
 
-	" this one causes a pause whenever you use q
-	" nmap q: :q
+    " this one causes a pause whenever you use q
+    " nmap q: :q
 
     "never use Ex mode -- I never *mean* to press it
-    nnoremap Q <ESC>            
+    nnoremap Q <ESC>
 
-	"never use F1 -- I'm reaching for escape
-	noremap  <F1> <ESC>
-	noremap! <F1> <ESC>
-	lnoremap <F1> <ESC>
+    "never use F1 -- I'm reaching for escape
+    noremap  <F1> <ESC>
+    noremap! <F1> <ESC>
+    lnoremap <F1> <ESC>
 " }
 
 " multiple files {
@@ -91,6 +94,9 @@
     nmap <S-TAB> :bp<CR>
     set autoread            "auto-reload files, if there's no conflict
     set shortmess+=IA       "no intro message, no swap-file message
+
+    "replacement for CTRL-I, also known as <tab>
+    noremap <C-P> <C-I>
 
     "window switching
     nnoremap <C-J> <C-W>j
@@ -130,7 +136,7 @@
     "NOT: smartindent                   "it does stupid things with comments
 
     "smart indenting by filetype, better than smartindent
-    filetype on       
+    filetype on
     filetype indent on
     filetype plugin on
 " }
@@ -141,7 +147,7 @@
     au BufNewFile,BufRead *.pxi set filetype=pyrex
 " }
 
-"bindings for vimdiff {
+" bindings for vimdiff {
     if &diff
         "next match
         nnoremap m ]cz.
@@ -154,23 +160,28 @@
     endif
 " }
 
-"nonstandard, personal preferences {
-    "replacement for CTRL-I, also known as <tab>
-    noremap <C-P> <C-I>
-
-    "replace <CTRL-V> with <CTRL-B>
-    inoremap <C-B> <C-V>
-
-    "if we don't have gui support, then CSApprox won't work.
-    if !has('gui')
+" plugins {
+    " pre-config {
+        " CSapprox: reproduce gvim colors in terminal vim..
         let g:CSApprox_verbose_level = 0 "don't complain
-        colorscheme murphy2              "fall back to pre-compiled color scheme
-    endif
-    
-    "vim plugin handling with pathogen:
+    " }
+
+    " Pathogen: keep plugins nicely bundled in separate folders.
     "       http://www.vim.org/scripts/script.php?script_id=2332
-    call pathogen#infect()  "load the bundles
-    Helptags                "plus any bundled help
+    runtime autoload/pathogen.vim
+    if exists('g:loaded_pathogen')
+        call pathogen#infect()  "load the bundles, if possible
+        Helptags                "plus any bundled help
+    endif
+    runtime! plugin/**/*.vim    "Load em up!
+
+    " post-config {
+        if !has('gui') || !exists('g:CSApprox_loaded')
+            " We don't have gui support, or CSApprox didn't load.
+            " Fall back to pre-compiled color scheme, if possible.
+            silent! execute 'colorscheme' colors_name.'-approx'
+        endif
+    " }
 " }
 
 " Location-specific settings.
@@ -182,4 +193,19 @@
     endif
 " }
 
-" vim:expandtab
+" functions {
+function! s:CSApproxSnapshotAll()
+    " Make an approximately gvim-equivalent snapshot of all currently installed color schemes.
+    let sep = pathogen#separator()
+    for dir in pathogen#split(&rtp)
+        for s:colorfile in filter(pathogen#glob(dir.sep.'colors'.sep.'*.vim'), '!matchstr(v:val,"-approx\\.vim")&&filereadable(v:val)')
+            let s:scheme = substitute(s:colorfile, '.*'.sep, '', 0)[:-5]
+            execute 'colorscheme' s:scheme
+            execute 'CSApproxSnapshot' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
+        endfor
+    endfor
+endfunction
+command! -bar CSApproxSnapshotAll call s:CSApproxSnapshotAll()
+" }
+
+" vim:expandtab:
