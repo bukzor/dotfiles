@@ -1,19 +1,10 @@
 # Ignore most things.
 *
+!.gitignore
 
 # But there are some things I'd like to keep track of.
+# These directories all have their own .gitignore file.
 !bin
-!bin/*
-
 !docs
-!docs/*
-
 !.vim
-!.vim/*
-.vim/.*
-
 !.ssh
-!.ssh/*
-.ssh/known_hosts
-.ssh/*rsa
-.ssh/*dsa
