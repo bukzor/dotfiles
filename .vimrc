@@ -2,7 +2,6 @@
     syntax on               "syntax coloring is a first-cut debugging tool
     colorscheme murphy      "change to taste. try `desert' or `evening'
 
-    set cursorline          "higlight my current line
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
     set ruler showcmd       "give line, column, and command in the status line
@@ -106,6 +105,16 @@
     nnoremap <C-Q> <C-W>q
 " }
 
+" cursor highlight {
+    set cursorline      " highlight my current line
+    hi clear CursorLine " Using bold text, not the default
+    hi CursorLine term=bold cterm=bold gui=bold
+
+    set cursorcolumn    " ... and my current column
+    hi clear CursorColumn    
+    hi CursorColumn term=bold cterm=bold gui=bold
+" }
+
 " general usability {
     "turn off the annoying "ding!"
     set visualbell
@@ -194,19 +203,25 @@
 " }
 
 " functions {
-function! s:CSApproxSnapshotAll()
-    " Make an approximately gvim-equivalent snapshot of all currently installed color schemes.
-    let sep = pathogen#separator()
-    for dir in pathogen#split(&rtp)
-        for s:colorfile in filter(pathogen#glob(dir.sep.'colors'.sep.'*.vim'), 'empty(matchstr(v:val,"-approx.vim"))&&filereadable(v:val)')
-            let s:scheme = substitute(s:colorfile, '.*'.sep, '', 0)[:-5]
-            echo 'SCHEME: '.s:scheme." FILE: ".s:colorfile
-            execute 'colorscheme' s:scheme
-            execute 'CSApproxSnapshot!' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
+if exists(':CSApproxSnapshot') == 2
+    function! s:CSApproxSnapshotAll()
+        " Make an approximately gvim-equivalent snapshot of all currently installed color schemes.
+        let sep = pathogen#separator()
+        for dir in pathogen#split(&rtp)
+            for s:colorfile in filter(
+                    \pathogen#glob(dir.sep.'colors'.sep.'*.vim'),
+                    \'!(match(v:val,"-approx\\.vim")+1)&&filereadable(v:val)'
+            \)
+                let s:scheme = substitute(s:colorfile, '.*'.sep, '', 0)[:-5]
+                colorscheme nocolor
+                execute 'colorscheme' s:scheme
+                echo s:colorfile
+                execute 'CSApproxSnapshot!' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
+            endfor
         endfor
-    endfor
-endfunction
-command! -bar CSApproxSnapshotAll call s:CSApproxSnapshotAll()
+    endfunction
+    command! -bar CSApproxSnapshotAll call s:CSApproxSnapshotAll()
+endif
 " }
 
 " vim:expandtab:
