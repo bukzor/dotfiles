@@ -1,0 +1,21 @@
+#!/bin/bash
+
+gvim -fNX --nofork -u /dev/null -U /dev/null --cmd '
+    runtime autoload/pathogen.vim
+    call pathogen#infect()
+    redir >> /dev/stdout
+    silent echo globpath(&rtp, "**/colors/*.vim")
+    quit
+' |
+grep '^/.*\.vim' |
+egrep -v -- '-approx|^$' |
+sed 's|.*/||;s/\.vim//' |
+xargs -P10 --replace \
+    gvim -NX -u /dev/null -U /dev/null --cmd '
+        runtime autoload/pathogen.vim
+        call pathogen#infect()
+        runtime plugin/**/CSApprox.vim
+        colorscheme {}
+        CSApproxSnapshot! $HOME/.vim/colors/{}-approx.vim
+        quit
+    '

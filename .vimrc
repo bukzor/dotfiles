@@ -202,26 +202,4 @@
     endif
 " }
 
-" functions {
-if exists(':CSApproxSnapshot') == 2
-    function! s:CSApproxSnapshotAll()
-        " Make an approximately gvim-equivalent snapshot of all currently installed color schemes.
-        let sep = pathogen#separator()
-        for dir in pathogen#split(&rtp)
-            for s:colorfile in filter(
-                    \pathogen#glob(dir.sep.'colors'.sep.'*.vim'),
-                    \'!(match(v:val,"-approx\\.vim")+1)&&filereadable(v:val)'
-            \)
-                let s:scheme = substitute(s:colorfile, '.*'.sep, '', 0)[:-5]
-                colorscheme nocolor
-                execute 'colorscheme' s:scheme
-                echo s:colorfile
-                execute 'CSApproxSnapshot!' $HOME.sep.'.vim'.sep.'colors'.sep.s:scheme.'-approx.vim'
-            endfor
-        endfor
-    endfunction
-    command! -bar CSApproxSnapshotAll call s:CSApproxSnapshotAll()
-endif
-" }
-
 " vim:expandtab:
