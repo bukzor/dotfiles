@@ -1,0 +1,21 @@
+ActionMapper -> RequestMapper
+    @expose maps to four rules:
+        get: And(POST(), Path())
+        post: And(GET(), Path())
+        action: And(POST(), Action())
+        action+get: And(GET(), Action())
+
+    This could be represented as one fairly strange-looking rule:
+        Or(Path('^save/?$'), Action('save')), self.save
+
+    This works, and competely covers compatiblity issues, but nobody likes it.
+
+    * I can run a MRjob against the ranger logs to see which rule is actually needed.
+    * For the jobs that are not found in ranger (old, infrequently-used flows), 
+        I'm adding a ActionMapperShim which tests each of the above four rules in series and logs which one is used.
+    * do a quick analysis of templates, to classify into trivial / hard
+
+    New tickets to be filed:
+        Getting rid of cmds._request_mapper.Action (jon and minh agree this is bad, even dangerous, style)
+        Analysing data collected by ActionMapperShim and refactoring accordingly 
+

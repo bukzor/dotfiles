@@ -17,7 +17,7 @@ dual monitor:
 		Identifier	"Default Screen"
 		DefaultDepth	24
 	+	SubSection "Display"
-	+                Virtual 3360 1200 
+	+                Virtual 1920 2100 
 	+        EndSubSection
 	 EndSection
 	 
