@@ -185,11 +185,11 @@
     runtime! plugin/**/*.vim    "Load em up!
 
     " post-config {
-        if !has('gui') || !exists('g:CSApprox_loaded')
-            " We don't have gui support, or CSApprox didn't load.
-            " Fall back to pre-compiled color scheme, if possible.
-            silent! execute 'colorscheme' colors_name.'-approx'
-        endif
+    if !exists('g:CSApprox_loaded')
+        " CSApprox didn't load.
+        " Fall back to pre-compiled color scheme, if possible.
+        silent! execute 'colorscheme' colors_name.'-approx'
+    endif
     " }
 " }
 
