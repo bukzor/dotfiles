@@ -97,12 +97,16 @@
     "replacement for CTRL-I, also known as <tab>
     noremap <C-P> <C-I>
 
-    "window switching
+    "window switching: ctrl+[hjkl]
     nnoremap <C-J> <C-W>j
     nnoremap <C-K> <C-W>k
     nnoremap <C-H> <C-W>h
     nnoremap <C-L> <C-W>l
     nnoremap <C-Q> <C-W>q
+
+    "tab switching: ctrl+left/right
+    nnoremap Od :tabp<CR>
+    nnoremap Oc :tabN<CR>
 " }
 
 " cursor highlight {
