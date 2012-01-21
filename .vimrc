@@ -193,8 +193,7 @@
     " }
 " }
 
-" Location-specific settings.
-" {
+" Location-specific settings. {
     if filereadable("/nail/scripts/aliases.sh")
         " At work!
         set noexpandtab

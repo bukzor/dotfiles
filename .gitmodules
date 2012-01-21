@@ -1,0 +1,3 @@
+[submodule ".vim/bundle/CSApprox"]
+	path = .vim/bundle/CSApprox
+	url = git@github.com:bukzor/csapprox.git
