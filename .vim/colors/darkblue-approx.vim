@@ -1,18 +1,26 @@
 " This scheme was created by CSApproxSnapshot
-" on Sat, 21 Jan 2012
+" on Mon, 23 Jan 2012
 
-hi clear
-if exists("syntax_on")
-    syntax reset
-endif
+syntax on
+let syntax_cmd="skip"
+highlight clear
 
-if v:version < 700
-    let g:colors_name = expand("<sfile>:t:r")
-    command! -nargs=+ CSAHi exe "hi" substitute(substitute(<q-args>, "undercurl", "underline", "g"), "guisp\\S\\+", "", "g")
-else
-    let g:colors_name = expand("<sfile>:t:r")
-    command! -nargs=+ CSAHi exe "hi" <q-args>
-endif
+let g:colors_name = expand("<sfile>:t:r")
+function! s:CSAhi(group, ...)
+    exe "hi clear" a:group
+    let hi = join(a:000, " ")
+    if v:version < 700
+        let hi = substitute(substitute(hi, "undercurl", "underline", "g"), "guisp=\\S\\+", "", "g")
+    endif
+    exe "hi" a:group hi
+endfunction
+command! -nargs=+ CSAhi call s:CSAhi(<f-args>)
+
+function! s:CSAlink(from, to)
+    exe "hi clear" a:from
+    exe "hi! link" a:from a:to
+endfunction
+command! -nargs=+ CSAlink call s:CSAlink(<f-args>)
 
 function! s:old_kde()
   " Konsole only used its own palette up til KDE 4.2.0
@@ -25,229 +33,178 @@ function! s:old_kde()
   endif
 endfunction
 
-if 0
-elseif has("gui_running") || (&t_Co == 256 && (&term ==# "xterm" || &term =~# "^screen") && exists("g:CSApprox_konsole") && g:CSApprox_konsole) || (&term =~? "^konsole" && s:old_kde())
-    CSAHi Normal term=NONE cterm=NONE ctermbg=17 ctermfg=250 gui=NONE guibg=#000040 guifg=#c0c0c0
-    CSAHi Statement term=NONE cterm=NONE ctermbg=bg ctermfg=227 gui=NONE guibg=bg guifg=#ffff60
-    CSAHi PreProc term=NONE cterm=NONE ctermbg=bg ctermfg=213 gui=NONE guibg=bg guifg=#ff80ff
-    CSAHi type term=NONE cterm=NONE ctermbg=bg ctermfg=83 gui=NONE guibg=bg guifg=#60ff60
-    CSAHi Underlined term=underline cterm=NONE ctermbg=bg ctermfg=fg gui=NONE guibg=bg guifg=fg
-    CSAHi Ignore term=NONE cterm=NONE ctermbg=bg ctermfg=17 gui=NONE guibg=bg guifg=bg
-    CSAHi SpecialKey term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi NonText term=bold cterm=bold ctermbg=bg ctermfg=27 gui=bold guibg=bg guifg=#0030ff
-    CSAHi Directory term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi ErrorMsg term=NONE cterm=NONE ctermbg=33 ctermfg=231 gui=NONE guibg=#287eff guifg=#ffffff
-    CSAHi IncSearch term=reverse cterm=reverse ctermbg=159 ctermfg=26 gui=reverse guibg=#2050d0 guifg=#b0ffff
-    CSAHi Search term=underline cterm=NONE ctermbg=26 ctermfg=123 gui=NONE guibg=#2050d0 guifg=#90fff0
-    CSAHi MoreMsg term=bold cterm=bold ctermbg=bg ctermfg=29 gui=bold guibg=bg guifg=SeaGreen
-    CSAHi ModeMsg term=bold cterm=bold ctermbg=bg ctermfg=44 gui=bold guibg=bg guifg=#22cce2
-    CSAHi LineNr term=underline cterm=NONE ctermbg=bg ctermfg=118 gui=NONE guibg=bg guifg=#90f020
-    CSAHi SpellLocal term=underline cterm=undercurl ctermbg=bg ctermfg=51 gui=undercurl guibg=bg guifg=fg guisp=Cyan
-    CSAHi Pmenu term=NONE cterm=NONE ctermbg=60 ctermfg=250 gui=NONE guibg=#404080 guifg=#c0c0c0
-    CSAHi PmenuSel term=NONE cterm=NONE ctermbg=26 ctermfg=250 gui=NONE guibg=#2050d0 guifg=#c0c0c0
-    CSAHi PmenuSbar term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi PmenuThumb term=NONE cterm=reverse ctermbg=250 ctermfg=fg gui=reverse guibg=bg guifg=#c0c0c0
-    CSAHi TabLine term=underline cterm=underline ctermbg=248 ctermfg=fg gui=underline guibg=DarkGrey guifg=fg
-    CSAHi TabLineSel term=bold cterm=bold ctermbg=bg ctermfg=fg gui=bold guibg=bg guifg=fg
-    CSAHi TabLineFill term=reverse cterm=reverse ctermbg=bg ctermfg=fg gui=reverse guibg=bg guifg=fg
-    CSAHi CursorColumn term=reverse cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi CursorLine term=underline cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi Question term=NONE cterm=NONE ctermbg=bg ctermfg=46 gui=NONE guibg=bg guifg=green
-    CSAHi StatusLine term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi StatusLineNC term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi VertSplit term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi Title term=bold cterm=NONE ctermbg=bg ctermfg=201 gui=NONE guibg=bg guifg=magenta
-    CSAHi Visual term=reverse cterm=reverse ctermbg=105 ctermfg=250 gui=reverse guibg=fg guifg=#8080ff
-    CSAHi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=105 ctermfg=250 gui=reverse,underline guibg=fg guifg=#8080ff
-    CSAHi WarningMsg term=NONE cterm=NONE ctermbg=bg ctermfg=196 gui=NONE guibg=bg guifg=red
-    CSAHi WildMenu term=NONE cterm=NONE ctermbg=16 ctermfg=226 gui=NONE guibg=black guifg=yellow
-    CSAHi Folded term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi ColorColumn term=reverse cterm=NONE ctermbg=88 ctermfg=fg gui=NONE guibg=DarkRed guifg=fg
-    CSAHi Cursor term=NONE cterm=NONE ctermbg=226 ctermfg=16 gui=NONE guibg=yellow guifg=black
-    CSAHi lCursor term=NONE cterm=NONE ctermbg=231 ctermfg=16 gui=NONE guibg=white guifg=black
-    CSAHi MatchParen term=reverse cterm=NONE ctermbg=30 ctermfg=fg gui=NONE guibg=DarkCyan guifg=fg
-    CSAHi Todo term=NONE cterm=NONE ctermbg=26 ctermfg=166 gui=NONE guibg=#1248d1 guifg=#d14a14
-    CSAHi Comment term=NONE cterm=NONE ctermbg=bg ctermfg=111 gui=NONE guibg=bg guifg=#80a0ff
-    CSAHi Constant term=NONE cterm=NONE ctermbg=bg ctermfg=217 gui=NONE guibg=bg guifg=#ffa0a0
-    CSAHi Special term=NONE cterm=NONE ctermbg=bg ctermfg=214 gui=NONE guibg=bg guifg=Orange
-    CSAHi Identifier term=NONE cterm=NONE ctermbg=bg ctermfg=87 gui=NONE guibg=bg guifg=#40ffff
-    CSAHi FoldColumn term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi DiffAdd term=NONE cterm=NONE ctermbg=18 ctermfg=fg gui=NONE guibg=darkblue guifg=fg
-    CSAHi DiffChange term=bold cterm=NONE ctermbg=90 ctermfg=fg gui=NONE guibg=darkmagenta guifg=fg
-    CSAHi DiffDelete term=bold cterm=bold ctermbg=30 ctermfg=21 gui=bold guibg=DarkCyan guifg=Blue
-    CSAHi DiffText term=reverse cterm=bold ctermbg=196 ctermfg=fg gui=bold guibg=Red guifg=fg
-    CSAHi SignColumn term=NONE cterm=NONE ctermbg=250 ctermfg=51 gui=NONE guibg=Grey guifg=Cyan
-    CSAHi Conceal term=NONE cterm=NONE ctermbg=248 ctermfg=252 gui=NONE guibg=DarkGrey guifg=LightGrey
-    CSAHi SpellBad term=reverse cterm=undercurl ctermbg=bg ctermfg=196 gui=undercurl guibg=bg guifg=fg guisp=Red
-    CSAHi SpellCap term=reverse cterm=undercurl ctermbg=bg ctermfg=21 gui=undercurl guibg=bg guifg=fg guisp=Blue
-    CSAHi SpellRare term=reverse cterm=undercurl ctermbg=bg ctermfg=201 gui=undercurl guibg=bg guifg=fg guisp=Magenta
-elseif has("gui_running") || (&t_Co == 256 && (&term ==# "xterm" || &term =~# "^screen") && exists("g:CSApprox_eterm") && g:CSApprox_eterm) || &term =~? "^eterm"
-    CSAHi Normal term=NONE cterm=NONE ctermbg=17 ctermfg=250 gui=NONE guibg=#000040 guifg=#c0c0c0
-    CSAHi Statement term=NONE cterm=NONE ctermbg=bg ctermfg=227 gui=NONE guibg=bg guifg=#ffff60
-    CSAHi PreProc term=NONE cterm=NONE ctermbg=bg ctermfg=213 gui=NONE guibg=bg guifg=#ff80ff
-    CSAHi type term=NONE cterm=NONE ctermbg=bg ctermfg=83 gui=NONE guibg=bg guifg=#60ff60
-    CSAHi Underlined term=underline cterm=NONE ctermbg=bg ctermfg=fg gui=NONE guibg=bg guifg=fg
-    CSAHi Ignore term=NONE cterm=NONE ctermbg=bg ctermfg=17 gui=NONE guibg=bg guifg=bg
-    CSAHi SpecialKey term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi NonText term=bold cterm=bold ctermbg=bg ctermfg=27 gui=bold guibg=bg guifg=#0030ff
-    CSAHi Directory term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi ErrorMsg term=NONE cterm=NONE ctermbg=33 ctermfg=231 gui=NONE guibg=#287eff guifg=#ffffff
-    CSAHi IncSearch term=reverse cterm=reverse ctermbg=159 ctermfg=26 gui=reverse guibg=#2050d0 guifg=#b0ffff
-    CSAHi Search term=underline cterm=NONE ctermbg=26 ctermfg=123 gui=NONE guibg=#2050d0 guifg=#90fff0
-    CSAHi MoreMsg term=bold cterm=bold ctermbg=bg ctermfg=29 gui=bold guibg=bg guifg=SeaGreen
-    CSAHi ModeMsg term=bold cterm=bold ctermbg=bg ctermfg=44 gui=bold guibg=bg guifg=#22cce2
-    CSAHi LineNr term=underline cterm=NONE ctermbg=bg ctermfg=118 gui=NONE guibg=bg guifg=#90f020
-    CSAHi SpellLocal term=underline cterm=undercurl ctermbg=bg ctermfg=51 gui=undercurl guibg=bg guifg=fg guisp=Cyan
-    CSAHi Pmenu term=NONE cterm=NONE ctermbg=60 ctermfg=250 gui=NONE guibg=#404080 guifg=#c0c0c0
-    CSAHi PmenuSel term=NONE cterm=NONE ctermbg=26 ctermfg=250 gui=NONE guibg=#2050d0 guifg=#c0c0c0
-    CSAHi PmenuSbar term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi PmenuThumb term=NONE cterm=reverse ctermbg=250 ctermfg=fg gui=reverse guibg=bg guifg=#c0c0c0
-    CSAHi TabLine term=underline cterm=underline ctermbg=248 ctermfg=fg gui=underline guibg=DarkGrey guifg=fg
-    CSAHi TabLineSel term=bold cterm=bold ctermbg=bg ctermfg=fg gui=bold guibg=bg guifg=fg
-    CSAHi TabLineFill term=reverse cterm=reverse ctermbg=bg ctermfg=fg gui=reverse guibg=bg guifg=fg
-    CSAHi CursorColumn term=reverse cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi CursorLine term=underline cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi Question term=NONE cterm=NONE ctermbg=bg ctermfg=46 gui=NONE guibg=bg guifg=green
-    CSAHi StatusLine term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi StatusLineNC term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi VertSplit term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi Title term=bold cterm=NONE ctermbg=bg ctermfg=201 gui=NONE guibg=bg guifg=magenta
-    CSAHi Visual term=reverse cterm=reverse ctermbg=105 ctermfg=250 gui=reverse guibg=fg guifg=#8080ff
-    CSAHi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=105 ctermfg=250 gui=reverse,underline guibg=fg guifg=#8080ff
-    CSAHi WarningMsg term=NONE cterm=NONE ctermbg=bg ctermfg=196 gui=NONE guibg=bg guifg=red
-    CSAHi WildMenu term=NONE cterm=NONE ctermbg=16 ctermfg=226 gui=NONE guibg=black guifg=yellow
-    CSAHi Folded term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi ColorColumn term=reverse cterm=NONE ctermbg=88 ctermfg=fg gui=NONE guibg=DarkRed guifg=fg
-    CSAHi Cursor term=NONE cterm=NONE ctermbg=226 ctermfg=16 gui=NONE guibg=yellow guifg=black
-    CSAHi lCursor term=NONE cterm=NONE ctermbg=231 ctermfg=16 gui=NONE guibg=white guifg=black
-    CSAHi MatchParen term=reverse cterm=NONE ctermbg=30 ctermfg=fg gui=NONE guibg=DarkCyan guifg=fg
-    CSAHi Todo term=NONE cterm=NONE ctermbg=26 ctermfg=166 gui=NONE guibg=#1248d1 guifg=#d14a14
-    CSAHi Comment term=NONE cterm=NONE ctermbg=bg ctermfg=111 gui=NONE guibg=bg guifg=#80a0ff
-    CSAHi Constant term=NONE cterm=NONE ctermbg=bg ctermfg=217 gui=NONE guibg=bg guifg=#ffa0a0
-    CSAHi Special term=NONE cterm=NONE ctermbg=bg ctermfg=214 gui=NONE guibg=bg guifg=Orange
-    CSAHi Identifier term=NONE cterm=NONE ctermbg=bg ctermfg=87 gui=NONE guibg=bg guifg=#40ffff
-    CSAHi FoldColumn term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi DiffAdd term=NONE cterm=NONE ctermbg=18 ctermfg=fg gui=NONE guibg=darkblue guifg=fg
-    CSAHi DiffChange term=bold cterm=NONE ctermbg=90 ctermfg=fg gui=NONE guibg=darkmagenta guifg=fg
-    CSAHi DiffDelete term=bold cterm=bold ctermbg=30 ctermfg=21 gui=bold guibg=DarkCyan guifg=Blue
-    CSAHi DiffText term=reverse cterm=bold ctermbg=196 ctermfg=fg gui=bold guibg=Red guifg=fg
-    CSAHi SignColumn term=NONE cterm=NONE ctermbg=250 ctermfg=51 gui=NONE guibg=Grey guifg=Cyan
-    CSAHi Conceal term=NONE cterm=NONE ctermbg=248 ctermfg=252 gui=NONE guibg=DarkGrey guifg=LightGrey
-    CSAHi SpellBad term=reverse cterm=undercurl ctermbg=bg ctermfg=196 gui=undercurl guibg=bg guifg=fg guisp=Red
-    CSAHi SpellCap term=reverse cterm=undercurl ctermbg=bg ctermfg=21 gui=undercurl guibg=bg guifg=fg guisp=Blue
-    CSAHi SpellRare term=reverse cterm=undercurl ctermbg=bg ctermfg=201 gui=undercurl guibg=bg guifg=fg guisp=Magenta
-elseif has("gui_running") || &t_Co == 256
-    CSAHi Normal term=NONE cterm=NONE ctermbg=17 ctermfg=250 gui=NONE guibg=#000040 guifg=#c0c0c0
-    CSAHi Statement term=NONE cterm=NONE ctermbg=bg ctermfg=227 gui=NONE guibg=bg guifg=#ffff60
-    CSAHi PreProc term=NONE cterm=NONE ctermbg=bg ctermfg=213 gui=NONE guibg=bg guifg=#ff80ff
-    CSAHi type term=NONE cterm=NONE ctermbg=bg ctermfg=83 gui=NONE guibg=bg guifg=#60ff60
-    CSAHi Underlined term=underline cterm=NONE ctermbg=bg ctermfg=fg gui=NONE guibg=bg guifg=fg
-    CSAHi Ignore term=NONE cterm=NONE ctermbg=bg ctermfg=17 gui=NONE guibg=bg guifg=bg
-    CSAHi SpecialKey term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi NonText term=bold cterm=bold ctermbg=bg ctermfg=27 gui=bold guibg=bg guifg=#0030ff
-    CSAHi Directory term=bold cterm=NONE ctermbg=bg ctermfg=51 gui=NONE guibg=bg guifg=cyan
-    CSAHi ErrorMsg term=NONE cterm=NONE ctermbg=33 ctermfg=231 gui=NONE guibg=#287eff guifg=#ffffff
-    CSAHi IncSearch term=reverse cterm=reverse ctermbg=159 ctermfg=26 gui=reverse guibg=#2050d0 guifg=#b0ffff
-    CSAHi Search term=underline cterm=NONE ctermbg=26 ctermfg=123 gui=NONE guibg=#2050d0 guifg=#90fff0
-    CSAHi MoreMsg term=bold cterm=bold ctermbg=bg ctermfg=29 gui=bold guibg=bg guifg=SeaGreen
-    CSAHi ModeMsg term=bold cterm=bold ctermbg=bg ctermfg=44 gui=bold guibg=bg guifg=#22cce2
-    CSAHi LineNr term=underline cterm=NONE ctermbg=bg ctermfg=118 gui=NONE guibg=bg guifg=#90f020
-    CSAHi SpellLocal term=underline cterm=undercurl ctermbg=bg ctermfg=51 gui=undercurl guibg=bg guifg=fg guisp=Cyan
-    CSAHi Pmenu term=NONE cterm=NONE ctermbg=60 ctermfg=250 gui=NONE guibg=#404080 guifg=#c0c0c0
-    CSAHi PmenuSel term=NONE cterm=NONE ctermbg=26 ctermfg=250 gui=NONE guibg=#2050d0 guifg=#c0c0c0
-    CSAHi PmenuSbar term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi PmenuThumb term=NONE cterm=reverse ctermbg=250 ctermfg=fg gui=reverse guibg=bg guifg=#c0c0c0
-    CSAHi TabLine term=underline cterm=underline ctermbg=248 ctermfg=fg gui=underline guibg=DarkGrey guifg=fg
-    CSAHi TabLineSel term=bold cterm=bold ctermbg=bg ctermfg=fg gui=bold guibg=bg guifg=fg
-    CSAHi TabLineFill term=reverse cterm=reverse ctermbg=bg ctermfg=fg gui=reverse guibg=bg guifg=fg
-    CSAHi CursorColumn term=reverse cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi CursorLine term=underline cterm=NONE ctermbg=241 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi Question term=NONE cterm=NONE ctermbg=bg ctermfg=46 gui=NONE guibg=bg guifg=green
-    CSAHi StatusLine term=NONE cterm=NONE ctermbg=248 ctermfg=21 gui=NONE guibg=darkgray guifg=blue
-    CSAHi StatusLineNC term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi VertSplit term=NONE cterm=NONE ctermbg=248 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi Title term=bold cterm=NONE ctermbg=bg ctermfg=201 gui=NONE guibg=bg guifg=magenta
-    CSAHi Visual term=reverse cterm=reverse ctermbg=105 ctermfg=250 gui=reverse guibg=fg guifg=#8080ff
-    CSAHi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=105 ctermfg=250 gui=reverse,underline guibg=fg guifg=#8080ff
-    CSAHi WarningMsg term=NONE cterm=NONE ctermbg=bg ctermfg=196 gui=NONE guibg=bg guifg=red
-    CSAHi WildMenu term=NONE cterm=NONE ctermbg=16 ctermfg=226 gui=NONE guibg=black guifg=yellow
-    CSAHi Folded term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi ColorColumn term=reverse cterm=NONE ctermbg=88 ctermfg=fg gui=NONE guibg=DarkRed guifg=fg
-    CSAHi Cursor term=NONE cterm=NONE ctermbg=226 ctermfg=16 gui=NONE guibg=yellow guifg=black
-    CSAHi lCursor term=NONE cterm=NONE ctermbg=231 ctermfg=16 gui=NONE guibg=white guifg=black
-    CSAHi MatchParen term=reverse cterm=NONE ctermbg=30 ctermfg=fg gui=NONE guibg=DarkCyan guifg=fg
-    CSAHi Todo term=NONE cterm=NONE ctermbg=26 ctermfg=166 gui=NONE guibg=#1248d1 guifg=#d14a14
-    CSAHi Comment term=NONE cterm=NONE ctermbg=bg ctermfg=111 gui=NONE guibg=bg guifg=#80a0ff
-    CSAHi Constant term=NONE cterm=NONE ctermbg=bg ctermfg=217 gui=NONE guibg=bg guifg=#ffa0a0
-    CSAHi Special term=NONE cterm=NONE ctermbg=bg ctermfg=214 gui=NONE guibg=bg guifg=Orange
-    CSAHi Identifier term=NONE cterm=NONE ctermbg=bg ctermfg=87 gui=NONE guibg=bg guifg=#40ffff
-    CSAHi FoldColumn term=bold cterm=NONE ctermbg=17 ctermfg=244 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi DiffAdd term=NONE cterm=NONE ctermbg=18 ctermfg=fg gui=NONE guibg=darkblue guifg=fg
-    CSAHi DiffChange term=bold cterm=NONE ctermbg=90 ctermfg=fg gui=NONE guibg=darkmagenta guifg=fg
-    CSAHi DiffDelete term=bold cterm=bold ctermbg=30 ctermfg=21 gui=bold guibg=DarkCyan guifg=Blue
-    CSAHi DiffText term=reverse cterm=bold ctermbg=196 ctermfg=fg gui=bold guibg=Red guifg=fg
-    CSAHi SignColumn term=NONE cterm=NONE ctermbg=250 ctermfg=51 gui=NONE guibg=Grey guifg=Cyan
-    CSAHi Conceal term=NONE cterm=NONE ctermbg=248 ctermfg=252 gui=NONE guibg=DarkGrey guifg=LightGrey
-    CSAHi SpellBad term=reverse cterm=undercurl ctermbg=bg ctermfg=196 gui=undercurl guibg=bg guifg=fg guisp=Red
-    CSAHi SpellCap term=reverse cterm=undercurl ctermbg=bg ctermfg=21 gui=undercurl guibg=bg guifg=fg guisp=Blue
-    CSAHi SpellRare term=reverse cterm=undercurl ctermbg=bg ctermfg=201 gui=undercurl guibg=bg guifg=fg guisp=Magenta
-elseif has("gui_running") || &t_Co == 88
-    CSAHi Normal term=NONE cterm=NONE ctermbg=16 ctermfg=85 gui=NONE guibg=#000040 guifg=#c0c0c0
-    CSAHi Statement term=NONE cterm=NONE ctermbg=bg ctermfg=77 gui=NONE guibg=bg guifg=#ffff60
-    CSAHi PreProc term=NONE cterm=NONE ctermbg=bg ctermfg=71 gui=NONE guibg=bg guifg=#ff80ff
-    CSAHi type term=NONE cterm=NONE ctermbg=bg ctermfg=45 gui=NONE guibg=bg guifg=#60ff60
-    CSAHi Underlined term=underline cterm=NONE ctermbg=bg ctermfg=fg gui=NONE guibg=bg guifg=fg
-    CSAHi Ignore term=NONE cterm=NONE ctermbg=bg ctermfg=16 gui=NONE guibg=bg guifg=bg
-    CSAHi SpecialKey term=bold cterm=NONE ctermbg=bg ctermfg=31 gui=NONE guibg=bg guifg=cyan
-    CSAHi NonText term=bold cterm=bold ctermbg=bg ctermfg=19 gui=bold guibg=bg guifg=#0030ff
-    CSAHi Directory term=bold cterm=NONE ctermbg=bg ctermfg=31 gui=NONE guibg=bg guifg=cyan
-    CSAHi ErrorMsg term=NONE cterm=NONE ctermbg=23 ctermfg=79 gui=NONE guibg=#287eff guifg=#ffffff
-    CSAHi IncSearch term=reverse cterm=reverse ctermbg=63 ctermfg=22 gui=reverse guibg=#2050d0 guifg=#b0ffff
-    CSAHi Search term=underline cterm=NONE ctermbg=22 ctermfg=47 gui=NONE guibg=#2050d0 guifg=#90fff0
-    CSAHi MoreMsg term=bold cterm=bold ctermbg=bg ctermfg=21 gui=bold guibg=bg guifg=SeaGreen
-    CSAHi ModeMsg term=bold cterm=bold ctermbg=bg ctermfg=26 gui=bold guibg=bg guifg=#22cce2
-    CSAHi LineNr term=underline cterm=NONE ctermbg=bg ctermfg=44 gui=NONE guibg=bg guifg=#90f020
-    CSAHi SpellLocal term=underline cterm=undercurl ctermbg=bg ctermfg=31 gui=undercurl guibg=bg guifg=fg guisp=Cyan
-    CSAHi Pmenu term=NONE cterm=NONE ctermbg=17 ctermfg=85 gui=NONE guibg=#404080 guifg=#c0c0c0
-    CSAHi PmenuSel term=NONE cterm=NONE ctermbg=22 ctermfg=85 gui=NONE guibg=#2050d0 guifg=#c0c0c0
-    CSAHi PmenuSbar term=NONE cterm=NONE ctermbg=84 ctermfg=19 gui=NONE guibg=darkgray guifg=blue
-    CSAHi PmenuThumb term=NONE cterm=reverse ctermbg=85 ctermfg=fg gui=reverse guibg=bg guifg=#c0c0c0
-    CSAHi TabLine term=underline cterm=underline ctermbg=84 ctermfg=fg gui=underline guibg=DarkGrey guifg=fg
-    CSAHi TabLineSel term=bold cterm=bold ctermbg=bg ctermfg=fg gui=bold guibg=bg guifg=fg
-    CSAHi TabLineFill term=reverse cterm=reverse ctermbg=bg ctermfg=fg gui=reverse guibg=bg guifg=fg
-    CSAHi CursorColumn term=reverse cterm=NONE ctermbg=81 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi CursorLine term=underline cterm=NONE ctermbg=81 ctermfg=fg gui=NONE guibg=Grey40 guifg=fg
-    CSAHi Question term=NONE cterm=NONE ctermbg=bg ctermfg=28 gui=NONE guibg=bg guifg=green
-    CSAHi StatusLine term=NONE cterm=NONE ctermbg=84 ctermfg=19 gui=NONE guibg=darkgray guifg=blue
-    CSAHi StatusLineNC term=NONE cterm=NONE ctermbg=84 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi VertSplit term=NONE cterm=NONE ctermbg=84 ctermfg=16 gui=NONE guibg=darkgray guifg=black
-    CSAHi Title term=bold cterm=NONE ctermbg=bg ctermfg=67 gui=NONE guibg=bg guifg=magenta
-    CSAHi Visual term=reverse cterm=reverse ctermbg=39 ctermfg=85 gui=reverse guibg=fg guifg=#8080ff
-    CSAHi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=39 ctermfg=85 gui=reverse,underline guibg=fg guifg=#8080ff
-    CSAHi WarningMsg term=NONE cterm=NONE ctermbg=bg ctermfg=64 gui=NONE guibg=bg guifg=red
-    CSAHi WildMenu term=NONE cterm=NONE ctermbg=16 ctermfg=76 gui=NONE guibg=black guifg=yellow
-    CSAHi Folded term=bold cterm=NONE ctermbg=16 ctermfg=83 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi ColorColumn term=reverse cterm=NONE ctermbg=32 ctermfg=fg gui=NONE guibg=DarkRed guifg=fg
-    CSAHi Cursor term=NONE cterm=NONE ctermbg=76 ctermfg=16 gui=NONE guibg=yellow guifg=black
-    CSAHi lCursor term=NONE cterm=NONE ctermbg=79 ctermfg=16 gui=NONE guibg=white guifg=black
-    CSAHi MatchParen term=reverse cterm=NONE ctermbg=21 ctermfg=fg gui=NONE guibg=DarkCyan guifg=fg
-    CSAHi Todo term=NONE cterm=NONE ctermbg=22 ctermfg=52 gui=NONE guibg=#1248d1 guifg=#d14a14
-    CSAHi Comment term=NONE cterm=NONE ctermbg=bg ctermfg=39 gui=NONE guibg=bg guifg=#80a0ff
-    CSAHi Constant term=NONE cterm=NONE ctermbg=bg ctermfg=69 gui=NONE guibg=bg guifg=#ffa0a0
-    CSAHi Special term=NONE cterm=NONE ctermbg=bg ctermfg=68 gui=NONE guibg=bg guifg=Orange
-    CSAHi Identifier term=NONE cterm=NONE ctermbg=bg ctermfg=31 gui=NONE guibg=bg guifg=#40ffff
-    CSAHi FoldColumn term=bold cterm=NONE ctermbg=16 ctermfg=83 gui=NONE guibg=#000040 guifg=#808080
-    CSAHi DiffAdd term=NONE cterm=NONE ctermbg=17 ctermfg=fg gui=NONE guibg=darkblue guifg=fg
-    CSAHi DiffChange term=bold cterm=NONE ctermbg=33 ctermfg=fg gui=NONE guibg=darkmagenta guifg=fg
-    CSAHi DiffDelete term=bold cterm=bold ctermbg=21 ctermfg=19 gui=bold guibg=DarkCyan guifg=Blue
-    CSAHi DiffText term=reverse cterm=bold ctermbg=64 ctermfg=fg gui=bold guibg=Red guifg=fg
-    CSAHi SignColumn term=NONE cterm=NONE ctermbg=85 ctermfg=31 gui=NONE guibg=Grey guifg=Cyan
-    CSAHi Conceal term=NONE cterm=NONE ctermbg=84 ctermfg=86 gui=NONE guibg=DarkGrey guifg=LightGrey
-    CSAHi SpellBad term=reverse cterm=undercurl ctermbg=bg ctermfg=64 gui=undercurl guibg=bg guifg=fg guisp=Red
-    CSAHi SpellCap term=reverse cterm=undercurl ctermbg=bg ctermfg=19 gui=undercurl guibg=bg guifg=fg guisp=Blue
-    CSAHi SpellRare term=reverse cterm=undercurl ctermbg=bg ctermfg=67 gui=undercurl guibg=bg guifg=fg guisp=Magenta
+if has("gui_running") || &t_Co == 256
+    CSAhi Normal ctermbg=17 ctermfg=250 guibg=#000040 guifg=#c0c0c0
+    CSAhi ColorColumn term=reverse ctermbg=88 guibg=DarkRed
+    CSAhi Comment term=bold ctermfg=111 guifg=#80a0ff
+    CSAhi Conceal ctermbg=248 ctermfg=252 guibg=DarkGrey guifg=LightGrey
+    CSAhi Constant term=underline ctermfg=217 guifg=#ffa0a0
+      CSAlink Boolean Constant
+      CSAlink Character Constant
+      CSAlink Float Constant
+      CSAlink Number Constant
+      CSAlink String Constant
+    CSAhi Cursor ctermbg=226 ctermfg=16 guibg=yellow guifg=black
+    CSAhi CursorColumn term=reverse ctermbg=241 guibg=Grey40
+    CSAhi CursorLine term=underline ctermbg=241 guibg=Grey40
+    CSAhi DiffAdd ctermbg=18 guibg=darkblue
+    CSAhi DiffChange term=bold ctermbg=90 guibg=darkmagenta
+    CSAhi DiffDelete term=bold cterm=bold ctermbg=30 ctermfg=21 gui=bold guibg=DarkCyan guifg=Blue
+    CSAhi DiffText term=reverse cterm=bold ctermbg=196 gui=bold guibg=Red
+    CSAhi Directory term=bold ctermfg=51 guifg=cyan
+    CSAhi Error term=reverse ctermbg=196 ctermfg=231 guibg=Red guifg=White
+    CSAhi ErrorMsg term=standout ctermbg=33 ctermfg=231 guibg=#287eff guifg=#ffffff
+    CSAhi FoldColumn term=bold ctermbg=17 ctermfg=244 guibg=#000040 guifg=#808080
+    CSAhi Folded term=bold ctermbg=17 ctermfg=244 guibg=#000040 guifg=#808080
+    CSAhi Identifier term=underline ctermfg=87 guifg=#40ffff
+      CSAlink Function Identifier
+    CSAhi Ignore ctermfg=17 guifg=bg
+    CSAhi IncSearch term=reverse cterm=reverse ctermbg=26 ctermfg=159 gui=reverse guibg=#2050d0 guifg=#b0ffff
+    CSAhi LineNr term=underline ctermfg=118 guifg=#90f020
+    CSAhi MatchParen term=reverse ctermbg=30 guibg=DarkCyan
+    CSAhi ModeMsg term=bold cterm=bold ctermfg=44 gui=bold guifg=#22cce2
+    CSAhi MoreMsg term=bold cterm=bold ctermfg=29 gui=bold guifg=SeaGreen
+    CSAhi NonText term=bold cterm=bold ctermfg=27 gui=bold guifg=#0030ff
+    CSAhi Pmenu ctermbg=60 ctermfg=250 guibg=#404080 guifg=#c0c0c0
+    CSAhi PmenuSbar ctermbg=248 ctermfg=21 guibg=darkgray guifg=blue
+    CSAhi PmenuSel ctermbg=26 ctermfg=250 guibg=#2050d0 guifg=#c0c0c0
+    CSAhi PmenuThumb cterm=reverse ctermfg=250 gui=reverse guifg=#c0c0c0
+    CSAhi PreProc term=underline ctermfg=213 guifg=#ff80ff
+      CSAlink Define PreProc
+      CSAlink Include PreProc
+      CSAlink Macro PreProc
+      CSAlink PreCondit PreProc
+    CSAhi Question term=standout ctermfg=46 guifg=green
+    CSAhi Search term=underline ctermbg=26 ctermfg=123 guibg=#2050d0 guifg=#90fff0
+    CSAhi SignColumn term=standout ctermbg=250 ctermfg=51 guibg=Grey guifg=Cyan
+    CSAhi Special term=bold ctermfg=214 guifg=Orange
+      CSAlink Debug Special
+      CSAlink Delimiter Special
+      CSAlink SpecialChar Special
+      CSAlink SpecialComment Special
+      CSAlink Tag Special
+    CSAhi SpecialKey term=bold ctermfg=51 guifg=cyan
+    CSAhi SpellBad term=reverse cterm=undercurl ctermfg=196 gui=undercurl guisp=Red
+    CSAhi SpellCap term=reverse cterm=undercurl ctermfg=21 gui=undercurl guisp=Blue
+    CSAhi SpellLocal term=underline cterm=undercurl ctermfg=51 gui=undercurl guisp=Cyan
+    CSAhi SpellRare term=reverse cterm=undercurl ctermfg=201 gui=undercurl guisp=Magenta
+    CSAhi Statement term=bold ctermfg=227 guifg=#ffff60
+      CSAlink Conditional Statement
+      CSAlink Exception Statement
+      CSAlink Keyword Statement
+      CSAlink Label Statement
+      CSAlink Operator Statement
+      CSAlink Repeat Statement
+    CSAhi StatusLine ctermbg=248 ctermfg=21 guibg=darkgray guifg=blue
+    CSAhi StatusLineNC ctermbg=248 ctermfg=16 guibg=darkgray guifg=black
+    CSAhi TabLine term=underline cterm=underline ctermbg=248 gui=underline guibg=DarkGrey
+    CSAhi TabLineFill term=reverse cterm=reverse gui=reverse
+    CSAhi TabLineSel term=bold cterm=bold gui=bold
+    CSAhi Title term=bold ctermfg=201 guifg=magenta
+    CSAhi Todo term=standout ctermbg=26 ctermfg=166 guibg=#1248d1 guifg=#d14a14
+    CSAhi Type term=underline ctermfg=83 guifg=#60ff60
+      CSAlink StorageClass Type
+      CSAlink Structure Type
+      CSAlink Typedef Type
+    CSAhi Underlined term=underline cterm=underline ctermfg=111 gui=underline guifg=#80a0ff
+    CSAhi VertSplit ctermbg=248 ctermfg=16 guibg=darkgray guifg=black
+    CSAhi Visual term=reverse cterm=reverse ctermbg=250 ctermfg=105 gui=reverse guibg=fg guifg=#8080ff
+    CSAhi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=250 ctermfg=105 gui=reverse,underline guibg=fg guifg=#8080ff
+    CSAhi WarningMsg term=standout ctermfg=196 guifg=red
+    CSAhi WildMenu ctermbg=16 ctermfg=226 guibg=black guifg=yellow
+    CSAhi lCursor ctermbg=231 ctermfg=16 guibg=white guifg=black
+
+    if &term =~# "^xterm" || &term =~# "^screen"
+        " that's an ambiguous terminal setting
+        if (exists("g:CSApprox_konsole") && g:CSApprox_konsole) || (&term =~? "^konsole" && s:old_kde())
+        elseif (exists("g:CSApprox_eterm") && g:CSApprox_eterm) || &term =~? "^eterm"
+        endif
+    endif
+
+elseif &t_Co == 88
+    CSAhi Normal ctermbg=16 ctermfg=85 guibg=#000040 guifg=#c0c0c0
+    CSAhi ColorColumn term=reverse ctermbg=32 guibg=DarkRed
+    CSAhi Comment term=bold ctermfg=39 guifg=#80a0ff
+    CSAhi Conceal ctermbg=84 ctermfg=86 guibg=DarkGrey guifg=LightGrey
+    CSAhi Constant term=underline ctermfg=69 guifg=#ffa0a0
+      CSAlink Boolean Constant
+      CSAlink Character Constant
+      CSAlink Float Constant
+      CSAlink Number Constant
+      CSAlink String Constant
+    CSAhi Cursor ctermbg=76 ctermfg=16 guibg=yellow guifg=black
+    CSAhi CursorColumn term=reverse ctermbg=81 guibg=Grey40
+    CSAhi CursorLine term=underline ctermbg=81 guibg=Grey40
+    CSAhi DiffAdd ctermbg=17 guibg=darkblue
+    CSAhi DiffChange term=bold ctermbg=33 guibg=darkmagenta
+    CSAhi DiffDelete term=bold cterm=bold ctermbg=21 ctermfg=19 gui=bold guibg=DarkCyan guifg=Blue
+    CSAhi DiffText term=reverse cterm=bold ctermbg=64 gui=bold guibg=Red
+    CSAhi Directory term=bold ctermfg=31 guifg=cyan
+    CSAhi Error term=reverse ctermbg=64 ctermfg=79 guibg=Red guifg=White
+    CSAhi ErrorMsg term=standout ctermbg=23 ctermfg=79 guibg=#287eff guifg=#ffffff
+    CSAhi FoldColumn term=bold ctermbg=16 ctermfg=83 guibg=#000040 guifg=#808080
+    CSAhi Folded term=bold ctermbg=16 ctermfg=83 guibg=#000040 guifg=#808080
+    CSAhi Identifier term=underline ctermfg=31 guifg=#40ffff
+      CSAlink Function Identifier
+    CSAhi Ignore ctermfg=16 guifg=bg
+    CSAhi IncSearch term=reverse cterm=reverse ctermbg=22 ctermfg=63 gui=reverse guibg=#2050d0 guifg=#b0ffff
+    CSAhi LineNr term=underline ctermfg=44 guifg=#90f020
+    CSAhi MatchParen term=reverse ctermbg=21 guibg=DarkCyan
+    CSAhi ModeMsg term=bold cterm=bold ctermfg=26 gui=bold guifg=#22cce2
+    CSAhi MoreMsg term=bold cterm=bold ctermfg=21 gui=bold guifg=SeaGreen
+    CSAhi NonText term=bold cterm=bold ctermfg=19 gui=bold guifg=#0030ff
+    CSAhi Pmenu ctermbg=17 ctermfg=85 guibg=#404080 guifg=#c0c0c0
+    CSAhi PmenuSbar ctermbg=84 ctermfg=19 guibg=darkgray guifg=blue
+    CSAhi PmenuSel ctermbg=22 ctermfg=85 guibg=#2050d0 guifg=#c0c0c0
+    CSAhi PmenuThumb cterm=reverse ctermfg=85 gui=reverse guifg=#c0c0c0
+    CSAhi PreProc term=underline ctermfg=71 guifg=#ff80ff
+      CSAlink Define PreProc
+      CSAlink Include PreProc
+      CSAlink Macro PreProc
+      CSAlink PreCondit PreProc
+    CSAhi Question term=standout ctermfg=28 guifg=green
+    CSAhi Search term=underline ctermbg=22 ctermfg=47 guibg=#2050d0 guifg=#90fff0
+    CSAhi SignColumn term=standout ctermbg=85 ctermfg=31 guibg=Grey guifg=Cyan
+    CSAhi Special term=bold ctermfg=68 guifg=Orange
+      CSAlink Debug Special
+      CSAlink Delimiter Special
+      CSAlink SpecialChar Special
+      CSAlink SpecialComment Special
+      CSAlink Tag Special
+    CSAhi SpecialKey term=bold ctermfg=31 guifg=cyan
+    CSAhi SpellBad term=reverse cterm=undercurl ctermfg=64 gui=undercurl guisp=Red
+    CSAhi SpellCap term=reverse cterm=undercurl ctermfg=19 gui=undercurl guisp=Blue
+    CSAhi SpellLocal term=underline cterm=undercurl ctermfg=31 gui=undercurl guisp=Cyan
+    CSAhi SpellRare term=reverse cterm=undercurl ctermfg=67 gui=undercurl guisp=Magenta
+    CSAhi Statement term=bold ctermfg=77 guifg=#ffff60
+      CSAlink Conditional Statement
+      CSAlink Exception Statement
+      CSAlink Keyword Statement
+      CSAlink Label Statement
+      CSAlink Operator Statement
+      CSAlink Repeat Statement
+    CSAhi StatusLine ctermbg=84 ctermfg=19 guibg=darkgray guifg=blue
+    CSAhi StatusLineNC ctermbg=84 ctermfg=16 guibg=darkgray guifg=black
+    CSAhi TabLine term=underline cterm=underline ctermbg=84 gui=underline guibg=DarkGrey
+    CSAhi TabLineFill term=reverse cterm=reverse gui=reverse
+    CSAhi TabLineSel term=bold cterm=bold gui=bold
+    CSAhi Title term=bold ctermfg=67 guifg=magenta
+    CSAhi Todo term=standout ctermbg=22 ctermfg=52 guibg=#1248d1 guifg=#d14a14
+    CSAhi Type term=underline ctermfg=45 guifg=#60ff60
+      CSAlink StorageClass Type
+      CSAlink Structure Type
+      CSAlink Typedef Type
+    CSAhi Underlined term=underline cterm=underline ctermfg=39 gui=underline guifg=#80a0ff
+    CSAhi VertSplit ctermbg=84 ctermfg=16 guibg=darkgray guifg=black
+    CSAhi Visual term=reverse cterm=reverse ctermbg=85 ctermfg=39 gui=reverse guibg=fg guifg=#8080ff
+    CSAhi VisualNOS term=bold,underline cterm=reverse,underline ctermbg=85 ctermfg=39 gui=reverse,underline guibg=fg guifg=#8080ff
+    CSAhi WarningMsg term=standout ctermfg=64 guifg=red
+    CSAhi WildMenu ctermbg=16 ctermfg=76 guibg=black guifg=yellow
+    CSAhi lCursor ctermbg=79 ctermfg=16 guibg=white guifg=black
 endif
 
-if 1
-    delcommand CSAHi
-endif
+delcommand CSAlink
+delfunction s:CSAlink
+delcommand CSAhi
+delfunction s:CSAhi
+let syntax_cmd="on"
