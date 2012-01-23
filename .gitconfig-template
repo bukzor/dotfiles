@@ -1,0 +1,7 @@
+[user]
+	name = Buck Golemon
+	email = buck@yelp.com
+[color]
+	ui = true
+[diff]
+        external = $HOME/bin/git_diff_wrapper
