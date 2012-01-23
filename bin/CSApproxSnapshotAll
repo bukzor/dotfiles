@@ -27,6 +27,7 @@ xargs --replace \
         runtime autoload/pathogen.vim
         call pathogen#infect()
         runtime plugin/**/CSApprox.vim
+        syntax on
         colorscheme {}
         CSApproxSnapshot! $HOME/.vim/colors/{}-approx.vim
         quit

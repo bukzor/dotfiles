@@ -205,4 +205,18 @@
     endif
 " }
 
+" functions {
+function! s:SaveColors(fname, overwrite)
+    if a:overwrite
+        let bang = '!'
+    else
+        let bang = ''
+    endif
+    exec 'redir'.bang '>' a:fname
+    silent highlight
+    redir END
+endfunction
+command! -bang -nargs=1 -complete=file -bar SaveColors call s:SaveColors(<f-args>, strlen("<bang>"))
+" }
+
 " vim:expandtab:
