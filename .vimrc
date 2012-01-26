@@ -113,10 +113,15 @@
     set cursorline      " highlight my current line
     hi clear CursorLine " Using bold text, not the default
     hi CursorLine term=bold cterm=bold gui=bold
+    " ... only in my current window.
+    autocmd WinEnter * setlocal cursorline
+    autocmd WinLeave * setlocal nocursorline
 
     set cursorcolumn    " ... and my current column
     hi clear CursorColumn    
     hi CursorColumn term=bold cterm=bold gui=bold
+    autocmd WinEnter * setlocal cursorcolumn
+    autocmd WinLeave * setlocal nocursorcolumn
 " }
 
 " general usability {
@@ -206,17 +211,12 @@
 " }
 
 " functions {
-function! s:SaveColors(fname, overwrite)
-    if a:overwrite
-        let bang = '!'
-    else
-        let bang = ''
-    endif
-    exec 'redir'.bang '>' a:fname
+function! s:SaveColors(fname, bang)
+    exec 'redir' . a:bang . ' >' a:fname
     silent highlight
     redir END
 endfunction
-command! -bang -nargs=1 -complete=file -bar SaveColors call s:SaveColors(<f-args>, strlen("<bang>"))
+command! -bang -nargs=1 -complete=file -bar SaveColors call s:SaveColors(<f-args>, "<bang>")
 " }
 
 " vim:expandtab:
