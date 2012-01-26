@@ -11,5 +11,8 @@
 
 def execute_request_profiled(request, response, initialize_logic=True):
 
-python ~/gprof2dot.py -f pstats /home/buck/dev/.pgconf-buck-security/logs/profilestats.la.prof | dot -Tpng -o ~/Desktop/home.logged-in-host.png
+python ~/gprof2dot.py -f pstats /home/buck/dev/.pgconf-buck-security/logs/profilestats.la.prof | dot -Tsvg -o ~/Desktop/home.logged-in-host.svg
 
+echo 'import yelp.testing' | python -m cProfile -o /dev/stdout /dev/stdin | gprof2dot.py -f pstats /dev/stdin | dot -Tsvg -o profile.svg 
+    
+python -m cProfile -o profile.pstats /usr/bin/testify yelp/tests/util/html_test.py && gprof2dot.py -f pstats profile.pstats | dot -Tsvg -o profile.svg 
