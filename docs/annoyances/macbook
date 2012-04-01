@@ -1,3 +1,9 @@
+fn keys:
+	# make function keys "normal" unless fn button is pressed
+	echo 2 | sudo tee /sys/module/hid_apple/parameters/fnmode
+	echo options hid_apple fnmode=2 | sudo tee -a /etc/modprobe.d/hid_apple.conf
+	sudo update-initramfs -u
+
 
 no wireless:
 	# The driver for MacBookPro8,2 was released in kernel 3.2-rc3+
