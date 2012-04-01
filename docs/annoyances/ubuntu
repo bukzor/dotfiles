@@ -31,7 +31,7 @@ primary monitor:
 grub menu:
 	see /etc/default/grub
 
-capslock:
+Disable capslock key:
     # X11: (see also: /usr/share/X11/xkb/rules/base.lst)
     sudo vim /etc/default/keyboard
         XKBOPTIONS="ctrl:nocaps"
@@ -43,5 +43,9 @@ capslock:
     # Restarting X doesn't accomplish anything, for whatever reason.
     sudo reboot -h now
 
-
+Disable F1 key from creating a Help popup:
+    (in Gnome)
+    system settings -> keyboard -> Shortcuts -> Launchers -> Launch Help Browser
+    (in Terminal)
+    edit -> keyboard shortcuts -> Help (very bottom)
 
