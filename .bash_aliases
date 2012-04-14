@@ -44,4 +44,11 @@ if [[ -e /nail/scripts/aliases.sh ]]; then
 	unset BT
 fi
 
+if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
+    export WORKON_HOME=$HOME/venv
+    export PROJECT_HOME=$HOME/trees
+    export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
+    source /usr/local/bin/virtualenvwrapper.sh
+fi
+
 # vim:syntax=sh:

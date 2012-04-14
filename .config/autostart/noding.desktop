@@ -1,1 +1,4 @@
-xset -b b off
+[Desktop Entry]
+Type=Application
+Name=Stop the Ding!
+Exec=xset -b b off
