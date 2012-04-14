@@ -24,13 +24,13 @@
     "TODO: can we get paste to work even with mouse enabled?
     set mouse=nvrh
 
-	" Moving up/down moves visually.
-	" This makes files with very long lines much more manageable.
+    " Moving up/down moves visually.
+    " This makes files with very long lines much more manageable.
     nnoremap j gj
     nnoremap k gk
-	" Moving left/right will wrap around to the previous/next line.
+    " Moving left/right will wrap around to the previous/next line.
     set whichwrap=b,s,h,l,<,>,~,[,]
-	" Backspace will delete whatever is behind your cursor.
+    " Backspace will delete whatever is behind your cursor.
     set backspace=indent,eol,start
 
     "Bind the 'old' up and down. Use these to skip past a very long line.
@@ -162,8 +162,8 @@
 
 " At work we use tabs =/
 if filereadable("/nail/scripts/aliases.sh")
-	set noexpandtab
-	set tabstop=4
+    set noexpandtab
+    set tabstop=4
 endif
 
 " My own extra stuff:
