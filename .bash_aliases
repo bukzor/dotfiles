@@ -40,6 +40,8 @@ if [[ -e /nail/scripts/aliases.sh ]]; then
 
 	source /etc/profile
 	source ~/mypy/bin/activate
+	unset YELPCODE
+	unset BT
 fi
 
 # vim:syntax=sh:
