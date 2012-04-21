@@ -32,18 +32,6 @@ alias l='ls -CF'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-
-if [[ -e /nail/scripts/aliases.sh ]]; then
-	# work-specific stuff
-	source /nail/scripts/aliases.sh
-	PATH="$PATH:$BT/tools:$BT/aws/bin"
-
-	source /etc/profile
-	source ~/mypy/bin/activate
-	unset YELPCODE
-	unset BT
-fi
-
 if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
     export WORKON_HOME=$HOME/venv
     export PROJECT_HOME=$HOME/trees
