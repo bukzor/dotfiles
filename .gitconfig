@@ -1,0 +1,15 @@
+[user]
+	name = Buck Golemon
+	email = workitharder@gmail.com
+[color]
+	ui = auto
+[diff]
+        external = $HOME/bin/git_diff_wrapper
+[pager]
+        diff = 
+[pack]
+        threads = 0
+[diff]
+        renamelimit = 0
+[push]
+        default = current

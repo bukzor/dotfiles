@@ -43,30 +43,33 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
 fi
 
 if [ "$TERM" == "xterm" ] && [ "$COLORTERM" == "gnome-terminal" ]; then
+    # Gnome terminal supports 256 colors, but doesn't have a way to edit $TERM
     export TERM=xterm-256color
 fi
 
+noerr () {
+    "$@" 2>/dev/null 
+}
+
 # set a fancy prompt (non-color, unless we know we "want" color)
+ GREEN='\[\e[1;32m\]'
+YELLOW='\[\e[1;33m\]'
+  BLUE='\[\e[1;34m\]'
+PURPLE='\[\e[1;35m\]'
+  TEAL='\[\e[1;36m\]'
+   END='\[\e[0;39m\]'
+   PS1='$(noerr __git_ps1 "'"${TEAL}(%s)${END} "'")${debian_chroot:+($debian_chroot)}'"${BLUE}\u${END}@${GREEN}\h${END}:${YELLOW}\w${END} \n${PURPLE}[\D{%a %m-%d %I:%M:%S%p}]${END}\$ "
+
 case "$TERM" in
 *-256col*)
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    # All's well.
     ;;
 *-col*)
     echo LOW COLOR TERM: $TERM
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
     ;;
 *)
     echo NO COLOR TERM: $TERM
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-    ;;
-esac
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
+    PS1='$(noerr __git_ps1 "%s ")${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
 
@@ -74,19 +77,17 @@ esac
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
 if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+    source ~/.bash_aliases
 fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
+    source /etc/bash_completion
 fi
-
-if [ -f ~/.bash_completion ]; then
-    . ~/.bash_completion
+# My own completions
+if [ -d ~/.bash_completion.d ]; then
+    source ~/.bash_completion.d/*.sh
 fi
-
