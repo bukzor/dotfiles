@@ -1,0 +1,49 @@
+" cursor highlight {
+    set cursorline      " highlight my current line
+    hi clear CursorLine " Using bold text, not the default
+    hi CursorLine term=bold cterm=bold gui=bold
+    " ... only in my current window.
+    autocmd WinEnter * setlocal cursorline
+    autocmd WinLeave * setlocal nocursorline
+
+    set cursorcolumn    " ... and my current column
+    hi clear CursorColumn    
+    hi CursorColumn term=bold cterm=bold gui=bold
+    autocmd WinEnter * setlocal cursorcolumn
+    autocmd WinLeave * setlocal nocursorcolumn
+" }
+
+" plugins {
+    " pre-config {
+        " CSapprox: reproduce gvim colors in terminal vim..
+        let g:CSApprox_verbose_level = 0 "don't complain
+    " }
+
+    " Pathogen: keep plugins nicely bundled in separate folders.
+    "       http://www.vim.org/scripts/script.php?script_id=2332
+    runtime autoload/pathogen.vim
+    if exists('g:loaded_pathogen')
+        call pathogen#infect()  "load the bundles, if possible
+        Helptags                "plus any bundled help
+    endif
+    runtime! plugin/**/*.vim    "Load em up!
+
+    " post-config {
+    if !exists('g:CSApprox_loaded')
+        " CSApprox didn't load.
+        " Fall back to pre-compiled color scheme, if possible.
+        silent! execute 'colorscheme' colors_name.'-approx'
+    endif
+    " }
+" }
+
+" functions {
+function! s:SaveColors(fname, bang)
+    exec 'redir' . a:bang . ' >' a:fname
+    silent highlight
+    redir END
+endfunction
+command! -bang -nargs=1 -complete=file -bar SaveColors call s:SaveColors(<f-args>, "<bang>")
+" }
+
+" vim:ft=vim:

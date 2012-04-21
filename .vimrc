@@ -24,20 +24,36 @@
     "TODO: can we get paste to work even with mouse enabled?
     set mouse=nvrh
 
-    "move around more like a normal editor
+    " Moving up/down moves visually.
+    " This makes files with very long lines much more manageable.
     nnoremap j gj
     nnoremap k gk
-    set whichwrap=b,s,h,l,<,>,[,]
+    " Moving left/right will wrap around to the previous/next line.
+    set whichwrap=b,s,h,l,<,>,~,[,]
+    " Backspace will delete whatever is behind your cursor.
     set backspace=indent,eol,start
 
-    "bindings for the 'old' up and down
+    "Bind the 'old' up and down. Use these to skip past a very long line.
     noremap gj j
     noremap gk k
 " }
 
+" general usability {
+    "turn off the annoying "ding!"
+    set visualbell
+
+    "allow setting extra option directly in files
+    "example: "vim: syntax=vim"
+    set modeline
+
+    "don't clobber the buffer when pasting in visual mode
+    vmap P p
+    vnoremap p "_dP
+" }
+
 " windows-style mappings {
     "ctrl+S to save.
-    "NOTE: put this in ~/.cshrc for it to work properly in terminal vim:
+    "NOTE: put this in ~/.bashrc for it to work properly in terminal vim:
     "       stty -ixon -ixoff
     map <c-s> :update<cr>
     imap <c-s> <c-o><c-s>
@@ -66,14 +82,14 @@
 " }
 
 " common typos {
-    "mapping a sequence starting with ':' causes a pause whenever : is typed
-    "if that's too annoying, remove these
-    nmap :Q :q
-    nmap :W :w
-    nmap :WQ :wq
+    " Often I hold shift too long when issuing these commands.
+    command Q q
+    command W w
+    command WQ wq
+    command Wq wq
     nmap Q: :q
 
-    " this one causes a pause whenever you use q
+    " this one causes a pause whenever you use q, so I don't use it
     " nmap q: :q
 
     "never use Ex mode -- I never *mean* to press it
@@ -109,49 +125,15 @@
     nnoremap Oc :tabN<CR>
 " }
 
-" cursor highlight {
-    set cursorline      " highlight my current line
-    hi clear CursorLine " Using bold text, not the default
-    hi CursorLine term=bold cterm=bold gui=bold
-    " ... only in my current window.
-    autocmd WinEnter * setlocal cursorline
-    autocmd WinLeave * setlocal nocursorline
-
-    set cursorcolumn    " ... and my current column
-    hi clear CursorColumn    
-    hi CursorColumn term=bold cterm=bold gui=bold
-    autocmd WinEnter * setlocal cursorcolumn
-    autocmd WinLeave * setlocal nocursorcolumn
-" }
-
-" general usability {
-    "turn off the annoying "ding!"
-    set visualbell
-
-    "cd to the file you're editing
-    "set autochdir "vim 7.0
-
-    "set extra option directly in files
-    "example: "vim: syntax=vim"
-    set modeline
-
-    "don't clobber the buffer when pasting in visual mode
-    vmap P p
-    vnoremap p "_dP
-
-    "reformat XML quickly
-    nmap =x :%s/> *</>\r</g<enter>=G=gg<c-o><c-o>
-" }
-
 "indentation options {
-    "TODO: conditional for @work
     set expandtab                       "use spaces, not tabs
     set softtabstop=4 shiftwidth=4      "4-space indents
+
 
     set shiftround                      "always use a multiple of 4 for indents
     set smarttab                        "backspace to remove space-indents
     set autoindent                      "auto-indent for code blocks
-    "NOT: smartindent                   "it does stupid things with comments
+    "DONT USE: smartindent              "it does stupid things with comments
 
     "smart indenting by filetype, better than smartindent
     filetype on
@@ -165,7 +147,7 @@
     au BufNewFile,BufRead *.pxi set filetype=pyrex
 " }
 
-" bindings for vimdiff {
+" tkdiff-like bindings for vimdiff {
     if &diff
         "next match
         nnoremap m ]cz.
@@ -178,45 +160,11 @@
     endif
 " }
 
-" plugins {
-    " pre-config {
-        " CSapprox: reproduce gvim colors in terminal vim..
-        let g:CSApprox_verbose_level = 0 "don't complain
-    " }
+" At work we use tabs =/
+if filereadable("/nail/scripts/aliases.sh")
+    set noexpandtab
+    set tabstop=4
+endif
 
-    " Pathogen: keep plugins nicely bundled in separate folders.
-    "       http://www.vim.org/scripts/script.php?script_id=2332
-    runtime autoload/pathogen.vim
-    if exists('g:loaded_pathogen')
-        call pathogen#infect()  "load the bundles, if possible
-        Helptags                "plus any bundled help
-    endif
-    runtime! plugin/**/*.vim    "Load em up!
-
-    " post-config {
-    if !exists('g:CSApprox_loaded')
-        " CSApprox didn't load.
-        " Fall back to pre-compiled color scheme, if possible.
-        silent! execute 'colorscheme' colors_name.'-approx'
-    endif
-    " }
-" }
-
-" Location-specific settings. {
-    if filereadable("/nail/scripts/aliases.sh")
-        " At work!
-        set noexpandtab
-        set tabstop=4
-    endif
-" }
-
-" functions {
-function! s:SaveColors(fname, bang)
-    exec 'redir' . a:bang . ' >' a:fname
-    silent highlight
-    redir END
-endfunction
-command! -bang -nargs=1 -complete=file -bar SaveColors call s:SaveColors(<f-args>, "<bang>")
-" }
-
-" vim:expandtab:
+" My own extra stuff:
+source $HOME/.vim.extra

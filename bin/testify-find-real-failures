@@ -6,7 +6,7 @@ else
 	OLD=1
 fi
 NEW=$OLD
-run=/nail/home/buck/pg/devscripts/run-testify-tests
+run=/nail/workflow/run-testify-tests
 
 if ! [[ -r failures.$OLD.txt ]]; then
 	echo $OLD: copy failing tests from buildbot into failure.$OLD.txt

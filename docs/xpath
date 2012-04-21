@@ -1,0 +1,10 @@
+
+axes diagram:
+http://our.umbraco.org/media/upload/0562fd58-c6db-4fa8-a432-68b28f11c3f2/rs/7x1B0.gif
+
+functions: (lxml/libxml2 uses xpath 1.0)
+	spec: http://www.w3.org/TR/xpath
+	nice searchable doc: http://zvon.org/comp/r/ref-XPath_1.html
+
+libxml2 standards: http://xmlsoft.org
+

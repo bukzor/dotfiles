@@ -8,3 +8,4 @@
 !docs
 !.vim
 !.ssh
+!.bash_completion.d
