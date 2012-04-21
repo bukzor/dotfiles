@@ -35,7 +35,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 if [[ -e /nail/scripts/aliases.sh ]]; then
 	# work-specific stuff
-	. /nail/scripts/aliases.sh
+	source /nail/scripts/aliases.sh
 	PATH="$PATH:$BT/tools:$BT/aws/bin"
 
 	source /etc/profile
