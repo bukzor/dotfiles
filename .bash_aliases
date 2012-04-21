@@ -1,6 +1,7 @@
 #!/not/executable/bash
 
 alias tmux-env='eval `~/bin/tmux-env`'
+alias crterm='export TERM=rxvt-unicode'
 function ssh-dev() {
 	ssh -ttA dev06 tmux attach $( test -z "$1" || echo -t ) "$1" 
 }
