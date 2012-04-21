@@ -1,6 +1,6 @@
 [user]
-        #TODO: name = Buck Golemon
-        #TODO: email = workitharder@gmail.com
+        name = Buck Golemon
+        email = workitharder@gmail.com
 [color]
 	ui = auto
 [diff]
