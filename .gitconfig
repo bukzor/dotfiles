@@ -1,8 +1,8 @@
 [user]
-        #TODO: name = Buck Golemon
-        #TODO: email = workitharder@gmail.com
+        name = Buck Golemon
+        email = buck@yelp.com
 [color]
-	ui = auto
+		ui = auto
 [diff]
         external = $HOME/bin/git_diff_wrapper
 [pager]
