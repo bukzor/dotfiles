@@ -51,6 +51,16 @@ noerr () {
     "$@" 2>/dev/null 
 }
 
+if [[ -e /nail/scripts/aliases.sh ]]; then
+       # work-specific stuff
+       source /nail/scripts/aliases.sh
+       PATH="$PATH:$BT/tools:$BT/aws/bin"
+
+       source /etc/profile
+       unset YELPCODE
+       unset BT
+fi
+
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[\e[1;32m\]'
 YELLOW='\[\e[1;33m\]'
@@ -72,6 +82,11 @@ case "$TERM" in
     PS1='$(noerr __git_ps1 "%s ")${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
+
+# My very own python!
+if [ -f ~/mypy/bin/activate ]; then
+	source ~/mypy/bin/activate
+fi
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like

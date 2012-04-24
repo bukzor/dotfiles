@@ -78,15 +78,16 @@
     vmap <c-v> "+P
 
     "replace <CTRL-V> with <CTRL-B>
+    noremap <c-b> <c-v>
     inoremap <c-b> <c-v>
 " }
 
 " common typos {
     " Often I hold shift too long when issuing these commands.
-    command Q q
-    command W w
-    command WQ wq
-    command Wq wq
+    command! Q q
+    command! W w
+    command! WQ wq
+    command! Wq wq
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
