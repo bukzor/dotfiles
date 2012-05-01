@@ -39,4 +39,8 @@ if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
     source /usr/local/bin/virtualenvwrapper.sh
 fi
 
-# vim:syntax=sh:
+# My very own python!
+if [ -f ~/mypy/bin/activate ]; then
+	function activate() { source ~/mypy/bin/activate; }
+	activate
+fi

@@ -85,7 +85,9 @@
 " common typos {
     " Often I hold shift too long when issuing these commands.
     command! Q q
+    command! Qall qall
     command! W w
+    command! Wall wall
     command! WQ wq
     command! Wq wq
     nmap Q: :q
