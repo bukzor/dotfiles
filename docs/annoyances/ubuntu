@@ -35,13 +35,18 @@ Disable capslock key:
     # X11: (see also: /usr/share/X11/xkb/rules/base.lst)
     sudo vim /etc/default/keyboard
         XKBOPTIONS="ctrl:nocaps"
+    udevadm trigger --subsystem-match=input --action=change
+    sudo restart lightdm
 
-    # Text console:
-    sudo vim /etc/kbd/remap
-        s/keycode  58 = Caps_Lock/keycode  58 = Control/;
+    # Text console: (stolen from setupcon)
+    #!/bin/sh
+    . /etc/default/console-setup 
+    . /etc/default/keyboard
+    ckbcomp $acm_option $rules_option -model "$XKBMODEL" \
+                "$XKBLAYOUT" "$XKBVARIANT" "$XKBOPTIONS" \
+                | gzip -9 2>/dev/null >/etc/console-setup/cached.kmap.gz
+    loadkeys /etc/console-setup/cached.kmap.gz
 
-    # Restarting X doesn't accomplish anything, for whatever reason.
-    sudo reboot -h now
 
 Disable F1 key from creating a Help popup:
     (in Gnome)
