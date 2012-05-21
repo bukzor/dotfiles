@@ -12,7 +12,5 @@
         threads = 0
 [diff]
         renamelimit = 0
-[push]
-        default = current
 
 # vim:sts=4:sw=4:et:
