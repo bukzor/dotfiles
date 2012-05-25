@@ -1,4 +1,3 @@
-echo "it works!"
 " cursor highlight {
     set cursorline      " highlight my current line
     hi clear CursorLine " Using bold text, not the default

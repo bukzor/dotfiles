@@ -181,4 +181,7 @@ endif
 " }
 
 " My own extra stuff:
-silent! source $HOME/.vimrc.extra 
+if filereadable($HOME . "/.vimrc.extra")
+    source $HOME/.vimrc.extra 
+endif
+" vim:et:sts=4:sw=4
