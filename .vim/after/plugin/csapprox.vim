@@ -4,3 +4,4 @@ if !exists('g:CSApprox_loaded')
     " Fall back to pre-compiled color scheme, if possible.
     silent! execute 'colorscheme' colors_name.'-approx'
 endif
+" vim:et:sts=4:sw=4
