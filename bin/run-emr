@@ -1,0 +1,15 @@
+# Runtimes:
+# cpu-intensive   (5xc1.xlarge) -- 2012/0[3-5]/*/*.gz' -- ~4h
+# standard   (???) -- 2012/04/[23]*/*.gz'  2012/05/0[0-5]/*.gz' -- 
+
+export BT=$PWD
+export BT=$PWD
+mkdir -p tmp/logs/
+(
+	time python ./batch/adhoc/mr_url_encodings.py \
+		's3://yelp-scribe-logs/logs/access/2012/04/[123]*/*.gz' \
+		's3://yelp-scribe-logs/logs/access/2012/05/0*/*.gz' |
+		--runner=emr \
+		--conf-path=/etc/mrjob.conf \
+	tee tmp/logs/mrjob.output > /dev/tty
+) |& tee tmp/logs/mrjob.err
