@@ -78,15 +78,18 @@
     vmap <c-v> "+P
 
     "replace <CTRL-V> with <CTRL-B>
+    noremap <c-b> <c-v>
     inoremap <c-b> <c-v>
 " }
 
 " common typos {
     " Often I hold shift too long when issuing these commands.
-    command Q q
-    command W w
-    command WQ wq
-    command Wq wq
+    command! Q q
+    command! Qall qall
+    command! W w
+    command! Wall wall
+    command! WQ wq
+    command! Wq wq
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -166,5 +169,19 @@ if filereadable("/nail/scripts/aliases.sh")
     set tabstop=4
 endif
 
+" Pathogen: {
+    " keep plugins nicely bundled in separate folders.
+    " http://www.vim.org/scripts/script.php?script_id=2332
+    runtime autoload/pathogen.vim
+    if exists('g:loaded_pathogen')
+        call pathogen#infect()    "load the bundles, if possible
+        Helptags                  "plus any bundled help
+        runtime bundle_config.vim "give me a chance to configure the plugins
+    endif
+" }
+
 " My own extra stuff:
-source $HOME/.vim.extra
+if filereadable($HOME . "/.vimrc.extra")
+    source $HOME/.vimrc.extra 
+endif
+" vim:et:sts=4:sw=4
