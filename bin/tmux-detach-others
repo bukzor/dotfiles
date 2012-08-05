@@ -1,4 +1,4 @@
 # Detach all other clients from the current session
 
-tmux list-clients | grep -v $SSH_TTY | col 1 | sed s/:// | xargs tmux detach-client -t
+tmux list-clients | grep -v $SSH_TTY | col 1 | sed s/:// | xargs -rn1 tmux detach-client -t
 
