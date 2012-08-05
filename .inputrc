@@ -1,0 +1,4 @@
+# configuration file for readline (aka "tab completion")
+
+# Use a flash instead of a ding.
+set bell-style visible
