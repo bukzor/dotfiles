@@ -169,5 +169,19 @@ if filereadable("/nail/scripts/aliases.sh")
     set tabstop=4
 endif
 
+" Pathogen: {
+    " keep plugins nicely bundled in separate folders.
+    " http://www.vim.org/scripts/script.php?script_id=2332
+    runtime autoload/pathogen.vim
+    if exists('g:loaded_pathogen')
+        call pathogen#infect()    "load the bundles, if possible
+        Helptags                  "plus any bundled help
+        runtime bundle_config.vim "give me a chance to configure the plugins
+    endif
+" }
+
 " My own extra stuff:
-source $HOME/.vim.extra
+if filereadable($HOME . "/.vimrc.extra")
+    source $HOME/.vimrc.extra 
+endif
+" vim:et:sts=4:sw=4
