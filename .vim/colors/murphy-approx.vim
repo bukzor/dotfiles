@@ -1,11 +1,10 @@
 " This scheme was created by CSApproxSnapshot
-" on Mon, 23 Jan 2012
+" on Tue, 24 Jan 2012
 
 syntax on
 let syntax_cmd="skip"
 highlight clear
 
-let g:colors_name = expand("<sfile>:t:r")
 function! s:CSAhi(group, ...)
     exe "hi clear" a:group
     let hi = join(a:000, " ")
@@ -122,89 +121,94 @@ if has("gui_running") || &t_Co == 256
     endif
 
 elseif &t_Co == 88
-    CSAhi Normal ctermbg=16 ctermfg=45 guibg=Black guifg=lightgreen
-    CSAhi ColorColumn term=reverse ctermbg=32 guibg=DarkRed
-    CSAhi Comment term=bold ctermfg=68 guifg=Orange
+    CSAhi Normal ctermbg=79 ctermfg=16 guibg=white guifg=black
+    CSAhi ColorColumn term=reverse ctermbg=74 guibg=LightRed
+    CSAhi Comment term=bold ctermfg=19 guifg=Blue
     CSAhi Conceal ctermbg=84 ctermfg=86 guibg=DarkGrey guifg=LightGrey
-    CSAhi Constant term=underline ctermfg=79 guifg=White
+    CSAhi Constant term=underline ctermfg=67 guifg=Magenta
       CSAlink Boolean Constant
       CSAlink Character Constant
       CSAlink Float Constant
       CSAlink Number Constant
       CSAlink String Constant
-    CSAhi Cursor ctermbg=45 ctermfg=54 guibg=fg guifg=Orchid
-    CSAhi CursorColumn term=reverse ctermbg=81 guibg=Grey40
-    CSAhi CursorLine term=underline ctermbg=81 guibg=Grey40
-    CSAhi DiffAdd term=bold ctermbg=17 guibg=DarkBlue
-    CSAhi DiffChange term=bold ctermbg=33 guibg=DarkMagenta
-    CSAhi DiffDelete term=bold cterm=bold ctermbg=21 ctermfg=19 gui=bold guibg=DarkCyan guifg=Blue
+    CSAhi Cursor ctermbg=16 ctermfg=79 guibg=fg guifg=bg
+    CSAhi CursorColumn term=reverse ctermbg=87 guibg=Grey90
+    CSAhi CursorLine term=underline ctermbg=87 guibg=Grey90
+    CSAhi DiffAdd term=bold ctermbg=58 guibg=LightBlue
+    CSAhi DiffChange term=bold ctermbg=75 guibg=LightMagenta
+    CSAhi DiffDelete term=bold cterm=bold ctermbg=63 ctermfg=19 gui=bold guibg=LightCyan guifg=Blue
     CSAhi DiffText term=reverse cterm=bold ctermbg=64 gui=bold guibg=Red
-    CSAhi Directory term=bold ctermfg=31 guifg=Cyan
+    CSAhi Directory term=bold ctermfg=19 guifg=Blue
     CSAhi Error term=reverse ctermbg=64 ctermfg=79 guibg=Red guifg=White
     CSAhi ErrorMsg term=standout ctermbg=64 ctermfg=79 guibg=Red guifg=White
-    CSAhi FoldColumn term=standout ctermbg=85 ctermfg=31 guibg=Grey guifg=Cyan
-    CSAhi Folded term=standout ctermbg=84 ctermfg=31 guibg=DarkGrey guifg=Cyan
-    CSAhi Identifier term=underline ctermfg=31 guifg=#00ffff
+    CSAhi FoldColumn term=standout ctermbg=85 ctermfg=17 guibg=Grey guifg=DarkBlue
+    CSAhi Folded term=standout ctermbg=86 ctermfg=17 guibg=LightGrey guifg=DarkBlue
+    CSAhi Identifier term=underline ctermfg=21 guifg=DarkCyan
       CSAlink Function Identifier
-    CSAhi Ignore ctermfg=16 guifg=bg
+    CSAhi Ignore ctermfg=79 guifg=bg
     CSAhi IncSearch term=reverse cterm=reverse gui=reverse
-    CSAhi LineNr term=underline ctermfg=76 guifg=Yellow
-    CSAhi MatchParen term=reverse ctermbg=21 guibg=DarkCyan
+    CSAhi LineNr term=underline ctermfg=32 guifg=Brown
+    CSAhi MatchParen term=reverse ctermbg=31 guibg=Cyan
     CSAhi ModeMsg term=bold cterm=bold gui=bold
     CSAhi MoreMsg term=bold cterm=bold ctermfg=21 gui=bold guifg=SeaGreen
     CSAhi NonText term=bold cterm=bold ctermfg=19 gui=bold guifg=Blue
-    CSAhi Pmenu ctermbg=67 guibg=Magenta
+    CSAhi Pmenu ctermbg=75 guibg=LightMagenta
     CSAhi PmenuSbar ctermbg=85 guibg=Grey
-    CSAhi PmenuSel ctermbg=84 guibg=DarkGrey
+    CSAhi PmenuSel ctermbg=85 guibg=Grey
     CSAhi PmenuThumb cterm=reverse gui=reverse
-    CSAhi PreProc term=underline ctermfg=74 guifg=Wheat
+    CSAhi PreProc term=underline ctermfg=35 guifg=Purple
       CSAlink Define PreProc
       CSAlink Include PreProc
       CSAlink Macro PreProc
       CSAlink PreCondit PreProc
-    CSAhi Question term=standout cterm=bold ctermfg=31 gui=bold guifg=Cyan
-    CSAhi Search term=reverse ctermbg=19 ctermfg=79 guibg=Blue guifg=white
-    CSAhi SignColumn term=standout ctermbg=85 ctermfg=31 guibg=Grey guifg=Cyan
-    CSAhi Special term=bold ctermfg=67 guifg=magenta
+    CSAhi Question term=standout cterm=bold ctermfg=21 gui=bold guifg=SeaGreen
+    CSAhi Search term=reverse ctermbg=76 guibg=Yellow
+    CSAhi SignColumn term=standout ctermbg=85 ctermfg=17 guibg=Grey guifg=DarkBlue
+    CSAhi Special term=bold ctermfg=38 guifg=SlateBlue
       CSAlink Debug Special
       CSAlink Delimiter Special
       CSAlink SpecialChar Special
       CSAlink SpecialComment Special
       CSAlink Tag Special
-    CSAhi SpecialKey term=bold ctermfg=31 guifg=Cyan
+    CSAhi SpecialKey term=bold ctermfg=19 guifg=Blue
     CSAhi SpellBad term=reverse cterm=undercurl ctermfg=64 gui=undercurl guisp=Red
     CSAhi SpellCap term=reverse cterm=undercurl ctermfg=19 gui=undercurl guisp=Blue
-    CSAhi SpellLocal term=underline cterm=undercurl ctermfg=31 gui=undercurl guisp=Cyan
+    CSAhi SpellLocal term=underline cterm=undercurl ctermfg=21 gui=undercurl guisp=DarkCyan
     CSAhi SpellRare term=reverse cterm=undercurl ctermfg=67 gui=undercurl guisp=Magenta
-    CSAhi Statement term=bold ctermfg=76 guifg=#ffff00
+    CSAhi Statement term=bold cterm=bold ctermfg=32 gui=bold guifg=Brown
       CSAlink Conditional Statement
       CSAlink Exception Statement
       CSAlink Keyword Statement
       CSAlink Label Statement
       CSAlink Operator Statement
       CSAlink Repeat Statement
-    CSAhi StatusLine term=bold,reverse ctermbg=17 ctermfg=79 guibg=darkblue guifg=White
-    CSAhi StatusLineNC term=reverse ctermbg=80 ctermfg=79 guibg=#333333 guifg=white
-    CSAhi TabLine term=underline cterm=underline ctermbg=84 gui=underline guibg=DarkGrey
+    CSAhi StatusLine term=bold,reverse cterm=bold,reverse gui=bold,reverse
+    CSAhi StatusLineNC term=reverse cterm=reverse gui=reverse
+    CSAhi TabLine term=underline cterm=underline ctermbg=86 gui=underline guibg=LightGrey
     CSAhi TabLineFill term=reverse cterm=reverse gui=reverse
     CSAhi TabLineSel term=bold cterm=bold gui=bold
-    CSAhi Title term=bold cterm=bold ctermfg=74 gui=bold guifg=Pink
+    CSAhi Title term=bold cterm=bold ctermfg=67 gui=bold guifg=Magenta
     CSAhi Todo term=standout ctermbg=76 ctermfg=19 guibg=Yellow guifg=Blue
-    CSAhi Type term=underline ctermfg=85 guifg=grey
+    CSAhi Type term=underline cterm=bold ctermfg=21 gui=bold guifg=SeaGreen
       CSAlink StorageClass Type
       CSAlink Structure Type
       CSAlink Typedef Type
-    CSAhi Underlined term=underline cterm=underline ctermfg=39 gui=underline guifg=#80a0ff
+    CSAhi Underlined term=underline cterm=underline ctermfg=38 gui=underline guifg=SlateBlue
     CSAhi VertSplit term=reverse cterm=reverse gui=reverse
-    CSAhi Visual term=reverse ctermbg=20 ctermfg=79 guibg=darkgreen guifg=white
+    CSAhi Visual term=reverse ctermbg=86 guibg=LightGrey
     CSAhi VisualNOS term=bold,underline cterm=bold,underline gui=bold,underline
     CSAhi WarningMsg term=standout ctermfg=64 guifg=Red
     CSAhi WildMenu term=standout ctermbg=76 ctermfg=16 guibg=Yellow guifg=Black
-    CSAhi lCursor ctermbg=45 ctermfg=16 guibg=fg guifg=bg
+    CSAhi lCursor ctermbg=16 ctermfg=79 guibg=fg guifg=bg
 endif
 
 delcommand CSAlink
 delfunction s:CSAlink
 delcommand CSAhi
 delfunction s:CSAhi
+" g:colors_name must be set at the end, or vim will
+" helpfully reload the colorscheme when we set the
+" background for the Normal group. See the help entries
+" ":hi-normal-cterm" and "g:colors_name"
+let g:colors_name = expand("<sfile>:t:r")
 let syntax_cmd="on"
