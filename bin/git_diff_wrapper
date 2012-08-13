@@ -1,7 +1,13 @@
 #!/bin/sh
 
-if tty -s; then
-    vimdiff "$2" "$5" </dev/stdin >/dev/stdin
+if tty -s < /dev/stdout; then
+    vimdiff "$2" "$5" < /dev/stdout
 else
-    git diff --no-ext-diff "$3" -- "$1"
+	if [ "$3" = '.' ]; then
+		if ! git diff --no-ext-diff -- "$2" "$5"; then
+			echo "git diff --no-ext-diff -- \"$2\" \"$5\"" > /dev/tty
+		fi
+	else
+		git diff --no-ext-diff "$3" -- "$5"
+	fi
 fi
