@@ -1,16 +1,24 @@
 [user]
-        name = Buck Golemon
-        email = buck@yelp.com
+    name = Buck Golemon
+    email = buck@yelp.com
 [color]
-        ui = auto
+    ui = auto
 [diff]
-        external = $HOME/bin/git_diff_wrapper
+    external = $HOME/bin/git_diff_wrapper
 [pager]
-        diff = 
-        blame = 
+    diff = 
+    blame = 
 [pack]
-        threads = 0
+    threads = 0
 [diff]
-        renamelimit = 0
+    renamelimit = 0
+[alias]
+    base = !sh -c '\
+        branch=`git symbolic-ref HEAD|sed s@^refs/heads/@@`&&\
+        remote=`git config branch.$branch.remote`&&\
+        merge=`git config branch.$branch.merge|sed s@^refs/heads/@@`&&\
+        git merge-base $remote/$merge HEAD\
+    '
+    diffbase = !sh -c 'git diff `git base` "$@"' -
 
 # vim:sts=4:sw=4:et:
