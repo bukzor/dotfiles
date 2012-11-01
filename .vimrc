@@ -160,6 +160,9 @@
         nnoremap R :w\|set nodiff\|set diff<cr>
         "quit, both panes
         nnoremap q :qall<cr>
+
+        "show me the top of the "new" file
+        autocmd VimEnter * normal lgg
     endif
 " }
 
