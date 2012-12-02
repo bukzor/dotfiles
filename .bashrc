@@ -51,16 +51,6 @@ noerr () {
     "$@" 2>/dev/null 
 }
 
-if [[ -e /nail/scripts/aliases.sh ]]; then
-       # work-specific stuff
-       source /nail/scripts/aliases.sh
-       PATH="$PATH:$BT/tools:$BT/aws/bin"
-
-       source /etc/profile
-       unset YELPCODE
-       unset BT
-fi
-
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[\e[1;32m\]'
 YELLOW='\[\e[1;33m\]'
