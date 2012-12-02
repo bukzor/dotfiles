@@ -43,7 +43,7 @@ elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
 fi
 
 # My very own python!
-if [ -f ~/mypy/bin/activate ]; then
-	function activate() { source ~/mypy/bin/activate; }
+if [ -f ~/venv/mypy/bin/activate ]; then
+	function activate() { workon mypy; }
 	activate
 fi

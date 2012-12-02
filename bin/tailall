@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tail -fn0 logs/apperror.log | pretty_error_log &
+tail -fn0 logs/apperror.log | ./tools/pretty_error_log &
 SUBPIDs="$!"
 tail -fn0 logs/app.log &
 SUBPIDs="$SUBPIDs $!"
