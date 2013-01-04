@@ -23,6 +23,8 @@
     '
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
-    bb = !sh -c 'eval `tmux-env` && git ypublish '"$@"' && bb-run -p 100'
+    bb = !sh -c 'eval `tmux-env` && git ypublish -f && bb-run -p 100 '"$@"''
+    bby = !sh -c 'eval `tmux-env` && git bb && git yreview'
+    lol = log --oneline --graph --decorate 
 
 # vim:sts=4:sw=4:et:
