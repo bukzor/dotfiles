@@ -54,7 +54,7 @@ noerr () {
 if [[ -e /nail/scripts/aliases.sh ]]; then
        # work-specific stuff
        source /nail/scripts/aliases.sh
-       PATH="$PATH:$BT/tools:$BT/aws/bin"
+       PATH="$PATH:$BT/tools:$BT/aws/bin:$HOME/pg/devscripts:$HOME/pg/devscripts/consumer"
 
        source /etc/profile
        unset YELPCODE

@@ -33,15 +33,17 @@ alias l='ls -CF'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+export WORKON_HOME=$HOME/venv
+export PROJECT_HOME=$HOME/trees/mine
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
 if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
-    export WORKON_HOME=$HOME/venv
-    export PROJECT_HOME=$HOME/trees/mine
-    export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
     source /usr/local/bin/virtualenvwrapper.sh
+elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
+    source ~/.local/bin/virtualenvwrapper.sh
 fi
 
 # My very own python!
-if [ -f ~/mypy/bin/activate ]; then
-	function activate() { source ~/mypy/bin/activate; }
+if [ -f ~/venv/mypy/bin/activate ]; then
+	function activate() { workon mypy; }
 	activate
 fi
