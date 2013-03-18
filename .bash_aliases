@@ -3,7 +3,7 @@
 alias tmux-env='eval `~/bin/tmux-env`'
 alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {
-	ssh -ttA dev06 tmux attach $( test -z "$1" || echo -t ) "$1" 
+	ssh -ttA dev26.706.yelpcorp.com tmux attach $( test -z "$1" || echo -t ) "$1" 
 }
 
 #because I've used csh for too long
@@ -35,7 +35,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
     export WORKON_HOME=$HOME/venv
-    export PROJECT_HOME=$HOME/trees
+    export PROJECT_HOME=$HOME/trees/mine
     export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
     source /usr/local/bin/virtualenvwrapper.sh
 fi

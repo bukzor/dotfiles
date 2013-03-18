@@ -90,6 +90,7 @@
     command! Wall wall
     command! WQ wq
     command! Wq wq
+    command  Redraw redraw!
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
