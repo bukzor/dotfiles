@@ -1,0 +1,2 @@
+#!/bin/bash
+exec grep --color --exclude-dir .svn -IR "$@" .
