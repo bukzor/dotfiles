@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+BRANCH=`git rev-parse --abbrev-ref --symbolic-full-name HEAD`
+if [[ $BRANCH == HEAD ]]; then
+	echo "Can't prune from detached state" >&2
+	exit 1
+fi
+UPSTREAM=`git rev-parse --symbolic-full-name --abbrev-ref @{u}`
+
+git checkout -q $UPSTREAM
+git branch --merged |
+	egrep -v "^(\*|  ${UPSTREAM##*/})" | 
+	xargs --replace sh -c '
+		git branch -d {} && git push origin :{}
+	'
+git fetch origin --prune
+git checkout -q $BRANCH
