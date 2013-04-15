@@ -10,3 +10,5 @@
 !.vim
 !.ssh
 !.bash_completion.d
+!.subversion
+!.bashrc*
