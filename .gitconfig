@@ -1,6 +1,6 @@
 [user]
     name = Buck Golemon
-    email = buck@yelp.com
+    email = workitharder@gmail.com
 [color]
     ui = auto
 [diff]
@@ -24,9 +24,5 @@
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
     lol = log --oneline --graph --decorate 
-
-    # These are only valid at work
-    ybb = !sh -c 'git ypublish -f && bb-run -p 11 "$@"' -
-    ybbr = !sh -c 'git bb && git yreview'
 
 # vim:sts=4:sw=4:et:
