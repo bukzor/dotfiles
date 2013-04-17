@@ -4,3 +4,9 @@
 [submodule ".vim/bundle/Syntastic"]
 	path = .vim/bundle/Syntastic
 	url = https://github.com/scrooloose/syntastic.git
+[submodule ".vim/bundle/rainbow_parenthesis"]
+	path = .vim/bundle/rainbow_parenthesis
+	url = https://github.com/kien/rainbow_parentheses.vim
+[submodule ".vim/bundle/VimClojure"]
+	path = .vim/bundle/VimClojure
+	url = git://github.com/vim-scripts/VimClojure.git
