@@ -1,4 +1,0 @@
-#!/bin/sh
-
-exec yelp_finder -name "*.tmpl" -print0 2> /dev/null | xargs -0 -n50 -P20 grep --color "$@"
-
