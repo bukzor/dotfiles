@@ -12,7 +12,7 @@ git checkout -q $UPSTREAM
 git branch --merged |
 	egrep -v "^(\*|  ${UPSTREAM##*/})" | 
 	xargs --replace sh -c '
-		git branch -d {} && git push origin :{}
+		git branch -d {} && git push --quiet --delete origin refs/heads/{}
 	'
 git fetch origin --prune
 git checkout -q $BRANCH
