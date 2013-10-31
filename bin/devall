@@ -2,7 +2,7 @@
 
 CMD=$(echo $@ | sed "s/'/'\"'\"'/g")
 
-grep HOSTNAME /etc/systems.d/groups/devpg.d/* -h |
+grep HOSTNAME /etc/systems.d/groups/dev*.d/* -h |
 	sed 's/HOSTNAME=//' |
 	sort |
 	xargs --replace -P10 sh -c "
