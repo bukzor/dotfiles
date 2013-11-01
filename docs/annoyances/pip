@@ -1,0 +1,12 @@
+Logging ascii error:
+	pip install lxml (with no libxml headers) yields ascii error
+
+Can't re-install pip.
+	pip uinstall pip
+	hash -r
+	pip install --upgrade pip
+	stops with "already satisfied".
+
+get-pip.py doesn't work if in a virtualenv with pip unisntalled.
+
+easy-install (an many setup.py's) add the system lib path ahead of the virtualenv path in easy-install.pth.
