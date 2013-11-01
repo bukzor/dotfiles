@@ -96,4 +96,24 @@ if [ -d ~/.bash_completion.d ]; then
     source ~/.bash_completion.d/*.sh
 fi
 
+# Further environment
+export TREES=$HOME/trees
+export PROJECT_HOME=$TREES/mine
+export WORKON_HOME=$HOME/venv
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
+if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
+    source /usr/local/bin/virtualenvwrapper.sh
+elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
+    source ~/.local/bin/virtualenvwrapper.sh
+fi
+mkdir -p $WORKON_HOME $PROJECT_HOME
+
+# My very own python!
+if [ -f ~/venv/mypy/bin/activate ]; then
+	function activate() { workon mypy; }
+    if [[ $TMUX ]]; then
+        activate
+    fi
+fi
+
 # vim:et:sw=4:sts=4:

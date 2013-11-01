@@ -24,6 +24,7 @@
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
     lol = log --oneline --graph --decorate 
+    fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
 
     # These are only valid at work
     ybb = !sh -c 'git ypublish -f && bb-run -p 11 "$@"' -
