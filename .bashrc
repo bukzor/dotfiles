@@ -112,6 +112,7 @@ mkdir -p $WORKON_HOME $PROJECT_HOME
 if [ -f ~/venv/mypy/bin/activate ]; then
 	function activate() { workon mypy; }
     if [[ $TMUX ]]; then
+        PROMPT_COMMAND='eval `~/bin/tmux-env`'
         activate
     fi
 fi

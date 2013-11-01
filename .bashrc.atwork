@@ -1,9 +1,3 @@
-    # work-specific stuff
-    source /nail/scripts/aliases.sh
-    PATH="$PATH:$BT/tools:$BT/aws/bin:$HOME/pg/devscripts:$HOME/pg/devscripts/consumer"
-
-    source /etc/profile
-
-    if [[ $TMUX ]]; then
-        PROMPT_COMMAND='eval `/nail/scripts/tmux-env`'
-    fi
+# work-specific stuff
+source /nail/scripts/aliases.sh
+PATH="$PATH:$HOME/pg/devscripts:$HOME/pg/devscripts/consumer"
