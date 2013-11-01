@@ -1,3 +1,0 @@
-# work-specific stuff
-source /nail/scripts/aliases.sh
-PATH="$PATH:$HOME/pg/devscripts:$HOME/pg/devscripts/consumer"

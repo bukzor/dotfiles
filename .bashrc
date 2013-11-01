@@ -51,10 +51,6 @@ noerr () {
     "$@" 2>/dev/null 
 }
 
-if [[ -e /nail/scripts/aliases.sh ]]; then
-    source ~/.bashrc.atwork
-fi
-
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[\e[1;32m\]'
 YELLOW='\[\e[1;33m\]'
