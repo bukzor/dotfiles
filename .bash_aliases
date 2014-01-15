@@ -3,7 +3,7 @@
 alias tmux-env='eval `~/bin/tmux-env`'
 alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {
-	ssh -ttA dev26 tmux attach $( test -z "$1" || echo -t ) "$1" 
+	ssh -R 4444:localhost:4444 -ttA dev11-devc tmux attach $(test -z "$1" || echo -t) "$1" 
 }
 
 #because I've used csh for too long
