@@ -24,5 +24,6 @@
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
     lol = log --oneline --graph --decorate 
+    fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
 
 # vim:sts=4:sw=4:et:

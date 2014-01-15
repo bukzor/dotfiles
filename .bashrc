@@ -51,10 +51,6 @@ noerr () {
     "$@" 2>/dev/null 
 }
 
-if [[ -e /nail/scripts/aliases.sh ]]; then
-    source ~/.bashrc.atwork
-fi
-
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[\e[1;32m\]'
 YELLOW='\[\e[1;33m\]'
@@ -94,6 +90,27 @@ fi
 # My own completions
 if [ -d ~/.bash_completion.d ]; then
     source ~/.bash_completion.d/*.sh
+fi
+
+# Further environment
+export TREES=$HOME/trees
+export PROJECT_HOME=$TREES/mine
+export WORKON_HOME=$HOME/venv
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
+if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
+    source /usr/local/bin/virtualenvwrapper.sh
+elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
+    source ~/.local/bin/virtualenvwrapper.sh
+fi
+mkdir -p $WORKON_HOME $PROJECT_HOME
+
+# My very own python!
+if [ -f ~/venv/mypy/bin/activate ]; then
+	function activate() { workon mypy; }
+    if [[ $TMUX ]]; then
+        PROMPT_COMMAND='eval `~/bin/tmux-env`'
+        activate
+    fi
 fi
 
 # vim:et:sw=4:sts=4:
