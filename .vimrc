@@ -148,6 +148,7 @@
     au BufNewFile,BufRead *.js.tmpl set filetype=javascript
     au BufNewFile,BufRead *.css.tmpl set filetype=css
     au BufNewFile,BufRead *.pxi set filetype=pyrex
+    au BufNewFile,BufRead *.md set filetype=markdown
 " }
 
 " tkdiff-like bindings for vimdiff {
