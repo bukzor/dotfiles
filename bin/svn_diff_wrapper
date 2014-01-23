@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if tty -s < /dev/stdout; then
+    # Interactive console.
+    vimdiff "$6" "$7" < /dev/stdout
+else
+    # Non-interactive pipeline.
+    exec diff "$@"
+fi

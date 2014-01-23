@@ -3,13 +3,7 @@
 alias tmux-env='eval `~/bin/tmux-env`'
 alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {
-	ssh -ttA dev26.706.yelpcorp.com tmux attach $( test -z "$1" || echo -t ) "$1" 
-}
-
-#because I've used csh for too long
-function setenv() {
-    export=`echo "$@" | sed 's/ /="/; s/^/export /; s/$/"/'`
-    eval "$export"
+	ssh -R 4444:localhost:4444 -ttA dev11-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1" 
 }
 
 # enable color support of ls and also add handy aliases
@@ -32,18 +26,3 @@ alias l='ls -CF'
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-export WORKON_HOME=$HOME/venv
-export PROJECT_HOME=$HOME/trees/mine
-export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages --distribute'
-if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
-    source /usr/local/bin/virtualenvwrapper.sh
-elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
-    source ~/.local/bin/virtualenvwrapper.sh
-fi
-
-# My very own python!
-if [ -f ~/venv/mypy/bin/activate ]; then
-	function activate() { workon mypy; }
-	activate
-fi
