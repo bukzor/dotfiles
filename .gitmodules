@@ -13,3 +13,9 @@
 [submodule ".vim/bundle/VimClojure"]
 	path = .vim/bundle/VimClojure
 	url = git://github.com/vim-scripts/VimClojure.git
+[submodule ".vim/bundle/vim-vimlint"]
+	path = .vim/bundle/vim-vimlint
+	url = https://github.com/syngan/vim-vimlint.git
+[submodule ".vim/bundle/vim-vimlparser"]
+	path = .vim/bundle/vim-vimlparser
+	url = https://github.com/ynkdir/vim-vimlparser.git
