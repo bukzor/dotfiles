@@ -1,0 +1,3 @@
+#/bin/sh
+wat=$(echo "$0" | sed 's|.*/||;s/git-//')
+exec toilet -f big --gay $wat
