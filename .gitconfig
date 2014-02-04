@@ -10,6 +10,7 @@
     blame = 
 [pack]
     threads = 0
+    packSizeLimit = 64m
 [diff]
     renamelimit = 0
 [alias]

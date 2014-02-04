@@ -168,12 +168,6 @@
     endif
 " }
 
-" At work we use tabs =/
-if filereadable("/nail/scripts/aliases.sh")
-    set noexpandtab
-    set tabstop=4
-endif
-
 " Pathogen: {
     " keep plugins nicely bundled in separate folders.
     " http://www.vim.org/scripts/script.php?script_id=2332

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec date +%F_%T
+exec date +%F_%T.%N
