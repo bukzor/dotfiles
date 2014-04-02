@@ -1,0 +1,3 @@
+#!/bin/sh
+exec curl -sw '%{redirect_url}\n' -o /dev/null -F 'code=<-' -F 'language=;webpage='  http://paste.pound-python.org/
+
