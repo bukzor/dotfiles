@@ -1,2 +1,2 @@
-#!/bin/bash
-curl -vF 'code=<-' -F 'language=text;webpage=' http://paste.pound-python.org -w '%{effective_url}' |& grep '< Location: '
+#!/bin/sh
+exec curl -F 'code=<-' -F 'language=;webpage=' http://paste.pound-python.org/ -so /dev/null -w '%{redirect_url}\n'

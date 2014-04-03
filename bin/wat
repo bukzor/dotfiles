@@ -1,5 +1,3 @@
-#/bin/bash
+#!/bin/bash
 wat=$(echo "$0" | sed 's|.*/||;s/git-//')
-exec toilet -f script --gay '  '"$wat"'   indeed.  '
-
-# vim:ft=sh:
+exec toilet -f bigmono9 --gay "$wat"' indeed.'
