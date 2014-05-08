@@ -1,0 +1,200 @@
+#!/usr/bin/python
+
+"""Submit a file or stream to pastebin"""
+
+from __future__ import with_statement
+
+import getpass
+import os
+import sys
+from urllib import urlencode
+import urllib2
+from urllib2 import HTTPError, Request, URLError, urlopen
+from urlparse import urlparse
+from copy import copy
+from optparse import Option, OptionValueError, OptionParser
+
+YELP_PB = "https://pb.yelpcorp.com/"
+YELP_AUTH_REALM = 'Systems Access'
+
+USAGE = "usage: %s [FILE]" % sys.argv[0]
+
+FORMATS = {
+    '.bas': 'qbasic',
+    '.c': 'c',
+    '.cpp': 'cpp',
+    '.css': 'css',
+    '.diff': 'diff',
+    '.erl': 'erlang',
+    '.hs': 'haskell',
+    '.html': 'html4strict',
+    '.java': 'java',
+    '.js': 'javascript',
+    '.php': 'php',
+    '.pl': 'perl',
+    '.py': 'python',
+    '.rb': 'ruby',
+    '.sh': 'bash',
+    '.sql': 'sql',
+    '.tex': 'latex',
+    '.txt': 'text',
+    '.xml': 'xml'
+}
+
+
+class PasteBinHTTPPasswordManager(urllib2.HTTPPasswordMgr):
+
+    def __init__(self):
+        urllib2.HTTPPasswordMgr.__init__(self)
+        self.user = self.passwd = None
+
+    def find_user_password(self, realm, authuri):
+
+        if not self.user or not self.passwd:
+            save_stdin = sys.stdin
+            save_stdout = sys.stdout
+            sys.stdin = open('/dev/tty', 'r')
+            sys.stdout = open('/dev/tty', 'w')
+            print "==> HTTP Authentication Required"
+            print 'Enter authorization information for "%s" at %s' % \
+            (realm, urlparse(authuri)[1])
+            self.user = raw_input('Username: ')
+            self.passwd = getpass.getpass('Password: ')
+            sys.stdin = save_stdin
+            sys.stdout = save_stdout
+
+        return self.user, self.passwd
+
+
+class PasteBinHTTPBasicAuthHandler(urllib2.HTTPBasicAuthHandler):
+    """Custom Basic Auth handler that doesn't retry excessively.
+
+    urllib2's HTTPBasicAuthHandler retries over and over, which is useless.
+    This subclass only retries once to make sure we've attempted with a
+    valid username and password. It will then fail so we can use
+    tempt_fate's retry handler.
+    """
+    def __init__(self, *args, **kwargs):
+        urllib2.HTTPBasicAuthHandler.__init__(self, *args, **kwargs)
+        self._retried = False
+        self._lasturl = ""
+
+    def retry_http_basic_auth(self, *args, **kwargs):
+        if self._lasturl != args[0]:
+            self._retried = False
+
+        self._lasturl = args[0]
+
+        if not self._retried:
+            self._retried = True
+            self.retried = 0
+            response = urllib2.HTTPBasicAuthHandler.retry_http_basic_auth(
+                self, *args, **kwargs)
+
+            if response.code != 401:
+                self._retried = False
+
+            return response
+        else:
+            return None
+
+class PasteBinServer(object):
+    """
+    An instance of a PasteBin server
+    """
+    def __init__(self, url):
+        self.url = url
+        if self.url[-1] != '/':
+            self.url += '/'
+
+        # Set up the HTTP libraries to support all of the features we need.
+        password_mgr        = PasteBinHTTPPasswordManager()
+        basic_auth_handler  = PasteBinHTTPBasicAuthHandler(password_mgr)
+
+        opener = urllib2.build_opener(basic_auth_handler)
+        opener.addheaders = [('User-agent', 'PasteBin/custom-in-nail-sys-bin')]
+        urllib2.install_opener(opener)
+
+def check_pbexpiry(option, opt, value):
+    values = {"forever": "f",
+              "month": "m",
+              "day": "d"}
+    if value in values:
+        return values[value]
+    else:
+        raise OptionValueError("option %s: invalid expiry time: %s" % (opt, value))
+
+class PBCommandLineOption(Option):
+    TYPES = Option.TYPES + ("pbexpiry",)
+    TYPE_CHECKER = copy(Option.TYPE_CHECKER)
+    TYPE_CHECKER["pbexpiry"] = check_pbexpiry
+
+def guess_filetype(filename):
+    """Guess filetype based on extension"""
+    _, ext = os.path.splitext(filename)
+    return FORMATS.get(ext.lower(), 'diff')
+
+def pastebin(content, user='Anonymous', filetype='diff', url=YELP_PB, expiry="f"):
+    """Post to the pastebin at url
+
+    On success, return the url of the new paste.
+    """
+    params = {
+        'poster': user,
+        'code2': content,
+        'format': filetype,
+        'paste': "Send",
+        'expiry': expiry
+    }
+
+    server = PasteBinServer(YELP_PB); server
+
+    response = urlopen(Request(url, urlencode(params)))
+    return response.geturl()
+
+def parse_args():
+    """Parse command line arguments with OptionParser"""
+    parser = OptionParser(usage="usage: %prog [options] <filename>", option_class=PBCommandLineOption)
+    parser.add_option("-e", "--expiry", dest="expiry",
+                      help="When this post should expire (either 'forever', 'month', or 'day')",
+                      action="store", type="pbexpiry", default="forever")
+    return parser.parse_args()
+
+def main():
+    """Call with one argument as filename, or none to read from stdin"""
+    (options, args) = parse_args()
+    if len(args) > 1:
+        sys.exit(USAGE)
+
+    if len(args) > 0 and args[0] != '-': # A filename was passed in
+        filename = args[0]
+
+        try:
+            with open(filename) as f:
+                content = f.read()
+        except IOError:
+            sys.exit("Unable to read from: %s" % filename)
+
+        filetype = guess_filetype(filename)
+    elif sys.stdin.isatty(): # No filename, but no pipe either
+        content = None # Don't attempt to read from a tty
+        filetype = None
+    else: # No filename; read from pipe
+        try:
+            content = sys.stdin.read()
+        except IOError:
+            sys.exit("Unable to read from stdin")
+
+        filetype = 'diff'
+
+    if not content:
+        sys.stderr.write("Cowardly refusing to pastebin nothing\n")
+        sys.exit(USAGE)
+
+    try:
+        print pastebin(content, os.environ.get('USER'), filetype, YELP_PB, expiry=options.expiry)
+    except (URLError, HTTPError):
+        sys.exit("Couldn't post to pastebin at '%s'" % YELP_PB)
+
+if __name__ == '__main__':
+    main()
