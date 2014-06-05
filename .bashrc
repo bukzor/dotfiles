@@ -48,10 +48,12 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-if [ "$TERM" == "xterm" ] && [ "$COLORTERM" == "gnome-terminal" ]; then
-    # Gnome terminal supports 256 colors, but doesn't have a way to edit $TERM
+terminal=$(ps -o comm= $PPID)
+case "$terminal" in
+lxterminal|gnome-terminal)
     export TERM=xterm-256color
-fi
+    ;;
+esac
 
 noerr () {
     "$@" 2>/dev/null 
@@ -71,10 +73,10 @@ case "$TERM" in
     # All's well.
     ;;
 *-col*)
-    echo LOW COLOR TERM: $TERM
+    echo LOW COLOR TERM: $TERM, $terminal
     ;;
 *)
-    echo NO COLOR TERM: $TERM
+    echo NO COLOR TERM: $TERM, $terminal
     PS1='$(noerr __git_ps1 "%s ")${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
