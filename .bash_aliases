@@ -1,5 +1,9 @@
 #!/not/executable/bash
 
+# enable pip's caching by default:
+export PIP_DOWNLOAD_CACHE="$HOME"'/.pip/cache'
+export PIP_FIND_LINKS='file://'"$HOME"'/.pip/cache'
+
 alias tmux-env='eval `~/bin/tmux-env`'
 alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {

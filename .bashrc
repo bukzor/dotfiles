@@ -6,6 +6,9 @@
 if [ -d ~/bin ] ; then
     export PATH=~/bin:"${PATH}"
 fi
+if [ -d ~/.local/bin ] ; then
+    export PATH=~/.local/bin:"${PATH}"
+fi
 
 # If not running interactively, don't do anything
 case $- in
