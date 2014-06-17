@@ -6,6 +6,9 @@
 if [ -d ~/bin ] ; then
     export PATH=~/bin:"${PATH}"
 fi
+if [ -d ~/prefices/brew/bin ] ; then
+    export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+fi
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
