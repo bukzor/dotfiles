@@ -5,7 +5,7 @@
 from __future__ import with_statement
 
 import getpass
-import os
+import os.path
 import sys
 from urllib import urlencode
 import urllib2
@@ -43,27 +43,20 @@ FORMATS = {
 
 
 class PasteBinHTTPPasswordManager(urllib2.HTTPPasswordMgr):
-
-    def __init__(self):
-        urllib2.HTTPPasswordMgr.__init__(self)
-        self.user = self.passwd = None
-
     def find_user_password(self, realm, authuri):
+        user, passwd = urllib2.HTTPPasswordMgr.find_user_password(self, realm, authuri)
 
-        if not self.user or not self.passwd:
-            save_stdin = sys.stdin
-            save_stdout = sys.stdout
-            sys.stdin = open('/dev/tty', 'r')
-            sys.stdout = open('/dev/tty', 'w')
+        if not user or not passwd:
             print "==> HTTP Authentication Required"
             print 'Enter authorization information for "%s" at %s' % \
-            (realm, urlparse(authuri)[1])
-            self.user = raw_input('Username: ')
-            self.passwd = getpass.getpass('Password: ')
-            sys.stdin = save_stdin
-            sys.stdout = save_stdout
+                (realm, urlparse(authuri)[1])
+            if not user:
+                user = getpass._raw_input('Username: ', input=open('/dev/tty'))
+            if not passwd:
+                passwd = getpass.getpass('Password: ')
+            self.add_password(YELP_AUTH_REALM, YELP_PB, user, passwd)
 
-        return self.user, self.passwd
+        return user, passwd
 
 
 class PasteBinHTTPBasicAuthHandler(urllib2.HTTPBasicAuthHandler):
@@ -98,22 +91,6 @@ class PasteBinHTTPBasicAuthHandler(urllib2.HTTPBasicAuthHandler):
         else:
             return None
 
-class PasteBinServer(object):
-    """
-    An instance of a PasteBin server
-    """
-    def __init__(self, url):
-        self.url = url
-        if self.url[-1] != '/':
-            self.url += '/'
-
-        # Set up the HTTP libraries to support all of the features we need.
-        password_mgr        = PasteBinHTTPPasswordManager()
-        basic_auth_handler  = PasteBinHTTPBasicAuthHandler(password_mgr)
-
-        opener = urllib2.build_opener(basic_auth_handler)
-        opener.addheaders = [('User-agent', 'PasteBin/custom-in-nail-sys-bin')]
-        urllib2.install_opener(opener)
 
 def check_pbexpiry(option, opt, value):
     values = {"forever": "f",
@@ -124,33 +101,43 @@ def check_pbexpiry(option, opt, value):
     else:
         raise OptionValueError("option %s: invalid expiry time: %s" % (opt, value))
 
+
 class PBCommandLineOption(Option):
     TYPES = Option.TYPES + ("pbexpiry",)
     TYPE_CHECKER = copy(Option.TYPE_CHECKER)
     TYPE_CHECKER["pbexpiry"] = check_pbexpiry
+
 
 def guess_filetype(filename):
     """Guess filetype based on extension"""
     _, ext = os.path.splitext(filename)
     return FORMATS.get(ext.lower(), 'diff')
 
-def pastebin(content, user='Anonymous', filetype='diff', url=YELP_PB, expiry="f"):
+
+def pastebin(content, user=None, filetype='diff', url=YELP_PB, expiry="f"):
     """Post to the pastebin at url
 
     On success, return the url of the new paste.
     """
     params = {
-        'poster': user,
+        'poster': user or 'Anonymous',
         'code2': content,
         'format': filetype,
         'paste': "Send",
         'expiry': expiry
     }
 
-    server = PasteBinServer(YELP_PB); server
+    # Set up the HTTP libraries to support all of the features we need.
+    password_mgr = PasteBinHTTPPasswordManager()
+    password_mgr.add_password(YELP_AUTH_REALM, YELP_PB, user, None)
+    basic_auth_handler = PasteBinHTTPBasicAuthHandler(password_mgr)
 
-    response = urlopen(Request(url, urlencode(params)))
+    opener = urllib2.build_opener(basic_auth_handler)
+    opener.addheaders = [('User-agent', 'PasteBin/custom-in-nail-sys-bin')]
+
+    response = opener.open(Request(url, urlencode(params)))
     return response.geturl()
+
 
 def parse_args():
     """Parse command line arguments with OptionParser"""
@@ -159,6 +146,7 @@ def parse_args():
                       help="When this post should expire (either 'forever', 'month', or 'day')",
                       action="store", type="pbexpiry", default="forever")
     return parser.parse_args()
+
 
 def main():
     """Call with one argument as filename, or none to read from stdin"""
@@ -192,7 +180,7 @@ def main():
         sys.exit(USAGE)
 
     try:
-        print pastebin(content, os.environ.get('USER'), filetype, YELP_PB, expiry=options.expiry)
+        print pastebin(content, getpass.getuser(), filetype, YELP_PB, expiry=options.expiry)
     except (URLError, HTTPError):
         sys.exit("Couldn't post to pastebin at '%s'" % YELP_PB)
 

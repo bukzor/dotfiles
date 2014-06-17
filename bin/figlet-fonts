@@ -1,0 +1,6 @@
+#!/bin/sh
+echo 'filters: (-F)'
+toilet --filter list | sed '1d; s/^"//; s/".*$//' | xargs --verbose -n1 --replace toilet -t -f mono12.tlf -F {} {} 2>&1
+
+echo 'fonts: (-f)'
+ls /usr/share/figlet/ | egrep -v '\.(flc)$' | xargs --verbose -n1 --replace toilet  -t -f {} {} 2>&1
