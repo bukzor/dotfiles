@@ -1,2 +1,11 @@
 #!/bin/sh
-tmux showenv | sed '/^-/{s/^-/unset /; bELSE}; s/^/export /;:ELSE; s/ / '"'"'/; s/$/'"'"';/'
+tmux showenv | sed '
+    /^-/{
+        s/^-/unset /
+        bELSE
+    }
+    s/^/export /
+    :ELSE
+    s/ / '"'"'/
+    s/$/'"'"';/
+'
