@@ -1,6 +1,6 @@
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    colorscheme murphy      "change to taste. try `desert' or `evening'
+    colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
@@ -203,6 +203,6 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
 " My own extra stuff:
 if filereadable($HOME . "/.vimrc.extra")
-    source $HOME/.vimrc.extra 
+    source $HOME/.vimrc.extra
 endif
 " vim:et:sts=4:sw=4

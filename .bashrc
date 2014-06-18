@@ -113,10 +113,8 @@ if ! shopt -oq posix; then
   export PROJECT_HOME=$TREES/mine
   export WORKON_HOME=$HOME/venv
   export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
-  if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
-    source /usr/local/bin/virtualenvwrapper.sh
-  elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
-    source ~/.local/bin/virtualenvwrapper.sh
+  if [[ -x $(which virtualenvwrapper.sh) ]]; then
+    source $(which virtualenvwrapper.sh)
   fi
   mkdir -p $WORKON_HOME $PROJECT_HOME
 
