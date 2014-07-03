@@ -1,6 +1,8 @@
 [user]
     name = Buck Golemon
     email = buck@yelp.com
+[core]
+    excludesfile = ~/.gitignore_global
 [color]
     ui = auto
 [diff]
