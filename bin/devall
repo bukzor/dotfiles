@@ -1,13 +1,5 @@
 #!/bin/bash
-
-CMD=$(echo $@ | sed "s/'/'\"'\"'/g")
-
 grep HOSTNAME /etc/systems.d/groups/devpg.d/* -h |
-	sed 's/HOSTNAME=//' |
-	sort |
-	xargs --replace -P10 sh -c "
-		echo -n '{}: ' > /tmp/$USER.{}.w.txt;
-		ssh -o BatchMode=yes -o StrictHostKeyChecking=no {} '$CMD' >> /tmp/$USER.{}.w.txt 2>&1;
-		cat /tmp/$USER.{}.w.txt
-	"
-#python -c 'for i in xrange(30): print "dev%02i" % i' |
+    sed 's/HOSTNAME=//' |
+    sort |
+    ssh-each "$@"
