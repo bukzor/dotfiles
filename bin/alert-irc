@@ -7,6 +7,7 @@ verbose = False #TODO: optionalize
 
 import os
 user = os.environ['USER']
+channel = os.environ.get('CHANNEL', user)
 
 import sys
 message = ' '.join(sys.argv[1:])
@@ -38,7 +39,7 @@ while data:
 	if data.startswith('PING'):
 		send('PONG ' + data.split() [ 1 ] + '\r\n')
 		#TODO: enable sending to a different user
-		send('PRIVMSG %s :%s\r\n' % (user, message))
+		send('PRIVMSG %s :%s\r\n' % (channel, message))
 		break
 recv()
 send('QUIT\r\n')
