@@ -5,16 +5,18 @@
     excludesfile = ~/.gitignore_global
 [color]
     ui = auto
-[diff]
-    external = $HOME/bin/git_diff_wrapper
 [pager]
-    diff = 
     blame = 
 [pack]
     threads = 0
     packSizeLimit = 64m
 [diff]
     renamelimit = 0
+    tool = vimdiff
+[difftool]
+    prompt = false
+[difftool "vimdiff"]
+    cmd = vim -f -d -c \"wincmd l\" -c 'cd \"$GIT_PREFIX\"' \"$LOCAL\" \"$REMOTE\"
 [alias]
     branchname = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
@@ -30,6 +32,8 @@
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
 
     branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -b "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
-
+    vimdiff = difftool
+    dt = difftool
+    df = diff
 
 # vim:sts=4:sw=4:et:
