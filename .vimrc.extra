@@ -3,6 +3,11 @@ set textwidth=120
 " cursor highlight {
     set cursorline      " highlight my current line
     set cursorcolumn    " ... and my current column
+    hi CursorLine term=bold cterm=bold gui=bold
+
+    " ... only in my current window.
+    autocmd WinEnter * setlocal cursorline | setlocal cursorcolumn
+    autocmd WinLeave * setlocal nocursorline | setlocal nocursorcolumn
 " }
 
 " functions {
