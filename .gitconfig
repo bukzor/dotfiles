@@ -24,6 +24,8 @@
     cmd = diffconflicts vim $BASE $LOCAL $REMOTE $MERGED
     trustExitCode = true
     keepBackup = false
+[push]
+    default = current
 [advice]
     detachedHead = false
 [alias]
