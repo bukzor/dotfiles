@@ -16,7 +16,7 @@
 [diff]
     renamelimit = 0
 [alias]
-    #branchname = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
+    branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
         git config branch.`git branchname`.upstream || \
         branch=`git branchname` && \
