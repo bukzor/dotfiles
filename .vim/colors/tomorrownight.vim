@@ -22,7 +22,7 @@ set background=light
 hi clear
 syntax reset
 
-let g:colors_name = "Tomorrow-Night"
+let g:colors_name = "tomorrownight"
 
 " Sets the highlighting for the given group
 fun <SID>X(group, fg, bg, attr)

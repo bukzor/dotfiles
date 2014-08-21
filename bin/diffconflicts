@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # A better vimdiff mergetool for Git
 #
 # Git does a great job resolving merge conflicts automatically but there are
@@ -84,26 +85,26 @@ printf -v QMERGED '%q' "${MERGED}"
 
 # Temporary files for left and right side
 LCONFL="${MERGED}.REMOTE.$$.tmp"
+CCONFL="${MERGED}.BASE.$$.tmp"
 RCONFL="${MERGED}.LOCAL.$$.tmp"
+timestamp="${MERGED}.timestamp"
+touch --reference "${MERGED}" "${timestamp}"
 
-# Always delete our temp files; Git will handle it's own temp files
-trap 'rm -f "'"${LCONFL}"'" "'"${RCONFL}"'"' SIGINT SIGTERM EXIT
+# Always delete our temp files; Git will handle its own temp files
+trap 'rm -f "'"${LCONFL}"'" "'"${CCONFL}"'" "'"${RCONFL}"'" "'"${timestamp}"'"' SIGINT SIGTERM EXIT
+
+git checkout --conflict=diff3 "${MERGED}"
 
 # Remove the conflict markers for each 'side' and put each into a temp file
 sed -e '/^<<<<<<< /,/^=======$/d' -e '/^>>>>>>> /d' "${MERGED}" > "${LCONFL}"
-sed -e '/^=======$/,/^>>>>>>> /d' -e '/^<<<<<<< /d' "${MERGED}" > "${RCONFL}"
+sed -e '/^<<<<<<< /,/^||||||| /d' -e '/^=======$/,/^>>>>>>> /d' "${MERGED}" > "${CCONFL}"
+sed -e '/^||||||| /,/^>>>>>>> /d' -e '/^<<<<<<< /d' "${MERGED}" > "${RCONFL}"
+
+mv "${RCONFL}" "${MERGED}"
+touch --reference "${timestamp}" "${MERGED}"
 
 # Fire up vimdiff
-$cmd -f -R -d "${LCONFL}" "${RCONFL}" \
-    -c ":set noro" \
-    -c ":tabe $QLOCAL" -c ":vert diffs $QBASE" -c ":vert diffs $QREMOTE" \
-    -c ":winc t" -c ":tabe $QMERGED" -c ":tabfir"
-
-EC=$?
-
-# Overwrite $MERGED only if vimdiff exits cleanly.
-if [[ $EC == "0" ]] ; then
-    cat "${LCONFL}" > "${MERGED}"
-fi
-
-exit $EC
+$cmd -f -R -d "${LCONFL}" "${MERGED}" \
+    -c ":tabe ${CCONFL}|vert diffs ${LCONFL}" \
+    -c ":tabe ${MERGED}|vert diffs ${CCONFL}" \
+    -c ":tabfir|winc b|set noro"

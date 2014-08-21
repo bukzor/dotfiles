@@ -5,8 +5,6 @@
     excludesfile = ~/.gitignore_global
 [color]
     ui = auto
-[pager]
-    blame = 
 [pack]
     threads = 0
     packSizeLimit = 64m
@@ -17,11 +15,22 @@
     prompt = false
 [difftool "vimdiff"]
     cmd = vim -f -d -c \"wincmd l\" -c 'cd \"$GIT_PREFIX\"' \"$LOCAL\" \"$REMOTE\"
+[merge]
+    tool = diffconflicts
+    conflictstyle = diff3
+[mergetool]
+    prompt = false
+[mergetool "diffconflicts"]
+    cmd = diffconflicts vim $BASE $LOCAL $REMOTE $MERGED
+    trustExitCode = true
+    keepBackup = false
+[advice]
+    detachedHead = false
 [alias]
-    branchname = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
+    branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
-        git config branch.`git branchname`.upstream || \
-        branch=`git branchname` && \
+        git config branch.`git branch-name`.upstream || \
+        branch=`git branch-name` && \
         remote=`git config \"branch.$branch.remote\"` && \
         merge=`git config \"branch.$branch.merge\"|sed s@^refs/heads/@@`&& \
         echo $remote/$merge\
@@ -35,5 +44,6 @@
     vimdiff = difftool
     dt = difftool
     df = diff
+    mt = mergetool
 
 # vim:sts=4:sw=4:et:
