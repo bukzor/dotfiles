@@ -39,9 +39,9 @@
     '
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
-    lol = !git log --oneline --graph --decorate --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' | \
-        sed -u 's/@yelp.com//' | \
-        less -XLR
+    lol = !git log --oneline --graph --decorate --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
+        sed -l 's/@yelp.com//' | \
+        less -XLR -
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
 
     branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -b "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
