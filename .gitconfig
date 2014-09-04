@@ -40,7 +40,7 @@
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
     lol = !git log --oneline --graph --decorate --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
-        sed -l 's/@yelp.com//' | \
+        sed 's/@yelp.com//' | \
         less -XLR -
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
 
