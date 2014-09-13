@@ -21,7 +21,7 @@
 
     "Use case-sensitive search for the * command though.
     :nnoremap * /\<<C-R>=expand('<cword>')<CR>\>\C<CR>
-    :nnoremap # /\<<C-R>=expand('<cword>')<CR>\>\C<CR>
+    :nnoremap # ?\<<C-R>=expand('<cword>')<CR>\>\C<CR>
 " }
 
 " statusline {
@@ -70,7 +70,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
     "don't clobber the buffer when pasting in visual mode
     vmap P p
-    vnoremap p "_dP
+    vnoremap p "0P
 " }
 
 " windows-style mappings {
@@ -147,8 +147,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     nnoremap <C-Q> <C-W>q
 
     "tab switching: ctrl+left/right
-    nnoremap Od :tabp<CR>
-    nnoremap Oc :tabN<CR>
+    nnoremap <C-PageUp> :tabp<CR>
+    nnoremap <C-PageDown> :tabN<CR>
 " }
 
 "indentation options {

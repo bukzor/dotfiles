@@ -8,6 +8,7 @@ if [ -d ~/bin ] ; then
 fi
 if [ -d ~/prefices/brew/bin ] ; then
     export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+fi
 if [ -d ~/.local/bin ] ; then
     export PATH=~/.local/bin:"${PATH}"
 fi

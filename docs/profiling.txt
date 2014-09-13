@@ -20,3 +20,8 @@ echo 'import admin_templates.cm_tools.rotd.pick_of_the_day_archive' |
 	python -m cProfile -o $PROF.pstats /dev/stdin && ./tools/gprof2dot.py --skew=.1 -wn3 -f pstats $PROF.pstats |
 	dot -Tsvg -o $PROF.svg && rsync -Pav $PROF.svg people:public_html/tmp/
 
+
+PROF=profiling
+python -m cProfile -o $PROF.pstats profiling.py &&
+    ~/pg/master/tools/gprof2dot.py --skew=.1 -wn3 -f pstats  $PROF.pstats |
+    dot -Tsvg -o $PROF.svg && rsync -Pav $PROF.svg people:public_html/tmp/

@@ -1,30 +1,52 @@
 [user]
     name = Buck Golemon
     email = workitharder@gmail.com
+[core]
+    excludesfile = ~/.gitignore_global
 [color]
     ui = auto
-[diff]
-    external = $HOME/bin/git_diff_wrapper
-[pager]
-    diff = 
-    blame = 
 [pack]
     threads = 0
     packSizeLimit = 64m
 [diff]
     renamelimit = 0
+    tool = vimdiff
+[difftool]
+    prompt = false
+[difftool "vimdiff"]
+    # This is the same as the default command git would use,
+    # except missing a -R (readonly) option.
+    cmd = vim -f -d -c \"wincmd l\" -c 'cd \"$GIT_PREFIX\"' \"$LOCAL\" \"$REMOTE\"
+[merge]
+    tool = diffconflicts
+    conflictstyle = diff3
+[mergetool]
+    prompt = false
+[mergetool "diffconflicts"]
+    cmd = diffconflicts vim $BASE $LOCAL $REMOTE $MERGED
+    trustExitCode = true
+    keepBackup = false
+[push]
+    default = current
+[advice]
+    detachedHead = false
 [alias]
-    branchname = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
+    branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
-        git config branch.`git branchname`.upstream || \
-        branch=`git branchname` && \
+        git config branch.`git branch-name`.upstream || \
+        branch=`git branch-name` && \
         remote=`git config \"branch.$branch.remote\"` && \
         merge=`git config \"branch.$branch.merge\"|sed s@^refs/heads/@@`&& \
         echo $remote/$merge\
     '
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
-    lol = log --oneline --graph --decorate 
+    lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
+        less -XLFR && true
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
+    vimdiff = difftool
+    dt = difftool
+    df = diff
+    mt = mergetool
 
 # vim:sts=4:sw=4:et:
