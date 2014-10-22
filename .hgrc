@@ -1,0 +1,39 @@
+[ui]
+username = Buck Golemon <buck@yelp.com>
+merge=internal:merge
+
+[extensions]
+progress = 
+graphlog = 
+
+#git=/usr/local/lib/python2.7/dist-packages/hggit/
+#mq=
+color=
+rebase=
+pager=
+#hgshelve=/home/greg/src/hgshelve/hgshelve.py
+#histedit=
+extdiff=
+
+[extdiff]
+cmd.dt=vimdiff
+cmd.vimdiff=vimdiff
+cmd.echo=
+
+[pager]
+pager = less -+LESS -R
+
+#[mq]
+#secret = yes
+# Also in fijal's .hgrc:
+#[ui]
+#ignore = ~/hgignore
+#[extensions]
+#purge=
+#churn=
+#transplant=
+#hgext.crecord = /home/fijal/src/crecord/crecord
+#parentrevspec=
+#activity=/home/fijal/src/hgactivity/activity.py
+#share=
+#mbox=/home/fijal/Downloads/mbox.py

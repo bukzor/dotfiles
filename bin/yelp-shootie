@@ -8,6 +8,7 @@ if [ -z "$1" ]; then
 else
     if [ -s "$1" ]; then
         url=$( curl -T "$1" http://yelp-shootie.appspot.com/put/$key )
+        echo $url
         if [ -n "$url" ]; then
             echo "$url" | xsel --clipboard --input
             msg="uploaded to yelp shootie, URL on clipboard"

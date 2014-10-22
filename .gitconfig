@@ -16,12 +16,13 @@
 [difftool "vimdiff"]
     cmd = vim -f -d -c \"wincmd l\" -c 'cd \"$GIT_PREFIX\"' \"$LOCAL\" \"$REMOTE\"
 [merge]
-    tool = diffconflicts
+    tool = vimmerge
     conflictstyle = diff3
 [mergetool]
     prompt = false
-[mergetool "diffconflicts"]
-    cmd = diffconflicts vim $BASE $LOCAL $REMOTE $MERGED
+    keepBackup = false
+[mergetool "vimmerge"]
+    cmd = vimmerge vim $BASE $LOCAL $REMOTE $MERGED
     trustExitCode = true
     keepBackup = false
 [push]
