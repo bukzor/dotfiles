@@ -1,6 +1,7 @@
 [ui]
 username = Buck Golemon <buck@yelp.com>
 merge=internal:merge
+ignore=~/.hgignore_global
 
 [extensions]
 progress = 
@@ -12,16 +13,21 @@ color=
 rebase=
 pager=
 #hgshelve=/home/greg/src/hgshelve/hgshelve.py
-#histedit=
+histedit=
 extdiff=
+purge=
+strip=
 
 [extdiff]
+# micro-bug: can't hg vimdiff a directory :(
 cmd.dt=vimdiff
 cmd.vimdiff=vimdiff
 cmd.echo=
 
 [pager]
-pager = less -+LESS -R
+pager = less -XLFR
+# defaults, plus help
+attend = annotate, cat, diff, export, glog, log, qdiff, help
 
 #[mq]
 #secret = yes
@@ -37,3 +43,10 @@ pager = less -+LESS -R
 #activity=/home/fijal/src/hgactivity/activity.py
 #share=
 #mbox=/home/fijal/Downloads/mbox.py
+
+
+[notes]
+make-mutable = check the "This is a non-publishing repository" config box in bitbucket
+make-mutable-posthoc = hg phase -f -d 1818
+
+rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbranches
