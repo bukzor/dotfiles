@@ -8,6 +8,7 @@ if [ -d ~/bin ] ; then
 fi
 if [ -d ~/prefices/brew/bin ] ; then
     export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+    export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
 fi
 if [ -d ~/.local/bin ] ; then
     export PATH=~/.local/bin:"${PATH}"
@@ -128,5 +129,8 @@ if ! shopt -oq posix; then
     fi
   fi
 fi
+
+# added by travis gem
+[ -f ~/.travis/travis.sh ] && source ~/.travis/travis.sh
 
 # vim:et:sw=2:sts=2:
