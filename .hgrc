@@ -1,0 +1,45 @@
+[ui]
+username = Buck Golemon <buck@yelp.com>
+merge=internal:merge
+ignore = ~/.hgignore
+
+[extensions]
+progress = 
+graphlog = 
+
+#git=/usr/local/lib/python2.7/dist-packages/hggit/
+#mq=
+color=
+strip=
+rebase=
+pager=
+#hgshelve=/home/greg/src/hgshelve/hgshelve.py
+#histedit=
+extdiff=
+
+[extdiff]
+cmd.dt=vimdiff
+cmd.vimdiff=vimdiff
+cmd.echo=
+
+[pager]
+pager = LESS='FRX' less
+
+[phases]
+publish = False
+
+[hostfingerprints]
+bitbucket.org = 45:ad:ae:1a:cf:0e:73:47:06:07:e0:88:f5:cc:10:e5:fa:1c:f7:99
+
+#[mq]
+#secret = yes
+# Also in fijal's .hgrc:
+#[extensions]
+#purge=
+#churn=
+#transplant=
+#hgext.crecord = /home/fijal/src/crecord/crecord
+#parentrevspec=
+#activity=/home/fijal/src/hgactivity/activity.py
+#share=
+#mbox=/home/fijal/Downloads/mbox.py
