@@ -1,0 +1,17 @@
+#!/bin/bash
+# Because i can never remember the proper tmux command.
+if [[ $1 ]]; then
+    BG="$1"
+else
+    # no arguments, show current value
+    colortest256
+    tmux show status-style
+    exit
+fi
+
+if [[ $2 ]]; then
+    FG="$2"
+else
+    FG=white
+fi
+tmux set status-style "bg=$BG,fg=$FG"
