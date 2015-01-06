@@ -1,0 +1,2 @@
+#!/bin/sed -urf
+s/\<0x[0-9a-z]+/0x${hex}/g
