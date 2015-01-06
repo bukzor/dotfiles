@@ -7,7 +7,7 @@ export PIP_FIND_LINKS='file://'"$HOME"'/.pip/cache'
 alias tmux-env='eval `~/bin/tmux-env`'
 alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {
-	ssh -R 4444:localhost:4444 -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1" 
+	ssh -R 4444:localhost:4444 -ttA dev34-devc.dev.yelpcorp.com TMPDIR=/nail/tmp tmux attach $(test -z "$1" || echo -t) "$1"
 }
 
 # enable color support of ls and also add handy aliases
