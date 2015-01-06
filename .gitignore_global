@@ -1,1 +1,4 @@
 .*.sw[a-z]
+tmp/
+*.tmp
+pylintrc.stock

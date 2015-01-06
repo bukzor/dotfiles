@@ -11,5 +11,5 @@
 !.ssh
 !.bash_completion.d
 !.subversion
-!.bashrc*
+!.bashrc
 !.irssi
