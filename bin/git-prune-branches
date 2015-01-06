@@ -8,11 +8,11 @@ if [[ $BRANCH == HEAD ]]; then
 fi
 UPSTREAM=`git rev-parse --symbolic-full-name --abbrev-ref @{u}`
 
+git fetch origin --prune
 git checkout -q $UPSTREAM
 git branch --merged |
 	egrep -v "^(\*|  ${UPSTREAM##*/})" | 
 	xargs --replace sh -c '
 		git branch -d {} && git push --quiet --delete origin refs/heads/{}
 	'
-git fetch origin --prune
 git checkout -q $BRANCH

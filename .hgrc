@@ -10,6 +10,7 @@ graphlog =
 #git=/usr/local/lib/python2.7/dist-packages/hggit/
 #mq=
 color=
+strip=
 rebase=
 pager=
 #hgshelve=/home/greg/src/hgshelve/hgshelve.py
@@ -29,11 +30,15 @@ pager = less -XLFR
 # defaults, plus help
 attend = annotate, cat, diff, export, glog, log, qdiff, help
 
+[phases]
+publish = False
+
+[hostfingerprints]
+bitbucket.org = 45:ad:ae:1a:cf:0e:73:47:06:07:e0:88:f5:cc:10:e5:fa:1c:f7:99
+
 #[mq]
 #secret = yes
 # Also in fijal's .hgrc:
-#[ui]
-#ignore = ~/hgignore
 #[extensions]
 #purge=
 #churn=
