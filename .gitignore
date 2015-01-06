@@ -12,3 +12,4 @@
 !.bash_completion.d
 !.subversion
 !.bashrc*
+!.irssi

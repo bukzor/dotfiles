@@ -1,6 +1,6 @@
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    colorscheme murphy      "change to taste. try `desert' or `evening'
+    colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
     set scrolloff=3         "keep three lines visible above and below
@@ -11,11 +11,33 @@
     set wildmenu            "a menu for resolving ambiguous tab-completion
                             "files we never want to edit
     set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
+" }
 
+" searching {
     set incsearch           "search as you type
     set hlsearch            "highlight the search
     set ignorecase          "ignore case
     set smartcase           " ...unless the search uses uppercase letters
+
+    "Use case-sensitive search for the * command though.
+    :nnoremap * /\<<C-R>=expand('<cword>')<CR>\>\C<CR>
+    :nnoremap # ?\<<C-R>=expand('<cword>')<CR>\>\C<CR>
+" }
+
+" statusline {
+" compare the default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+set statusline =                " clear!
+set statusline +=%<             " truncation point
+set statusline +=%2n:           " buffer number
+set statusline +=%f\            " relative path to file
+set statusline +=%#Error#%m     " modified flag [+], highlighted as error
+set statusline +=%r             " readonly flag [RO]
+set statusline +=%##%y          " filetype [ruby], reset color
+set statusline +=%=             " split point for left and right justification
+set statusline +=row:\ %3l      " current line number
+set statusline +=/%-3L\          " number of lines in buffer
+set statusline +=(%3P)\         " percentage through buffer
+set statusline +=col:\ %3v\     " current virtual column number (visual count)
 " }
 
 " movement options {
@@ -48,7 +70,7 @@
 
     "don't clobber the buffer when pasting in visual mode
     vmap P p
-    vnoremap p "_dP
+    vnoremap p pgvy
 " }
 
 " windows-style mappings {
@@ -90,7 +112,7 @@
     command! Wall wall
     command! WQ wq
     command! Wq wq
-    command  Redraw redraw!
+    command! -bang Redraw redraw!
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -125,8 +147,8 @@
     nnoremap <C-Q> <C-W>q
 
     "tab switching: ctrl+left/right
-    nnoremap Od :tabp<CR>
-    nnoremap Oc :tabN<CR>
+    nnoremap <C-PageUp> :tabp<CR>
+    nnoremap <C-PageDown> :tabN<CR>
 " }
 
 "indentation options {
@@ -181,6 +203,6 @@
 
 " My own extra stuff:
 if filereadable($HOME . "/.vimrc.extra")
-    source $HOME/.vimrc.extra 
+    source $HOME/.vimrc.extra
 endif
 " vim:et:sts=4:sw=4

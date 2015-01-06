@@ -1,0 +1,42 @@
+## Grab my .vimrc from https://github.com/bukzor/dotfiles/raw/master/.vimrc
+## I've marked bindings from my vimrc with a * at the end. They are few.
+============== Basics =================|============== Search =================|
+hjkl    Movement  | :w [file]   save   |/[pattern]  searches for pattern       |
+:q      quit      | :h [topic]  help   |n (N)       goto next (previous) match |
+u (^R)  undo (redo)                    |:%s/1/2/g   replace every 1 with 2     |
+i (^C)  enter (exit) insert mode       |                                       |
+                                       |============== Buffers ================|
+============== Motion =================|:e file        edit "file" in a buffer |
+(press 'v' before motion to highlight) |<TAB> (S-TAB)  goto next (prev) buffer*|
+w (W)   next word (space-seperated)    |:(v)sp [file]  (vert) split and open   |
+e (E)   end of word (space-seperated)  |:ls            list all buffers        |
+b (B)   word before (space-seperated)  |                                       |
+0 HOME  beginning of line              |============== Windows ================|
+$ END   end of line                    |:spl (:vsp)     split the window (vert)|
+fX (FX) go to next (prev) 'X'          |^Q             close window*          |
+tX (TX) go *till* next (prev) 'X'      |^[HJKL]        goto next window*      |
+^O (^P) go to prev (next*) location    |                                       |
+g#      goto line #                    |============ Visual Mode ==============|
+gg      goto beginning of file         |(highlight text for further operations)|
+G       goto end of file               |(this makes the . command work well)   |
+ggXG    perform 'X' on whole file      |v (V)       highlight (whole line)     |
+                                       |^V          highlight block of text    |
+============ Inserting ================|u (U) (~)   lower (upper/swap) casing  |
+i (gI)  inserts (at start of line)     |                                       |
+a (A)   appends (at end of line)       |=========== Indentation ===============|
+o (O)   open new line below (above)    |<<              shift line left        |
+r       replaces single letter         |                                       |
+                                       |============== vimdiff ================|
+=========== "Delete" (Cut) ============|vimdiff file1 file2 -- to start vimdiff|
+x (X)       delete (before) cursor     |m (n)       goto next (previous) diff* |
+d{motion}   "delete" cuts over {motion}|R           refresh the diff*          |
+dd          cut whole line             |=============== Misc ==================|
+D           cut to end of line         |J                   join lines         |
+c,cc,C      "change" delete & insert   |^A (^X)     add (subtract) to #|
+y,yy,Y      "yank" copy without delete |~                   switch case        |
+                                       |:!{cmd}             shell command {cmd}|
+=============== Paste =================|                                       |
+(all deletes go to clipboard too)      |======= File-Specific Settings ========|
+p (P)   pastes after (before) cursor   |vim:set et nu ai si cin ts=4 co=88:    |
+gP      Windows-style paste            |
+

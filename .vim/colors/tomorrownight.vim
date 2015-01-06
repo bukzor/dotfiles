@@ -22,7 +22,7 @@ set background=light
 hi clear
 syntax reset
 
-let g:colors_name = "Tomorrow-Night"
+let g:colors_name = "tomorrownight"
 
 " Sets the highlighting for the given group
 fun <SID>X(group, fg, bg, attr)
@@ -64,6 +64,7 @@ call <SID>X("CursorLine", "", s:line, "")
 call <SID>X("CursorColumn", "", s:line, "")
 call <SID>X("PMenu", s:foreground, s:selection, "")
 call <SID>X("PMenuSel", s:foreground, s:selection, "reverse")
+call <SID>X("SignColumn", "", s:background, "none")
 call <SID>X("ColorColumn", "", s:line, "")
 
 " Standard Highlighting
@@ -92,6 +93,8 @@ call <SID>X("vimCommand", s:red, "", "none")
 " C Highlighting
 call <SID>X("cType", s:yellow, "", "")
 call <SID>X("cStorageClass", s:purple, "", "")
+call <SID>X("cConditional", s:purple, "", "")
+call <SID>X("cRepeat", s:purple, "", "")
 
 " PHP Highlighting
 call <SID>X("phpVarSelector", s:red, "", "")
@@ -117,7 +120,22 @@ call <SID>X("rubyRepeat", s:purple, "", "")
 call <SID>X("pythonInclude", s:purple, "", "")
 call <SID>X("pythonStatement", s:purple, "", "")
 call <SID>X("pythonConditional", s:purple, "", "")
+call <SID>X("pythonRepeat", s:purple, "", "")
+call <SID>X("pythonException", s:purple, "", "")
 call <SID>X("pythonFunction", s:blue, "", "")
+
+" Go Highlighting
+call <SID>X("goStatement", s:purple, "", "")
+call <SID>X("goConditional", s:purple, "", "")
+call <SID>X("goRepeat", s:purple, "", "")
+call <SID>X("goException", s:purple, "", "")
+call <SID>X("goDeclaration", s:blue, "", "")
+call <SID>X("goConstants", s:yellow, "", "")
+call <SID>X("goBuiltins", s:orange, "", "")
+
+" CoffeeScript Highlighting
+call <SID>X("coffeeKeyword", s:purple, "", "")
+call <SID>X("coffeeConditional", s:purple, "", "")
 
 " JavaScript Highlighting
 call <SID>X("javaScriptBraces", s:foreground, "", "")
@@ -127,9 +145,27 @@ call <SID>X("javaScriptRepeat", s:purple, "", "")
 call <SID>X("javaScriptNumber", s:orange, "", "")
 call <SID>X("javaScriptMember", s:orange, "", "")
 
+" HTML Highlighting
+call <SID>X("htmlTag", s:red, "", "")
+call <SID>X("htmlTagName", s:red, "", "")
+call <SID>X("htmlArg", s:red, "", "")
+call <SID>X("htmlScriptTag", s:red, "", "")
+
 " Diff Highlighting
+let s:diffbackground = "494e56"
+
 call <SID>X("diffAdded", s:green, "", "")
 call <SID>X("diffRemoved", s:red, "", "")
+call <SID>X("DiffAdd", s:green, s:diffbackground, "")
+call <SID>X("DiffDelete", s:red, s:diffbackground, "")
+call <SID>X("DiffChange", s:yellow, s:diffbackground, "")
+call <SID>X("DiffText", s:diffbackground, s:orange, "")
+
+" ShowMarks Highlighting
+call <SID>X("ShowMarksHLl", s:orange, s:background, "none")
+call <SID>X("ShowMarksHLo", s:purple, s:background, "none")
+call <SID>X("ShowMarksHLu", s:yellow, s:background, "none")
+call <SID>X("ShowMarksHLm", s:aqua, s:background, "none")
 
 " Delete Functions
 delf <SID>X

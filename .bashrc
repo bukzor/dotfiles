@@ -6,9 +6,18 @@
 if [ -d ~/bin ] ; then
     export PATH=~/bin:"${PATH}"
 fi
+if [ -d ~/prefices/brew/bin ] ; then
+    export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+fi
+if [ -d ~/.local/bin ] ; then
+    export PATH=~/.local/bin:"${PATH}"
+fi
 
 # If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+case $- in
+    *i*) ;;
+      *) return;;
+esac
 
 #MY PREFERENCES ==============================================================
 export EDITOR VISUAL GIT_EDITOR
@@ -17,8 +26,7 @@ VISUAL=$EDITOR
 GIT_EDITOR=$EDITOR
 
 # don't put duplicate lines in the history. See bash(1) for more options
-# ... or force ignoredups and ignorespace
-HISTCONTROL=erasedups:ignorespace
+HISTCONTROL=erasedups
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -31,6 +39,10 @@ HISTFILESIZE=2000
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+shopt -s globstar
+
 #unmap CTRL-S and CTRL-Q
 stty -ixon -ixoff
 
@@ -38,14 +50,16 @@ stty -ixon -ixoff
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-if [ "$TERM" == "xterm" ] && [ "$COLORTERM" == "gnome-terminal" ]; then
-    # Gnome terminal supports 256 colors, but doesn't have a way to edit $TERM
+terminal=$(ps -o comm= $PPID)
+case "$terminal" in
+lxterminal|gnome-terminal|xfce4-terminal)
     export TERM=xterm-256color
-fi
+    ;;
+esac
 
 noerr () {
     "$@" 2>/dev/null 
@@ -65,10 +79,10 @@ case "$TERM" in
     # All's well.
     ;;
 *-col*)
-    echo LOW COLOR TERM: $TERM
+    echo LOW COLOR TERM: $TERM, $terminal
     ;;
 *)
-    echo NO COLOR TERM: $TERM
+    echo NO COLOR TERM: $TERM, $terminal
     PS1='$(noerr __git_ps1 "%s ")${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
     ;;
 esac
@@ -84,33 +98,35 @@ fi
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    source /etc/bash_completion
-fi
-# My own completions
-if [ -d ~/.bash_completion.d ]; then
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+  # My own completions
+  if [ -d ~/.bash_completion.d ]; then
     source ~/.bash_completion.d/*.sh
-fi
+  fi
 
-# Further environment
-export TREES=$HOME/trees
-export PROJECT_HOME=$TREES/mine
-export WORKON_HOME=$HOME/venv
-export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
-if [[ -e /usr/local/bin/virtualenvwrapper.sh ]]; then
-    source /usr/local/bin/virtualenvwrapper.sh
-elif [[ -e ~/.local/bin/virtualenvwrapper.sh ]]; then
-    source ~/.local/bin/virtualenvwrapper.sh
-fi
-mkdir -p $WORKON_HOME $PROJECT_HOME
+  # Further environment
+  export TREES=$HOME/trees
+  export PROJECT_HOME=$TREES/mine
+  export WORKON_HOME=$HOME/venv
+  export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+  if [[ -x $(which virtualenvwrapper.sh) ]]; then
+    source $(which virtualenvwrapper.sh)
+  fi
+  mkdir -p $WORKON_HOME $PROJECT_HOME
 
-# My very own python!
-if [ -f ~/venv/mypy/bin/activate ]; then
+  # My very own python!
+  if [ -f ~/venv/mypy/bin/activate ]; then
     function activate() { workon mypy; }
     if [[ $TMUX ]]; then
-        PROMPT_COMMAND='eval `~/bin/tmux-env`'
-        activate
+      PROMPT_COMMAND='eval `~/bin/tmux-env`'
+      activate
     fi
+  fi
 fi
 
-# vim:et:sw=4:sts=4:
+# vim:et:sw=2:sts=2:
