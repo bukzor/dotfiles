@@ -1,0 +1,21 @@
+syntax: glob
+
+# Files that can appear anywhere in the tree.
+*.py[cod]
+*.so
+*.bak
+.coverage
+.coverage.*
+.*.sw[a-z]
+
+# Stuff in the root.
+build
+*.egg-info
+dist
+.tox
+
+# temporary data:
+tmp/
+*.tmp
+*.bak
+*.orig

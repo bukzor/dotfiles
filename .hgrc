@@ -1,7 +1,7 @@
 [ui]
 username = Buck Golemon <buck@yelp.com>
 merge=internal:merge
-ignore = ~/.hgignore
+ignore=~/.hgignore_global
 
 [extensions]
 progress = 
@@ -14,16 +14,21 @@ strip=
 rebase=
 pager=
 #hgshelve=/home/greg/src/hgshelve/hgshelve.py
-#histedit=
+histedit=
 extdiff=
+purge=
+strip=
 
 [extdiff]
+# micro-bug: can't hg vimdiff a directory :(
 cmd.dt=vimdiff
 cmd.vimdiff=vimdiff
 cmd.echo=
 
 [pager]
-pager = LESS='FRX' less
+pager = less -XLFR
+# defaults, plus help
+attend = annotate, cat, diff, export, glog, log, qdiff, help
 
 [phases]
 publish = False
@@ -43,3 +48,10 @@ bitbucket.org = 45:ad:ae:1a:cf:0e:73:47:06:07:e0:88:f5:cc:10:e5:fa:1c:f7:99
 #activity=/home/fijal/src/hgactivity/activity.py
 #share=
 #mbox=/home/fijal/Downloads/mbox.py
+
+
+[notes]
+make-mutable = check the "This is a non-publishing repository" config box in bitbucket
+make-mutable-posthoc = hg phase -f -d 1818
+
+rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbranches
