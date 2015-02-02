@@ -48,7 +48,7 @@
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
     fetchdev = !sh -c 'colorize git fetch "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
 
-    branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -b "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
+    branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -B "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
     vimdiff = difftool
     dt = difftool
     df = diff

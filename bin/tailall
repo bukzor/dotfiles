@@ -1,8 +1,9 @@
 #!/bin/bash
 
 tail -fn0 logs/apperror.log | pretty_error_log &
-tail -fn0 logs/app.log &
+tail -fn0 logs/* &
 
 pgname=`python -c 'import config.custom; print config.custom.pgname'`
-tail -fn0 ~/.pgconf-$pgname/logs/error.log &
+tail -fn0 ~/.pgconf-$pgname/logs/* &
 
+wait
