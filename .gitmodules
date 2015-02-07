@@ -19,3 +19,6 @@
 [submodule ".vim/bundle/vim-vimlparser"]
 	path = .vim/bundle/vim-vimlparser
 	url = https://github.com/ynkdir/vim-vimlparser.git
+[submodule ".vim/bundle/EditorConfig"]
+	path = .vim/bundle/EditorConfig
+	url = git@github.com:editorconfig/editorconfig-vim.git
