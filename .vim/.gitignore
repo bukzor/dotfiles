@@ -1,4 +1,7 @@
 !*
 .*
 !.gitignore
-pypy
+pypy*
+python*
+yEd
+git-remote-hg
