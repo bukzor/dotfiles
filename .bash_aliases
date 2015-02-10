@@ -9,6 +9,13 @@ alias crterm='export TERM=xterm-256color; source ~/.bashrc'
 function ssh-dev() {
 	ssh -R 4444:localhost:4444 -ttA dev34-devc.dev.yelpcorp.com TMPDIR=/nail/tmp tmux attach $(test -z "$1" || echo -t) "$1"
 }
+function reset() {
+    ## http://askubuntu.com/a/123296/23034
+    tput rmcup
+    command reset
+}
+
+alias login='source ~/.bashrc'
 
 # enable color support of ls and also add handy aliases
 if [ -x $(which dircolors) ]; then
