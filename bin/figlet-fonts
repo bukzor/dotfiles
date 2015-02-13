@@ -1,6 +1,47 @@
-#!/bin/sh
+#!/bin/bash
 #echo 'filters: (-F)'
-#toilet --filter list | sed '1d; s/^"//; s/".*$//' | xargs --verbose -n1 --replace toilet -t -f mono12.tlf -F {} {} 2>&1
 
-#echo 'fonts: (-f)'
-figlist | sed 1,3d | xargs --verbose -n1 --replace figlet  -w 999 -f {} {} 2>&1
+export PHRASE=${1:-wtf, indeed!}
+FONTDIR=${FONTDIR:-/usr/share/figlet}
+
+
+echo '-------------------------------------------------------------------------------'
+echo 'figlet fonts: (-f)'
+ls $FONTDIR/*.flf |
+    sed 's|.*/||; s|\..*||' |
+    xargs --replace sh -c '
+        echo figlet font: {}
+        echo figlet -w 999 -f {} "$PHRASE"
+        figlet -w 999 -f {} "$PHRASE"
+    '
+
+if false; then
+    # boring!
+    echo '-------------------------------------------------------------------------------'
+    echo 'figlet controls: (-C)'
+    ls $FONTDIR/*.flc |
+        sed 's|.*/||; s|\..*||' |
+        xargs --verbose -n1 --replace figlet  -w 999 -C {} {}
+    exit
+fi
+
+if which toilet >&/dev/null; then
+    echo '-------------------------------------------------------------------------------'
+    echo 'toilet fonts: (-f)'
+    ls $FONTDIR/*.tlf |
+        sed 's|.*/||; s|\..*||' |
+        xargs --replace sh -c '
+            echo toilet font: {}
+            echo toilet -w 999 -f {} "$PHRASE"
+            toilet -w 999 -f {} "$PHRASE"
+        '
+
+    echo '-------------------------------------------------------------------------------'
+    echo "toilet filters: (-F)"
+    toilet --filter list | sed '1d; s/^"//; s/".*$//' |
+        xargs --replace sh -c '
+            echo toilet filter: {}
+            echo toilet -t -f mono12 -F {} "$PHRASE"
+            toilet -t -f mono12 -F {} "$PHRASE"
+        '
+fi
