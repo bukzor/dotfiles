@@ -1,4 +1,5 @@
 #!/bin/sh
-
+set -ex
 ./setup.d/01-debs
 ./setup.d/05-brew
+./setup.d/10-docker
