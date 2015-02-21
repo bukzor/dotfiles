@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+ME=$(readlink -f $0)
+TMP=true
+BREWDIR=~/prefices/brew
+
+cd ~
+if [ `uname -s` = Darwin ]; then
+    echo "FIXME: ($0)"
+elif [ `uname -s` = Linux ]; then
+    if ! $TMP; then
+    git clone git@github.com:Homebrew/linuxbrew.git $BREWDIR
+    fi
+fi
+
+cd $BREWDIR
+git apply $ME.patches.d/*.patch
+cd -
+
+cat $ME.list | grep -v '\s*#' | xargs -L1 --verbose $BREWDIR/bin/brew install
+

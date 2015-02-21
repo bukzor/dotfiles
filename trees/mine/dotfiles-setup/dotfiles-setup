@@ -1,0 +1,4 @@
+#!/bin/sh
+
+./setup.d/01-debs
+./setup.d/05-brew

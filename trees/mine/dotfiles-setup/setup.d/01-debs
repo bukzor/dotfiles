@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ `uname -s` = Darwin ]; then
+    echo "FIXME: ($0)"
+elif [ `uname -s` = Linux ]; then
+    cat ${0}.list | grep -v '\s*#' | xargs --verbose sudo apt-get install --yes
+fi

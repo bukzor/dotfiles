@@ -1,0 +1,12 @@
+diff --git a/Library/Formula/coreutils.rb b/Library/Formula/coreutils.rb
+index f24238d..efb2725 100644
+--- a/Library/Formula/coreutils.rb
++++ b/Library/Formula/coreutils.rb
+@@ -47,7 +47,6 @@ class Coreutils < Formula
+       system "./bootstrap"
+     end
+     system "./configure", "--prefix=#{prefix}",
+-                          "--program-prefix=g",
+                           "--without-gmp"
+     system "make", "install"
+ 

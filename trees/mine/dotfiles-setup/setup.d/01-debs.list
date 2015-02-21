@@ -1,0 +1,18 @@
+# aptitude is still my apt-get frontend of choice
+aptitude
+
+# vim uber alles
+vim-nox
+
+# I install brew via curl
+git
+
+# brew depends on curl
+curl
+
+# brew python -> brew mercurial -> python-dev
+python-dev
+
+# brew python -> zlib-dev
+zlib1g-dev
+g++
