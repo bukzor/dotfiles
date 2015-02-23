@@ -1,5 +1,21 @@
+# gnu is nice.
 coreutils
+
+# completions are nice!
+bash-completion
+
+# i like tmux
+tmux
+
+# vim is pretty good
 vim
+
+# git is ok
 git
+
+# a tiny, nice env editing tool
+envv
+
+# python is certianly not the worst
 python
 python3 --HEAD

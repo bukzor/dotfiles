@@ -1,0 +1,10 @@
+#!/bin/bash
+set -ex
+BREW=$HOME/prefices/brew/bin
+LOCAL=$HOME/.local/bin
+export PATH="$LOCAL:$BREW:/bin:/usr/bin:/usr/local/bin"
+
+$BREW/pip3 install --user virtualenvwrapper
+ln -s $BREW/python3 $LOCAL/python
+source $LOCAL/virtualenvwrapper.sh
+mkvirtualenv mypy --python $BREW/python3

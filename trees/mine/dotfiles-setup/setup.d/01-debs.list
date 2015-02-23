@@ -7,6 +7,9 @@ vim-nox
 # I install brew via curl
 git
 
+# better than top
+htop
+
 # brew depends on curl
 curl
 
@@ -16,3 +19,17 @@ python-dev
 # brew python -> zlib-dev
 zlib1g-dev
 g++
+
+# building python...
+build-essential
+libbz2-dev
+libncursesw5-dev
+libreadline6-dev
+libssl-dev
+libgdbm-dev
+libc6-dev
+libsqlite3-dev
+tk-dev
+
+# brew tmux
+libncursesw5-dev

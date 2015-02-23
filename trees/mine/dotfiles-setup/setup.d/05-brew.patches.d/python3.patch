@@ -1,5 +1,5 @@
 diff --git a/Library/Formula/python3.rb b/Library/Formula/python3.rb
-index 4632e5a..d149635 100644
+index 4632e5a..d355bcd 100644
 --- a/Library/Formula/python3.rb
 +++ b/Library/Formula/python3.rb
 @@ -11,7 +11,7 @@ class Python3 < Formula
@@ -7,16 +7,16 @@ index 4632e5a..d149635 100644
    end
  
 -  head "https://hg.python.org/cpython", :using => :hg, :branch => "3.5"
-+  head "https://hg.python.org/cpython", :using => :hg, :branch => "default"
++  head "https://hg.python.org/cpython", :using => :hg
  
    devel do
      url "https://www.python.org/ftp/python/3.5.0/Python-3.5.0a1.tgz"
-@@ -142,7 +142,7 @@ class Python3 < Formula
-     rm bin/"2to3"
+@@ -197,7 +197,7 @@ class Python3 < Formula
+   end
  
-     # Remove the site-packages that Python created in its Cellar.
--    site_packages_cellar.rmtree
-+    site_packages_cellar.rmtree if site_packages_cellar.exist?
+   def xy
+-    version.to_s.slice /(3.\d)/
++    version.to_s.slice(/(3.\d)/) || "3.5"
+   end
  
-     %w[setuptools pip].each do |r|
-       (libexec/r).install resource(r)
+   def distutils_fix_superenv(args)
