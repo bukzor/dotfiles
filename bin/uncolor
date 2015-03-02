@@ -1,2 +1,4 @@
 #!/bin/sed -rf
+# really this removes ansi escape codes:
+#   http://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
 s/\[[^[:alpha:]]*[[:alpha:]]//g

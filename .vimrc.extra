@@ -7,6 +7,7 @@ set textwidth=120
 
     " use bold font for cursor highlight
     hi CursorLine term=bold cterm=bold gui=bold
+    hi CursorColumn term=bold cterm=bold gui=bold ctermbg=none
 " }
 
 " functions {

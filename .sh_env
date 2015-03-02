@@ -1,0 +1,86 @@
+# interactive environment that should be shared by bash and zsh
+
+# set PATH so it includes user's private bin if it exists
+  export PATH=~/bin:"${PATH}"
+  export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+  export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
+  export PATH=~/.local/bin:"${PATH}"
+
+#MY PREFERENCES ==============================================================
+export EDITOR VISUAL GIT_EDITOR
+EDITOR=vim
+VISUAL=$EDITOR
+GIT_EDITOR=$EDITOR
+
+if [[ -z "$LANG" ]]; then
+  export LANG='en_US.UTF-8'
+fi
+
+# Set the default Less options.
+export LESS='-XFR -i -M -w -z-4'
+export PAGER=less
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# Browser
+if [[ "$OSTYPE" == darwin* ]]; then
+  export BROWSER='open'
+fi
+
+# don't put duplicate lines in the history. See bash(1) for more options
+HISTCONTROL=erasedups
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=10000
+
+#unmap CTRL-S and CTRL-Q
+stty -ixon -ixoff
+
+# fix up TERM values
+terminal=$(ps -o comm= $PPID)
+case "$terminal" in
+lxterminal|gnome-terminal|xfce4-terminal)
+    export COLORTERM=true
+    export TERM=xterm-256color
+    ;;
+esac
+
+# Alias definitions.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+if [ -f ~/.bash_aliases ]; then
+    source ~/.bash_aliases
+fi
+
+# Further environment
+export GEM_HOME=~/prefices/rubygems
+export TREES=$HOME/trees
+export PROJECT_HOME=$TREES/mine
+export WORKON_HOME=$HOME/venv
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+if [[ -x $(which virtualenvwrapper.sh) ]]; then
+  source $(which virtualenvwrapper.sh)
+fi
+mkdir -p $WORKON_HOME $PROJECT_HOME
+
+# My very own python!
+if [ -f ~/venv/mypy/bin/activate ]; then
+  activate() { workon mypy; }
+  if [[ -n $TMUX ]]; then
+    PROMPT_COMMAND='eval `~/bin/tmux-env`'
+    activate
+  fi
+fi
+
+# Temporary Files
+if [[ ! -d "$TMPDIR" ]]; then
+  export TMPDIR="/tmp/$USER"
+  mkdir -p -m 700 "$TMPDIR"
+fi
+
+# added by travis gem
+if [[ -f ~/.travis/travis.sh ]]; then
+  source ~/.travis/travis.sh
+fi
+
+# vim:ft=zsh:et:sw=2:sts=2:

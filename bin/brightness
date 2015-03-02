@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import division
+
 UP = object()
 DOWN = object()
 
@@ -23,7 +25,7 @@ def optparse():
 
 def set(brightness):
     with open('/sys/class/backlight/intel_backlight/brightness', 'w') as led:
-        led.write(str(brightness))
+        led.write(str(int(brightness)))
 
 def get():
     with open('/sys/class/backlight/intel_backlight/brightness') as led:
@@ -35,6 +37,8 @@ def run(cmd):
     p = Popen(cmd)
     p.wait()
 
+RATIO = 1.25
+
 def main():
     value, direction = optparse()
     if value is not None:
@@ -42,9 +46,9 @@ def main():
 
     value = get()
     if direction is UP:
-        set(max(value * 2, 1))
+        set(max(value * RATIO, 1))
     elif direction is DOWN:
-        set(value / 2)
+        set(value / RATIO)
     else:
         print get()
 

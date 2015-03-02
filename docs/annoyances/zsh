@@ -1,0 +1,19 @@
+starting tmux loses 256 color support
+    need to port the TERM setting from my bashrc
+
+during command-editing, if i scroll to the left in the command, i have to wait a second to see the position of the cursor -- it's hidden when repositioning it.
+    cause:
+        echo ${ZSH_HIGHLIGHT_STYLES[cursor]}
+        standout
+    fix:
+        ZSH_HIGHLIGHT_STYLES[cursor]="standout,bg=green"
+
+
+
+history is shared a little too much between sessions (see eevee's zshrc)
+
+history completion makes me press enter twice
+
+
+
+# vim:ft=markdown
