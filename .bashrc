@@ -12,6 +12,9 @@ esac
 if [ -f ~/.sh_env ]; then
     source ~/.sh_env
 fi
+if [ -f ~/.sh_aliases ]; then
+    source ~/.sh_aliases
+fi
 
 # bash options  ==============================================================
 # don't put duplicate lines in the history. See bash(1) for more options
