@@ -1,10 +1,58 @@
 #!/usr/bin/python
 from __future__ import print_function
 from sys import argv
-from pipes import quote
-quoted = ' '.join([quote(arg) for arg in argv[1:]])
 
-# Make the string slightly shorter by factoring out noop '' sequences
-quoted = quoted.replace("''", "")
+if len(argv) < 2 or argv[1] in ('-h', '--help'):
+    print('''\
+sh-quote: quote a wrapped command suitably for shell interpretation
 
-print(quoted)
+The intent is to help deal with arguments with embedded whitespace more easily
+in the face of nested shells.
+
+EXAMPLE:
+    touch '1 2' '3 4'
+    sh-quote ls -l "1 2" "3 4" | sh
+    sh-quote "$(sh-quote ls -l "1 2" "3 4")" | xargs --replace sh -c {}\
+''')
+    exit(0)
+
+# brazenly stolen from stdlib `pipes`
+import string
+safechars = frozenset(string.ascii_letters + string.digits + '@%_-+=:,./')
+safechars_softquote = frozenset(" '#")
+
+
+def quote(arg):
+    result = []
+    stack = [arg]
+    while stack:
+        arg = stack.pop()
+
+        argset = frozenset(arg)
+        unsafe = argset - safechars
+        if not unsafe:
+            result.append(arg)
+        elif '=' in arg:
+            lhs, rhs = arg.split('=', 1)
+            result.append('='.join((quote(lhs), quote(rhs))))
+        elif safechars_softquote.issuperset(unsafe):
+            result.append(''.join(('"', arg, '"')))
+        elif not "'" in unsafe:
+            result.append(''.join(("'", arg, "'")))
+        else:
+            stack.extend(reversed(arg.split("'")))
+
+    return "\\'".join(result)
+
+
+def quotecmd(cmd):
+    return ' '.join([quote(arg) for arg in cmd])
+
+
+def main():
+    cmd = argv[1:]
+    print(quotecmd(cmd))
+
+
+if __name__ == '__main__':
+    exit(main())

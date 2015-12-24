@@ -1,0 +1,3 @@
+#!/bin/bash
+set -eu
+exec ps --sort -rss -lfyu "$@" | head -30
