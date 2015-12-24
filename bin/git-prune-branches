@@ -1,18 +1,36 @@
 #!/bin/bash
 set -e
 
-BRANCH=`git rev-parse --abbrev-ref --symbolic-full-name HEAD`
+BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD)
 if [[ $BRANCH == HEAD ]]; then
-	echo "Can't prune from detached state" >&2
-	exit 1
+    echo "Can't prune from detached state" >&2
+    exit 1
 fi
-UPSTREAM=`git rev-parse --symbolic-full-name --abbrev-ref @{u}`
+export GIT_COMMITER_EMAIL=${GIT_COMMITER_EMAIL:-$(git config user.email)}
+if [[ ! "$GIT_COMMITER_EMAIL" ]]; then
+    echo 'Please set your email: git config --global user.email me@example.com'  >&2
+    exit 1
+fi
+UPSTREAM=$(git rev-parse --symbolic-full-name --abbrev-ref @{u})
 
-git fetch origin --prune
-git checkout -q $UPSTREAM
-git branch --merged |
-	egrep -v "^(\*|  ${UPSTREAM##*/})" | 
-	xargs --replace sh -c '
-		git branch -d {} && git push --quiet --delete origin refs/heads/{}
-	'
-git checkout -q $BRANCH
+colorize() {
+    echo -e "\033[01;36m>\033[m \033[01;33m$@\033[m" >&2
+    "$@"
+}
+export -f colorize
+
+colorize git fetch --all --prune --tags
+colorize git branch -q -a --merged "$UPSTREAM" |
+    sed 's/^[[:space:]]*//; s/[[:space:]].*//' |
+    egrep -v "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" | 
+    xargs -r --replace bash --norc -ec '
+        # only mess with branches where I am the last committer
+        ##git log -1 --format=%ae "{}" | grep -Fxq "$GIT_COMMITER_EMAIL"
+        if [[ "{}" =~ ^remotes/ ]]; then
+            colorize git push --quiet --delete $(
+                sed '\''s|^remotes/||; s|/| |;'\'' <<< "{}"
+            )
+        else
+            colorize git branch -d "{}"
+        fi
+    '
