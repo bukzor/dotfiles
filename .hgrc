@@ -35,7 +35,7 @@ attend = annotate, cat, diff, export, glog, log, qdiff, help
 publish = False
 
 [hostfingerprints]
-bitbucket.org = 45:ad:ae:1a:cf:0e:73:47:06:07:e0:88:f5:cc:10:e5:fa:1c:f7:99
+bitbucket.org = 46:de:34:e7:9b:18:cd:7f:ae:fd:8b:e3:bc:f4:1a:5e:38:d7:ac:24
 
 #[mq]
 #secret = yes
