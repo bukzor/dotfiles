@@ -1,4 +1,7 @@
 #!/bin/bash
+set -eu
+# kill all background jobs upon exit
+trap 'kill $(jobs -p)' EXIT
 
 tail -fn0 logs/apperror.log | pretty_error_log &
 tail -fn0 logs/* &
@@ -6,4 +9,5 @@ tail -fn0 logs/* &
 pgname=`python -c 'import config.custom; print config.custom.pgname'`
 tail -fn0 ~/.pgconf-$pgname/logs/* &
 
+# block indefinitely for background jobs to exit.
 wait
