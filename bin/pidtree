@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ -n "$*" ]; then
+    exec pstree -lp "$@" | grep -Po '\(\d+\)' | grep -Po '\d+'
+fi
