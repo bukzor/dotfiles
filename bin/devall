@@ -1,0 +1,5 @@
+#!/bin/bash
+grep HOSTNAME /etc/systems.d/groups/devpg.d/* -h |
+    sed 's/HOSTNAME=//' |
+    sort |
+    ssh-each "$@"

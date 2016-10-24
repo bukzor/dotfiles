@@ -1,6 +1,6 @@
 [user]
     name = Buck Evan
-    email = buck.2019@gmail.com
+    email = buck@yelp.com
 [core]
     excludesfile = ~/.gitignore_global
 [color]
@@ -43,8 +43,12 @@
     base = !git merge-base `git upstream` HEAD
     diffbase = !sh -c 'git diff `git base` "$@"' -
     lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
+        sed 's/@yelp.com//' | \
         less -XLFR && true
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
+    fetchdev = !sh -c 'colorize git fetch "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
+
+    branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -B "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
     vimdiff = difftool
     dt = difftool
     df = diff
