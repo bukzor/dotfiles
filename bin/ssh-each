@@ -1,10 +1,12 @@
 #!/bin/bash
 ## usage:  echo buildbot28 bb{90..96}-useast1atestopia | time ssh-each hostname -f
-CMD=$(echo $@ | sed "s/'/'\"'\"'/g")
+# the wrapped command is quoted twice, so that it survives both the shell below,
+#   and the shell inside ssh
+CMD="$(sh-quote "$(sh-quote "$@")")"
 
 exec xargs -n1 | xargs --replace -P10 sh -c "
     echo -n '{}: ' > /tmp/$USER.{}.w.txt;
-    ssh -TA -o ConnectTimeout=3 -o BatchMode=yes -o LogLevel=ERROR -o StrictHostKeyChecking=no -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null {} '$CMD' >> /tmp/$USER.{}.w.txt 2>&1;
+    ssh-noninteractive {} $CMD >> /tmp/$USER.{}.w.txt 2>&1;
     cat /tmp/$USER.{}.w.txt
     rm -f /tmp/$USER.{}.w.txt
 "

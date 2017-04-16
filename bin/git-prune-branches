@@ -1,18 +1,25 @@
 #!/bin/bash
-set -e
+set -eu
 
-BRANCH=`git rev-parse --abbrev-ref --symbolic-full-name HEAD`
+BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD)
 if [[ $BRANCH == HEAD ]]; then
 	echo "Can't prune from detached state" >&2
 	exit 1
 fi
-UPSTREAM=`git rev-parse --symbolic-full-name --abbrev-ref @{u}`
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 
-git fetch origin --prune
+set -x
+trap "git checkout -q $BRANCH" EXIT
 git checkout -q $UPSTREAM
 git branch --merged |
-	egrep -v "^(\*|  ${UPSTREAM##*/})" | 
-	xargs --replace sh -c '
-		git branch -d {} && git push --quiet --delete origin refs/heads/{}
-	'
-git checkout -q $BRANCH
+	grep -v "^\*" |  # our detached state isn't a branch
+	grep -v "^  $BRANCH\>" |  # don't delete our original branch; too confusing
+	xargs -L1 git branch --delete
+
+: clean up merged remote branches
+git fetch --prune
+git branch -r --merged |
+        grep -v '/HEAD\>' |  # HEAD isn't a branch
+        grep -v "^  $UPSTREAM\>" |  # don't delete our upstream
+        sed -r 's@^  ([^/]*)/(.*)@\1 refs/heads/\2@' |  # transform to git-push format
+	xargs -L1 git push --delete

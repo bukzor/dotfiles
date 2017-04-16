@@ -1,0 +1,9 @@
+#!/bin/sh
+exec ssh -TA \
+    -o ConnectTimeout=3 \
+    -o BatchMode=yes \
+    -o LogLevel=ERROR \
+    -o StrictHostKeyChecking=no \
+    -o GlobalKnownHostsFile=/dev/null \
+    -o UserKnownHostsFile=/dev/null  \
+    "$@"

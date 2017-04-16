@@ -1,5 +1,10 @@
 #!/bin/bash
 wat=$(echo "$0" | sed 's|.*/||;s/git-//')
-exec toilet -tf bigmono9 --gay "$wat $@"' indeed.'
+if [[ "$@" ]]; then
+    space=' '
+else
+    space=''
+fi
+exec toilet -tf mono12 --gay "$wat$space$@"' indeed'
 
 # vim:ft=sh:

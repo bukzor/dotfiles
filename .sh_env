@@ -63,17 +63,10 @@ fi
 # Further environment
 export GEM_HOME=~/prefices/rubygems
 export TREES=$HOME/trees
-export PROJECT_HOME=$TREES/mine
-export WORKON_HOME=$HOME/venv
-export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
-if [[ -x $(which virtualenvwrapper.sh) ]]; then
-  source $(which virtualenvwrapper.sh)
-fi
-mkdir -p $WORKON_HOME $PROJECT_HOME
 
 # My very own python!
 if [ -f ~/venv/mypy/bin/activate ]; then
-  activate() { workon mypy; }
+  activate() { source ~/venv/mypy/bin/activate; }
   if [[ -n $TMUX ]]; then
     PROMPT_COMMAND='eval `~/bin/tmux-env`'
     activate

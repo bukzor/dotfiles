@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+network='irc.yelpcorp.com'
+port=6697
+bufsize = 2**11 # unrealIRCd seems to use 2k buffers
+verbose = False #TODO: optionalize
+
+import os
+user = os.environ['USER']
+channel = os.environ.get('CHANNEL', user)
+
+import sys
+message = ' '.join(sys.argv[1:])
+if not message:
+	message = "it's done!"
+
+import socket, ssl
+irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+irc = ssl.wrap_socket(irc)
+irc.connect((network, port))
+
+def send(msg):
+	if verbose:
+		sys.stdout.write('>> ' + msg)
+	irc.send(msg)
+def recv():
+	data = irc.recv(bufsize)
+	if verbose:
+		sys.stdout.write('<< ' + data)
+	return data
+
+send('PASS thunderb1rd\r\n')
+send('NICK %s-bot\r\n' % user)
+send('USER %(user)s-bot %(user)s-bot %(user)s-bot :%(user)s\'s alert bot\r\n' % dict(user=user))
+
+data = True
+while data:
+	data = recv()
+	if data.startswith('PING'):
+		send('PONG ' + data.split() [ 1 ] + '\r\n')
+		#TODO: enable sending to a different user
+		send('PRIVMSG %s :%s\r\n' % (channel, message))
+		break
+recv()
+send('QUIT\r\n')
