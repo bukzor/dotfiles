@@ -1,10 +1,10 @@
 # interactive environment that should be shared by bash and zsh
 
 # set PATH so it includes user's private bin if it exists
-  export PATH=~/bin:"${PATH}"
-  export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
-  export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
-  export PATH=~/.local/bin:"${PATH}"
+export PATH=~/bin:"${PATH}"
+export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
+export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
+export PATH=~/.local/bin:"${PATH}"
 
 #MY PREFERENCES ==============================================================
 export EDITOR VISUAL GIT_EDITOR
@@ -38,11 +38,19 @@ HISTFILESIZE=10000
 stty -ixon -ixoff
 
 # fix up TERM values
-terminal=$(ps -o comm= $PPID)
+if [[ $PPID = 0 ]]; then
+  terminal=init
+else
+  terminal=$(ps -o comm= $PPID)
+fi
 case "$terminal" in
 lxterminal|gnome-terminal|xfce4-terminal)
     export COLORTERM=true
     export TERM=xterm-256color
+    ;;
+tmux)
+    export COLORTERM=true
+    export TERM=screen-256color
     ;;
 esac
 

@@ -1,16 +1,7 @@
 #
-# Executes commands at the start of an interactive session.
+# Executes commands at the start of any interactive session.
+# Shell options, functions, and aliases go here!
+# Environment variables do *not* go here. They go in .zprofile.
 #
-# Authors:
-#   Sorin Ionescu <sorin.ionescu@gmail.com>
-#
 
-# Source Prezto.
-if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
-fi
-
-# Customize to your needs...
-
-# make sure I can see the cursor
-ZSH_HIGHLIGHT_STYLES[cursor]="standout,bg=green"
+setopt PROMPT_SUBST

@@ -3,3 +3,5 @@ tmp*/
 *.tmp
 pylintrc.stock
 *.py[cod]
+/venv/
+/node_modules/

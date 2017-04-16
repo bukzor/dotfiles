@@ -1,0 +1,4 @@
+#!/bin/bash
+shopt -s nullglob
+ls -d  * .[!.]* | xargs -r -d\\n -n1 -P10 du -hs | sort -h
+df -h .
