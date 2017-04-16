@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eu
+
+echo "[01;31mWARNING:[m: This will stop ALL docker processes and remove ALL docker images."
+read -p "Continue (y/n)? "
+if [ "$REPLY" != "y" ]; then
+    echo "Aborting."
+    exit 1
+fi
+
+xdocker() { exec xargs -r -n10 --verbose docker "$@"; }
+
+set -x
+docker ps -q | xdocker stop
+docker ps -aq | xdocker rm
+docker images -q | xdocker rmi
+docker images -aq | xdocker rmi

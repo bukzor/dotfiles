@@ -1,9 +1,13 @@
-#!/bin/sh
-exec ssh -TA \
-    -o ConnectTimeout=3 \
-    -o BatchMode=yes \
-    -o LogLevel=ERROR \
-    -o StrictHostKeyChecking=no \
-    -o GlobalKnownHostsFile=/dev/null \
-    -o UserKnownHostsFile=/dev/null  \
-    "$@"
+#!/bin/bash
+# ssh-noninteractive: reliably use ssh under cron, and other headless environments
+DEFAULTS=(
+    -o ConnectTimeout=${SSH_TIMEOUT:-3}  # by default ssh would hang for 90 seconds
+    -o BatchMode=yes  # disables all prompts
+    -o StrictHostKeyChecking=no  # hosts are not required to have a known-host key
+    -o GlobalKnownHostsFile=/dev/null  # an outdated known-host key wont cause explosion
+    -o UserKnownHostsFile=/dev/null
+)
+exec ssh -TA ${DEFAULTS[@]} ${SSH_OPTS} "$@" 2> >(
+    # suppress this bogus warning, specifically; it is "adding" to /dev/null
+    grep -v '^Warning: Permanently added .* to the list of known hosts' >&2
+)

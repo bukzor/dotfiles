@@ -1,0 +1,8 @@
+#!/bin/bash
+set -eu
+if [[ "$@" ]]; then
+    MSG="$@"
+else
+    MSG='oh, hi!'
+fi
+USER=greetings CHANNEL='#webcore' alert-irc "$MSG"

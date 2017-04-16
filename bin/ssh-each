@@ -1,12 +1,34 @@
 #!/bin/bash
 ## usage:  echo buildbot28 bb{90..96}-useast1atestopia | time ssh-each hostname -f
-# the wrapped command is quoted twice, so that it survives both the shell below,
-#   and the shell inside ssh
-CMD="$(sh-quote "$(sh-quote "$@")")"
+# the wrapped command is quoted so that it survives the shell inside ssh
+set -euo pipefail
 
-exec xargs -n1 | xargs --replace -P10 sh -c "
-    echo -n '{}: ' > /tmp/$USER.{}.w.txt;
-    ssh-noninteractive {} $CMD >> /tmp/$USER.{}.w.txt 2>&1;
-    cat /tmp/$USER.{}.w.txt
-    rm -f /tmp/$USER.{}.w.txt
-"
+# we create a shared lock to prevent interleaving output
+tmpdir="${TMPDIR:-/tmp}/$USER/ssh-each"
+mkdir -p "$tmpdir"
+
+lock=$tmpdir/$$.lock
+exec 200>"$lock"
+rm "$lock"
+
+xargs -n1 | xargs --replace -P50 bash -c '
+    set -euo pipefail
+    (
+        # fd 5 points at the original stdout
+        exec 5>&1
+
+        # fd 4 points at our line-counting pipeline
+        exec 4> >(
+            if [ "$(tee /dev/fd/5 | wc -l)" = 0 ]; then
+                echo "(no output)"
+            fi
+        )
+
+        # stdout and stderr point at fd 4
+        exec 1>&4
+        exec 2>&4
+
+        echo -n "{}: "
+        ssh-noninteractive "{}" '"$(sh-quote "$@")"' || true
+    ) | flock -x 200 cat
+'

@@ -1,0 +1,27 @@
+#!/usr/bin/env python3.4
+
+
+def groupby(infile, key, value):
+    from collections import defaultdict
+    groups = defaultdict(int)
+
+    for line in infile:
+        line = line.split()
+        groups[line[key]] += float(line[value])
+
+    for group, value in sorted(groups.items()):
+        print(group, format(value, '.99g'))
+
+
+def main():
+    import sys
+    key, value = sys.argv[1:]
+    key = int(key)
+    value = int(value)
+    infile = sys.stdin
+
+    groupby(infile, key, value)
+
+
+if __name__ == '__main__':
+    exit(main())

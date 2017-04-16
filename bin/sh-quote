@@ -1,10 +1,113 @@
 #!/usr/bin/python
 from __future__ import print_function
-from sys import argv
-from pipes import quote
-quoted = ' '.join([quote(arg) for arg in argv[1:]])
 
-# Make the string slightly shorter by factoring out noop '' sequences
-quoted = quoted.replace("''", "")
+# brazenly stolen from stdlib `pipes`
+import string
 
-print(quoted)
+# none of these characters need to be quoted, ever
+safechars = frozenset(string.ascii_letters + string.digits + '@%_-+=:,./')
+
+# these characters can be soft-quoted
+safechars_softquote = safechars | frozenset(" '#")
+
+
+def first_not_of(string, charset):
+    for i, char in enumerate(string):
+        if char not in charset:
+            return i
+    else:
+        return len(string)
+
+
+def cant_softquote(string):
+    return first_not_of(string, safechars_softquote)
+
+
+def cant_hardquote(string):
+    try:
+        return string.index("'")
+    except ValueError:
+        return len(string)
+
+
+def quote2(arg):
+    result = []
+    while arg:
+        must_quote = first_not_of(arg, safechars)
+        if must_quote == len(arg):
+            result.append(arg)
+            break
+
+        soft_end = cant_softquote(arg)
+        hard_end = cant_hardquote(arg)
+        if soft_end > hard_end:
+            end = soft_end
+            quote = '"'
+        else:
+            end = hard_end
+            quote = "'"
+
+        if len([
+                char
+                for char in arg[:end]
+                if char not in safechars
+        ]) <= 2:  # we only need to escape two characters
+            # this makes things more readable, and makes subsequent escaping more efficient
+            result.append(arg[:must_quote])
+            result.append('\\' + arg[must_quote])
+            arg = arg[must_quote + 1:]
+        else:
+            result.extend((quote, arg[:end], quote))
+            arg = arg[end:]
+
+    return "".join(result)
+
+
+def quote(arg):
+    """
+    >>> print(quote('''A' " "'"'"Z'''))
+    A' " "'\'Z
+    >>> print(quote('A=foo bar'))
+    A="foo bar"
+    """
+    if '=' in arg and first_not_of(arg, safechars) > arg.index('='):
+        left, right = arg.split('=', 1)
+        return '='.join((left, quote2(right)))
+
+    result = quote2(arg)
+    if not result:
+        return "''"
+    else:
+        return result
+
+
+def quotecmd(cmd):
+    return ' '.join([quote(arg) for arg in cmd])
+
+
+def all_permutations(iterable):
+    from itertools import chain, permutations
+    iterable = list(iterable)
+    return chain.from_iterable(
+        permutations(iterable, size)
+        for size in range(len(iterable) + 1)
+    )
+
+
+def test():
+    for string in all_permutations(('foobar', '=', '#', "'", '!')):
+        string = ''.join(string)
+        print(string, end=' ')
+        for _ in range(4):
+            string = quote(string)
+            print('   ', string, len(string), end=' ')
+        print()
+
+
+def main():
+    from sys import argv
+    print(quotecmd(argv[1:]))
+
+
+if __name__ == '__main__':
+    exit(main())

@@ -1,0 +1,3 @@
+#!/bin/bash
+set -eu
+exec ps -e -o user= -o rss= | groupby 0 1
