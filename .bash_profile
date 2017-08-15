@@ -2,8 +2,13 @@
 # see /usr/share/doc/bash/examples/startup-files for examples.
 # the files are located in the bash-doc package.
 #
+# environment variables go here!
+export PYTHONSTARTUP=~/.pythonrc.py
 
-# the default umask is set in /etc/login.defs
+# include .bashrc if it exists
+if [ -f ~/.profile ]; then
+    . ~/.profile
+fi
 
 # include .bashrc if it exists
 if [ -f ~/.bashrc ]; then

@@ -1,7 +1,6 @@
 .*.sw[a-z]
-tmp*/
+tmp/
+venv/
 *.tmp
 pylintrc.stock
 *.py[cod]
-/venv/
-/node_modules/

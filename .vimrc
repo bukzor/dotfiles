@@ -94,25 +94,20 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     "ctrl+Q to save/quit
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
-    "ctrl+V to paste
-    map <c-v> "+gP
-    imap <c-v> <c-o>"+gP
+    "ctrl+V to paste, in visual mode
     vmap <c-v> "+P
-
-    "replace <CTRL-V> with <CTRL-B>
-    noremap <c-b> <c-v>
-    inoremap <c-b> <c-v>
 " }
 
 " common typos {
     " Often I hold shift too long when issuing these commands.
-    command! Q q
-    command! Qall qall
-    command! W w
-    command! Wall wall
-    command! WQ wq
-    command! Wq wq
+    command! -bang Q q<bang>
+    command! -bang Qall qall<bang>
+    command! -bang W w<bang>
+    command! -bang Wall wall<bang>
+    command! -bang WQ wq<bang>
+    command! -bang Wq wq<bang>
     command! -bang Redraw redraw!
+    command! -nargs=* Set set <args>
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -172,6 +167,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     au BufNewFile,BufRead *.css.tmpl set filetype=css
     au BufNewFile,BufRead *.pxi set filetype=pyrex
     au BufNewFile,BufRead *.md set filetype=markdown
+    au BufNewFile,BufRead *.proto set filetype=proto
 " }
 
 " tkdiff-like bindings for vimdiff {
@@ -187,8 +183,24 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
         "show me the top of the "new" file
         autocmd VimEnter * normal lgg
+
+        set diffopt+=iwhite
     endif
 " }
+
+" { from http://www.bestofvim.com/tip/diff-diff/
+    nnoremap <Leader>df :call DiffToggle()<CR>
+
+    function! DiffToggle()
+        if &diff
+            diffoff
+        else
+            diffthis
+        endif
+    :endfunction
+" }
+"
+nnoremap <Leader>gd :e %:h<CR>
 
 " Pathogen: {
     " keep plugins nicely bundled in separate folders.
@@ -206,3 +218,7 @@ if filereadable($HOME . "/.vimrc.extra")
     source $HOME/.vimrc.extra
 endif
 " vim:et:sts=4:sw=4
+
+
+set exrc
+set secure

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -e
 
 BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD)
 if [[ $BRANCH == HEAD ]]; then
@@ -25,7 +25,7 @@ colorize git branch -q -a --merged "$UPSTREAM" |
     egrep -v "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" | 
     xargs -r --replace bash --norc -ec '
         # only mess with branches where I am the last committer
-        ##git log -1 --format=%ae "{}" | grep -Fxq "$GIT_COMMITER_EMAIL"
+        git log -1 --format=%ae "{}" | grep -Fxq "$GIT_COMMITER_EMAIL"
         if [[ "{}" =~ ^remotes/ ]]; then
             colorize git push --quiet --delete $(
                 sed '\''s|^remotes/||; s|/| |;'\'' <<< "{}"

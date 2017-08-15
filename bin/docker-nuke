@@ -8,10 +8,20 @@ if [ "$REPLY" != "y" ]; then
     exit 1
 fi
 
-xdocker() { exec xargs -r -n10 --verbose docker "$@"; }
+xdocker() { exec xargs -P10 -r -n1 --verbose docker "$@"; }
 
 set -x
+
+# remove containers
 docker ps -q | xdocker stop
 docker ps -aq | xdocker rm
+
+# remove tags
+docker images | sed 1d | grep -v '^<none>' | col 1 2 | sed 's/ /:/' | xdocker rmi
+
+# remove images
 docker images -q | xdocker rmi
 docker images -aq | xdocker rmi
+
+# remove volumes
+docker volume ls -q | xdocker volume rm

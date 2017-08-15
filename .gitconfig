@@ -1,6 +1,6 @@
 [user]
     name = Buck Evan
-    email = buck.2019@gmail.com
+    email = buck@yelp.com
 [core]
     excludesfile = ~/.gitignore_global
 [color]
@@ -11,22 +11,23 @@
 [diff]
     renamelimit = 0
     tool = vimdiff
+    # detect renames and copies by default
+    renames = copy
 [difftool]
     prompt = false
 [difftool "vimdiff"]
     # This is the same as the default command git would use,
     # except missing a -R (readonly) option.
-    cmd = vim -f -d -c \"wincmd l\" -c 'cd \"$GIT_PREFIX\"' \"$LOCAL\" \"$REMOTE\"
+    cmd = vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
 [merge]
-    tool = vimmerge
+    tool = vimdiff
     conflictstyle = diff3
 [mergetool]
     prompt = false
     keepBackup = false
+    trustExitCode = true
 [mergetool "vimmerge"]
     cmd = vimmerge vim $BASE $LOCAL $REMOTE $MERGED
-    trustExitCode = true
-    keepBackup = false
 [push]
     default = current
 [advice]
@@ -41,17 +42,19 @@
         echo $remote/$merge\
     '
     base = !git merge-base `git upstream` HEAD
-    diffbase = !sh -c 'git diff `git base` "$@"' -
+    diffbase = !sh -c 'git dt `git base` "$@"' -
     lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
         sed 's/@yelp.com//' | \
         less -XLFR && true
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
-    fetchdev = !sh -c 'colorize git fetch "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
+    fetchdev = !sh -c 'colorize git fetch -f "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
 
     branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -B "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
     vimdiff = difftool
     dt = difftool
-    df = diff
+    d = diff
     mt = mergetool
+    wip = commit -m 'WIP' --no-verify
+    amend = commit --amend --no-edit
 
 # vim:sts=4:sw=4:et:
