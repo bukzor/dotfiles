@@ -1,4 +1,14 @@
-#!/bin/sed -rf
-# really this removes ansi escape codes:
-#   http://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
-s/\[[^[:alpha:]]*[[:alpha:]]//g
+#!/bin/sh
+
+sed -r '
+s/[^[:alpha:]]*[[:alpha:]]//g
+s/+$//g
+' | python -c '
+import sys
+import re
+re = re.compile("(^|[^\b])\b")
+for line in sys.stdin:
+    while "\b" in line:
+        line = re.sub("", line)
+    sys.stdout.write(line)
+'

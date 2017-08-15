@@ -1,10 +1,7 @@
 #!/bin/bash
 wat=$(echo "$0" | sed 's|.*/||;s/git-//')
-if [[ "$@" ]]; then
-    space=' '
-else
-    space=''
-fi
-exec toilet -tf mono12 --gay "$wat$space$@"' indeed'
+set -- "$wat" "$@"
+# nice fonts: doom standard bigfig big
+exec toilet -F crop -tSf doom --gay "$@"' indeed!'
 
 # vim:ft=sh:
