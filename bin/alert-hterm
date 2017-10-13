@@ -17,7 +17,7 @@ notify_tmux() {
 # Send a notification.
 # Usage: [title] [body]
 notify() {
-  local title="${1-}" body="${2-}"
+  local title="alert" body="$@"
   case ${TERM-} in
   screen*)
     # Since tmux defaults to setting TERM=screen (ugh), we need to detect
@@ -73,10 +73,7 @@ main() {
     esac
   done
   if [ $# -eq 0 ]; then
-    die "Missing message to send"
-  fi
-  if [ $# -gt 2 ]; then
-    usage "Too many arguments"
+    set it\'s done!
   fi
   notify "$@"
 }
