@@ -3,6 +3,7 @@
     colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
+    set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
     set ruler showcmd       "give line, column, and command in the status line
     set laststatus=2        "always show the status line
@@ -56,8 +57,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     set backspace=indent,eol,start
 
     "Bind the 'old' up and down. Use these to skip past a very long line.
-    noremap gj j
-    noremap gk k
+    nnoremap gj j
+    nnoremap gk k
 " }
 
 " general usability {
@@ -94,14 +95,11 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     "ctrl+Q to save/quit
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
-    "ctrl+V to paste
-    map <c-v> "+gP
-    imap <c-v> <c-o>"+gP
-    vmap <c-v> "+P
-
-    "replace <CTRL-V> with <CTRL-B>
-    noremap <c-b> <c-v>
-    inoremap <c-b> <c-v>
+    " C-V is rectangular-visual mode, useful sometimes
+    ""ctrl+V to paste
+    "map <c-v> "+gP
+    "imap <c-v> <c-o>"+gP
+    "vmap <c-v> "+P
 " }
 
 " common typos {
@@ -189,6 +187,36 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
         autocmd VimEnter * normal lgg
     endif
 " }
+
+" use patience algorithm for improved diffs {
+    " lifted from :help diff-diffexpr
+    set diffexpr=MyDiff()
+    function MyDiff()
+        let opt = ""
+        " not supported by git-diff
+        "if &diffopt =~ "icase"
+            "let opt = opt . "-i "
+        "endif
+
+        if &diffopt =~ "iwhite"
+            let opt = opt . "-w "
+        endif
+        if
+        \   getfsize(v:fname_in) <= 6 &&
+        \   getfsize(v:fname_new) <= 6 &&
+        \   readfile(v:fname_in, 0, 1)[0] ==# 'line1' &&
+        \   readfile(v:fname_new, 0, 1)[0] ==# 'line2'
+            " don't run twice:
+            " https://stackoverflow.com/a/15884198/146821
+            call writefile(["1c1", "< line1", "---", "> line2"], v:fname_out)
+        else
+            "silent execute "!diff -a --binary " . opt . v:fname_in . " " . v:fname_new .
+            silent execute "!git-diff--ed " . opt . v:fname_in . " " . v:fname_new .
+                \  " > " . v:fname_out
+            redraw!
+        endif
+    endfunction
+"
 
 " Pathogen: {
     " keep plugins nicely bundled in separate folders.

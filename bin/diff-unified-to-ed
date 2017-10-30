@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+import sys
+
+
+def strip(prefix, text):
+    assert text.startswith(prefix), (prefix, text)
+    return text[len(prefix):]
+
+
+def unified_chunk_spec(chunk_spec):
+    start, sep, run = chunk_spec.partition(',')
+    if not sep:
+        run = '1'
+    return int(start), int(run)
+
+
+def normal_chunk_spec(start, run):
+    result = str(start)
+    if run > 1:
+        result += ',' + str(start + run - 1)
+    return result
+
+
+def handle_chunk(header, rest, callback):
+    header = strip('@@ ', header)
+    header, sep, _ = header.partition(' @@')
+    assert sep, sep
+    left, sep, right = header.partition(' ')
+    assert sep, sep
+    left = strip('-', left)
+    right = strip('+', right)
+    left_start, left_run = unified_chunk_spec(left)
+    right_start, right_run = unified_chunk_spec(right)
+
+    callback(normal_chunk_spec(left_start, left_run))
+
+    if left_run == 0:
+        callback('a')
+    elif right_run == 0:
+        callback('d')
+    else:
+        callback('c')
+
+    callback(normal_chunk_spec(right_start, right_run))
+    callback('\n')
+
+    separator = None
+    for line in rest:
+        if line.startswith('-'):
+            callback('< ' + line[1:])
+            separator = False
+        elif line.startswith('+'):
+            if separator is False:
+                callback('---\n')
+                separator = True
+            callback('> ' + line[1:])
+        elif line.startswith('@@'):
+            return line
+        elif line.startswith(' '):
+            raise(ValueError("Context line detected. Input must be generated with -U0."))
+        else:
+            assert line.startswith(('-', '+', '@@', ' ')), line
+
+
+def main():
+    for line in sys.stdin:
+        if line.startswith('@@'):
+            break
+
+    header = line
+    while header:
+        header = handle_chunk(header, sys.stdin, sys.stdout.write)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

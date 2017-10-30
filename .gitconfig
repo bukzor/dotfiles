@@ -11,6 +11,7 @@
 [diff]
     renamelimit = 0
     tool = vimdiff
+    algorithm = histogram
 [difftool]
     prompt = false
 [difftool "vimdiff"]

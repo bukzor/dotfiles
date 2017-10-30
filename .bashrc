@@ -8,13 +8,6 @@ case $- in
       *) return;;
 esac
 
-# General shell environment, shared by zsh
-if [ -f ~/.sh_env ]; then
-    source ~/.sh_env
-fi
-if [ -f ~/.sh_aliases ]; then
-    source ~/.sh_aliases
-fi
 
 # bash options  ==============================================================
 # don't put duplicate lines in the history. See bash(1) for more options
@@ -31,6 +24,17 @@ shopt -s checkwinsize
 # If set, the pattern "**" used in a pathname expansion context will
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
+
+# allow regex-type functionality in globs
+shopt -s extglob
+
+# General shell environment, shared by zsh
+if [ -f ~/.sh_env ]; then
+    source ~/.sh_env
+fi
+if [ -f ~/.sh_aliases ]; then
+    source ~/.sh_aliases
+fi
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
@@ -51,10 +55,10 @@ case "$TERM" in
     # All's well.
     ;;
 *-col*)
-    echo LOW COLOR TERM: $TERM, $terminal
+    echo "LOW COLOR TERM: $TERM ($terminal)"
     ;;
 *)
-    echo NO COLOR TERM: $TERM, $terminal
+    echo "NO COLOR TERM: $TERM ($terminal)"
     PS1=$(echo "$PS1" | uncolor)
     ;;
 esac

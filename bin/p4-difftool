@@ -1,0 +1,12 @@
+#!/bin/dash
+
+while test -n "$1"; do
+  while test "$1" = ":"; do shift; done
+  file1="$1"
+  shift
+  file2="$1"
+  shift
+  while test "$1" = ":"; do shift; done
+
+  vimdiff "$file1" "$file2"
+done

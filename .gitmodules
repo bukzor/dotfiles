@@ -1,6 +1,6 @@
 [submodule ".vim/bundle/CSApprox"]
 	path = .vim/bundle/CSApprox
-	url = git@github.com:bukzor/csapprox.git
+	url = https://github.com/bukzor/csapprox.git
 [submodule ".vim/bundle/Syntastic"]
 	path = .vim/bundle/Syntastic
 	url = https://github.com/scrooloose/syntastic.git
@@ -21,4 +21,4 @@
 	url = https://github.com/ynkdir/vim-vimlparser.git
 [submodule ".vim/bundle/EditorConfig"]
 	path = .vim/bundle/EditorConfig
-	url = git@github.com:editorconfig/editorconfig-vim.git
+	url = https://github.com/editorconfig/editorconfig-vim.git
