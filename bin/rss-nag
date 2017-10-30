@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eu
-rss-summary | sort -rnk 2 | head -5 | xargs -r -L1 sh -c '
+rss-summary | head -5 | xargs -r -L1 sh -c '
     set -eu
     echo $1: using $(($2 / 1000000)) GB
     rss-user "$1" --width 79 | head -30

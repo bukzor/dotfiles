@@ -1,3 +1,4 @@
+#!/not/executable/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -12,10 +13,13 @@ esac
 # bash options  ==============================================================
 # don't put duplicate lines in the history. See bash(1) for more options
 HISTCONTROL=erasedups
+
 # append to the history file, don't overwrite it
 shopt -s histappend
-# let me fix it if history-substition fails.
-shopt -s histreedit
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -78,6 +82,15 @@ if ! shopt -oq posix; then
   if [ -d ~/.bash_completion.d ]; then
     source ~/.bash_completion.d/*.sh
   fi
+
+  # completions for travis, added by travis gem
+  [ -f ~/.travis/travis.sh ] && source ~/.travis/travis.sh
 fi
 
+if [[ $TMUX ]]; then
+  PROMPT_COMMAND='eval `~/bin/tmux-env`; '"$PROMPT_COMMAND"
+fi
+if which aactivator >/dev/null; then
+  eval "$(aactivator init)"
+fi
 # vim:et:sw=2:sts=2:

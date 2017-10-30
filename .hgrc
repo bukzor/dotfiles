@@ -1,6 +1,5 @@
 [ui]
-username=Buck Evan
-email=buck.2019@gmail.com
+username=Buck Evan <buck.2019@gmail.com>
 merge=internal:merge
 ignore=~/.hgignore_global
 

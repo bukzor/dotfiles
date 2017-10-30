@@ -38,7 +38,7 @@ if which toilet >&/dev/null; then
     echo "toilet filters: (-F)"
     toilet --filter list | sed '1d; s/^"//; s/".*$//' |
         xargs --replace sh -xc '
-            : toilet -t -f mono12 -F {} "$PHRASE"
-            toilet -t -f mono12 -F {} "$PHRASE"
+            : toilet -t -f big -F {} "$PHRASE"
+            toilet -t -f big -F {} "$PHRASE"
         '
 fi

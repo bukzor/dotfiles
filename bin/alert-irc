@@ -1,63 +1,96 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.6
+# pylint:disable=invalid-name
 import os
+import asyncio
 
 BUFSIZE = 2**11 # unrealIRCd seems to use 2k buffers
 VERBOSE = os.environ.get('VERBOSE', '')
 
 def show(msg):
     from sys import stdout
-    stdout.write(msg)
+    stdout.write(msg.decode('UTF-8'))
 
 
-def send(irc, msg):
+async def send(writer, msg):
     if VERBOSE:
-        show('>> ' + msg)
-    irc.send(msg)
+        show(b'>> ' + msg)
+    writer.write(msg)
+    return writer.drain()
 
 
-def recv(irc):
-    data = irc.recv(BUFSIZE)
+async def recv(reader):
+    data = await reader.read(BUFSIZE)
     if VERBOSE:
-        show('<< ' + data)
+        show(b'<< ' + data)
     return data
 
 
-def main():
+async def pong(loop, reader, writer, channel, message):
+    joined = False
+    while True:
+        data = await recv(reader)
+        if data.startswith(b'PING'):
+            await send(writer, b'PONG %s\r\n' % data.split()[1])
+            if not joined and channel.startswith(b'#'):
+                await send(writer, b'JOIN :%s\r\n' % channel)
+                joined = True
+                await send_message(writer, channel, message)
+
+
+async def send_message(writer, channel, message):
+    sent = False
+    while True:
+        try:
+            await send(writer, b'PRIVMSG %s :%s\r\n' % (channel, next(message)))
+        except StopIteration:
+            if sent:
+                await send(writer, b'QUIT\r\n')
+                return
+            else:
+                message = iter(["it's done!\n"])
+        else:
+            sent = True
+
+
+async def amain(loop):
     """the entry point"""
     network = 'irc.yelpcorp.com'
     port = 6697
 
-    user = os.environ['USER']
-    channel = os.environ.get('CHANNEL', user)
+    user = os.environ['USER'].encode('US-ASCII')
+    channel = os.environ.get('CHANNEL', user).encode('US-ASCII')
 
     import sys
     message = ' '.join(sys.argv[1:])
-    if not message:
-        message = "it's done!"
+    if message:
+        message = message.encode('UTF-8')
+        message = iter(message.splitlines(True))
+    else:
+        message = iter(open('/dev/stdin', 'rb'))
 
-    import socket, ssl
-    irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    irc = ssl.wrap_socket(irc)
-    irc.connect((network, port))
+    loop = asyncio.get_event_loop()
+    reader, writer = await asyncio.open_connection(host=network, port=port, ssl=True)
 
-    send(irc, 'PASS thunderb1rd\r\n')
-    send(irc, 'NICK %s-bot\r\n' % user)
-    send(
-        irc,
-        'USER %(user)s-bot %(user)s-bot '
-            '%(user)s-bot :%(user)s\'s alert bot\r\n'
-            % dict(user=user),
+    await send(writer, b'PASS thunderb1rd\r\n')
+    await send(writer, b'NICK %s-bot\r\n' % user)
+    await send(
+        writer,
+        (
+            b'USER %(user)s-bot %(user)s-bot '
+            b'%(user)s-bot :%(user)s\'s alert bot\r\n'
+        ) % {b'user': user}
     )
 
-    data = True
-    while data:
-        data = recv(irc)
-        if data.startswith('PING'):
-            send(irc, 'PONG ' + data.split() [ 1 ] + '\r\n')
-            send(irc, 'PRIVMSG %s :%s\r\n' % (channel, message))
-            break
-    recv(irc)
-    send(irc, 'QUIT\r\n')
+    await pong(loop, reader, writer, channel, message)
+
+
+def main():
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(amain(loop))
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
 
 
 if __name__ == '__main__':

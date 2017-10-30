@@ -29,6 +29,6 @@ xargs -n1 | xargs --replace -P50 bash -c '
         exec 2>&4
 
         echo -n "{}: "
-        ssh-noninteractive "{}" '"$(sh-quote "$@")"' || true
+        ssh-noninteractive "{}" '"$(sh-quote "$(sh-quote "$@")")"' || true
     ) | flock -x 200 cat
 '
