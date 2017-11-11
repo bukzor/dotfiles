@@ -29,16 +29,11 @@ shopt -s checkwinsize
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
 
-# allow regex-type functionality in globs
+# allow regex-like functionality in globs
 shopt -s extglob
 
-# General shell environment, shared by zsh
-if [ -f ~/.sh_env ]; then
-    source ~/.sh_env
-fi
-if [ -f ~/.sh_aliases ]; then
-    source ~/.sh_aliases
-fi
+# shell aliases, shared by zsh
+. ~/.sh_aliases
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
@@ -80,11 +75,11 @@ if ! shopt -oq posix; then
   fi
   # My own completions
   if [ -d ~/.bash_completion.d ]; then
-    source ~/.bash_completion.d/*.sh
+    . ~/.bash_completion.d/*.sh
   fi
 
   # completions for travis, added by travis gem
-  [ -f ~/.travis/travis.sh ] && source ~/.travis/travis.sh
+  [ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 fi
 
 if [[ $TMUX ]]; then

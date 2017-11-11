@@ -1,18 +1,25 @@
 # interactive environment that should be shared by bash and zsh
 
+# ensure access to private dotfiles
+if command -v prodcertstatus && ! prodcertstatus; then
+    prodaccess
+fi
+
 # set PATH so it includes user's private bin if it exists
-export PATH=~/bin:"${PATH}"
+export PATH=~/bin:~/private-dotfiles/bin:"${PATH}"
 export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
 export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
 export PATH=~/.local/bin:"${PATH}"
 
 #MY PREFERENCES ==============================================================
-export EDITOR VISUAL GIT_EDITOR
-EDITOR=vim
-VISUAL=$EDITOR
-GIT_EDITOR=$EDITOR
+export EDITOR=vim
+export VISUAL=$EDITOR
+export GIT_EDITOR=$EDITOR
+export P4DIFFOPTS="-u --color"
+export P4DIFF="~/bin/p4-difftool"
+export PYTHONSTARTUP=~/.pythonrc.py
 
-if [[ -z "$LANG" ]]; then
+if [ -z "$LANG" ]; then
   export LANG='en_US.UTF-8'
 fi
 
@@ -23,7 +30,7 @@ export PAGER=less
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # Browser
-if [[ "$OSTYPE" == darwin* ]]; then
+if echo "$OSTYPE" | grep -q '^darwin'; then
   export BROWSER='open'
 fi
 
@@ -38,7 +45,7 @@ HISTFILESIZE=10000
 stty -ixon -ixoff
 
 # fix up TERM values
-if [[ $PPID = 0 ]]; then
+if [ "$PPID" = 0 ]; then
   terminal=init
 else
   terminal=$(ps -o comm= $PPID)
@@ -47,16 +54,10 @@ case "$terminal" in
 lxterminal|gnome-terminal|xfce4-terminal)
     export TERM=xterm-256color
     ;;
-tmux?(: server))
+tmux|"tmux: server")
     export TERM=screen-256color
     ;;
 esac
-
-# Alias definitions.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-if [ -f ~/.bash_aliases ]; then
-    source ~/.bash_aliases
-fi
 
 # Further environment
 export GEM_HOME=~/prefices/rubygems
@@ -64,22 +65,22 @@ export TREES=$HOME/trees
 
 # My very own python!
 if [ -f ~/venv/mypy/bin/activate ]; then
-  activate() { source ~/venv/mypy/bin/activate; }
-  if [[ -n $TMUX ]]; then
+  activate() { . ~/venv/mypy/bin/activate; }
+  if [ -n "$TMUX" ]; then
     PROMPT_COMMAND='eval `~/bin/tmux-env`'
     activate
   fi
 fi
 
 # Temporary Files
-if [[ ! -d "$TMPDIR" ]]; then
+if [ ! -d "$TMPDIR" ]; then
   export TMPDIR="/tmp/$USER"
   mkdir -p -m 700 "$TMPDIR"
 fi
 
 # added by travis gem
-if [[ -f ~/.travis/travis.sh ]]; then
-  source ~/.travis/travis.sh
+if [ -f ~/.travis/travis.sh ]; then
+  . ~/.travis/travis.sh
 fi
 
 # vim:ft=zsh:et:sw=2:sts=2:

@@ -5,7 +5,7 @@ noerr () {
 }
 
 alias tmux-env='eval `~/bin/tmux-env`'
-alias crterm='export TERM=xterm-256color; source ~/.bashrc'
+alias crterm='export TERM=xterm-256color; . ~/.bashrc'
 function ssh-dev() {
 	ssh -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1"
 }
@@ -15,7 +15,7 @@ function reset() {
     command reset
 }
 
-alias login='source ~/.sh_env'
+alias login='. ~/.profile'
 
 # enable color support of ls and also add handy aliases
 if [ -x $(which dircolors) ]; then
@@ -47,4 +47,4 @@ function title {
 }
 
 
-source ~/private-dotfiles/.sh_aliases
+. ~/private-dotfiles/.sh_aliases

@@ -6,4 +6,4 @@
 
 setopt PROMPT_SUBST
 
-source .sh_aliases
+. .sh_aliases
