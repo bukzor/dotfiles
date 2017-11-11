@@ -1,0 +1,3 @@
+#!/bin/sh
+# filter out lines that contain non-printable bytes
+exec grep -av '[^[:print:]       ]'
