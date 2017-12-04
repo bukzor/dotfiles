@@ -244,12 +244,16 @@ nnoremap <Leader>gd :e %:h<CR>
     endif
 " }
 
-" My own extra stuff:
+" extra, local settings {
 if filereadable($HOME . "/.vimrc.extra")
     source $HOME/.vimrc.extra
 endif
-" vim:et:sts=4:sw=4
+if filereadable($HOME . "/private-dotfiles/.vimrc")
+    source $HOME/private-dotfiles/.vimrc
+endif
+" }
 
 
 set exrc
 set secure
+" vim:et:sts=4:sw=4
