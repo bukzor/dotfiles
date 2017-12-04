@@ -45,10 +45,11 @@ HISTFILESIZE=10000
 stty -ixon -ixoff
 
 # fix up TERM values
-if [ "$PPID" = 0 ]; then
+# get the command name of the session-leader's parent
+terminal="$(ps -o comm:1= "$(ps -o ppid:1= "$(ps -o sid:1= $$)")" 2>&-)"
+if [[ "$?" -ne 0 ]]; then
+  # if our session-leader doesn't have a real real parent (pid:0) then we're running as init
   terminal=init
-else
-  terminal=$(ps -o comm= $PPID)
 fi
 case "$terminal" in
 lxterminal|gnome-terminal|xfce4-terminal)
@@ -56,6 +57,11 @@ lxterminal|gnome-terminal|xfce4-terminal)
     ;;
 tmux|"tmux: server")
     export TERM=screen-256color
+    ;;
+*)
+    if ! [[ "$TERM" =~ '^(xterm|screen)-256color$' ]]; then
+      echo "Warning, unknown terminal: \"$terminal\" (TERM=$TERM)" >&2
+    fi
     ;;
 esac
 
