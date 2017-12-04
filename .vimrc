@@ -191,8 +191,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
 " use patience algorithm for improved diffs {
     " lifted from :help diff-diffexpr
-    set diffexpr=MyDiff()
-    function MyDiff()
+    ""set diffexpr=MyDiff()
+    function! MyDiff()
         let opt = ""
         " not supported by git-diff
         "if &diffopt =~ "icase"
