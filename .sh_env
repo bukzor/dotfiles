@@ -1,15 +1,23 @@
 # interactive environment that should be shared by bash and zsh
+# commands that must be run just once for each new terminal
+# generally, this is environment variables
+# if your command needs to be run for each new *shell* use ~/.sh_aliases
 
 # ensure access to private dotfiles
-if command -v prodcertstatus && ! prodcertstatus; then
-    prodaccess
+if command -v prodcertstatus && ! prodcertstatus --check_remaining_hours 8; then
+  prodaccess
+fi
+
+# save/restore our $PATH, so that we can (re-)source this file idempotently
+if [[ -z "$__orig_PATH" ]]; then
+  export __orig_PATH="$PATH"
+else
+  PATH="$__orig_PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
-export PATH=~/bin:~/private-dotfiles/bin:"${PATH}"
-export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
-export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
-export PATH=~/.local/bin:"${PATH}"
+PATH=~/.local/bin:~/prefix/brew/sbin:~/prefix/brew/bin:~/private-dotfiles/bin:~/bin:"$PATH"
+export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefix/brew/bin"
 
 #MY PREFERENCES ==============================================================
 export EDITOR=vim
@@ -34,13 +42,6 @@ if echo "$OSTYPE" | grep -q '^darwin'; then
   export BROWSER='open'
 fi
 
-# don't put duplicate lines in the history. See bash(1) for more options
-HISTCONTROL=erasedups
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=10000
-
 #unmap CTRL-S and CTRL-Q
 stty -ixon -ixoff
 
@@ -53,29 +54,26 @@ if [[ "$?" -ne 0 ]]; then
 fi
 case "$terminal" in
 lxterminal|gnome-terminal|xfce4-terminal)
-    export TERM=xterm-256color
-    ;;
+  export TERM=xterm-256color
+  ;;
 tmux|"tmux: server")
-    export TERM=screen-256color
-    ;;
+  export TERM=screen-256color
+  ;;
 *)
-    if ! [[ "$TERM" =~ '^(xterm|screen)-256color$' ]]; then
-      echo "Warning, unknown terminal: \"$terminal\" (TERM=$TERM)" >&2
-    fi
-    ;;
+  if ! [[ "$TERM" =~ '^(xterm|screen)-256color$' ]]; then
+    echo "Warning, unknown terminal: \"$terminal\" (TERM=$TERM)" >&2
+  fi
+  ;;
 esac
 
 # Further environment
-export GEM_HOME=~/prefices/rubygems
+export GEM_HOME=~/prefix/rubygems
 export TREES=$HOME/trees
 
 # My very own python!
+activate() { . ~/venv/mypy/bin/activate; }
 if [ -f ~/venv/mypy/bin/activate ]; then
-  activate() { . ~/venv/mypy/bin/activate; }
-  if [ -n "$TMUX" ]; then
-    PROMPT_COMMAND='eval `~/bin/tmux-env`'
-    activate
-  fi
+  activate
 fi
 
 # Temporary Files
@@ -88,5 +86,8 @@ fi
 if [ -f ~/.travis/travis.sh ]; then
   . ~/.travis/travis.sh
 fi
+if command -v aactivator >/dev/null; then
+  eval "$(aactivator init)"
+fi
 
-# vim:ft=zsh:et:sw=2:sts=2:
+# vim:ft=sh:et:sw=2:sts=2:
