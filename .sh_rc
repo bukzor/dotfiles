@@ -27,7 +27,7 @@ else
 fi
 
 # VCS detection
-function __detect_vcs() {
+function __vcs() {
   if [[ "$__detect_vcs_pwd" = "$PWD" ]]; then
     return 0
   fi
@@ -46,17 +46,36 @@ function __detect_vcs() {
         export VCS=p4
       else
         TOP=/
-        unset VCS PS1_VCS
+        unset VCS VCS_PS1
         return 0
       fi
     fi
   fi
 
-  export TOP="$candidate"
-  PS1_VCS="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$TOP")")) "
+  export VCS_TOP="$candidate"
+  VCS_PS1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
 }
 
-precmd_functions+=(__detect_vcs)
+function __vcs_branch() {
+  if [[ "$VCS" = "git" ]]; then
+    export VCS_BRANCH="$(git branch-name 2>/dev/null)"
+  elif [[ "$VCS" = "hg" ]]; then
+    export VCS_BRANCH="$(cat $VCS_TOP/.hg/bookmarks.current 2>/dev/null)"
+  elif [[ "$VCS" ]]; then
+    unset VCS_BRANCH
+  else
+    unset VCS_BRANCH
+    VCS_PS2=""
+    return 0
+  fi
+  if [[ $VCS_BRANCH ]]; then
+    VCS_PS2=" $VCS_BRANCH) "
+  else
+    VCS_PS2=") "
+  fi
+}
+
+precmd_functions+=(__vcs __vcs_branch)
 preexec_functions+=('eval $(~/bin/tmux-env)')
 
 # set a fancy prompt (non-color, unless we know we "want" color)
@@ -66,7 +85,7 @@ YELLOW='\[[1;33m\]'
 PURPLE='\[[1;35m\]'
   TEAL='\[[1;36m\]'
    END='\[[0;39m\]'
-   PS1="$TEAL"'$PS1_VCS'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
+   PS1="$TEAL"'$VCS_PS1$VCS_PS2'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
 $PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
 
 if [[ "$ZSH_VERSION" ]]; then
