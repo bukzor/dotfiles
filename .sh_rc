@@ -16,7 +16,7 @@ fi
 # anything that's mutated (rather than overwritten) should be listed here.
 precmd_functions+=()
 preexec_functions+=()
-if [[ "${#__orig_settings[@]}" -gt 0 ]]; then
+if [[ "${#__orig_settings[@]}" -eq 0 ]]; then
   for varname in precmd_functions preexec_functions; do
     __orig_settings+=("$(typeset -p $varname)")
   done
