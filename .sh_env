@@ -1,7 +1,7 @@
 # interactive environment that should be shared by bash and zsh
 # commands that must be run just once for each new terminal
 # generally, this is environment variables
-# if your command needs to be run for each new *shell* use ~/.sh_aliases
+# if your command needs to be run for each new *shell* use ~/.sh_rc
 
 # ensure access to private dotfiles
 if command -v prodcertstatus && ! prodcertstatus --check_remaining_hours 8; then
@@ -9,6 +9,7 @@ if command -v prodcertstatus && ! prodcertstatus --check_remaining_hours 8; then
 fi
 
 # save/restore our $PATH, so that we can (re-)source this file idempotently
+# currently this is the only environment variable we modify (rather than overwrite), but we should do this for all such
 if [[ -z "$__orig_PATH" ]]; then
   export __orig_PATH="$PATH"
 else

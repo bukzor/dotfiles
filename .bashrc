@@ -26,8 +26,8 @@ shopt -s globstar
 # allow regex-like functionality in globs
 shopt -s extglob
 
-# shell aliases, shared by zsh
-. ~/.sh_aliases
+# shell settings and aliases, shared by zsh
+. ~/.sh_rc
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -40,8 +40,5 @@ if ! shopt -oq posix; then
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
-
-  # completions for travis, added by travis gem
-  [ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 fi
 # vim:et:sw=2:sts=2:

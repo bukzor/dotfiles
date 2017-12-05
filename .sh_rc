@@ -140,5 +140,8 @@ function title {
     echo -n "]0;"$*""
 }
 
+# completions for travis, added by travis gem
+[ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 
-. ~/private-dotfiles/.sh_aliases
+# extra shell settings for work
+[ -f ~/private-dotfiles/.sh_rc ] && . ~/private-dotfiles/.sh_rc
