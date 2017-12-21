@@ -60,23 +60,22 @@ function __vcs_branch() {
   if [[ "$VCS" = "git" ]]; then
     export VCS_BRANCH="$(git branch-name 2>/dev/null)"
   elif [[ "$VCS" = "hg" ]]; then
-    export VCS_BRANCH="$(cat $VCS_TOP/.hg/bookmarks.current 2>/dev/null)"
-  elif [[ "$VCS" ]]; then
-    unset VCS_BRANCH
+    export VCS_BRANCH="$(hg id -btB | xargs -n1 | egrep -xv 'default|tip' | tr '\n' ' ')"
   else
     unset VCS_BRANCH
-    VCS_PS2=""
-    return 0
   fi
+
   if [[ $VCS_BRANCH ]]; then
     VCS_PS2=" $VCS_BRANCH) "
-  else
+  elif [[ "$VCS" ]]; then
     VCS_PS2=") "
+  else
+    VCS_PS2=""
   fi
 }
 
 precmd_functions+=(__vcs __vcs_branch)
-preexec_functions+=('eval $(~/bin/tmux-env)')
+preexec_functions+=('eval "$(tmux show-env -s)"')
 
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[[1;32m\]'
@@ -117,7 +116,7 @@ HISTSIZE=8000
 HISTFILESIZE=64000
 HISTTIMEFORMAT="[%F %r %z] "
 
-alias tmux-env='eval `~/bin/tmux-env`'
+alias tmux-env='eval "$(tmux show-env -s)"'
 alias crterm='export TERM=xterm-256color; . ~/.bashrc'
 function ssh-dev() {
 	ssh -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1"

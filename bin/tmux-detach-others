@@ -1,4 +1,4 @@
 #!/bin/sh
 # Detach all other clients from the current tmux session
-eval `tmux-env`
+eval "$(tmux show-env -s)"
 tmux list-clients | grep -vw $SSH_TTY | col 1 | sed s/:// | xargs -rn1 tmux detach-client -t
