@@ -18,12 +18,15 @@ function reset() {
 alias login='. ~/.profile'
 
 # enable color support of ls and also add handy aliases
-if [ -x $(which dircolors) ]; then
+if command -v dircolors > /dev/null; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
+fi
 
+# busybox grep doesn't have --color=auto :(
+if grep --color=auto -q '' <<< '' ; then
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
@@ -47,4 +50,6 @@ function title {
 }
 
 
-. ~/private-dotfiles/.sh_aliases
+if [ -f ~/private-dotfiles/.sh_aliases ]; then
+    . ~/private-dotfiles/.sh_aliases
+fi
