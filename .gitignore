@@ -9,6 +9,7 @@
 !docs
 !private-dotfiles.d
 !trees
+!.bash
 !.vim
 !.ssh
 !.bash_completion.d

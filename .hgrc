@@ -23,7 +23,8 @@ strip=
 vimdiff=
 
 [alias]
-difftool = !hg status -n "$@" | xargs -on1 hg vimdiff "$@"
+# FIXME: I want this to handle both "path/to/file" and "-r mybookmark"
+difftool = !hg status -n "$@" | xargs -on1 hg vimdiff
 dt = !hg difftool "$@"
 
 [pager]

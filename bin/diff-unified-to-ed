@@ -66,6 +66,8 @@ def main():
     for line in sys.stdin:
         if line.startswith('@@'):
             break
+    else:
+        return
 
     header = line
     while header:

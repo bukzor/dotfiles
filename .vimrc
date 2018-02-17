@@ -191,8 +191,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
 " use patience algorithm for improved diffs {
     " lifted from :help diff-diffexpr
-    set diffexpr=MyDiff()
-    function MyDiff()
+    ""set diffexpr=MyDiff()
+    function! MyDiff()
         let opt = ""
         " not supported by git-diff
         "if &diffopt =~ "icase"
@@ -244,12 +244,16 @@ nnoremap <Leader>gd :e %:h<CR>
     endif
 " }
 
-" My own extra stuff:
+" extra, local settings {
 if filereadable($HOME . "/.vimrc.extra")
     source $HOME/.vimrc.extra
 endif
-" vim:et:sts=4:sw=4
+if filereadable($HOME . "/private-dotfiles/.vimrc")
+    source $HOME/private-dotfiles/.vimrc
+endif
+" }
 
 
 set exrc
 set secure
+" vim:et:sts=4:sw=4

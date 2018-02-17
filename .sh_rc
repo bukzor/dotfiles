@@ -1,0 +1,152 @@
+#!/not/executable/bash
+# commands that must be run on each new shell
+# generally, this is aliases, shell settings, functions
+# if your command only needs to be run once per *terminal* use ~/.sh_env
+
+function time() {
+  /usr/bin/time -o /dev/tty "$@"
+}
+
+if [ "$BASH" ]; then
+  # enable precmd_functions and preexec_functions, for zsh compatibility
+  source ~/.bash/bash-preexec.sh
+fi
+
+# save/restore our state, so that we can (re-)source this file idempotently
+# anything that's mutated (rather than overwritten) should be listed here.
+precmd_functions+=()
+preexec_functions+=()
+if [[ "${#__orig_settings[@]}" -gt 0 ]]; then
+  for varname in precmd_functions preexec_functions; do
+    __orig_settings+=("$(typeset -p $varname)")
+  done
+else
+  for state in "${__orig_settings[@]}"; do
+    eval "$state"
+  done
+fi
+
+# VCS detection
+function __detect_vcs() {
+  if [[ "$__detect_vcs_pwd" = "$PWD" ]]; then
+    return 0
+  fi
+
+  __detect_vcs_pwd="$PWD"
+  candidate="$(git rev-parse --show-toplevel 2>&-)"
+  if [[ $? -eq 0 ]]; then
+    export VCS=git
+  else
+    candidate="$(hg show bundle.mainreporoot)"
+    if [[ $? -eq 0 ]]; then
+      export VCS=hg
+    else
+      candidate="$(p4 info | grep '^Client root:' | sed 's/.* //')"
+      if [[ "$candidate" ]]; then
+        export VCS=p4
+      else
+        TOP=/
+        unset VCS PS1_VCS
+        return 0
+      fi
+    fi
+  fi
+
+  export TOP="$candidate"
+  PS1_VCS="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$TOP")")) "
+}
+
+precmd_functions+=(__detect_vcs)
+preexec_functions+=('eval $(~/bin/tmux-env)')
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+ GREEN='\[[1;32m\]'
+YELLOW='\[[1;33m\]'
+  BLUE='\[[1;34m\]'
+PURPLE='\[[1;35m\]'
+  TEAL='\[[1;36m\]'
+   END='\[[0;39m\]'
+   PS1="$TEAL"'$PS1_VCS'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
+$PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
+
+if [[ "$ZSH_VERSION" ]]; then
+  # do a bit of transformation on the bash PS1 to make it a zsh PS1
+  PS1="$(sed '
+    s/\\\[/%{/g
+    s/\\\]/%}/g
+    s/\\u/%n/g
+    s/\\h/%m/g
+    s/\\w/%d/g
+    s/\\D/%D/g
+'  <<< "$PS1")"
+fi
+
+case "$TERM" in
+*-256col*|*-col*)
+    # All's well.
+    ;;
+*)
+    PS1="$(uncolor <<< "$PS1")"
+    ;;
+esac
+
+# don't put duplicate lines in the history. See bash(1) for more options
+HISTCONTROL=erasedups
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=8000
+HISTFILESIZE=64000
+HISTTIMEFORMAT="[%F %r %z] "
+
+alias tmux-env='eval `~/bin/tmux-env`'
+alias crterm='export TERM=xterm-256color; . ~/.bashrc'
+function ssh-dev() {
+	ssh -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1"
+}
+function reset() {
+    ## http://askubuntu.com/a/123296/23034
+    tput rmcup
+    command reset
+}
+
+alias login='. ~/.profile'
+
+# enable color support of ls and also add handy aliases
+if command -v dircolors > /dev/null; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+fi
+
+# busybox grep doesn't have --color=auto :(
+if grep --color=auto -q '' <<< '' ; then
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+alias diff='diff -d'
+alias info='info --vi-keys'
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+## Add an "alert" alias for long running commands.  Use like so:
+##   sleep 10; alert
+#alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -re '\''s/^\s*[0-9]+\s*//;s/[;&|]+\s*alert$//'\'')"'
+
+# http://superuser.com/a/599156/50425
+function title {
+    echo -n "]0;"$*""
+}
+
+# completions for travis, added by travis gem
+[ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
+
+# extra shell settings for work
+if [ -f ~/private-dotfiles/.sh_rc ]; then
+    . ~/private-dotfiles/.sh_rc
+fi
