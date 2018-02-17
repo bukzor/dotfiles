@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-import urllib2
+#!/usr/bin/env python3
+from urllib.request import urlopen
 import json
 import sys
 
@@ -16,12 +16,16 @@ for fname in files:
     else:
         f = open(fname)
 
-    data['files'][fname] = {'content': f.read()}
+    fname = fname.replace('/', '⧸')
+    data['files'][fname] = {
+        'type': 'text/plain',
+        'content': f.read(),
+    }
 
-r = urllib2.urlopen(
+r = urlopen(
     'https://api.github.com/gists',
-    json.dumps(data),
+    json.dumps(data).encode('UTF-8'),
 )
 
 response = json.loads(r.read())
-print response['html_url']
+print(response['html_url'])
