@@ -1,0 +1,11 @@
+#!/bin/bash
+set -eux
+
+path="${1:-$PWD}"
+while true; do
+    case $path in
+        /* ) echo $path; path=${path%/*};;
+        '' ) echo /; break;;
+        * ) path=$PWD/$path;;
+    esac
+done
