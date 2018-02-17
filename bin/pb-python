@@ -1,2 +1,3 @@
 #!/bin/sh
-exec curl -F 'code=<-' -F 'language=python' -F 'webpage=' 'https://paste.pound-python.org/' -so /dev/null -w '%{redirect_url}\n'
+cat "$@" |
+    exec curl -F 'code=<-' -F 'language=python' -F 'webpage=' 'https://paste.pound-python.org/' -so /dev/null -w '%{redirect_url}\n'
