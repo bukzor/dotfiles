@@ -1,6 +1,5 @@
 [ui]
-username=Buck Evan
-email=buck@yelp.com
+username=Buck Evan <buck.2019@gmail.com>
 merge=internal:merge
 ignore=~/.hgignore_global
 
@@ -21,10 +20,11 @@ purge=
 strip=
 
 [extdiff]
-# micro-bug: can't hg vimdiff a directory :(
-cmd.dt=vimdiff
-cmd.vimdiff=vimdiff
-cmd.echo=
+vimdiff=
+
+[alias]
+difftool = !hg status -n "$@" | xargs -on1 hg vimdiff "$@"
+dt = !hg difftool "$@"
 
 [pager]
 pager = less -XLFR
@@ -56,3 +56,5 @@ make-mutable = check the "This is a non-publishing repository" config box in bit
 make-mutable-posthoc = hg phase -f -d 1818
 
 rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbranches
+
+%include private-dotfiles/.hgrc

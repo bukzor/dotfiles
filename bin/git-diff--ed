@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eu
+
+exec git diff \
+    --no-index \
+    --no-color \
+    --no-ext-diff \
+    -U0 \
+    --diff-algorithm=histogram \
+    --text \
+    --binary "$@" |
+diff-unified-to-ed

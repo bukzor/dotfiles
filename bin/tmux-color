@@ -5,7 +5,7 @@ if [[ $1 ]]; then
 else
     # no arguments, show current value
     colortest256
-    tmux show status-style
+    (tmux show -g; tmux show -s; tmux show -w; tmux show) | egrep '^(status-bg|status-fg)'
     exit
 fi
 
@@ -14,4 +14,11 @@ if [[ $2 ]]; then
 else
     FG=white
 fi
-tmux set status-style "bg=$BG,fg=$FG"
+
+set -x
+# numbers must be prefixed with 'colour'
+case "$BG" in [0-9]*) BG=colour"$BG"; esac
+case "$FG" in [0-9]*) FG=colour"$FG"; esac
+
+tmux -q set status-bg "$BG"
+tmux -q set status-fg "$FG"

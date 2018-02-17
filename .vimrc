@@ -3,6 +3,7 @@
     colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
+    set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
     set ruler showcmd       "give line, column, and command in the status line
     set laststatus=2        "always show the status line
@@ -56,8 +57,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     set backspace=indent,eol,start
 
     "Bind the 'old' up and down. Use these to skip past a very long line.
-    noremap gj j
-    noremap gk k
+    nnoremap gj j
+    nnoremap gk k
 " }
 
 " general usability {
@@ -94,19 +95,20 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     "ctrl+Q to save/quit
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
-    "ctrl+V to paste
+    "ctrl+V to paste, in visual mode
     vmap <c-v> "+P
 " }
 
 " common typos {
     " Often I hold shift too long when issuing these commands.
-    command! Q q
-    command! Qall qall
-    command! W w
-    command! Wall wall
-    command! WQ wq
-    command! Wq wq
+    command! -bang Q q<bang>
+    command! -bang Qall qall<bang>
+    command! -bang W w<bang>
+    command! -bang Wall wall<bang>
+    command! -bang WQ wq<bang>
+    command! -bang Wq wq<bang>
     command! -bang Redraw redraw!
+    command! -nargs=* Set set <args>
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -166,6 +168,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     au BufNewFile,BufRead *.css.tmpl set filetype=css
     au BufNewFile,BufRead *.pxi set filetype=pyrex
     au BufNewFile,BufRead *.md set filetype=markdown
+    au BufNewFile,BufRead *.proto set filetype=proto
 " }
 
 " tkdiff-like bindings for vimdiff {
@@ -181,8 +184,54 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
         "show me the top of the "new" file
         autocmd VimEnter * normal lgg
+
+        set diffopt+=iwhite
     endif
 " }
+
+" use patience algorithm for improved diffs {
+    " lifted from :help diff-diffexpr
+    set diffexpr=MyDiff()
+    function MyDiff()
+        let opt = ""
+        " not supported by git-diff
+        "if &diffopt =~ "icase"
+            "let opt = opt . "-i "
+        "endif
+
+        if &diffopt =~ "iwhite"
+            let opt = opt . "-w "
+        endif
+        if
+        \   getfsize(v:fname_in) <= 6 &&
+        \   getfsize(v:fname_new) <= 6 &&
+        \   readfile(v:fname_in, 0, 1)[0] ==# 'line1' &&
+        \   readfile(v:fname_new, 0, 1)[0] ==# 'line2'
+            " don't run twice:
+            " https://stackoverflow.com/a/15884198/146821
+            call writefile(["1c1", "< line1", "---", "> line2"], v:fname_out)
+        else
+            "silent execute "!diff -a --binary " . opt . v:fname_in . " " . v:fname_new .
+            silent execute "!git-diff--ed " . opt . v:fname_in . " " . v:fname_new .
+                \  " > " . v:fname_out
+            redraw!
+        endif
+    endfunction
+"
+
+" { from http://www.bestofvim.com/tip/diff-diff/
+    nnoremap <Leader>df :call DiffToggle()<CR>
+
+    function! DiffToggle()
+        if &diff
+            diffoff
+        else
+            diffthis
+        endif
+    :endfunction
+" }
+"
+nnoremap <Leader>gd :e %:h<CR>
 
 " Pathogen: {
     " keep plugins nicely bundled in separate folders.
@@ -200,3 +249,7 @@ if filereadable($HOME . "/.vimrc.extra")
     source $HOME/.vimrc.extra
 endif
 " vim:et:sts=4:sw=4
+
+
+set exrc
+set secure

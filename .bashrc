@@ -1,3 +1,4 @@
+#!/not/executable/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
@@ -8,21 +9,17 @@ case $- in
       *) return;;
 esac
 
-# General shell environment, shared by zsh
-if [ -f ~/.sh_env ]; then
-    source ~/.sh_env
-fi
-if [ -f ~/.sh_aliases ]; then
-    source ~/.sh_aliases
-fi
 
 # bash options  ==============================================================
 # don't put duplicate lines in the history. See bash(1) for more options
 HISTCONTROL=erasedups
+
 # append to the history file, don't overwrite it
 shopt -s histappend
-# let me fix it if history-substition fails.
-shopt -s histreedit
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -31,6 +28,12 @@ shopt -s checkwinsize
 # If set, the pattern "**" used in a pathname expansion context will
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
+
+# allow regex-like functionality in globs
+shopt -s extglob
+
+# shell aliases, shared by zsh
+. ~/.sh_aliases
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
@@ -51,10 +54,10 @@ case "$TERM" in
     # All's well.
     ;;
 *-col*)
-    echo LOW COLOR TERM: $TERM, $terminal
+    echo "LOW COLOR TERM: $TERM ($terminal)"
     ;;
 *)
-    echo NO COLOR TERM: $TERM, $terminal
+    echo "NO COLOR TERM: $TERM ($terminal)"
     PS1=$(echo "$PS1" | uncolor)
     ;;
 esac
@@ -72,8 +75,17 @@ if ! shopt -oq posix; then
   fi
   # My own completions
   if [ -d ~/.bash_completion.d ]; then
-    source ~/.bash_completion.d/*.sh
+    . ~/.bash_completion.d/*.sh
   fi
+
+  # completions for travis, added by travis gem
+  [ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 fi
 
+if [[ $TMUX ]]; then
+  PROMPT_COMMAND='eval `~/bin/tmux-env`; '"$PROMPT_COMMAND"
+fi
+if which aactivator >/dev/null; then
+  eval "$(aactivator init)"
+fi
 # vim:et:sw=2:sts=2:

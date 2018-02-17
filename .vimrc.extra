@@ -1,4 +1,4 @@
-set textwidth=120
+set textwidth=131
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
@@ -7,7 +7,6 @@ set textwidth=120
 
     " use bold font for cursor highlight
     hi CursorLine term=bold cterm=bold gui=bold
-    hi CursorColumn term=bold cterm=bold gui=bold ctermbg=none
 " }
 
 " functions {

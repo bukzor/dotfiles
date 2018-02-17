@@ -1,7 +1,7 @@
 #!/bin/bash
 #echo 'filters: (-F)'
 
-export PHRASE=${1:-wtf, indeed!}
+export PHRASE="${1:-wtf, indeed!}"
 FONTDIR=${FONTDIR:-/usr/share/figlet}
 
 
@@ -9,9 +9,8 @@ echo '--------------------------------------------------------------------------
 echo 'figlet fonts: (-f)'
 ls $FONTDIR/*.flf |
     sed 's|.*/||; s|\..*||' |
-    xargs --replace sh -c '
-        echo figlet font: {}
-        echo figlet -w 999 -f {} "$PHRASE"
+    xargs --replace sh -xc '
+        : figlet font: {}
         figlet -w 999 -f {} "$PHRASE"
     '
 
@@ -30,18 +29,16 @@ if which toilet >&/dev/null; then
     echo 'toilet fonts: (-f)'
     ls $FONTDIR/*.tlf |
         sed 's|.*/||; s|\..*||' |
-        xargs --replace sh -c '
-            echo toilet font: {}
-            echo toilet -w 999 -f {} "$PHRASE"
+        xargs --replace sh -xc '
+            : toilet font: {}
             toilet -w 999 -f {} "$PHRASE"
         '
 
     echo '-------------------------------------------------------------------------------'
     echo "toilet filters: (-F)"
     toilet --filter list | sed '1d; s/^"//; s/".*$//' |
-        xargs --replace sh -c '
-            echo toilet filter: {}
-            echo toilet -t -f mono12 -F {} "$PHRASE"
-            toilet -t -f mono12 -F {} "$PHRASE"
+        xargs --replace sh -xc '
+            : toilet -t -f big -F {} "$PHRASE"
+            toilet -t -f big -F {} "$PHRASE"
         '
 fi
