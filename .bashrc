@@ -16,6 +16,8 @@ HISTCONTROL=erasedups
 
 # append to the history file, don't overwrite it
 shopt -s histappend
+# let me fix it if history-substition fails.
+shopt -s histreedit
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=1000
