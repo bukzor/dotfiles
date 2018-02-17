@@ -95,13 +95,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     map <c-q> :update\|q<cr>
     imap <c-q> <c-o><c-q>
     "ctrl+V to paste
-    map <c-v> "+gP
-    imap <c-v> <c-o>"+gP
     vmap <c-v> "+P
-
-    "replace <CTRL-V> with <CTRL-B>
-    noremap <c-b> <c-v>
-    inoremap <c-b> <c-v>
 " }
 
 " common typos {
