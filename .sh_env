@@ -4,6 +4,9 @@
 export PATH=~/bin:"${PATH}"
 export PATH=~/prefices/brew/sbin:~/prefices/brew/bin:"${PATH}"
 export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefices/brew/bin"
+export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
+export HOMEBREW_VERBOSE=1
+export HOMEBREW_BUILD_FROM_SOURCE=1
 export PATH=~/.local/bin:"${PATH}"
 
 #MY PREFERENCES ==============================================================
@@ -48,7 +51,7 @@ lxterminal|gnome-terminal|xfce4-terminal)
     export COLORTERM=true
     export TERM=xterm-256color
     ;;
-tmux)
+tmux*)
     export COLORTERM=true
     export TERM=screen-256color
     ;;
