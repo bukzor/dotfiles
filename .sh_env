@@ -1,3 +1,4 @@
+#!/not/executable/bash
 # interactive environment that should be shared by bash and zsh
 # commands that must be run just once for each new terminal
 # generally, this is environment variables
@@ -100,4 +101,4 @@ if command -v aactivator >/dev/null; then
   eval "$(aactivator init)"
 fi
 
-# vim:ft=sh:et:sw=2:sts=2:
+# vim:et:sw=2:sts=2:
