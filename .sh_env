@@ -10,7 +10,7 @@ fi
 
 # save/restore our $PATH, so that we can (re-)source this file idempotently
 # currently this is the only environment variable we modify (rather than overwrite), but we should do this for all such
-if [[ -z "$__orig_PATH" ]]; then
+if [ -z "$__orig_PATH" ]; then
   export __orig_PATH="$PATH"
 else
   PATH="$__orig_PATH"
@@ -53,7 +53,7 @@ stty -ixon -ixoff
 # fix up TERM values
 # get the command name of the session-leader's parent
 terminal="$(ps -o comm:1= "$(ps -o ppid:1= "$(ps -o sid:1= $$)")" 2>&-)"
-if [[ "$?" -ne 0 ]]; then
+if [ "$?" -eq 0 ]; then
   # if our session-leader doesn't have a real real parent (pid:0) then we're running as init
   terminal=init
 fi
@@ -64,9 +64,14 @@ lxterminal|gnome-terminal|xfce4-terminal)
 tmux|"tmux: server")
   export TERM=screen-256color
   ;;
+init)
+  if [ "$TERM" != "linux" ]; then
+    echo 'Warning, unknown terminal: "'"$terminal"'" (TERM='"$TERM)" >&2
+  fi
+  ;;
 *)
-  if ! [[ "$TERM" =~ '^(xterm|screen)-256color$' ]]; then
-    echo "Warning, unknown terminal: \"$terminal\" (TERM=$TERM)" >&2
+  if ! echo "$TERM" | egrep -q '^(xterm|screen)-256color$'; then
+    echo 'Warning, unknown terminal: "'"$terminal"'" (TERM='"$TERM)" >&2
   fi
   ;;
 esac
