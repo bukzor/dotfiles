@@ -49,13 +49,18 @@ if echo "$OSTYPE" | grep -q '^darwin'; then
 fi
 
 #unmap CTRL-S and CTRL-Q
-stty -ixon -ixoff
+if tty -s; then
+  stty -ixon -ixoff
+fi
 
 # fix up TERM values
-# get the command name of the session-leader's parent
-terminal="$(ps -o comm:1= "$(ps -o ppid:1= "$(ps -o sid:1= $$)")" 2>&-)"
+# get the session-leader's parent
+terminal="$(ps -o ppid:1= "$(ps -o sid:1= $$)")"
 if [ "$?" -eq 0 ]; then
-  # if our session-leader doesn't have a real real parent (pid:0) then we're running as init
+  #use the basename of its arg[0]
+  terminal="$(basename "$(head -zn1 /proc/$terminal/cmdline | tr -d '\0')")"
+else
+  # if our session-leader doesn't have a real parent (pid:0) then we're running as init
   terminal=init
 fi
 case "$terminal" in
@@ -88,9 +93,14 @@ if [ -f ~/venv/mypy/bin/activate ]; then
 fi
 
 # Temporary Files
-if [ ! -d "$TMPDIR" ]; then
+if [ "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
+  : all is well!
+else
   export TMPDIR="/tmp/$USER"
   mkdir -p -m 700 "$TMPDIR"
+  if ! [ -w "$TMPDIR" ]; then
+    echo 'Warning, no writable TMPDIR found' >&2
+  fi
 fi
 
 # added by travis gem
