@@ -76,7 +76,7 @@ if [[ "$ZSH_VERSION" ]]; then
     s/\\\]/%}/g
     s/\\u/%n/g
     s/\\h/%m/g
-    s/\\w/%d/g
+    s/\\w/%~/g
     s/\\D/%D/g
 '  <<< "$PS1")"
 fi
