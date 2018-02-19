@@ -73,7 +73,7 @@ esac
 
 # Further environment
 export GEM_HOME=~/prefix/rubygems
-export TREES=$HOME/trees
+export REPO=$HOME/repo
 
 # My very own python!
 activate() { . ~/venv/mypy/bin/activate; }
