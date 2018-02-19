@@ -1,5 +1,11 @@
 # ~/.profile: executed by the command interpreter for login shells.
 
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
 preferred_shell=/usr/bin/zsh
 if [[ "$SHELL" != "$preferred_shell" ]]; then
   SHELL="$preferred_shell" exec "$preferred_shell" -l
