@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+status_args=("$@")
+extdiff_args=()
+for arg in "$@"; do
+  if test -e "$arg"; then
+    : no thanks
+  else
+    extdiff_args+=("$arg")
+  fi
+done
+
+hg status -n "${status_args[@]}" |
+  xargs -ron1 hg extdiff -p vimdiff "${extdiff_args[@]}"
