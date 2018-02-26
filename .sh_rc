@@ -112,8 +112,9 @@ esac
 HISTCONTROL=erasedups
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=8000
-HISTFILESIZE=64000
+HISTSIZE=64000
+HISTFILESIZE=512000
+SAVEHIST=$HISTFILESIZE
 HISTTIMEFORMAT="[%F %r %z] "
 
 alias tmux-env='eval "$(tmux show-env -s)"'
