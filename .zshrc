@@ -31,7 +31,13 @@ bindkey -d
 bindkey -v
 
 # allow backspace after vi-A
-bindkey -v '$key[Backspace]' backward-delete-char
+bindkey "$key[Backspace]" backward-delete-char
+
+# fix home/end keys
+bindkey "$key[Home]" beginning-of-line
+bindkey "$key[End]" end-of-line
+bindkey -a "$key[Home]" beginning-of-line
+bindkey -a "$key[End]" end-of-line
 
 # esc-v to edit command in vim
 autoload -U edit-command-line
