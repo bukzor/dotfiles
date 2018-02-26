@@ -2,6 +2,7 @@ set textwidth=131
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
+    set cursorline | set cursorcolumn
     autocmd WinEnter * setlocal cursorline | setlocal cursorcolumn
     autocmd WinLeave * setlocal nocursorline | setlocal nocursorcolumn
 
