@@ -4,7 +4,7 @@
 # if your command only needs to be run once per *terminal* use ~/.sh_env
 
 function time() {
-  /usr/bin/time -o /dev/tty "$@"
+  /usr/bin/time -ao /dev/tty "$@"
 }
 
 if [ "$BASH" ]; then
