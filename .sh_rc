@@ -4,7 +4,7 @@
 # if your command only needs to be run once per *terminal* use ~/.sh_env
 
 function time() {
-  /usr/bin/time -o /dev/tty "$@"
+  /usr/bin/time -ao /dev/tty "$@"
 }
 
 if [ "$BASH" ]; then
@@ -16,7 +16,7 @@ fi
 # anything that's mutated (rather than overwritten) should be listed here.
 precmd_functions+=()
 preexec_functions+=()
-if [[ "${#__orig_settings[@]}" -gt 0 ]]; then
+if [[ "${#__orig_settings[@]}" -eq 0 ]]; then
   for varname in precmd_functions preexec_functions; do
     __orig_settings+=("$(typeset -p $varname)")
   done
@@ -27,7 +27,7 @@ else
 fi
 
 # VCS detection
-function __detect_vcs() {
+function __vcs() {
   if [[ "$__detect_vcs_pwd" = "$PWD" ]]; then
     return 0
   fi
@@ -46,18 +46,36 @@ function __detect_vcs() {
         export VCS=p4
       else
         TOP=/
-        unset VCS PS1_VCS
+        unset VCS VCS_PS1
         return 0
       fi
     fi
   fi
 
-  export TOP="$candidate"
-  PS1_VCS="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$TOP")")) "
+  export VCS_TOP="$candidate"
+  VCS_PS1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
 }
 
-precmd_functions+=(__detect_vcs)
-preexec_functions+=('eval $(~/bin/tmux-env)')
+function __vcs_branch() {
+  if [[ "$VCS" = "git" ]]; then
+    export VCS_BRANCH="$(git branch-name 2>/dev/null)"
+  elif [[ "$VCS" = "hg" ]]; then
+    export VCS_BRANCH="$(hg id -btB | xargs -n1 | egrep -xv 'default|tip' | tr '\n' ' ')"
+  else
+    unset VCS_BRANCH
+  fi
+
+  if [[ $VCS_BRANCH ]]; then
+    VCS_PS2=" $VCS_BRANCH) "
+  elif [[ "$VCS" ]]; then
+    VCS_PS2=") "
+  else
+    VCS_PS2=""
+  fi
+}
+
+precmd_functions+=(__vcs __vcs_branch)
+preexec_functions+=('eval "$(tmux show-env -s)"')
 
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[[1;32m\]'
@@ -66,7 +84,7 @@ YELLOW='\[[1;33m\]'
 PURPLE='\[[1;35m\]'
   TEAL='\[[1;36m\]'
    END='\[[0;39m\]'
-   PS1="$TEAL"'$PS1_VCS'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
+   PS1="$TEAL"'$VCS_PS1$VCS_PS2'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
 $PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
 
 if [[ "$ZSH_VERSION" ]]; then
@@ -94,11 +112,12 @@ esac
 HISTCONTROL=erasedups
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=8000
-HISTFILESIZE=64000
+HISTSIZE=64000
+HISTFILESIZE=512000
+SAVEHIST=$HISTFILESIZE
 HISTTIMEFORMAT="[%F %r %z] "
 
-alias tmux-env='eval `~/bin/tmux-env`'
+alias tmux-env='eval "$(tmux show-env -s)"'
 alias crterm='export TERM=xterm-256color; . ~/.bashrc'
 function ssh-dev() {
 	ssh -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1"
@@ -109,7 +128,12 @@ function reset() {
     command reset
 }
 
-alias login='. ~/.profile'
+function login() {
+  . ~/.profile
+  if [[ "$ZSH_VERSION" ]]; then
+    . ~/.zshrc
+  fi
+}
 
 # enable color support of ls and also add handy aliases
 if command -v dircolors > /dev/null; then

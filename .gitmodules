@@ -22,6 +22,9 @@
 [submodule ".vim/bundle/EditorConfig"]
 	path = .vim/bundle/EditorConfig
 	url = https://github.com/editorconfig/editorconfig-vim.git
+[submodule ".vim/bundle/vim-bracketed-paste"]
+	path = .vim/bundle/vim-bracketed-paste
+	url = https://github.com/ConradIrwin/vim-bracketed-paste
 [submodule ".vim/bundle/elm"]
 	path = .vim/bundle/elm
 	url = git@github.com:ElmCast/elm-vim.git

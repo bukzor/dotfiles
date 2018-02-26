@@ -28,16 +28,16 @@
 " statusline {
 " compare the default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
 set statusline =                " clear!
-set statusline +=%<             " truncation point
 set statusline +=%2n:           " buffer number
+set statusline +=%<             " truncation point
 set statusline +=%f\            " relative path to file
 set statusline +=%#Error#%m     " modified flag [+], highlighted as error
 set statusline +=%r             " readonly flag [RO]
 set statusline +=%##%y          " filetype [ruby], reset color
 set statusline +=%=             " split point for left and right justification
+set statusline +=%P\ \          " percentage through buffer
 set statusline +=row:\ %3l      " current line number
-set statusline +=/%-3L\          " number of lines in buffer
-set statusline +=(%3P)\         " percentage through buffer
+set statusline +=/%-3L\         " number of lines in buffer
 set statusline +=col:\ %3v\     " current virtual column number (visual count)
 " }
 
@@ -92,9 +92,6 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     "ctrl+Z to undo
     "map <c-z> u            "this clobbers UNIX ctrl+z to background vim
     imap <c-z> <c-o>u
-    "ctrl+Q to save/quit
-    map <c-q> :update\|q<cr>
-    imap <c-q> <c-o><c-q>
     "ctrl+V to paste, in visual mode
     vmap <c-v> "+P
 " }
@@ -136,15 +133,25 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     noremap <C-P> <C-I>
 
     "window switching: ctrl+[hjkl]
+    nnoremap <C-H> <C-W>h
     nnoremap <C-J> <C-W>j
     nnoremap <C-K> <C-W>k
-    nnoremap <C-H> <C-W>h
     nnoremap <C-L> <C-W>l
-    nnoremap <C-Q> <C-W>q
+    if has('nvim')
+      "bindings for switching windows while in :terminal
+      tnoremap <C-H> <C-\><C-N><C-W>h
+      tnoremap <C-J> <C-\><C-N><C-W>j
+      tnoremap <C-K> <C-\><C-N><C-W>k
+      tnoremap <C-L> <C-\><C-N><C-W>l
+      tnoremap <ESC><ESC> <C-\><C-N>
+    endif
 
     "tab switching: ctrl+left/right
     nnoremap <C-PageUp> :tabp<CR>
     nnoremap <C-PageDown> :tabN<CR>
+
+    "paste the filename
+    noremap <Leader>pf :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
 " }
 
 "indentation options {

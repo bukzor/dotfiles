@@ -57,5 +57,8 @@
     mt = mergetool
     wip = commit -m 'WIP' --no-verify
     amend = commit --amend --no-edit
+[include]
+    path = private-dotfiles/.gitconfig
+
 
 # vim:sts=4:sw=4:et:
