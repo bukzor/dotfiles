@@ -7,7 +7,7 @@ case $- in
 esac
 
 preferred_shell=/usr/bin/zsh
-if [ "$SHELL" != "$preferred_shell" && -x "$preferred_shell" ]; then
+if [ "$SHELL" != "$preferred_shell" -a -x "$preferred_shell" ]; then
   SHELL="$preferred_shell" exec "$preferred_shell" -l
 fi
 
