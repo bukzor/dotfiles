@@ -10,6 +10,7 @@ case $- in
       *) return;;
 esac
 
+# allow variables in PS1
 setopt PROMPT_SUBST
 
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
@@ -18,6 +19,14 @@ setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming 
 setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
 setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
 setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt COMPLETE_IN_WORD          # tab in the middle of a word works correctly!
+setopt ALWAYS_TO_END
+setopt INTERACTIVE_COMMENTS      # sometimes I copy-paste comments
+
+# enable advanced completions
+autoload -Uz compinit
+compinit
+zstyle ':completion:*' menu select insert-unambiguous
 
 HISTFILE="$HOME/.zsh_history"
 
@@ -36,8 +45,29 @@ unset zkbd_file
 bindkey -d
 bindkey -v
 
+# Anoyances:
 # allow backspace after vi-A
 bindkey "$key[Backspace]" backward-delete-char
+# backspace doesn't work if you were ever in normal mode
+bindkey "^?" backward-delete-char
+bindkey "^W" backward-kill-word
+bindkey "^H" backward-delete-char
+bindkey "^U" backward-kill-line
+
+# tab completion is over-eager
+unsetopt MENU_COMPLETE
+setopt AUTO_MENU
+bindkey "^[[Z" reverse-menu-complete
+
+
+# can't move cursor left to previous line
+bindkey "^[OC" forward-char
+bindkey "^[OD" backward-char
+bindkey "^[OF" end-of-line
+bindkey "^[OH" beginning-of-line
+bindkey "^[[3~" delete-char
+bindkey "^[[C" forward-char
+bindkey "^[[D" backward-char
 
 # fix home/end keys
 bindkey "$key[Home]" beginning-of-line
