@@ -36,9 +36,13 @@ function history() {
 
 . ~/.sh_rc
 
-zkbd_file="${ZDOTDIR:-$HOME}/.zkbd/$TERM-$VENDOR-$OSTYPE"
-source "$zkbd_file" ||
-    (autoload zkbd && zkbd && source "$zkbd_file")
+zkbd_dir="${ZDOTDIR:-$HOME}/.zkbd"
+zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"
+ln -sf $zkbd_file $zkbd_dir/$TERM.tmp
+if ! source "$zkbd_file"; then
+    autoload zkbd && zkbd
+    source "$zkbd_file"
+fi
 unset zkbd_file
 
 # reset and enable vim bindings
