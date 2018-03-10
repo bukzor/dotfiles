@@ -144,7 +144,7 @@ if command -v dircolors > /dev/null; then
 fi
 
 # busybox grep doesn't have --color=auto :(
-if grep --color=auto -q '' <<< '' ; then
+if grep --color=auto -q '' <<< '' 2>/dev/null; then
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'

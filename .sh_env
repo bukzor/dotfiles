@@ -49,13 +49,13 @@ if echo "$OSTYPE" | grep -q '^darwin'; then
 fi
 
 #unmap CTRL-S and CTRL-Q
-if tty -s; then
+if tty >/dev/null; then
   stty -ixon -ixoff
 fi
 
 # fix up TERM values
 # get the session-leader's parent
-terminal="$(ps -o ppid:1= "$(ps -o sid:1= $$)")"
+terminal="$(ps -o ppid:1= "$(ps -o sid:1= $$ 2>/dev/null)" 2>/dev/null)"
 if [ "$?" -eq 0 ]; then
   #use the basename of its arg[0]
   terminal="$(basename "$(head -zn1 /proc/$terminal/cmdline | tr -d '\0')")"
@@ -97,9 +97,13 @@ if [ "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
   : all is well!
 else
   export TMPDIR="/tmp/$USER"
-  mkdir -p -m 700 "$TMPDIR"
+  mkdir -p -m 700 "$TMPDIR" 2> /dev/null
   if ! [ -w "$TMPDIR" ]; then
-    echo 'Warning, no writable TMPDIR found' >&2
+    export TMPDIR="/$HOME/tmp"
+    mkdir -p -m 700 "$TMPDIR"
+    if ! [ -w "$TMPDIR" ]; then
+      echo 'Warning, no writable TMPDIR!' >&2
+    fi
   fi
 fi
 
