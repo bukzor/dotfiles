@@ -1,5 +1,6 @@
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
+    set termguicolors       " Use 24bit color schemes in the terminal
     colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
