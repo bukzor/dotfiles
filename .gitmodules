@@ -1,6 +1,3 @@
-[submodule ".vim/bundle/CSApprox"]
-	path = .vim/bundle/CSApprox
-	url = https://github.com/bukzor/csapprox.git
 [submodule ".vim/bundle/Syntastic"]
 	path = .vim/bundle/Syntastic
 	url = https://github.com/scrooloose/syntastic.git
