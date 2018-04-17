@@ -56,9 +56,8 @@ __bpc_precmd_invoke_cmd() {
     # Invoke every function defined in our function array.
     local precmd_function
     for precmd_function in "${precmd_functions[@]}"; do
-
         # Only execute this function if it actually exists.
-        if command -v "$precmd_function" 1>/dev/null; then
+        if declare -f "$precmd_function" 1>/dev/null; then
             $precmd_function
         fi
     done
@@ -85,11 +84,6 @@ __bpc_install() {
     fi
 
     PROMPT_COMMAND="__bpc_precmd_invoke_cmd"
-
-
-    # Add a function to our array for convenience
-    # of definition.
-    precmd_functions+=(precmd)
 }
 
 __bpc_install

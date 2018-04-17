@@ -3,21 +3,21 @@
 # generally, this is aliases, shell settings, functions
 # if your command only needs to be run once per *terminal* use ~/.sh_env
 
+
 function time() {
   /usr/bin/time -ao /dev/tty "$@"
 }
 
 if [ "$BASH" ]; then
-  # enable precmd_functions and preexec_functions, for zsh compatibility
-  source ~/.bash/bash-preexec.sh
+  # enable precmd_functions, for zsh compatibility
+  source ~/.bash/bash-precmd.sh
 fi
 
 # save/restore our state, so that we can (re-)source this file idempotently
 # anything that's mutated (rather than overwritten) should be listed here.
 precmd_functions+=()
-preexec_functions+=()
 if [[ "${#__orig_settings[@]}" -eq 0 ]]; then
-  for varname in precmd_functions preexec_functions; do
+  for varname in precmd_functions; do
     __orig_settings+=("$(typeset -p $varname)")
   done
 else
@@ -26,13 +26,22 @@ else
   done
 fi
 
-# VCS detection
-function __vcs() {
-  if [[ "$__detect_vcs_pwd" = "$PWD" ]]; then
+# facility for running code "on cd"
+oncd_functions+=()
+function __oncd() {
+  if [[ "$__oncd_pwd" = "$PWD" ]]; then
     return 0
   fi
+  __oncd_pwd="$PWD"
 
-  __detect_vcs_pwd="$PWD"
+  local oncd_function
+  for oncd_function in "${oncd_functions[@]}"; do
+    "$oncd_function"
+  done
+}
+
+# VCS detection
+function __vcs() {
   candidate="$(git rev-parse --show-toplevel 2>&-)"
   if [[ $? -eq 0 ]]; then
     export VCS=git
@@ -74,8 +83,12 @@ function __vcs_branch() {
   fi
 }
 
-precmd_functions+=(__vcs __vcs_branch)
-preexec_functions+=('eval "$(tmux show-env -s)"')
+function tmux_ssh() {
+  eval "$(tmux show-env -s)"
+}
+
+precmd_functions+=(__oncd __vcs_branch tmux_ssh)
+oncd_functions+=(__vcs)
 
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[[1;32m\]'
