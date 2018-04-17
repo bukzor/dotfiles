@@ -16,8 +16,10 @@ fi
 # save/restore our state, so that we can (re-)source this file idempotently
 # anything that's mutated (rather than overwritten) should be listed here.
 precmd_functions+=()
+oncd_functions+=()
+__oncd_pwd=
 if [[ "${#__orig_settings[@]}" -eq 0 ]]; then
-  for varname in precmd_functions; do
+  for varname in precmd_functions oncd_functions __oncd_pwd; do
     __orig_settings+=("$(typeset -p $varname)")
   done
 else
