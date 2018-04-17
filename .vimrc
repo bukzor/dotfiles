@@ -69,6 +69,9 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     "example: "vim: syntax=vim"
     set modeline
 
+    "use jj to escape insert mode
+    inoremap jj <ESC>
+
     "don't clobber the buffer when pasting in visual mode
     vmap P p
     vnoremap p pgvy

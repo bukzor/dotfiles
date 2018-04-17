@@ -84,6 +84,9 @@ autoload -U edit-command-line
 zle -N edit-command-line
 bindkey -M vicmd v edit-command-line
 
+# jj for normal mode
+bindkey 'jj' vi-cmd-mode
+
 # ctrl-w removed word backwards
 bindkey '^w' backward-kill-word
 
