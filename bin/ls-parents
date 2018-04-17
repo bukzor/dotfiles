@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eu
 
 path="${1:-$PWD}"
 while true; do
