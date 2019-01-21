@@ -202,141 +202,127 @@ def dodiff(ui, repo, cmdline, pats, opts):
 
   matcher = scmutil.match(repo[node2], pats, opts)
 
-  if opts.get('patch'):
-    if subrepos:
-      raise error.Abort(_('--patch cannot be used with --subrepos'))
-    if node2 is None:
-      raise error.Abort(_('--patch requires two revisions'))
-  else:
-    mod_a, add_a, rem_a = map(
+  mod_a, add_a, rem_a = map(
+      set,
+      repo.status(node1a, node2, matcher, listsubrepos=subrepos)[:3])
+  if do3way:
+    mod_b, add_b, rem_b = map(
         set,
-        repo.status(node1a, node2, matcher, listsubrepos=subrepos)[:3])
-    if do3way:
-      mod_b, add_b, rem_b = map(
-          set,
-          repo.status(node1b, node2, matcher, listsubrepos=subrepos)[:3])
-    else:
-      mod_b, add_b, rem_b = set(), set(), set()
-    modadd = mod_a | add_a | mod_b | add_b
-    common = modadd | rem_a | rem_b
-    if not common:
-      return 0
+        repo.status(node1b, node2, matcher, listsubrepos=subrepos)[:3])
+  else:
+    mod_b, add_b, rem_b = set(), set(), set()
+  modadd = mod_a | add_a | mod_b | add_b
+  common = modadd | rem_a | rem_b
+  if not common:
+    return 0
 
   tmproot = pycompat.mkdtemp(prefix='extdiff2.')
   try:
-    if not opts.get('patch'):
-      # Always make a copy of node1a (and node1b, if applicable)
-      dir1a_files = mod_a | rem_a | ((mod_b | add_b) - add_a)
-      dir1a = snapshot(ui, repo, dir1a_files, node1a, tmproot, subrepos)[0]
-      rev1a = '@%d' % repo[node1a].rev()
-      if do3way:
-        dir1b_files = mod_b | rem_b | ((mod_a | add_a) - add_b)
-        dir1b = snapshot(ui, repo, dir1b_files, node1b, tmproot, subrepos)[0]
-        rev1b = '@%d' % repo[node1b].rev()
-      else:
-        dir1b = None
-        rev1b = ''
-
-      fnsandstat = []
-
-      # If node2 in not the wc or there is >1 change, copy it
-      dir2root = ''
-      rev2 = ''
-      if node2:
-        dir2 = snapshot(ui, repo, modadd, node2, tmproot, subrepos)[0]
-        rev2 = '@%d' % repo[node2].rev()
-      elif len(common) > 1:
-        #we only actually need to get the files to copy back to
-        #the working dir in this case (because the other cases
-        #are: diffing 2 revisions or single file -- in which case
-        #the file is already directly passed to the diff tool).
-        dir2, fnsandstat = snapshot(ui, repo, modadd, None, tmproot, subrepos)
-      else:
-        # This lets the diff tool open the changed file directly
-        dir2 = ''
-        dir2root = repo.root
-
-      label1a = rev1a
-      label1b = rev1b
-      label2 = rev2
-
-      # If only one change, diff the files instead of the directories
-      # Handle bogus modifies correctly by checking if the files exist
-      if len(common) == 1:
-        common_file = util.localpath(common.pop())
-        dir1a = os.path.join(tmproot, dir1a, common_file)
-        label1a = common_file + rev1a
-        if not os.path.isfile(dir1a):
-          dir1a = os.devnull
-        if do3way:
-          dir1b = os.path.join(tmproot, dir1b, common_file)
-          label1b = common_file + rev1b
-          if not os.path.isfile(dir1b):
-            dir1b = os.devnull
-        dir2 = os.path.join(dir2root, dir2, common_file)
-        label2 = common_file + rev2
+    # Always make a copy of node1a (and node1b, if applicable)
+    dir1a_files = mod_a | rem_a | ((mod_b | add_b) - add_a)
+    dir1a = snapshot(ui, repo, dir1a_files, node1a, tmproot, subrepos)[0]
+    dir1a = os.path.join(tmproot, dir1a)
+    rev1a = '@%d' % repo[node1a].rev()
+    if do3way:
+      dir1b_files = mod_b | rem_b | ((mod_a | add_a) - add_b)
+      dir1b = snapshot(ui, repo, dir1b_files, node1b, tmproot, subrepos)[0]
+      dir1b = os.path.join(tmproot, dir1b)
+      rev1b = '@%d' % repo[node1b].rev()
     else:
-      template = 'hg-%h.patch'
-      with formatter.nullformatter(ui, 'extdiff2', {}) as fm:
-        cmdutil.export(
-            repo, [repo[node1a].rev(), repo[node2].rev()],
-            fm,
-            fntemplate=repo.vfs.reljoin(tmproot, template),
-            match=matcher)
-      label1a = cmdutil.makefilename(repo[node1a], template)
-      label2 = cmdutil.makefilename(repo[node2], template)
-      dir1a = repo.vfs.reljoin(tmproot, label1a)
-      dir2 = repo.vfs.reljoin(tmproot, label2)
       dir1b = None
-      label1b = None
-      fnsandstat = []
+      rev1b = ''
 
-    # Function to quote file/dir names in the argument string.
-    # When not operating in 3-way mode, an empty string is
-    # returned for parent2
-    replace = {
-        'parent': dir1a,
-        'parent1': dir1a,
-        'parent2': dir1b,
-        'plabel1': label1a,
-        'plabel2': label1b,
-        'clabel': label2,
-        'child': dir2,
-        'root': repo.root
-    }
+    fnsandstat = []
 
-    def quote(match):
-      pre = match.group(2)
-      key = match.group(3)
-      if not do3way and key == 'parent2':
-        return pre
-      return pre + procutil.shellquote(replace[key])
+    # If node2 in not the wc or there is >1 change, copy it
+    rev2 = ''
+    if node2:
+      dir2 = snapshot(ui, repo, modadd, node2, tmproot, subrepos)[0]
+      rev2 = '@%d' % repo[node2].rev()
+    elif False:  # len(common) > 1:
+      #we only actually need to get the files to copy back to
+      #the working dir in this case (because the other cases
+      #are: diffing 2 revisions or single file -- in which case
+      #the file is already directly passed to the diff tool).
+      dir2, fnsandstat = snapshot(ui, repo, modadd, None, tmproot, subrepos)
+    else:
+      # This lets the diff tool open the changed file(s) directly
+      dir2 = ''
 
-    # Match parent2 first, so 'parent1?' will match both parent1 and parent
-    regex = (br"""(['"]?)([^\s'"$]*)"""
-             br'\$(parent2|parent1?|child|plabel1|plabel2|clabel|root)\1')
-    if not do3way and not re.search(regex, cmdline):
-      cmdline += ' $parent1 $child'
-    cmdline = re.sub(regex, quote, cmdline)
+    label1a = rev1a
+    label1b = rev1b
+    label2 = rev2
 
-    ui.debug('running %r in %s\n' % (pycompat.bytestr(cmdline), tmproot))
-    ui.system(cmdline, cwd=tmproot, blockedtag='extdiff2')
+    # Diff the files instead of the directories
+    # Handle bogus modifies correctly by checking if the files exist
+    for common_file in common:
+      common_file = util.localpath(common_file)
+      print('COMMON_FILE', common_file)
+      file1a = os.path.join(dir1a, common_file)
+      label1a = common_file + rev1a
+      if not os.path.isfile(file1a):
+        file1a = os.devnull
+      if do3way:
+        file1b = os.path.join(dir1b, common_file)
+        label1b = common_file + rev1b
+        if not os.path.isfile(file1b):
+          file1b = os.devnull
+      else:
+        file1b = None
 
-    for copy_fn, working_fn, st in fnsandstat:
-      cpstat = os.lstat(copy_fn)
-      # Some tools copy the file and attributes, so mtime may not detect
-      # all changes.  A size check will detect more cases, but not all.
-      # The only certain way to detect every case is to diff all files,
-      # which could be expensive.
-      # copyfile() carries over the permission, so the mode check could
-      # be in an 'elif' branch, but for the case where the file has
-      # changed without affecting mtime or size.
-      if (cpstat[stat.ST_MTIME] != st[stat.ST_MTIME] or
-          cpstat.st_size != st.st_size or
-          (cpstat.st_mode & 0o100) != (st.st_mode & 0o100)):
-        ui.debug('file changed while diffing. '
-                 'Overwriting: %s (src: %s)\n' % (working_fn, copy_fn))
-        util.copyfile(copy_fn, working_fn)
+      file2 = os.path.join(repo.root, common_file)
+      if not dir2:
+        file2 = os.path.relpath(file2)
+      label2 = common_file + rev2
+
+      # Function to quote file/dir names in the argument string.
+      # When not operating in 3-way mode, an empty string is
+      # returned for parent2
+      replace = {
+          'parent': file1a,
+          'parent1': file1a,
+          'parent2': file1b,
+          'plabel1': label1a,
+          'plabel2': label1b,
+          'clabel': label2,
+          'child': file2,
+          'root': repo.root
+      }
+
+      def quote(match):
+        pre = match.group(2)
+        key = match.group(3)
+        if not do3way and key == 'parent2':
+          return pre
+        return pre + procutil.shellquote(replace[key])
+
+      # Match parent2 first, so 'parent1?' will match both parent1 and parent
+      regex = (br"""(['"]?)([^\s'"$]*)"""
+               br'\$(parent2|parent1?|child|plabel1|plabel2|clabel|root)\1')
+      if not do3way and not re.search(regex, cmdline):
+        cmdline2 = cmdline + ' $parent1 $child'
+      else:
+        cmdline2 = cmdline
+      cmdline3 = re.sub(regex, quote, cmdline2)
+
+      ui.debug('running %r\n' % (pycompat.bytestr(cmdline3)))
+      ui.system(cmdline3, blockedtag='extdiff2')
+
+      for copy_fn, working_fn, st in fnsandstat:
+        cpstat = os.lstat(copy_fn)
+        # Some tools copy the file and attributes, so mtime may not detect
+        # all changes.  A size check will detect more cases, but not all.
+        # The only certain way to detect every case is to diff all files,
+        # which could be expensive.
+        # copyfile() carries over the permission, so the mode check could
+        # be in an 'elif' branch, but for the case where the file has
+        # changed without affecting mtime or size.
+        if (cpstat[stat.ST_MTIME] != st[stat.ST_MTIME] or
+            cpstat.st_size != st.st_size or
+            (cpstat.st_mode & 0o100) != (st.st_mode & 0o100)):
+          ui.debug('file changed while diffing. '
+                   'Overwriting: %s (src: %s)\n' % (working_fn, copy_fn))
+          util.copyfile(copy_fn, working_fn)
 
     return 1
   finally:
@@ -349,7 +335,6 @@ extdiffopts = [
      _('pass option to comparison program'), _('OPT')),
     ('r', 'rev', [], _('revision'), _('REV')),
     ('c', 'change', '', _('change made by revision'), _('REV')),
-    ('', 'patch', None, _('compare patches for two revisions'))
 ] + cmdutil.walkopts + cmdutil.subrepoopts
 
 
