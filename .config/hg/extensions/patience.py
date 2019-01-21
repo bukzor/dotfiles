@@ -25,7 +25,8 @@ do.  If you just want hg diff to default to patience diffs, use::
 
 """
 
-from mercurial import extensions, commands, bdiff, patch, mdiff
+import mercurial
+from mercurial import extensions, commands, patch, mdiff
 from mercurial.i18n import _
 import difflib
 
@@ -137,10 +138,10 @@ def blockswrapper(orig, *args, **kwargs):
 def uisetup(ui):
   'Add --patience option to diff command and wrap a few functions.'
   entry = extensions.wrapcommand(commands.table, 'diff', diffcmdwrapper)
-  entry[1].append(('', 'patience', None,
+  entry[1].append(('', 'patience', True,
                    _('use patience diff algorithm')))
 
-  extensions.wrapfunction(bdiff, 'blocks', blockswrapper)
+  extensions.wrapfunction(mdiff.bdiff, 'blocks', blockswrapper)
   extensions.wrapfunction(patch, 'diff', diffwrapper)
   extensions.wrapfunction(mdiff, 'unidiff', unidiffwrapper)
 
@@ -202,8 +203,8 @@ def patienceblocks(a, b):
   an = splitnewlines(a)
   bn = splitnewlines(b)
 
-  a_dupes = _getdupes(a)
-  b_dupes = _getdupes(b)
+  a_dupes = _getdupes(an)
+  b_dupes = _getdupes(bn)
   dupes = a_dupes & b_dupes
 
   d = difflib.SequenceMatcher(dupes.__contains__, an, bn).get_matching_blocks()
