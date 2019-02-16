@@ -67,19 +67,13 @@ from __future__ import absolute_import
 import os
 import re
 import shutil
-import stat
 
 from mercurial.i18n import _
-from mercurial.node import (
-    nullid,
-    short,
-)
+from mercurial.node import short
 from mercurial import (
     archival,
     cmdutil,
-    error,
     filemerge,
-    formatter,
     pycompat,
     registrar,
     scmutil,
@@ -109,12 +103,6 @@ configitem(
     default=None,
     generic=True,
 )
-
-# Note for extension authors: ONLY specify testedwith = 'ships-with-hg-core' for
-# extensions which SHIP WITH MERCURIAL. Non-mainline extensions should
-# be specifying the version(s) of Mercurial they are tested with, or
-# leave the attribute unspecified.
-testedwith = 'ships-with-hg-core'
 
 
 def snapshot(ui, repo, files, node, tmproot, listsubrepos):
