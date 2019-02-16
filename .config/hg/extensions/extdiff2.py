@@ -173,21 +173,13 @@ def dodiff(ui, repo, cmdline, pats, opts):
     """
 
   revs = opts.get('rev')
-  change = opts.get('change')
   do3way = '$parent2' in cmdline
 
-  if revs and change:
-    msg = _('cannot specify --rev and --change at the same time')
-    raise error.Abort(msg)
-  elif change:
-    ctx2 = scmutil.revsingle(repo, change, None)
-    ctx1a, ctx1b = ctx2.p1(), ctx2.p2()
+  ctx1a, ctx2 = scmutil.revpair(repo, revs)
+  if not revs:
+    ctx1b = repo[None].p2()
   else:
-    ctx1a, ctx2 = scmutil.revpair(repo, revs)
-    if not revs:
-      ctx1b = repo[None].p2()
-    else:
-      ctx1b = repo[nullid]
+    ctx1b = repo[nullid]
 
   node1a = ctx1a.node()
   node1b = ctx1b.node()
@@ -333,7 +325,6 @@ extdiffopts = [
     ('o', 'option', [],
      _('pass option to comparison program'), _('OPT')),
     ('r', 'rev', [], _('revision'), _('REV')),
-    ('c', 'change', '', _('change made by revision'), _('REV')),
 ] + cmdutil.walkopts + cmdutil.subrepoopts
 
 
