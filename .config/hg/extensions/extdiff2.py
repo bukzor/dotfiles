@@ -41,9 +41,8 @@ you do not need to type :hg:`extdiff2 -p kdiff3` always. ::
 
 Tool arguments can include variables that are expanded at runtime::
 
-  $parent1, $plabel1 - filename, descriptive label of first parent
+  $parent1, $plabel1 - filename, descriptive label of parent revision
   $child,   $clabel  - filename, descriptive label of child revision
-  $parent2, $plabel2 - filename, descriptive label of second parent
   $root              - repository root
   $parent is an alias for $parent1.
 
@@ -164,31 +163,13 @@ def snapshot(ui, repo, files, node, tmproot, listsubrepos):
 
 
 def dodiff(ui, repo, cmdline, pats, opts):
-  """Do the actual diff:
-
-    - copy to a temp structure if diffing 2 internal revisions
-    - copy to a temp structure if diffing working revision with
-      another one and more than 1 file is changed
-    - just invoke the diff for a single file in the working dir
-    """
+  """Do the actual diff."""
 
   revs = opts.get('rev')
-  do3way = '$parent2' in cmdline
-
   ctx1a, ctx2 = scmutil.revpair(repo, revs)
-  if not revs:
-    ctx1b = repo[None].p2()
-  else:
-    ctx1b = repo[nullid]
 
   node1a = ctx1a.node()
-  node1b = ctx1b.node()
   node2 = ctx2.node()
-
-  # Disable 3-way merge if there is only one parent
-  if do3way:
-    if node1b == nullid:
-      do3way = False
 
   subrepos = opts.get('subrepos')
 
@@ -197,32 +178,18 @@ def dodiff(ui, repo, cmdline, pats, opts):
   mod_a, add_a, rem_a = map(
       set,
       repo.status(node1a, node2, matcher, listsubrepos=subrepos)[:3])
-  if do3way:
-    mod_b, add_b, rem_b = map(
-        set,
-        repo.status(node1b, node2, matcher, listsubrepos=subrepos)[:3])
-  else:
-    mod_b, add_b, rem_b = set(), set(), set()
-  modadd = mod_a | add_a | mod_b | add_b
-  common = modadd | rem_a | rem_b
+  modadd = mod_a | add_a
+  common = modadd | rem_a
   if not common:
     return 0
 
   tmproot = pycompat.mkdtemp(prefix='extdiff2.')
   try:
-    # Always make a copy of node1a (and node1b, if applicable)
-    dir1a_files = mod_a | rem_a | ((mod_b | add_b) - add_a)
+    # Always make a copy of node1a
+    dir1a_files = mod_a | rem_a
     dir1a = snapshot(ui, repo, dir1a_files, node1a, tmproot, subrepos)[0]
     dir1a = os.path.join(tmproot, dir1a)
     rev1a = '@%d' % repo[node1a].rev()
-    if do3way:
-      dir1b_files = mod_b | rem_b | ((mod_a | add_a) - add_b)
-      dir1b = snapshot(ui, repo, dir1b_files, node1b, tmproot, subrepos)[0]
-      dir1b = os.path.join(tmproot, dir1b)
-      rev1b = '@%d' % repo[node1b].rev()
-    else:
-      dir1b = None
-      rev1b = ''
 
     fnsandstat = []
 
@@ -242,7 +209,6 @@ def dodiff(ui, repo, cmdline, pats, opts):
       dir2 = ''
 
     label1a = rev1a
-    label1b = rev1b
     label2 = rev2
 
     # Diff the files instead of the directories
@@ -253,13 +219,6 @@ def dodiff(ui, repo, cmdline, pats, opts):
       label1a = common_file + rev1a
       #if not os.path.isfile(file1a):
       #file1a = os.devnull
-      if do3way:
-        file1b = os.path.join(dir1b, common_file)
-        label1b = common_file + rev1b
-        #if not os.path.isfile(file1b):
-        #file1b = os.devnull
-      else:
-        file1b = None
 
       file2 = os.path.join(repo.root, common_file)
       if not dir2:
@@ -267,14 +226,10 @@ def dodiff(ui, repo, cmdline, pats, opts):
       label2 = common_file + rev2
 
       # Function to quote file/dir names in the argument string.
-      # When not operating in 3-way mode, an empty string is
-      # returned for parent2
       replace = {
           'parent': file1a,
           'parent1': file1a,
-          'parent2': file1b,
           'plabel1': label1a,
-          'plabel2': label1b,
           'clabel': label2,
           'child': file2,
           'root': repo.root
@@ -283,14 +238,12 @@ def dodiff(ui, repo, cmdline, pats, opts):
       def quote(match):
         pre = match.group(2)
         key = match.group(3)
-        if not do3way and key == 'parent2':
-          return pre
         return pre + procutil.shellquote(replace[key])
 
-      # Match parent2 first, so 'parent1?' will match both parent1 and parent
+      # 'parent1?' will match both parent1 and parent
       regex = (br"""(['"]?)([^\s'"$]*)"""
-               br'\$(parent2|parent1?|child|plabel1|plabel2|clabel|root)\1')
-      if not do3way and not re.search(regex, cmdline):
+               br'\$(parent1?|child|plabel1|clabel|root)\1')
+      if not re.search(regex, cmdline):
         cmdline2 = cmdline + ' $parent1 $child'
       else:
         cmdline2 = cmdline
