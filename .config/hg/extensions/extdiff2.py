@@ -12,7 +12,7 @@ diff programs are called with a configurable set of options and two
 non-option arguments: paths to directories containing snapshots of
 files to compare.
 
-If there is more than one file being compared and the "child" revision
+If there is more than one file being compared and the "new" revision
 is the working directory, any modifications made in the external diff
 program will be copied back to the working directory from the temporary
 directory.
@@ -41,10 +41,9 @@ you do not need to type :hg:`extdiff2 -p kdiff3` always. ::
 
 Tool arguments can include variables that are expanded at runtime::
 
-  $parent1, $plabel1 - filename, descriptive label of parent revision
-  $child,   $clabel  - filename, descriptive label of child revision
-  $root              - repository root
-  $parent is an alias for $parent1.
+  $old, $olabel - filename, descriptive label of old revision
+  $new, $nlabel - filename, descriptive label of new revision
+  $root         - repository root
 
 The extdiff2 extension will look in your [diff-tools] and [merge-tools]
 sections for diff tool arguments, when none are specified in [extdiff2].
@@ -55,7 +54,7 @@ sections for diff tool arguments, when none are specified in [extdiff2].
   kdiff3 =
 
   [diff-tools]
-  kdiff3.diffargs=--L1 '$plabel1' --L2 '$clabel' $parent $child
+  kdiff3.diffargs=--L1 '$olabel' --L2 '$nlabel' $old $new
 
 You can use -I/-X and list of file or directory names like normal
 :hg:`diff` command. The extdiff2 extension makes snapshots of only
@@ -166,72 +165,58 @@ def dodiff(ui, repo, cmdline, pats, opts):
   """Do the actual diff."""
 
   revs = opts.get('rev')
-  ctx1a, ctx2 = scmutil.revpair(repo, revs)
-
-  node1a = ctx1a.node()
-  node2 = ctx2.node()
+  old, new = scmutil.revpair(repo, revs)
 
   subrepos = opts.get('subrepos')
 
-  matcher = scmutil.match(repo[node2], pats, opts)
+  matcher = scmutil.match(new, pats, opts)
 
-  mod_a, add_a, rem_a = map(
-      set,
-      repo.status(node1a, node2, matcher, listsubrepos=subrepos)[:3])
-  modadd = mod_a | add_a
-  common = modadd | rem_a
-  if not common:
+  status = old.status(new, matcher, listsubrepos=subrepos)
+  mod, add, rem = map(set, status[:3])
+  paths_new = mod | add
+  paths_old = mod | rem
+  paths_all = paths_old | paths_new
+  if not paths_all:
     return 0
 
   tmproot = pycompat.mkdtemp(prefix='extdiff2.')
   try:
-    # Always make a copy of node1a
-    dir1a_files = mod_a | rem_a
-    dir1a = snapshot(ui, repo, dir1a_files, node1a, tmproot, subrepos)[0]
-    dir1a = os.path.join(tmproot, dir1a)
-    rev1a = '@%d' % repo[node1a].rev()
+    # Always make a copy of old
+    dir_old = snapshot(ui, repo, paths_old, old.node(), tmproot, subrepos)[0]
+    dir_old = os.path.join(tmproot, dir_old)
+    label_old = '@%d' % old.rev()
 
     fnsandstat = []
 
-    # If node2 in not the wc or there is >1 change, copy it
-    rev2 = ''
-    if node2:
-      dir2 = snapshot(ui, repo, modadd, node2, tmproot, subrepos)[0]
-      rev2 = '@%d' % repo[node2].rev()
-    elif False:  # len(common) > 1:
-      #we only actually need to get the files to copy back to
-      #the working dir in this case (because the other cases
-      #are: diffing 2 revisions or single file -- in which case
-      #the file is already directly passed to the diff tool).
-      dir2, fnsandstat = snapshot(ui, repo, modadd, None, tmproot, subrepos)
+    # If new in not the wc, copy it
+    if new.node():
+      dir_new = snapshot(ui, repo, paths_new, new.node(), tmproot, subrepos)[0]
+      label_new = '@%d' % new.rev()
     else:
       # This lets the diff tool open the changed file(s) directly
-      dir2 = ''
-
-    label1a = rev1a
-    label2 = rev2
+      dir_new = ''
+      label_new = ''
 
     # Diff the files instead of the directories
     # Handle bogus modifies correctly by checking if the files exist
-    for common_file in common:
-      common_file = util.localpath(common_file)
-      file1a = os.path.join(dir1a, common_file)
-      label1a = common_file + rev1a
-      #if not os.path.isfile(file1a):
-      #file1a = os.devnull
+    for path in paths_all:
+      path = util.localpath(path)
+      path_old = os.path.join(dir_old, path)
+      label_old = path + label_old
+      #if not os.path.isfile(path_old):
+      #path_old = os.devnull
 
-      file2 = os.path.join(repo.root, common_file)
-      if not dir2:
-        file2 = os.path.relpath(file2)
-      label2 = common_file + rev2
+      path_new = os.path.join(repo.root, path)
+      if not dir_new:
+        path_new = os.path.relpath(path_new)
+      label_new = path + label_new
 
       # Function to quote file/dir names in the argument string.
       replace = {
-          'parent': file1a,
-          'parent1': file1a,
-          'plabel1': label1a,
-          'clabel': label2,
-          'child': file2,
+          'old': path_old,
+          'olabel': label_old,
+          'nlabel': label_new,
+          'new': path_new,
           'root': repo.root
       }
 
@@ -240,11 +225,9 @@ def dodiff(ui, repo, cmdline, pats, opts):
         key = match.group(3)
         return pre + procutil.shellquote(replace[key])
 
-      # 'parent1?' will match both parent1 and parent
-      regex = (br"""(['"]?)([^\s'"$]*)"""
-               br'\$(parent1?|child|plabel1|clabel|root)\1')
+      regex = (br"""(['"]?)([^\s'"$]*)""" br'\$(old|new|olabel|nlabel|root)\1')
       if not re.search(regex, cmdline):
-        cmdline2 = cmdline + ' $parent1 $child'
+        cmdline2 = cmdline + ' $old $new'
       else:
         cmdline2 = cmdline
       cmdline3 = re.sub(regex, quote, cmdline2)
