@@ -130,7 +130,6 @@ def snapshot(ui, repo, files, node, tmproot, listsubrepos):
     dirname = '%s.%s' % (dirname, short(node))
   base = os.path.join(tmproot, dirname)
   os.mkdir(base)
-  fnsandstat = []
 
   if node is not None:
     ui.note(_('making snapshot of %d files from rev %s\n') %
@@ -150,15 +149,7 @@ def snapshot(ui, repo, files, node, tmproot, listsubrepos):
         match=scmutil.matchfiles(repo, files),
         subrepos=listsubrepos)
 
-    for fn in sorted(files):
-      wfn = util.pconvert(fn)
-      ui.note('  %s\n' % wfn)
-
-      if node is None:
-        dest = os.path.join(base, wfn)
-
-        fnsandstat.append((dest, repo.wjoin(fn), os.lstat(dest)))
-  return dirname, fnsandstat
+  return dirname
 
 
 def dodiff(ui, repo, cmdline, pats, opts):
@@ -182,15 +173,13 @@ def dodiff(ui, repo, cmdline, pats, opts):
   tmproot = pycompat.mkdtemp(prefix='extdiff2.')
   try:
     # Always make a copy of old
-    dir_old = snapshot(ui, repo, paths_old, old.node(), tmproot, subrepos)[0]
+    dir_old = snapshot(ui, repo, paths_old, old.node(), tmproot, subrepos)
     dir_old = os.path.join(tmproot, dir_old)
     label_old = '@%d' % old.rev()
 
-    fnsandstat = []
-
     # If new in not the wc, copy it
     if new.node():
-      dir_new = snapshot(ui, repo, paths_new, new.node(), tmproot, subrepos)[0]
+      dir_new = snapshot(ui, repo, paths_new, new.node(), tmproot, subrepos)
       label_new = '@%d' % new.rev()
     else:
       # This lets the diff tool open the changed file(s) directly
@@ -234,22 +223,6 @@ def dodiff(ui, repo, cmdline, pats, opts):
 
       ui.write(pycompat.bytestr(cmdline3) + b'\n')
       ui.system(cmdline3, blockedtag='extdiff2')
-
-      for copy_fn, working_fn, st in fnsandstat:
-        cpstat = os.lstat(copy_fn)
-        # Some tools copy the file and attributes, so mtime may not detect
-        # all changes.  A size check will detect more cases, but not all.
-        # The only certain way to detect every case is to diff all files,
-        # which could be expensive.
-        # copyfile() carries over the permission, so the mode check could
-        # be in an 'elif' branch, but for the case where the file has
-        # changed without affecting mtime or size.
-        if (cpstat[stat.ST_MTIME] != st[stat.ST_MTIME] or
-            cpstat.st_size != st.st_size or (cpstat.st_mode & 0o100) !=
-            (st.st_mode & 0o100)):
-          ui.debug('file changed while diffing. '
-                   'Overwriting: %s (src: %s)\n' % (working_fn, copy_fn))
-          util.copyfile(copy_fn, working_fn)
 
     return 1
   finally:
