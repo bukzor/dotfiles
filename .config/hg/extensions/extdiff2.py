@@ -73,6 +73,7 @@ from mercurial.node import short
 from mercurial import (
     archival,
     cmdutil,
+    copies,
     filemerge,
     pycompat,
     registrar,
@@ -151,9 +152,11 @@ def dodiff(ui, repo, cmdline, pats, opts):
   matcher = scmutil.match(new, pats, opts)
 
   status = old.status(new, matcher, listsubrepos=subrepos)
+  copy = copies.pathcopies(old, new, matcher)
+
   mod, add, rem = map(set, status[:3])
   paths_new = mod | add
-  paths_old = mod | rem
+  paths_old = mod | set(copy.values())
   paths_all = paths_old | paths_new
   if not paths_all:
     return 0
@@ -176,9 +179,9 @@ def dodiff(ui, repo, cmdline, pats, opts):
 
     # Diff the files instead of the directories
     # Handle bogus modifies correctly by checking if the files exist
-    for path in paths_all:
+    for path in paths_new:
       path = util.localpath(path)
-      path_old = os.path.join(dir_old, path)
+      path_old = os.path.join(dir_old, copy.get(path, path))
       label_old = path + label_old
       #if not os.path.isfile(path_old):
       #path_old = os.devnull
