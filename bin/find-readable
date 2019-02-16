@@ -1,0 +1,2 @@
+#!/bin/sh
+exec find \( -type d -not -readable -prune \) -or \( "$@" -print \)

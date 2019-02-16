@@ -9,8 +9,9 @@
 !docs
 !private-dotfiles.d
 !repo
-!.bash
+!.sh_lib
 !.vim
+!.sh_plugins.d
 !.ssh
 !.bash_completion.d
 !.subversion

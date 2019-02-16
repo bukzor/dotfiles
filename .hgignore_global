@@ -9,13 +9,18 @@ syntax: glob
 .*.sw[a-z]
 
 # Stuff in the root.
-build
-*.egg-info
-dist
-.tox
+/build/
+/*.egg-info
+/dist
+/.tox
 
 # temporary data:
 tmp/
 *.tmp
 *.bak
 *.orig
+log
+*.log
+*.log.*
+
+terraform.tfstate.*.backup

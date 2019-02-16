@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+for id in "$@"; do
+  echo "$id" |
+    sed -r '
+      s/^(.*)\.([^.]*\.[^.]*)$/tf untaint --module \1 \2/
+      s/module\.//g
+      s/\[/./g
+      s/\]//g
+    ' |
+    sh -x
+done
+

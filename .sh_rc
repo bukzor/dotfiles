@@ -4,93 +4,29 @@
 # if your command only needs to be run once per *terminal* use ~/.sh_env
 
 
-function time() {
-  /usr/bin/time -ao /dev/tty "$@"
-}
+alias time="/usr/bin/time -ao /dev/tty"
 
 if [ "$BASH" ]; then
   # enable precmd_functions, for zsh compatibility
-  source ~/.bash/bash-precmd.sh
+  source ~/.sh_lib/bash-precmd.sh
 fi
 
-# save/restore our state, so that we can (re-)source this file idempotently
-# anything that's mutated (rather than overwritten) should be listed here.
-precmd_functions+=()
-oncd_functions+=()
-__oncd_pwd=
-if [[ "${#__orig_settings[@]}" -eq 0 ]]; then
-  for varname in precmd_functions oncd_functions __oncd_pwd; do
-    __orig_settings+=("$(typeset -p $varname)")
-  done
-else
-  for state in "${__orig_settings[@]}"; do
-    eval "$state"
-  done
-fi
+mkdir -p $XDG_RUNTIME_DIR/tmux-env
 
-# facility for running code "on cd"
-oncd_functions+=()
-function __oncd() {
-  if [[ "$__oncd_pwd" = "$PWD" ]]; then
-    return 0
-  fi
-  __oncd_pwd="$PWD"
-
-  local oncd_function
-  for oncd_function in "${oncd_functions[@]}"; do
-    "$oncd_function"
-  done
-}
-
-# VCS detection
-function __vcs() {
-  candidate="$(git rev-parse --show-toplevel 2>&-)"
-  if [[ $? -eq 0 ]]; then
-    export VCS=git
-  else
-    candidate="$(hg show bundle.mainreporoot)"
-    if [[ $? -eq 0 ]]; then
-      export VCS=hg
+tmux_env() {
+  if [ "$TMUX" ]; then
+    local var=$XDG_RUNTIME_DIR/tmux-env
+    local old=$var/old.$$
+    local new=$var/new
+    tmux show-env -s > $new
+    if test -e $old && cmp -s $old $new; then
+      :
     else
-      candidate="$(p4 info | grep '^Client root:' | sed 's/.* //')"
-      if [[ "$candidate" ]]; then
-        export VCS=p4
-      else
-        TOP=/
-        unset VCS VCS_PS1
-        return 0
-      fi
+      mv $new $old
+      source $old
     fi
   fi
-
-  export VCS_TOP="$candidate"
-  VCS_PS1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
 }
-
-function __vcs_branch() {
-  if [[ "$VCS" = "git" ]]; then
-    export VCS_BRANCH="$(git branch-name 2>/dev/null)"
-  elif [[ "$VCS" = "hg" ]]; then
-    export VCS_BRANCH="$(hg id -btB | xargs -n1 | egrep -xv 'default|tip' | tr '\n' ' ')"
-  else
-    unset VCS_BRANCH
-  fi
-
-  if [[ $VCS_BRANCH ]]; then
-    VCS_PS2=" $VCS_BRANCH) "
-  elif [[ "$VCS" ]]; then
-    VCS_PS2=") "
-  else
-    VCS_PS2=""
-  fi
-}
-
-function tmux_ssh() {
-  eval "$(tmux show-env -s)"
-}
-
-precmd_functions+=(__oncd __vcs_branch tmux_ssh)
-oncd_functions+=(__vcs)
 
 # set a fancy prompt (non-color, unless we know we "want" color)
  GREEN='\[[1;32m\]'
@@ -102,24 +38,36 @@ PURPLE='\[[1;35m\]'
    PS1="$TEAL"'$VCS_PS1$VCS_PS2'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
 $PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
 
-if [[ "$ZSH_VERSION" ]]; then
+if [ "$BASH" ]; then
+  : good to go.
+elif [ "$ZSH_VERSION" ]; then
   # do a bit of transformation on the bash PS1 to make it a zsh PS1
-  PS1="$(sed '
+  PS1="$(echo "$PS1" | sed '
     s/\\\[/%{/g
     s/\\\]/%}/g
     s/\\u/%n/g
     s/\\h/%m/g
     s/\\w/%~/g
     s/\\D/%D/g
-'  <<< "$PS1")"
+')"
+else
+  # dash, or busybox, or similar
+  PS1="$(echo "$PS1" | sed '
+    s/\\\[/%{/g
+    s/\\\]/%}/g
+    s/\\u/%n/g
+    s/\\h/%m/g
+    s/\\w/%~/g
+    s/\\D/%D/g
+')"
 fi
 
 case "$TERM" in
-*-256col*|*-col*)
+*-256col*|*-col*|*-direct)
     # All's well.
     ;;
 *)
-    PS1="$(uncolor <<< "$PS1")"
+    PS1="$(echo "$PS1" | uncolor)"
     ;;
 esac
 
@@ -134,18 +82,15 @@ HISTTIMEFORMAT="[%F %r %z] "
 
 alias tmux-env='eval "$(tmux show-env -s)"'
 alias crterm='export TERM=xterm-256color; . ~/.bashrc'
-function ssh-dev() {
-	ssh -ttA dev34-devc.dev.yelpcorp.com tmux attach $(test -z "$1" || echo -t) "$1"
-}
-function reset() {
+reset() {
     ## http://askubuntu.com/a/123296/23034
     tput rmcup
     command reset
 }
 
-function login() {
+login() {
   . ~/.profile
-  if [[ "$ZSH_VERSION" ]]; then
+  if [ "$ZSH_VERSION" ]; then
     . ~/.zshrc
   fi
 }
@@ -159,7 +104,7 @@ if command -v dircolors > /dev/null; then
 fi
 
 # busybox grep doesn't have --color=auto :(
-if grep --color=auto -q '' <<< '' 2>/dev/null; then
+if grep --color=auto -q '' </dev/zero 2>/dev/null; then
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
@@ -178,14 +123,15 @@ alias l='ls -CF'
 #alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -re '\''s/^\s*[0-9]+\s*//;s/[;&|]+\s*alert$//'\'')"'
 
 # http://superuser.com/a/599156/50425
-function title {
+title() {
     echo -n "]0;"$*""
 }
-
-# completions for travis, added by travis gem
-[ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 
 # extra shell settings for work
 if [ -f ~/private-dotfiles/.sh_rc ]; then
     . ~/private-dotfiles/.sh_rc
+fi
+
+if command -v declare >/dev/null; then
+  . ~/.sh_advanced_rc
 fi

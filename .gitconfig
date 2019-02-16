@@ -47,6 +47,7 @@
     lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
         sed 's/@yelp.com//' | \
         less -XLFR && true
+    xl = lol
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
     fetchdev = !sh -c 'colorize git fetch -f "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
 
@@ -57,8 +58,11 @@
     mt = mergetool
     wip = commit -m 'WIP' --no-verify
     amend = commit --amend --no-edit
+    co = checkout
+    ci = commit
+    top = rev-parse --show-toplevel
+    gerrit = push origin HEAD:refs/for/master
 [include]
     path = private-dotfiles/.gitconfig
-
 
 # vim:sts=4:sw=4:et:

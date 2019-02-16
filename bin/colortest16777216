@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+# pylint: disable=g-import-not-at-top,missing-docstring,g-wrong-blank-lines
+from collections import namedtuple
+
+
+class Color(namedtuple('Color', 'r g b')):
+  """values are 0 to 1"""
+
+  @classmethod
+  def from_rgb(cls, r, g, b):
+    return cls(r, g, b)
+
+  @classmethod
+  def from_hsl(cls, h, s, l):
+    from colorsys import hls_to_rgb
+    return cls(*hls_to_rgb(h, l, s))
+
+  def show(color):  # pylint: disable=no-self-argument
+    color = [int(x * 255) for x in color]
+    code = ';'.join(str(x) for x in color)
+    # #repr = ''.join(format(x, '02x') for x in color)
+    return '\x1b[48;2;%sm ' % code
+
+def white_fg():
+  return '\x1b[1;38;5;231m'
+
+def black_fg():
+  return '\x1b[1;38;5;232m'
+
+def reset(end='\n'):
+  return '\x1b[0m' + end
+
+
+def frange(start, stop, step):
+  from sys import float_info
+  curr = start
+  while stop - curr > -float_info.epsilon:
+    yield curr
+    curr += step
+
+
+def colortest_truecolor(outfile, rows, columns):
+  for h in frange(0, 1.0, 1.0/(rows - 3)):
+    for l in frange(0, 1.0, 1.0/(columns - 1)):
+      outfile.write(Color.from_hsl(h, 1.0, l).show())
+    outfile.write(reset())
+
+
+def main():
+  import shutil as S
+  columns, rows = S.get_terminal_size((80, 20))
+
+  import sys as S
+  colortest_truecolor(S.stdout, rows - 3, columns - 1)
+
+
+if __name__ == '__main__':
+  exit(main())

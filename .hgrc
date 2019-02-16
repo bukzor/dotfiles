@@ -1,11 +1,15 @@
+%include /etc/mercurial/hgrc.d/optins/256color
+%include /etc/mercurial/hgrc.d/optins/rebase-in-memory-merge
+
 [ui]
 username=Buck Evan <buck.2019@gmail.com>
-merge = vimdiff
+merge = vimmerge
 ignore=~/.hgignore_global
 
 [extensions]
 progress = 
 graphlog = 
+patience = ~/.config/hg/extensions/patience.py
 
 #git=/usr/local/lib/python2.7/dist-packages/hggit/
 #mq=
@@ -15,9 +19,19 @@ rebase=
 pager=
 #hgshelve=/home/greg/src/hgshelve/hgshelve.py
 histedit=
-extdiff=
+#extdiff=
+extdiff2 = ~/.config/hg/extensions/extdiff2.py
 purge=
 strip=
+journal=
+
+[extdiff2]
+#cmd = vimdiff
+cmd.vimdiff =
+#opts.vimdiff = '+execute "DirDiff" fnameescape(argv(0)) fnameescape(argv(1))'
+
+[diff]
+git = True
 
 [commands]
 status.relative = True
@@ -26,17 +40,24 @@ status.relative = True
 dropmissing = True
 
 [alias]
-vimdiff = !hg-vimdiff "$@"
+#vimdiff = !hg-vimdiff "$@"
 difftool = vimdiff
 dt = difftool
+show = log -l1 -p -r
+l = log -G -T google_compact -r '.::head() + p4head::.'
+ls-files = status -manc .
+hg = !/usr/games/cowsay -f stegosaurus $HG_ARGS | /usr/games/lolcat; $HG $@
+- = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)"
+s = status
 
 [merge-tools]
-vimdiff.args = $base $local $output $other +close +close
+vimmerge.args = $local $output $other $base
+vimmerge.premerge = keep-merge3
 
 [pager]
 pager = less -XLFR
 # defaults, plus help
-attend = annotate, cat, diff, export, glog, log, ll, xl, l, qdiff, help
+attend = annotate, cat, diff, export, glog, log, ll, xl, l, qdiff, help, show
 
 [phases]
 publish = False
@@ -68,3 +89,6 @@ rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbran
 
 [trusted]
 users = root
+
+[evolve]
+update = False

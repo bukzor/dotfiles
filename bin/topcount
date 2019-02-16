@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sort | uniq -c | sort -rnk1 | head "$@"

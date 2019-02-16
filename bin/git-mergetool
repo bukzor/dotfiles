@@ -68,26 +68,31 @@ set -eu
 #
 # NOTE: Use :cq to abort the merge and exit Vim with an error code.
 
-if [[ -z $@ || $# -lt 3 || $# -gt 4 ]] ; then
-    echo -e "Usage: $0 MINE MERGED THEIRS [BASE]"
+if [[ -z $@ || $# != "5" ]] ; then
+    echo -e "Usage: $0 \$EDITOR \$BASE \$LOCAL \$REMOTE \$MERGED"
     exit 1
 fi
 
-MINE="$1"
-MERGED="$2"
-THEIRS="$3"
-BASE="${4:-}"
+cmd=$1
+BASE="$2"
+LOCAL="$3"
+REMOTE="$4"
+MERGED="$5"
 
-if [[ "$BASE" ]]; then
-  tab2=( -c ":tabe ${MINE}|vert diffs ${BASE}|vert diffs ${THEIRS}" )
-else
-  tab2=()
-fi
+# we need to preserve timestamp to allow git to detect resolution versus non-resolution
+# see also `man git-config` mergetool.<tool>.trustExitCode
+timestamp=$(stat -c %y "${MERGED}")
+
+git checkout --conflict=merge "${MERGED}"
+sed -i '/^<<<<<<< /d; /^=======$/,/^>>>>>>> /d' "${MERGED}"
+
+touch --date "${timestamp}" "${MERGED}"
 
 # Fire up vimdiff
-vim -R \
-  -d "${MINE}" "${MERGED}" "${THEIRS}" \
-  "${tab2[@]}" \
-  -c ":tabfir |wincmd l |set noro |wincmd t"
+$cmd -f -R -d "${REMOTE}" "${MERGED}" \
+    -c ":tabe ${MERGED}|vert diffs ${LOCAL}" \
+    -c ":tabe ${REMOTE}|vert diffs ${BASE}" \
+    -c ":tabe ${LOCAL}|vert diffs ${BASE}" \
+    -c ":tabfir|set diff|winc b|set noro"
 
 # :vim:textwidth=79:

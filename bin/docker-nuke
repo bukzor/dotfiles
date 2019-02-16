@@ -12,12 +12,14 @@ xdocker() { exec xargs -P10 -r -n1 --verbose docker "$@"; }
 
 set -x
 
-# remove containers
+# stop containers
 docker ps -q | xdocker stop
+
+# remove containers
 docker ps -aq | xdocker rm
 
 # remove tags
-docker images | sed 1d | grep -v '^<none>' | col 1 2 | sed 's/ /:/' | xdocker rmi
+docker images | sed 1d | grep -v '<none>' | col 1 2 | sed 's/ /:/' | xdocker rmi
 
 # remove images
 docker images -q | xdocker rmi

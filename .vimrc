@@ -1,6 +1,8 @@
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    set termguicolors       " Use 24bit color schemes in the terminal
+    if has('termguicolors')
+        set termguicolors   "use 24bit color schemes in the terminal
+    endif
     colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
     set wrap                "wrap long lines
@@ -13,6 +15,10 @@
     set wildmenu            "a menu for resolving ambiguous tab-completion
                             "files we never want to edit
     set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
+
+    " Make hidden characters look nice when shown.
+    set listchars=tab:▷\ ,eol:¬,extends:»,precedes:«
+
 " }
 
 " searching {
@@ -110,6 +116,8 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     command! -bang Wq wq<bang>
     command! -bang Redraw redraw!
     command! -nargs=* Set set <args>
+    command! -nargs=* E edit <args>
+    command! -nargs=* Edit edit <args>
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -143,12 +151,18 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     nnoremap <C-L> <C-W>l
     if has('nvim')
       "bindings for switching windows while in :terminal
+      tnoremap <C-W> <C-\><C-N><C-W>
       tnoremap <C-H> <C-\><C-N><C-W>h
       tnoremap <C-J> <C-\><C-N><C-W>j
       tnoremap <C-K> <C-\><C-N><C-W>k
       tnoremap <C-L> <C-\><C-N><C-W>l
       tnoremap <ESC><ESC> <C-\><C-N>
     endif
+    augroup MyTermMappings
+      autocmd!
+      autocmd TermOpen * nnoremap <buffer> o i
+      autocmd TermOpen * nnoremap <buffer> O i
+    augroup END
 
     "tab switching: ctrl+left/right
     nnoremap <C-PageUp> :tabp<CR>
@@ -197,38 +211,14 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
         autocmd VimEnter * normal lgg
 
         set diffopt+=iwhite
+        set diffopt+=hiddenoff
+        set diffopt+=algorithm:histogram
     endif
 " }
 
-" use patience algorithm for improved diffs {
-    " lifted from :help diff-diffexpr
-    ""set diffexpr=MyDiff()
-    function! MyDiff()
-        let opt = ""
-        " not supported by git-diff
-        "if &diffopt =~ "icase"
-            "let opt = opt . "-i "
-        "endif
-
-        if &diffopt =~ "iwhite"
-            let opt = opt . "-w "
-        endif
-        if
-        \   getfsize(v:fname_in) <= 6 &&
-        \   getfsize(v:fname_new) <= 6 &&
-        \   readfile(v:fname_in, 0, 1)[0] ==# 'line1' &&
-        \   readfile(v:fname_new, 0, 1)[0] ==# 'line2'
-            " don't run twice:
-            " https://stackoverflow.com/a/15884198/146821
-            call writefile(["1c1", "< line1", "---", "> line2"], v:fname_out)
-        else
-            "silent execute "!diff -a --binary " . opt . v:fname_in . " " . v:fname_new .
-            silent execute "!git-diff--ed " . opt . v:fname_in . " " . v:fname_new .
-                \  " > " . v:fname_out
-            redraw!
-        endif
-    endfunction
-"
+" { Finger-savers:
+nnoremap bd :bn \| bd#<CR>
+" }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
     nnoremap <Leader>df :call DiffToggle()<CR>
@@ -239,6 +229,16 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
         else
             diffthis
         endif
+    :endfunction
+
+    nnoremap <Leader>dw :call DiffToggleWhitespace()<CR>
+
+    function! DiffToggleWhitespace()
+       if &diffopt =~ 'iwhite'
+         set diffopt-=iwhite
+       else
+         set diffopt+=iwhite
+       endif
     :endfunction
 " }
 "

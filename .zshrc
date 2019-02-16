@@ -10,6 +10,9 @@ case $- in
       *) return;;
 esac
 
+# no ding!
+ZBEEP=""
+
 # allow variables in PS1
 setopt PROMPT_SUBST
 
@@ -31,7 +34,7 @@ zstyle ':completion:*' menu select insert-unambiguous
 HISTFILE="$HOME/.zsh_history"
 
 function history() {
-    builtin history -LDi -n
+    builtin history -LDi -n "$@"
 }
 
 . ~/.sh_rc
@@ -121,3 +124,7 @@ bindkey -a '?' history-incremental-pattern-search-backward
     zle -N down-line-or-local-history
     bindkey "$key[Down]" down-line-or-local-history
     bindkey -a "j" down-line-or-local-history
+
+if [ -e "$HOME/private-dotfiles/.zshrc" ]; then
+    source "$HOME/private-dotfiles/.zshrc"
+fi

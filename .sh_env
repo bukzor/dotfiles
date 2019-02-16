@@ -9,6 +9,11 @@ if command -v prodcertstatus && ! prodcertstatus --check_remaining_hours 8; then
   prodaccess
 fi
 
+# extra shell environment for work
+if [ -f ~/private-dotfiles/.sh_env ]; then
+    . ~/private-dotfiles/.sh_env
+fi
+
 # save/restore our $PATH, so that we can (re-)source this file idempotently
 # currently this is the only environment variable we modify (rather than overwrite), but we should do this for all such
 if [ -z "$__orig_PATH" ]; then
@@ -19,6 +24,7 @@ fi
 
 # set PATH so it includes user's private bin if it exists
 export PATH=~/.local/bin:~/prefix/brew/sbin:~/prefix/brew/bin:~/private-dotfiles/bin:~/bin:"$PATH"
+export GOPATH=~/prefix/gopath
 export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefix/brew/bin"
 export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
 export HOMEBREW_VERBOSE=1
@@ -83,6 +89,7 @@ init)
 esac
 
 # Further environment
+export PREFIX="$(readlink -m "$HOME/../..")"
 export GEM_HOME=~/prefix/rubygems
 export REPO=$HOME/repo
 
@@ -92,19 +99,29 @@ if [ -f ~/venv/mypy/bin/activate ]; then
   activate
 fi
 
-# Temporary Files
+export TMPDIR
+for TMPDIR in \
+    "$TMPDIR" \
+    "$PREFIX/tmp" \
+    "/tmp/$USER" \
+    "/tmp" \
+    "/$HOME/tmp";
+do
+  if [ "$TMPDIR" ]; then
+    mkdir -p -m 700 "$TMPDIR" 2>/dev/null
+    chmod -f 700 "$TMPDIR"
+    if [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
+      break
+    fi
+  fi
+done
+
+warn() { echo "[1;33mWARNING: [22m$@[0m"; }
 if [ "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
   : all is well!
 else
-  export TMPDIR="/tmp/$USER"
-  mkdir -p -m 700 "$TMPDIR" 2> /dev/null
-  if ! [ -w "$TMPDIR" ]; then
-    export TMPDIR="/$HOME/tmp"
-    mkdir -p -m 700 "$TMPDIR"
-    if ! [ -w "$TMPDIR" ]; then
-      echo 'Warning, no writable TMPDIR!' >&2
-    fi
-  fi
+  unset TMPDIR
+  warn 'No writable TMPDIR!' >&2
 fi
 
 # added by travis gem

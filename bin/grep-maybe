@@ -1,0 +1,17 @@
+#!/bin/bash
+# Don't fail if there's no matches. It's okay!
+set -uo pipefail
+
+grep "$@"
+status=$?
+
+set -e
+trap 'echo ERROR: $?' ERR
+
+if [ $status -eq 1 ] || [ $status -eq 0 ]; then
+  # No matches is okay, actually.
+  exit 0
+else
+  echo 'STATUS:' $status
+  exit $status
+fi

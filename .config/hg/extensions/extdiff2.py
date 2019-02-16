@@ -257,16 +257,15 @@ def dodiff(ui, repo, cmdline, pats, opts):
     # Handle bogus modifies correctly by checking if the files exist
     for common_file in common:
       common_file = util.localpath(common_file)
-      print('COMMON_FILE', common_file)
       file1a = os.path.join(dir1a, common_file)
       label1a = common_file + rev1a
-      if not os.path.isfile(file1a):
-        file1a = os.devnull
+      #if not os.path.isfile(file1a):
+      #file1a = os.devnull
       if do3way:
         file1b = os.path.join(dir1b, common_file)
         label1b = common_file + rev1b
-        if not os.path.isfile(file1b):
-          file1b = os.devnull
+        #if not os.path.isfile(file1b):
+        #file1b = os.devnull
       else:
         file1b = None
 
@@ -305,7 +304,7 @@ def dodiff(ui, repo, cmdline, pats, opts):
         cmdline2 = cmdline
       cmdline3 = re.sub(regex, quote, cmdline2)
 
-      ui.debug('running %r\n' % (pycompat.bytestr(cmdline3)))
+      ui.write(pycompat.bytestr(cmdline3) + b'\n')
       ui.system(cmdline3, blockedtag='extdiff2')
 
       for copy_fn, working_fn, st in fnsandstat:
@@ -318,8 +317,8 @@ def dodiff(ui, repo, cmdline, pats, opts):
         # be in an 'elif' branch, but for the case where the file has
         # changed without affecting mtime or size.
         if (cpstat[stat.ST_MTIME] != st[stat.ST_MTIME] or
-            cpstat.st_size != st.st_size or
-            (cpstat.st_mode & 0o100) != (st.st_mode & 0o100)):
+            cpstat.st_size != st.st_size or (cpstat.st_mode & 0o100) !=
+            (st.st_mode & 0o100)):
           ui.debug('file changed while diffing. '
                    'Overwriting: %s (src: %s)\n' % (working_fn, copy_fn))
           util.copyfile(copy_fn, working_fn)

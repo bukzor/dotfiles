@@ -11,5 +11,6 @@ for arg in "$@"; do
   fi
 done
 
-hg status -n "${status_args[@]}" |
-  xargs -ron1 hg extdiff -p vimdiff "${extdiff_args[@]}"
+hg status -damndarn "${status_args[@]}" |
+  grep -v '^#' |
+  xargs -tron1 hg extdiff -p vimdiff "${extdiff_args[@]}"
