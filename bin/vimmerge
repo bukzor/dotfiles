@@ -79,15 +79,14 @@ THEIRS="$3"
 BASE="${4:-}"
 
 if [[ "$BASE" ]]; then
-  tab2=( -c ":tabe ${MINE}|vert diffs ${BASE}|vert diffs ${THEIRS}" )
+  middle=("$BASE")
 else
-  tab2=()
+  middle=()
 fi
 
 # Fire up vimdiff
 vim -R \
-  -d "${MINE}" "${MERGED}" "${THEIRS}" \
-  "${tab2[@]}" \
-  -c ":tabfir |wincmd l |set noro |wincmd t"
+  -d "${MINE}" "$MERGED" "${base[@]}" "${THEIRS}" \
+  -c ":tabfir |wincmd l |wincmd q |bo sp |b2 |set noro nodiff cursorbind"
 
 # :vim:textwidth=79:

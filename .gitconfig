@@ -28,7 +28,7 @@
     keepBackup = false
     trustExitCode = true
 [mergetool "vimmerge"]
-    cmd = vimmerge vim $BASE $LOCAL $REMOTE $MERGED
+    cmd = vimmerge $REMOTE $MERGED $LOCAL $BASE
 [push]
     default = current
 [advice]
@@ -62,6 +62,8 @@
     ci = commit
     top = rev-parse --show-toplevel
     gerrit = push origin HEAD:refs/for/master
+[http]
+    cookiefile = ~/.gitcookies
 [include]
     path = private-dotfiles/.gitconfig
 

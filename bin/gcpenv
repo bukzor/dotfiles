@@ -1,0 +1,12 @@
+#!/bin/sh
+set -euo pipefail
+
+case $# in
+  0) gcloud config configurations list; exit 0 ;;
+  *) gcloud config configurations activate "$@" ;;
+esac
+
+eval "$(gcloud config list --format 'get(compute,container)')"
+flock $HOME/.kube/config \
+  gcloud container clusters get-credentials --region "$region" "$cluster"
+kubectl config current-context >&2

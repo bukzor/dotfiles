@@ -8,7 +8,9 @@
     set wrap                "wrap long lines
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
+    set sidescrolloff=10    "keep cursor away from left and right edge, too
     set ruler showcmd       "give line, column, and command in the status line
+    set colorcolumn=80      "often I want to know when/if I've exceeded 80 columns
     set laststatus=2        "always show the status line
                             "make filename-completion more terminal-like
     set wildmode=longest:full
@@ -174,7 +176,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
 "indentation options {
     set expandtab                       "use spaces, not tabs
-    set softtabstop=4 shiftwidth=4      "4-space indents
+    set softtabstop=2 shiftwidth=2      "2-space indents
 
 
     set shiftround                      "always use a multiple of 4 for indents

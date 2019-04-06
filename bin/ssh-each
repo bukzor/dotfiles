@@ -6,6 +6,7 @@ set -euo pipefail
 # we create a shared lock to prevent interleaving output
 tmpdir="${TMPDIR:-/tmp}/$USER/ssh-each"
 mkdir -p "$tmpdir"
+SSH=${SSH:-ssh-noninteractive}
 
 lock=$tmpdir/$$.lock
 exec 200>"$lock"
@@ -29,6 +30,6 @@ xargs -n1 | xargs --replace -P50 bash -c '
         exec 2>&4
 
         echo -n "{}: "
-        ssh-noninteractive "{}" '"$(sh-quote "$(sh-quote "$@")")"' || true
+        '"$SSH"' "{}" '"$(sh-quote "$(sh-quote "$@")")"' || true
     ) | flock -x 200 cat
 '

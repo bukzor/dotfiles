@@ -1,10 +1,15 @@
 set textwidth=131
+set colorcolumn+=132
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
     set cursorline | set cursorcolumn
-    autocmd WinEnter * setlocal cursorline | setlocal cursorcolumn
-    autocmd WinLeave * setlocal nocursorline | setlocal nocursorcolumn
+
+    if ! &diff
+      " TODO: turn these on/off with cursorbind
+      autocmd WinEnter * setlocal   cursorline   cursorcolumn
+      autocmd WinLeave * setlocal nocursorline nocursorcolumn
+    endif
 
     " use bold font for cursor highlight
     hi CursorLine term=bold cterm=bold gui=bold

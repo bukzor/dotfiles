@@ -40,15 +40,21 @@ status.relative = True
 dropmissing = True
 
 [alias]
+ll = log -G -T compact
+l = ll -r tree -r 'ancestor(p4head, .)::. + .::head()'
+xl = l -r smart
+
 #vimdiff = !hg-vimdiff "$@"
 difftool = vimdiff
 dt = difftool
 show = log -l1 -p -r
-l = log -G -T google_compact -r 'ancestor(p4head, .)::. + .::head()'
 ls-files = status -manc .
 hg = !/usr/games/cowsay -f stegosaurus $HG_ARGS | /usr/games/lolcat; $HG $@
 - = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)"
 s = status
+
+[templates]
+##mycompact = "{date|age}"
 
 [merge-tools]
 vimmerge.args = $local $output $other $base
@@ -85,10 +91,11 @@ make-mutable-posthoc = hg phase -f -d 1818
 
 rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbranches
 
-%include private-dotfiles/.hgrc
-
 [trusted]
 users = root
 
 [evolve]
 update = False
+
+
+%include private-dotfiles/.hgrc

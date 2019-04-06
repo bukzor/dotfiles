@@ -1,0 +1,13 @@
+#!/bin/bash
+
+URL="$1"
+RAW_URL="$(sed 's@/blob/@/raw/@' <<< "$URL")"
+filename="$(basename $1)"
+
+cat > "$filename" <<EOF
+# Retrived $(date +%F) by $(whoami)
+# From $URL
+
+EOF
+
+curl -sSL $RAW_URL >> $filename
