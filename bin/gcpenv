@@ -2,8 +2,15 @@
 set -euo pipefail
 
 case $# in
-  0) gcloud config configurations list; exit 0 ;;
-  *) gcloud config configurations activate "$@" ;;
+  0) exec gcloud config configurations list;;
+  1)
+    if ! gcloud config configurations activate "$@"; then
+      gcloud config configurations create "$@"
+      echo >&2 FIXME: need to set cluster and region
+      exit 1
+    fi
+  ;;
+  *) exec gcloud config configurations "$@";;
 esac
 
 eval "$(gcloud config list --format 'get(compute,container)')"

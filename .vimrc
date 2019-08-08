@@ -117,9 +117,9 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
     command! -bang WQ wq<bang>
     command! -bang Wq wq<bang>
     command! -bang Redraw redraw!
-    command! -nargs=* Set set <args>
-    command! -nargs=* E edit <args>
-    command! -nargs=* Edit edit <args>
+    command! -bang -nargs=* Set set<bang> <args>
+    command! -bang -nargs=* E edit<bang> <args>
+    command! -bang -nargs=* Edit edit<bang> <args>
     nmap Q: :q
 
     " this one causes a pause whenever you use q, so I don't use it
@@ -269,4 +269,5 @@ endif
 
 set exrc
 set secure
+set modeline
 " vim:et:sts=4:sw=4

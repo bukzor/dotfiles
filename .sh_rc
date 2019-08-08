@@ -6,7 +6,7 @@
 
 alias time="/usr/bin/time -ao /dev/tty"
 
-if [ "$BASH" ]; then
+if [ "${BASH:-}" ]; then
   # enable precmd_functions, for zsh compatibility
   source ~/.sh_lib/bash-precmd.sh
 fi
@@ -38,7 +38,7 @@ PURPLE='\[[1;35m\]'
    PS1="$TEAL"'$VCS_PS1$VCS_PS2'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
 $PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
 
-if [ "$BASH" ]; then
+if [ "${BASH:-}" ]; then
   : good to go.
 elif [ "$ZSH_VERSION" ]; then
   # do a bit of transformation on the bash PS1 to make it a zsh PS1
@@ -95,6 +95,14 @@ login() {
   fi
 }
 
+silent(){
+  "$@" >/dev/null 2>&1
+}
+noisy(){
+  echo "+$@" >&2
+  "$@"
+}
+
 # enable color support of ls and also add handy aliases
 if command -v dircolors > /dev/null; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -112,11 +120,18 @@ fi
 
 alias diff='diff -d'
 alias info='info --vi-keys'
+alias ip='ip --color'
 
 # some more ls aliases
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+alias ..='noisy cd ..'
+alias ...='noisy cd ../..'
+alias ....='noisy cd ../../..'
+alias .....='noisy cd ../../../..'
+alias ......='noisy cd ../../../../..'
+alias .......='noisy cd ../../../../../..'
 
 ## Add an "alert" alias for long running commands.  Use like so:
 ##   sleep 10; alert
@@ -125,6 +140,10 @@ alias l='ls -CF'
 # http://superuser.com/a/599156/50425
 title() {
     echo -n "]0;"$*""
+}
+
+alert() {
+  command alert "$@" "  (status: $?)"
 }
 
 # extra shell settings for work

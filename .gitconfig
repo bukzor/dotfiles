@@ -47,7 +47,8 @@
     lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h - %C(bold blue)%aE%Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
         sed 's/@yelp.com//' | \
         less -XLFR && true
-    xl = lol
+    l = lol
+    xl = lol --all
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
     fetchdev = !sh -c 'colorize git fetch -f "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
 
@@ -63,7 +64,7 @@
     top = rev-parse --show-toplevel
     gerrit = push origin HEAD:refs/for/master
 [http]
-    cookiefile = ~/.gitcookies
+	cookiefile = /usr/local/google/home/bukzor/.gitcookies
 [include]
     path = private-dotfiles/.gitconfig
 

@@ -33,6 +33,11 @@ cmd.vimdiff =
 [diff]
 git = True
 
+[revsetalias]
+related(s) = closure(s::)
+closure(s) = ancestor(s)::s
+revisions(s) = allprecursors(s) + allsuccessors(s) + s
+
 [commands]
 status.relative = True
 
@@ -41,7 +46,8 @@ dropmissing = True
 
 [alias]
 ll = log -G -T compact
-l = ll -r tree -r 'ancestor(p4head, .)::. + .::head()'
+l = ll -r tree -r 'ancestor(p4head, . % p4head)::. + .::head()'
+history = ll --hidden -rev 'closure(revisions(.))'
 xl = l -r smart
 
 #vimdiff = !hg-vimdiff "$@"
@@ -95,7 +101,8 @@ rebase = hg rebase -b __main__-support -d 'remote(default, upstream)' --keepbran
 users = root
 
 [evolve]
-update = False
+# Check out the tip after evolving?
+update = True
 
 
 %include private-dotfiles/.hgrc

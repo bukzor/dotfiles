@@ -125,6 +125,11 @@ bindkey -a '?' history-incremental-pattern-search-backward
     bindkey "$key[Down]" down-line-or-local-history
     bindkey -a "j" down-line-or-local-history
 
+# opam configuration
+if [ -r ~/.opam/opam-init/init.zsh ]; then
+  . ~/.opam/opam-init/init.zsh
+fi
+
 if [ -e "$HOME/private-dotfiles/.zshrc" ]; then
     source "$HOME/private-dotfiles/.zshrc"
 fi

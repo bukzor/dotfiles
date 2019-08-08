@@ -15,6 +15,6 @@ fi
 . ~/.sh_env
 
 # if running bash
-if [ -n "$BASH_VERSION" ]; then
+if [ -n "${BASH_VERSION:-}" ]; then
     . "$HOME/.bashrc"
 fi

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+echo >&2 This script just shows the commands. Pipe to `sh` to commit.
+echo set -ex
 sed -r '
   s/^((.*)\.)?([^.]*\.[^.]*)$/tf taint --module '\''\2'\'' \3/
   s/module\.//g

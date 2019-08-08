@@ -1,0 +1,79 @@
+# completions for travis, added by travis gem
+[ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
+
+# Reset our state, so that we can (re-)source this file idempotently.
+# Anything that's mutated (rather than overwritten) should be listed here.
+typeset -Uga preexec_functions=()
+typeset -Uga precmd_functions=()
+typeset -Uga oncd_functions=()
+typeset -g __oncd_pwd="(no previous pwd)"
+
+# facility for running code "on cd"
+__oncd() {
+  if [ "$__oncd_pwd" = "$PWD" ]; then
+    return 0
+  fi
+  __oncd_pwd="$PWD"
+
+  local oncd_function
+  for oncd_function in "${oncd_functions[@]}"; do
+    "$oncd_function"
+  done
+}
+
+# VCS detection
+__vcs() {
+  candidate="$(git rev-parse --show-toplevel 2>&-)"
+  if [ $? -eq 0 ]; then
+    export VCS=git
+  else
+    candidate="$(hg showconfig bundle.mainreporoot)"
+    if [ $? -eq 0 ]; then
+      export VCS=hg
+    else
+      candidate="$(p4 info | grep '^Client root:' | sed 's/.* //')"
+      if [ "$candidate" ]; then
+        export VCS=p4
+      else
+        TOP=/
+        unset VCS VCS_PS1
+        return 0
+      fi
+    fi
+  fi
+
+  export VCS_TOP="$candidate"
+  VCS_PS1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
+}
+
+__vcs_branch() {
+  if [ "$VCS" = "git" ]; then
+    export VCS_BRANCH="$(git branch-name 2>/dev/null)"
+  elif [ "$VCS" = "hg" ]; then
+    export VCS_BRANCH="{hg-branch})"
+    # FIXME: hg too painfully slow. needs async, and hg optimization
+    #export VCS_BRANCH="$(hg id -btB | xargs -n1 | egrep -xv 'default|tip' | tr '\n' ' ')"
+  else
+    unset VCS_BRANCH
+  fi
+
+  if [ "$VCS_BRANCH" ]; then
+    VCS_PS2=" $VCS_BRANCH) "
+  elif [ "$VCS" ]; then
+    VCS_PS2=") "
+  else
+    VCS_PS2=""
+  fi
+}
+
+precmd_functions+=(__oncd tmux_env __vcs_branch)
+oncd_functions+=(__vcs)
+
+. ~/.sh_plugins.d/*
+
+# extra shell settings for work
+if [ -f ~/private-dotfiles/.sh_advanced_rc ]; then
+    . ~/private-dotfiles/.sh_advanced_rc
+fi
+
+# vim:ft=sh
