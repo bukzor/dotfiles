@@ -28,48 +28,96 @@ tmux_env() {
   fi
 }
 
-# set a fancy prompt (non-color, unless we know we "want" color)
- GREEN='\[[1;32m\]'
-YELLOW='\[[1;33m\]'
-  BLUE='\[[1;34m\]'
-PURPLE='\[[1;35m\]'
-  TEAL='\[[1;36m\]'
-   END='\[[0;39m\]'
-   PS1="$TEAL"'$VCS_PS1$VCS_PS2'"$END$BLUE\u$END@$GREEN\h$END:$YELLOW\w$END 
-$PURPLE"'[\D{%F %r %z (%a)}]'"$END"'$ '
+# XKCD terminal colors
+# From: https://xkcd.com/color/rgb/
+# black red green yellow blue purple teal white
+# [
+#   "#070d0d",  # almost black
+#   "#8c000f",  # crimson
+#   "#15b01a",  # green
+#   "#b79400",  # yellow brown
+#   "#0504aa",  # royal blue
+#   "#7e1e9c",  # purple
+#   "#029386",  # teal
+#   "#a5a391",  # cement
+#   "#7d7f7c",  # medium grey
+#   "#ff000d",  # bright red
+#   "#01ff07",  # bright green
+#   "#ffff14",  # yellow
+#   "#0165fc",  # bright blue
+#   "#be03fd",  # bright purple
+#   "#01f9c6",  # bright teal
+#   "#ffffff"   # white
+# ]
 
-if [ "${BASH:-}" ]; then
-  : good to go.
-elif [ "$ZSH_VERSION" ]; then
-  # do a bit of transformation on the bash PS1 to make it a zsh PS1
-  PS1="$(echo "$PS1" | sed '
-    s/\\\[/%{/g
-    s/\\\]/%}/g
-    s/\\u/%n/g
-    s/\\h/%m/g
-    s/\\w/%~/g
-    s/\\D/%D/g
-')"
-else
-  # dash, or busybox, or similar
-  PS1="$(echo "$PS1" | sed '
-    s/\\\[/%{/g
-    s/\\\]/%}/g
-    s/\\u/%n/g
-    s/\\h/%m/g
-    s/\\w/%~/g
-    s/\\D/%D/g
-')"
-fi
-
+# set a fancy prompt
 case "$TERM" in
 *-256col*|*-col*|*-direct)
-    # All's well.
-    ;;
+  RESET="$(printf '\033[0m')"
+  ascii_color() {
+      printf '\033[0;3'"$1"'m'
+  }
+;;
 *)
-    PS1="$(echo "$PS1" | uncolor)"
-    ;;
+  RESET=''
+  ascii_color() {
+    true;
+  }
+;;
 esac
+   RED="$(ascii_color 1)"
+ GREEN="$(ascii_color 2)"
+YELLOW="$(ascii_color 3)"
+  BLUE="$(ascii_color 4)"
+PURPLE="$(ascii_color 5)"
+  TEAL="$(ascii_color 6)"
+
+PROMPT_DIRTRIM=3
+if [ "${BASH:-}" ]; then
+  PSLESC='\['
+  PSRESC='\]'
+  PSUSER='\u'
+  PSHOST='\h'
+  PS1PWD='\w'
+  PSDATE='\D{'"$HISTTIMEFORMAT"'}'
+elif [ "$ZSH_VERSION" ]; then
+  PSLESC='%{'
+  PSRESC='%}'
+  PSUSER='%n'
+  PSHOST='%m'
+  PS1PWD='%~'
+  PSDATE='%D{$HISTTIMEFORMAT}'
+else # dash, busybox, or similar
+  PSLESC=''
+  PSRESC=''
+  PS1PWD='$PWD'
+  PSUSER='$USER'
+  PSHOST='$(hostname -s)'
+  PSDATE='$(date +"$HISTTIMEFORMAT")'
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  PS1END='#'
+else
+  PS1END='$'
+fi
+
+esc() {
+  echo -n "$PSLESC$1$PSRESC"
+}
+
+PS1="
+"\
+"$(esc "$BLUE")$PSUSER"\
+"$(esc "$RESET")@"\
+"$(esc "$GREEN")$PSHOST "\
+"$(esc "$YELLOW")$PS1PWD "\
+"$(esc "$PURPLE")$PSDATE"\
+"$(esc "$RED")$PS1END"\
+"$(esc "$RESET") "
+unset esc
+
+export PS1
 
 # don't put duplicate lines in the history. See bash(1) for more options
 HISTCONTROL=erasedups
@@ -78,7 +126,7 @@ HISTCONTROL=erasedups
 HISTSIZE=64000
 HISTFILESIZE=512000
 SAVEHIST=$HISTFILESIZE
-HISTTIMEFORMAT="[%F %r %z] "
+HISTTIMEFORMAT='[%F %a %p %I:%M%z]'
 
 alias tmux-env='eval "$(tmux show-env -s)"'
 alias crterm='export TERM=xterm-256color; . ~/.bashrc'
@@ -154,3 +202,7 @@ fi
 if command -v declare >/dev/null; then
   . ~/.sh_advanced_rc
 fi
+
+module use /usr/local/google/gchips/tools/gchips-modulefiles
+module load gchips-cloud/tools
+

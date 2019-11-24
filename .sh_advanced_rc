@@ -1,11 +1,12 @@
+#!/not/executable/bash
 # completions for travis, added by travis gem
 [ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
 
 # Reset our state, so that we can (re-)source this file idempotently.
 # Anything that's mutated (rather than overwritten) should be listed here.
-typeset -Uga preexec_functions=()
-typeset -Uga precmd_functions=()
-typeset -Uga oncd_functions=()
+typeset -ga preexec_functions=()
+typeset -ga precmd_functions=()
+typeset -ga oncd_functions=()
 typeset -g __oncd_pwd="(no previous pwd)"
 
 # facility for running code "on cd"
@@ -36,14 +37,14 @@ __vcs() {
         export VCS=p4
       else
         TOP=/
-        unset VCS VCS_PS1
+        unset VCS VCS_PROMPT1
         return 0
       fi
     fi
   fi
 
   export VCS_TOP="$candidate"
-  VCS_PS1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
+  VCS_PROMPT1="($VCS:$(basename "$(sed 's@'"$HOME"'@~@' <<< "$VCS_TOP")")"
 }
 
 __vcs_branch() {
@@ -58,18 +59,26 @@ __vcs_branch() {
   fi
 
   if [ "$VCS_BRANCH" ]; then
-    VCS_PS2=" $VCS_BRANCH) "
+    VCS_PROMPT2=" $VCS_BRANCH) "
   elif [ "$VCS" ]; then
-    VCS_PS2=") "
+    VCS_PROMPT2=") "
   else
-    VCS_PS2=""
+    VCS_PROMPT2=""
   fi
 }
 
 precmd_functions+=(__oncd tmux_env __vcs_branch)
 oncd_functions+=(__vcs)
 
-. ~/.sh_plugins.d/*
+# Stolen from /etc/profile.
+if [ -d ~/.sh_plugins.d ]; then
+  for i in ~/.sh_plugins.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+fi
 
 # extra shell settings for work
 if [ -f ~/private-dotfiles/.sh_advanced_rc ]; then

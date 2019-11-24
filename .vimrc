@@ -5,6 +5,7 @@
     endif
     colorscheme tomorrownight "change to taste. try `desert' or `evening'
 
+    set number
     set wrap                "wrap long lines
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
@@ -36,18 +37,18 @@
 
 " statusline {
 " compare the default statusline: %<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
-set statusline =                " clear!
-set statusline +=%2n:           " buffer number
-set statusline +=%<             " truncation point
-set statusline +=%f\            " relative path to file
-set statusline +=%#Error#%m     " modified flag [+], highlighted as error
-set statusline +=%r             " readonly flag [RO]
-set statusline +=%##%y          " filetype [ruby], reset color
-set statusline +=%=             " split point for left and right justification
-set statusline +=%P\ \          " percentage through buffer
-set statusline +=row:\ %3l      " current line number
-set statusline +=/%-3L\         " number of lines in buffer
-set statusline +=col:\ %3v\     " current virtual column number (visual count)
+    set statusline =                " clear!
+    set statusline +=%2n:           " buffer number
+    set statusline +=%<             " truncation point
+    set statusline +=%f\            " relative path to file
+    set statusline +=%#Error#%m     " modified flag [+], highlighted as error
+    set statusline +=%r             " readonly flag [RO]
+    set statusline +=%##%y          " filetype [ruby], reset color
+    set statusline +=%=             " split point for left and right justification
+    set statusline +=%P\ \          " percentage through buffer
+    set statusline +=row:\ %3l      " current line number
+    set statusline +=/%-3L\         " number of lines in buffer
+    set statusline +=col:\ %3v\     " current virtual column number (visual count)
 " }
 
 " movement options {
@@ -214,7 +215,7 @@ set statusline +=col:\ %3v\     " current virtual column number (visual count)
 
         set diffopt+=iwhite
         set diffopt+=hiddenoff
-        set diffopt+=algorithm:histogram
+        set diffopt+=algorithm:patience
     endif
 " }
 

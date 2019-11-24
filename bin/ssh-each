@@ -7,12 +7,13 @@ set -euo pipefail
 tmpdir="${TMPDIR:-/tmp}/$USER/ssh-each"
 mkdir -p "$tmpdir"
 SSH=${SSH:-ssh-noninteractive}
+SSH_PARALLEL=${SSH_PARALLEL:-20}
 
 lock=$tmpdir/$$.lock
 exec 200>"$lock"
 rm "$lock"
 
-xargs -n1 | xargs --replace -P50 bash -c '
+xargs -n1 | xargs --replace -P"$SSH_PARALLEL" bash -c '
     set -euo pipefail
     (
         # fd 5 points at the original stdout

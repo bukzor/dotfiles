@@ -1,0 +1,9 @@
+#!/bin/sh
+set -euo pipefail
+
+PID="${1:-$PPID}"
+
+while [[ "$PID" -ne 1 ]]; do
+  echo "$PID"
+  PID="$(grep -Pom1 '(?<=^PPid:[\t]).*$' /proc/$PID/status)"
+done

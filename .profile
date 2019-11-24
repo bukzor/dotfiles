@@ -7,7 +7,7 @@ case $- in
 esac
 
 preferred_shell=/usr/bin/zsh
-if [ "$SHELL" != "$preferred_shell" -a -x "$preferred_shell" ]; then
+if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
   SHELL="$preferred_shell" exec "$preferred_shell" -l
 fi
 
@@ -17,4 +17,8 @@ fi
 # if running bash
 if [ -n "${BASH_VERSION:-}" ]; then
     . "$HOME/.bashrc"
+elif [ "$ZSH_VERSION" ]; then
+    : good to go.
+else
+    . "$HOME/.sh_rc"
 fi

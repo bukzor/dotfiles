@@ -1,5 +1,4 @@
 %include /etc/mercurial/hgrc.d/optins/256color
-%include /etc/mercurial/hgrc.d/optins/rebase-in-memory-merge
 
 [ui]
 username=Buck Evan <buck.2019@gmail.com>
