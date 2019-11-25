@@ -160,12 +160,12 @@
       tnoremap <C-K> <C-\><C-N><C-W>k
       tnoremap <C-L> <C-\><C-N><C-W>l
       tnoremap <ESC><ESC> <C-\><C-N>
+      augroup MyTermMappings
+        autocmd!
+        autocmd TermOpen * nnoremap <buffer> o i
+        autocmd TermOpen * nnoremap <buffer> O i
+      augroup END
     endif
-    augroup MyTermMappings
-      autocmd!
-      autocmd TermOpen * nnoremap <buffer> o i
-      autocmd TermOpen * nnoremap <buffer> O i
-    augroup END
 
     "tab switching: ctrl+left/right
     nnoremap <C-PageUp> :tabp<CR>

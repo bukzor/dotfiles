@@ -65,7 +65,7 @@
     top = rev-parse --show-toplevel
     gerrit = push origin HEAD:refs/for/master
 [http]
-	cookiefile = /usr/local/google/home/bukzor/.gitcookies
+	cookiefile = /home/bukzor/.gitcookies
 [include]
     path = private-dotfiles/.gitconfig
 

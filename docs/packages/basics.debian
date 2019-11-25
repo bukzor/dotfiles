@@ -1,0 +1,6 @@
+cat <<EOF | xargs sudo apt install -y
+build-essential
+vim-nox
+tmux
+aptitude
+EOF

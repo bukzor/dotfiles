@@ -202,7 +202,3 @@ fi
 if command -v declare >/dev/null; then
   . ~/.sh_advanced_rc
 fi
-
-module use /usr/local/google/gchips/tools/gchips-modulefiles
-module load gchips-cloud/tools
-
