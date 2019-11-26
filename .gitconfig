@@ -48,8 +48,8 @@
         sed -r 's/(@[^.]*)\\.com /\\1 /g' | \
         sed -r 's/(buck@yelp|bukzor@google|(buck.2019|workitharder)@gmail) / bukzor /' | \
         less -XLFR && true
-    l = lol
-    xl = lol --all
+    l = !git lol
+    xl = !git lol --all
     fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
     fetchdev = !sh -c 'colorize git fetch -f "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
 

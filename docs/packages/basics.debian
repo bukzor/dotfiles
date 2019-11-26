@@ -3,4 +3,9 @@ build-essential
 vim-nox
 tmux
 aptitude
+tree
+command-not-found
 EOF
+
+sudo apt-file update
+sudo update-command-not-found

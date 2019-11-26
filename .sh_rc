@@ -3,122 +3,6 @@
 # generally, this is aliases, shell settings, functions
 # if your command only needs to be run once per *terminal* use ~/.sh_env
 
-
-alias time="/usr/bin/time -ao /dev/tty"
-
-if [ "${BASH:-}" ]; then
-  # enable precmd_functions, for zsh compatibility
-  source ~/.sh_lib/bash-precmd.sh
-fi
-
-mkdir -p $XDG_RUNTIME_DIR/tmux-env
-
-tmux_env() {
-  if [ "$TMUX" ]; then
-    local var=$XDG_RUNTIME_DIR/tmux-env
-    local old=$var/old.$$
-    local new=$var/new
-    tmux show-env -s > $new
-    if test -e $old && cmp -s $old $new; then
-      :
-    else
-      mv $new $old
-      source $old
-    fi
-  fi
-}
-
-# XKCD terminal colors
-# From: https://xkcd.com/color/rgb/
-# black red green yellow blue purple teal white
-# [
-#   "#070d0d",  # almost black
-#   "#8c000f",  # crimson
-#   "#15b01a",  # green
-#   "#b79400",  # yellow brown
-#   "#0504aa",  # royal blue
-#   "#7e1e9c",  # purple
-#   "#029386",  # teal
-#   "#a5a391",  # cement
-#   "#7d7f7c",  # medium grey
-#   "#ff000d",  # bright red
-#   "#01ff07",  # bright green
-#   "#ffff14",  # yellow
-#   "#0165fc",  # bright blue
-#   "#be03fd",  # bright purple
-#   "#01f9c6",  # bright teal
-#   "#ffffff"   # white
-# ]
-
-# set a fancy prompt
-case "$TERM" in
-*-256col*|*-col*|*-direct)
-  RESET="$(printf '\033[0m')"
-  ascii_color() {
-      printf '\033[0;3'"$1"'m'
-  }
-;;
-*)
-  RESET=''
-  ascii_color() {
-    true;
-  }
-;;
-esac
-   RED="$(ascii_color 1)"
- GREEN="$(ascii_color 2)"
-YELLOW="$(ascii_color 3)"
-  BLUE="$(ascii_color 4)"
-PURPLE="$(ascii_color 5)"
-  TEAL="$(ascii_color 6)"
-
-PROMPT_DIRTRIM=3
-if [ "${BASH:-}" ]; then
-  PSLESC='\['
-  PSRESC='\]'
-  PSUSER='\u'
-  PSHOST='\h'
-  PS1PWD='\w'
-  PSDATE='\D{'"$HISTTIMEFORMAT"'}'
-elif [ "$ZSH_VERSION" ]; then
-  PSLESC='%{'
-  PSRESC='%}'
-  PSUSER='%n'
-  PSHOST='%m'
-  PS1PWD='%~'
-  PSDATE='%D{$HISTTIMEFORMAT}'
-else # dash, busybox, or similar
-  PSLESC=''
-  PSRESC=''
-  PS1PWD='$PWD'
-  PSUSER='$USER'
-  PSHOST='$(hostname -s)'
-  PSDATE='$(date +"$HISTTIMEFORMAT")'
-fi
-
-if [ "$(id -u)" -eq 0 ]; then
-  PS1END='#'
-else
-  PS1END='$'
-fi
-
-esc() {
-  echo -n "$PSLESC$1$PSRESC"
-}
-
-PS1="
-"\
-"$(esc "$BLUE")$PSUSER"\
-"$(esc "$RESET")@"\
-"$(esc "$GREEN")$PSHOST "\
-"$(esc "$YELLOW")$PS1PWD "\
-"$(esc "$PURPLE")$PSDATE"\
-"$(esc "$RED")$PS1END"\
-"$(esc "$RESET") "
-unset esc
-
-export PS1
-
 # don't put duplicate lines in the history. See bash(1) for more options
 HISTCONTROL=erasedups
 
@@ -128,6 +12,8 @@ HISTFILESIZE=512000
 SAVEHIST=$HISTFILESIZE
 HISTTIMEFORMAT='[%F %a %p %I:%M%z]'
 
+# aliases and functions {
+alias time="/usr/bin/time -ao /dev/tty"
 alias tmux-env='eval "$(tmux show-env -s)"'
 alias crterm='export TERM=xterm-256color; . ~/.bashrc'
 reset() {
@@ -193,6 +79,120 @@ title() {
 alert() {
   command alert "$@" "  (status: $?)"
 }
+
+mkdir -p $XDG_RUNTIME_DIR/tmux-env
+tmux_env() {
+  if [ "$TMUX" ]; then
+    local var=$XDG_RUNTIME_DIR/tmux-env
+    local old=$var/old.$$
+    local new=$var/new
+    tmux show-env -s > $new
+    if test -e $old && cmp -s $old $new; then
+      :
+    else
+      mv $new $old
+      source $old
+    fi
+  fi
+}
+# } aliases and functions
+
+
+if [ "${BASH:-}" ]; then
+  # enable precmd_functions, for zsh compatibility
+  source ~/.sh_lib/bash-precmd.sh
+fi
+
+# XKCD terminal colors
+# From: https://xkcd.com/color/rgb/
+# black red green yellow blue purple teal white
+# [
+#   "#070d0d",  # almost black
+#   "#8c000f",  # crimson
+#   "#15b01a",  # green
+#   "#b79400",  # yellow brown
+#   "#0504aa",  # royal blue
+#   "#7e1e9c",  # purple
+#   "#029386",  # teal
+#   "#a5a391",  # cement
+#   "#7d7f7c",  # medium grey
+#   "#ff000d",  # bright red
+#   "#01ff07",  # bright green
+#   "#ffff14",  # yellow
+#   "#0165fc",  # bright blue
+#   "#be03fd",  # bright purple
+#   "#01f9c6",  # bright teal
+#   "#ffffff"   # white
+# ]
+
+# set a fancy prompt
+case "$TERM" in
+*-256col*|*-col*|*-direct)
+  RESET="$(printf '\033[0m')"
+  ascii_color() {
+      printf '\033[0;3'"$1"'m'
+  }
+;;
+*)
+  RESET=''
+  ascii_color() {
+    true;
+  }
+;;
+esac
+   RED="$(ascii_color 1)"
+ GREEN="$(ascii_color 2)"
+YELLOW="$(ascii_color 3)"
+  BLUE="$(ascii_color 4)"
+PURPLE="$(ascii_color 5)"
+  TEAL="$(ascii_color 6)"
+
+PROMPT_DIRTRIM=3
+if [ "${BASH:-}" ]; then
+  PSLESC='\['
+  PSRESC='\]'
+  PSUSER='\u'
+  PSHOST='\h'
+  PS1PWD='\w'
+  PSDATE='\D{'"$HISTTIMEFORMAT"'}'
+elif [ "$ZSH_VERSION" ]; then
+  PSLESC='%{'
+  PSRESC='%}'
+  PSUSER='%n'
+  PSHOST='%m'
+  PS1PWD='%~'
+  PSDATE='%D{'"$HISTTIMEFORMAT"'}'
+else # dash, busybox, or similar
+  PSLESC=''
+  PSRESC=''
+  PS1PWD='$PWD'
+  PSUSER='$USER'
+  PSHOST='$(hostname -s)'
+  PSDATE='$(date +"$HISTTIMEFORMAT")'
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  PS1END='#'
+else
+  PS1END='$'
+fi
+
+esc() {
+  echo -n "$PSLESC$1$PSRESC"
+}
+
+PS1="
+"\
+"$(esc "$BLUE")$PSUSER"\
+"$(esc "$RESET")@"\
+"$(esc "$GREEN")$PSHOST "\
+"$(esc "$YELLOW")$PS1PWD "\
+"$(esc "$PURPLE")$PSDATE"\
+"$(esc "$RED")$PS1END"\
+"$(esc "$RESET") "
+unset esc
+
+export PS1
 
 # extra shell settings for work
 if [ -f ~/private-dotfiles/.sh_rc ]; then

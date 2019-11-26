@@ -102,7 +102,7 @@ fi
 export TMPDIR
 for TMPDIR in \
     "$TMPDIR" \
-    "$PREFIX/tmp" \
+    "$(cd $PREFIX/tmp; pwd)" \
     "/tmp/$USER" \
     "/tmp" \
     "/$HOME/tmp";
@@ -118,11 +118,41 @@ done
 
 warn() { echo "[1;33mWARNING: [22m$@[0m"; }
 if [ "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
-  : all is well!
+  TMPDIR="$(cd $TMPDIR; pwd)"
 else
   unset TMPDIR
   warn 'No writable TMPDIR!' >&2
 fi
+
+# XDG {
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+if ! [ "$XDG_DATA_HOME" ]; then
+  XDG_DATA_HOME="$HOME/.local/share"
+  mkdir -p $XDG_DATA_HOME --mode 700
+fi
+if ! [ "$XDG_CONFIG_HOME" ]; then
+  XDG_CONFIG_HOME="$HOME/.config"
+  mkdir -p $XDG_CONFIG_HOME --mode 700
+fi
+XDG_DATA_DIRS="${XDG_DATA_DIRS:-usr/local/share/:/usr/share/}"
+XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
+if ! [ "$XDG_CACHE_HOME" ]; then
+  XDG_CACHE_HOME="$HOME/.cache"
+  mkdir -p $XDG_CACHE_HOME --mode 700
+fi
+if ! [ "$XDG_RUNTIME_DIR" ]; then
+  XDG_RUNTIME_DIR="$TMPDIR/runtime-$vnc_user"
+  bootstamp="$(sed 's/^btime //; t; d' /proc/stat)"
+  bootdir="$XDG_RUNTIME_DIR-$bootstamp"
+  unset bootstamp
+
+  mkdir -p $bootdir --mode 700 || true
+  ln -sfn $bootdir -T $XDG_RUNTIME_DIR
+  flock --nonblock $bootdir -c sleep infinity &
+  flock --nonblock $XDG_RUNTIME_DIR -c sleep infinity &
+  unset bootdir
+fi
+# } XDG
 
 # added by travis gem
 if [ -f ~/.travis/travis.sh ]; then
