@@ -92,12 +92,8 @@ function! s:get_OSC52_DCS (str)
 endfunction
 
 " Echo a string to the terminal without munging the escape sequences.
-"
-" This function causes the terminal to flash as a side effect.  It would be
-" better if it didn't, but I can't figure out how.
 function! s:rawecho (str)
-  exec("silent! !echo " . shellescape(a:str))
-  redraw!
+  call system("echo -en " . shellescape(a:str) . " > /dev/tty")
 endfunction
 
 " Lookup table for s:b64encode.
