@@ -1,5 +1,11 @@
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
+    scriptencoding utf-8
+    " FIXME: set up personal termcaps
+    if empty(&t_8f)         "24bit color escapes; see ':help xterm-true-color'.
+        let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+        let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    endif
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
@@ -19,8 +25,9 @@
                             "files we never want to edit
     set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
 
-    " Make hidden characters look nice when shown.
-    set listchars=tab:▷\ ,eol:¬,extends:»,precedes:«
+    " Make whitespace characters look nice when shown.
+    set listchars=tab:→\ ,extends:»,precedes:«,nbsp:␠,trail:␠
+    set list
 
 " }
 
@@ -85,6 +92,9 @@
     "don't clobber the buffer when pasting in visual mode
     vmap P p
     vnoremap p pgvy
+
+    " send any copied lines to the clipboard, too
+    vnoremap y y:call SendViaOSC52(getreg('"'))<cr>
 " }
 
 " windows-style mappings {
@@ -97,7 +107,7 @@
     noremap <c-a> ggVG
     imap <c-a> <esc><c-a>
     "ctrl+C to copy
-    map <c-c> "+y
+    map <c-c> y
     "ctrl+Y to redo
     map <c-y> <c-r>
     imap <c-y> <c-o><c-r>
@@ -214,8 +224,8 @@
         autocmd VimEnter * normal lgg
 
         set diffopt+=iwhite
-        set diffopt+=hiddenoff
-        set diffopt+=algorithm:patience
+        silent! set diffopt+=hiddenoff
+        silent! set diffopt+=algorithm:patience
     endif
 " }
 

@@ -1,18 +1,22 @@
-set textwidth=131
-set colorcolumn+=132
+set textwidth=79
+set colorcolumn=+1,+2,+3,+4,+5
+autocmd ColorScheme * hi ColorColumn ctermbg=black guibg=black
+autocmd ColorScheme * hi Search cterm=reverse
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
     set cursorline | set cursorcolumn
 
     if ! &diff
-      " TODO: turn these on/off with cursorbind
       autocmd WinEnter * setlocal   cursorline   cursorcolumn
       autocmd WinLeave * setlocal nocursorline nocursorcolumn
     endif
 
-    " use bold font for cursor highlight
-    hi CursorLine term=bold cterm=bold gui=bold
+    " Adjust highlight of cursor line and column.
+    autocmd ColorScheme * hi CursorLine term=underline cterm=underline gui=underline guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * hi CursorColumn term=underline cterm=underline gui=underline                                
+    autocmd ColorScheme * hi CursorColumn ctermbg=NONE guibg=NONE ctermfg=NONE guifg=NONE                      
+    doautocmd ColorScheme
 " }
 
 " functions {
