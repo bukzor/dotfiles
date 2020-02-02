@@ -154,7 +154,9 @@ def dodiff(ui, repo, cmdline, pats, opts):
   status = old.status(new, matcher, listsubrepos=subrepos)
   copy = copies.pathcopies(old, new, matcher)
 
-  mod, add, rem = map(set, status[:3])
+  mod = set(status.modified)
+  add = set(status.added)
+  rem = set(status.removed)
   paths_new = mod | add
   paths_old = mod | set(copy.values())
   paths_all = paths_old | paths_new
