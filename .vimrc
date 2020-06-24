@@ -15,9 +15,8 @@
     set wrap                "wrap long lines
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
-    set sidescrolloff=10    "keep cursor away from left and right edge, too
+    set sidescrolloff=8     "keep cursor away from left and right edge, too
     set ruler showcmd       "give line, column, and command in the status line
-    set colorcolumn=80      "often I want to know when/if I've exceeded 80 columns
     set laststatus=2        "always show the status line
                             "make filename-completion more terminal-like
     set wildmode=longest:full
@@ -266,6 +265,15 @@ nnoremap <Leader>gd :e %:h<CR>
         Helptags                  "plus any bundled help
         runtime bundle_config.vim "give me a chance to configure the plugins
     endif
+" }
+
+" Vim 8 Packages {
+    " Load all plugins now.
+    " Plugins need to be added to runtimepath before helptags can be generated.
+    packloadall
+    " Load all of the helptags now, after plugins have been loaded.
+    " All messages and errors will be ignored.
+    silent! helptags ALL
 " }
 
 " extra, local settings {

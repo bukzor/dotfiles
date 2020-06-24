@@ -23,13 +23,17 @@ else
 fi
 
 # set PATH so it includes user's private bin if it exists
-export PATH=~/.local/bin:~/prefix/brew/sbin:~/prefix/brew/bin:~/private-dotfiles/bin:~/bin:"$PATH"
+export PATH=~/.local/bin:~/.cargo/bin:~/private-dotfiles/bin:~/bin:"$PATH"
 export GOPATH=~/prefix/gopath
-export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefix/brew/bin"
+export GDK_SCALE=2
 export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
 export HOMEBREW_VERBOSE=1
 export HOMEBREW_BUILD_FROM_SOURCE=1
 export PATH=~/.local/bin:"${PATH}"
+export HOMEBREW="$(command -v brew)"
+if [[ -x "$HOMEBREW" ]]; then
+  eval "$($HOMEBREW shellenv)"
+fi
 
 #MY PREFERENCES ==============================================================
 export EDITOR=vim

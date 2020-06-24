@@ -1,7 +1,0 @@
-#!/bin/bash
-wat=$(echo "$0" | sed 's|.*/||;s/git-//')
-set -- "$wat" "$@"
-# nice fonts: doom standard bigfig big
-exec toilet -F crop -tSf slant --gay "$@"' indeed!'
-
-# vim:ft=sh:

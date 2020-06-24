@@ -24,7 +24,7 @@ notify_tmux() {
 # Send a notification.
 # Usage: [title] [body]
 notify() {
-  local title="alert" body="$@"
+  local title="alert" body="$*"
 
   case ${TERM-} in
   screen*)
@@ -88,7 +88,7 @@ main() {
   done
 
   if [ $# -eq 0 ]; then
-    set it\'s done!
+    set "it's done!"
   fi
 
   notify "$@"
