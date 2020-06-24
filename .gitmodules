@@ -34,3 +34,12 @@
 [submodule ".vim/pack/plugins/start/elm-vim"]
 	path = .vim/pack/plugins/start/elm-vim
 	url = https://github.com/ElmCast/elm-vim.git
+[submodule ".vim/pack/plugins/start/ale"]
+	path = .vim/pack/plugins/start/ale
+	url = https://github.com/dense-analysis/ale.git
+[submodule ".vim/pack/plugins/start/rust"]
+	path = .vim/pack/plugins/start/rust
+	url = https://github.com/rust-lang/rust.vim
+[submodule ".vim/pack/plugins/start/vim-reason-plus"]
+	path = .vim/pack/plugins/start/vim-reason-plus
+	url = https://github.com/reasonml-editor/vim-reason-plus.git
