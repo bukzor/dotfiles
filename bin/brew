@@ -1,0 +1,24 @@
+#!/bin/bash
+for brew in \
+    ~/prefix/brew/bin/brew \
+    ~/.linuxbrew/bin/brew \
+    ~/.linuxbrew/Homebrew/bin/brew \
+    /home/linuxbrew/.linuxbrew/bin/brew;
+do
+  if [ -x "$brew" ]; then
+    exec "$brew" "$@"
+  fi
+done
+
+echo 'Could not find a homebrew installation!'
+read -p 'Install now? [yN] '
+if [[ "$REPLY" =~ ^[Yy] ]]; then
+  # https://docs.brew.sh/Homebrew-on-Linux#debian-or-ubuntu
+  sudo apt-get install build-essential curl file git
+
+  # https://brew.sh/
+  eval "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+  # Retry.
+  exec "$0" "$@"
+fi

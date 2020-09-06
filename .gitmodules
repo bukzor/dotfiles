@@ -43,3 +43,12 @@
 [submodule ".vim/pack/plugins/start/vim-reason-plus"]
 	path = .vim/pack/plugins/start/vim-reason-plus
 	url = https://github.com/reasonml-editor/vim-reason-plus.git
+[submodule ".vim/pack/plugins/start/formality-vim"]
+	path = .vim/pack/plugins/start/formality-vim
+	url = https://gitlab.com/moonad/formality-vim
+[submodule "scratch"]
+	path = scratch
+	url = git@github.com:bukzor/scratch.git
+[submodule ".vim/pack/plugins/start/vim-autoformat"]
+	path = .vim/pack/plugins/start/vim-autoformat
+	url = https://github.com/Chiel92/vim-autoformat

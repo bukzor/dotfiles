@@ -1,0 +1,3 @@
+#!/bin/sh
+SLOWLY="${SLOWLY:-10}"
+"$@" | exec pv -qL "$SLOWLY"
