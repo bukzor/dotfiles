@@ -229,7 +229,8 @@
 " }
 
 " { Finger-savers:
-nnoremap bd :bn \| bd#<CR>
+noremap <Leader>bd :bn \| bd#<CR>
+noremap <Leader>sc :w\|SyntasticCheck<CR>
 " }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
@@ -284,6 +285,35 @@ if filereadable($HOME . "/private-dotfiles/.vimrc")
     source $HOME/private-dotfiles/.vimrc
 endif
 " }
+
+" plugin: syntastic {
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 2
+let g:syntastic_loc_list_height = 5
+
+let g:syntastic_rst_sphinx_args = "-n"
+let g:syntastic_rst_checkers = ["sphinx"]
+
+let g:syntastic_mode_map = {
+    \ "mode": "active",
+    \ "active_filetypes": ["bzl", "sh"],
+    \ "passive_filetypes": ["python"] }
+" } plugin: syntastic
+
+" plugin: ALE {
+let g:ale_fix_on_save = 1
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'javascript': ['eslint'],
+\   'python': ['black'],
+\}
+" } plugin: ALE
 
 
 set exrc

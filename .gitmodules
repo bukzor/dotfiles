@@ -4,9 +4,6 @@
 [submodule ".vim/bundle/puppet-syntax-vim"]
 	path = .vim/bundle/puppet-syntax-vim
 	url = https://github.com/puppetlabs/puppet-syntax-vim
-[submodule ".vim/bundle/rainbow_parenthesis"]
-	path = .vim/bundle/rainbow_parenthesis
-	url = https://github.com/kien/rainbow_parentheses.vim
 [submodule ".vim/bundle/VimClojure"]
 	path = .vim/bundle/VimClojure
 	url = git://github.com/vim-scripts/VimClojure.git
@@ -22,9 +19,6 @@
 [submodule ".vim/bundle/vim-bracketed-paste"]
 	path = .vim/bundle/vim-bracketed-paste
 	url = https://github.com/ConradIrwin/vim-bracketed-paste
-[submodule ".vim/bundle/elm"]
-	path = .vim/bundle/elm
-	url = git@github.com:ElmCast/elm-vim.git
 [submodule ".vim/bundle/terraform"]
 	path = .vim/bundle/terraform
 	url = https://github.com/hashivim/vim-terraform
@@ -49,6 +43,3 @@
 [submodule "scratch"]
 	path = scratch
 	url = git@github.com:bukzor/scratch.git
-[submodule ".vim/pack/plugins/start/vim-autoformat"]
-	path = .vim/pack/plugins/start/vim-autoformat
-	url = https://github.com/Chiel92/vim-autoformat
