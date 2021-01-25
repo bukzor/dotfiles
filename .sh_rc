@@ -202,3 +202,5 @@ fi
 if command -v declare >/dev/null; then
   . ~/.sh_advanced_rc
 fi
+
+tail -vn +1 $HOME/TODO.md
