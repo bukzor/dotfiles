@@ -31,3 +31,6 @@
 [submodule ".vim/bundle/vim-dirdiff"]
 	path = .vim/bundle/vim-dirdiff
 	url = https://github.com/will133/vim-dirdiff
+[submodule ".vim/pack/plugins/start/ale"]
+	path = .vim/pack/plugins/start/ale
+	url = https://github.com/dense-analysis/ale.git

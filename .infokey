@@ -1,40 +1,64 @@
 # --vi-keys for info(1)
 #info
-g       first-node
-G       last-node
-\mb     beginning-of-node
-\me     end-of-node
+# g       first-node
+# G       last-node
+g       beginning-of-node
+G       end-of-node
 j       next-line
 k       prev-line
-
-f       scroll-forward-page-only
-^f      scroll-forward-page-only
-\m\     scroll-forward-page-only
-z       scroll-forward-page-only-set-window
-
-b       scroll-backward-page-only
-^b      scroll-backward-page-only
-w       scroll-backward-page-only-set-window
-
-\kd     down-line
-^e      down-line
-^j      down-line
-^m      down-line
-\ku     up-line
-^y      up-line
-^k      up-line
 
 d       scroll-half-screen-down
 ^d      scroll-half-screen-down
 u       scroll-half-screen-up
 ^u      scroll-half-screen-up
 
-^xn     next-node
-^xp     prev-node
+^p      next-node
+^o      prev-node
+\t      next-node
+
+# OMFG can't bind shift-tab at all
+^I      prev-node
+\T      prev-node
+^i      prev-node
+^I      prev-node
+\e\t    prev-node
+\e\011  prev-node
+\011  prev-node
+\017 prev-node
+# \e\415    prev-node
+# \415    prev-node
+\e[Z prev-node
+^[[Z prev-node
+^[[z prev-node
+\e[1Z prev-node
+^[[1Z prev-node
+^[[1z prev-node
+<S-Tab> prev-node
+<S-Tab> prev-node
+[Z    prev-node
+[1Z    prev-node
+^H prev-node
+\e[D prev-node
+\e[B prev-node
+(BackTab) prev-node
+BackTab      prev-node
+<BackTab>      prev-node
+S-<Tab>      prev-node
+<S-Tab>      prev-node
+<M-Tab>      prev-node
+M-<Tab>      prev-node
+<Shift-Tab>      prev-node
+\m\t      prev-node
+\s\t      prev-node
+\mi      prev-node
+\mI      prev-node
+
 ^xu     up-node
-'       last-node
+^o      last-node
 \mt     top-node
 \md     dir-node
+
+gf      view-file
 
 ^xg     goto-node
 I       goto-invocation-node

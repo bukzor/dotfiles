@@ -85,7 +85,7 @@ def diffwrapper(orig, *args, **kwargs):
 
     """
   ui = args[0].ui
-  if ui.configbool('diff', 'patience'):
+  if ui.configbool(b'diff', b'patience'):
     if len(args) > 5 and args[5]:
       # Replace args[5] (the diff argument) with a patiencediffopts
       # object.
@@ -137,13 +137,13 @@ def blockswrapper(orig, *args, **kwargs):
 
 def uisetup(ui):
   'Add --patience option to diff command and wrap a few functions.'
-  entry = extensions.wrapcommand(commands.table, 'diff', diffcmdwrapper)
-  entry[1].append(('', 'patience', True,
+  entry = extensions.wrapcommand(commands.table, b'diff', diffcmdwrapper)
+  entry[1].append((b'', b'patience', True,
                    _('use patience diff algorithm')))
 
-  extensions.wrapfunction(mdiff.bdiff, 'blocks', blockswrapper)
-  extensions.wrapfunction(patch, 'diff', diffwrapper)
-  extensions.wrapfunction(mdiff, 'unidiff', unidiffwrapper)
+  extensions.wrapfunction(mdiff.bdiff, b'blocks', blockswrapper)
+  extensions.wrapfunction(patch, b'diff', diffwrapper)
+  extensions.wrapfunction(mdiff, b'unidiff', unidiffwrapper)
 
 
 #### Slightly-modified copy of hg's bdiff.py below. ####
@@ -151,9 +151,9 @@ def uisetup(ui):
 
 def splitnewlines(text):
   """like str.splitlines, but only split on newlines."""
-  lines = [l + '\n' for l in text.split('\n')]
+  lines = [l + b'\n' for l in text.split(b'\n')]
   if lines:
-    if lines[-1] == '\n':
+    if lines[-1] == b'\n':
       lines.pop()
     else:
       lines[-1] = lines[-1][:-1]

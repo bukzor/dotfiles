@@ -32,7 +32,7 @@ __vcs() {
     if [ $? -eq 0 ]; then
       export VCS=hg
     else
-      candidate="$(p4 info | grep '^Client root:' | sed 's/.* //')"
+      candidate="$(timeout -sINT -k2 1 p4 info | grep '^Client root:' | sed 's/.* //')"
       if [ "$candidate" ]; then
         export VCS=p4
       else

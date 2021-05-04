@@ -1,0 +1,5 @@
+#!/bin/bash
+tmp="$(mktemp --tmpdir -d "strace-o.XXXXXX")"
+
+echo "# strace logs at: $tmp" >&2
+exec strace-defaults -ff -o $tmp/strace "$@"

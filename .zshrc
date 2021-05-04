@@ -34,7 +34,11 @@ zstyle ':completion:*' menu select insert-unambiguous
 HISTFILE="$HOME/.zsh_history"
 
 function history() {
-    builtin history -LDi -n "$@"
+  if [[ "$#" -eq 0 ]] ; then
+    # Modify default options.
+    set -- -LDi -n
+  fi
+  builtin history "$@"
 }
 
 . ~/.sh_rc

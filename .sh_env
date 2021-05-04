@@ -23,12 +23,10 @@ else
 fi
 
 # set PATH so it includes user's private bin if it exists
-export PATH=~/.local/bin:~/prefix/brew/sbin:~/prefix/brew/bin:~/private-dotfiles/bin:~/bin:"$PATH"
+export PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
 export GOPATH=~/prefix/gopath
-export HOMEBREW_CASK_OPTS="--caskroom=~/Caskroom --binarydir=~/prefix/brew/bin"
 export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
 export HOMEBREW_VERBOSE=1
-export HOMEBREW_BUILD_FROM_SOURCE=1
 export PATH=~/.local/bin:"${PATH}"
 
 #MY PREFERENCES ==============================================================
@@ -62,7 +60,7 @@ fi
 # fix up TERM values
 # get the session-leader's parent
 terminal="$(ps -o ppid:1= "$(ps -o sid:1= $$ 2>/dev/null)" 2>/dev/null)"
-if [ "$?" -eq 0 ]; then
+if [ "$?" -eq 0 -a "$terminal" -gt 0 ]; then
   #use the basename of its arg[0]
   terminal="$(basename "$(head -zn1 /proc/$terminal/cmdline | tr -d '\0')")"
 else
@@ -92,6 +90,7 @@ esac
 export PREFIX="$(readlink -m "$HOME/../..")"
 export GEM_HOME=~/prefix/rubygems
 export REPO=$HOME/repo
+export BOOT="$(sed 's/^btime //; t; d' /proc/stat)"
 
 # My very own python!
 activate() { . ~/venv/mypy/bin/activate; }
@@ -102,11 +101,12 @@ fi
 export TMPDIR
 for TMPDIR in \
     "$TMPDIR" \
-    "$(cd $PREFIX/tmp; pwd)" \
-    "/tmp/$USER" \
+    "$(cd $PREFIX/tmp; pwd)/$USER/$BOOT/$(date -I)" \
+    "/tmp/$USER/$BOOT/$(date -I)" \
     "/tmp" \
-    "/$HOME/tmp";
-do
+    "/$HOME/tmp/$BOOT/$(date -I)" \
+    "/$HOME/tmp" \
+; do
   if [ "$TMPDIR" ]; then
     mkdir -p -m 700 "$TMPDIR" 2>/dev/null
     chmod -f 700 "$TMPDIR"
@@ -141,15 +141,13 @@ if ! [ "$XDG_CACHE_HOME" ]; then
   mkdir -p $XDG_CACHE_HOME --mode 700
 fi
 if ! [ "$XDG_RUNTIME_DIR" ]; then
-  XDG_RUNTIME_DIR="$TMPDIR/runtime-$vnc_user"
-  bootstamp="$(sed 's/^btime //; t; d' /proc/stat)"
-  bootdir="$XDG_RUNTIME_DIR-$bootstamp"
-  unset bootstamp
+  XDG_RUNTIME_DIR="$TMPDIR/runtime-$USER"
+  bootdir="$XDG_RUNTIME_DIR-$BOOT"
 
   mkdir -p $bootdir --mode 700 || true
   ln -sfn $bootdir -T $XDG_RUNTIME_DIR
-  flock --nonblock $bootdir -c sleep infinity &
-  flock --nonblock $XDG_RUNTIME_DIR -c sleep infinity &
+  setsid flock --nonblock $bootdir -c "sleep infinity"
+  setsid flock --nonblock $XDG_RUNTIME_DIR -c "sleep infinity"
   unset bootdir
 fi
 # } XDG

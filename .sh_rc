@@ -159,7 +159,7 @@ elif [ "$ZSH_VERSION" ]; then
   PSLESC='%{'
   PSRESC='%}'
   PSUSER='%n'
-  PSHOST='%m'
+  PSHOST='%M'
   PS1PWD='%~'
   PSDATE='%D{'"$HISTTIMEFORMAT"'}'
 else # dash, busybox, or similar

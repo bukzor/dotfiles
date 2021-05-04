@@ -95,6 +95,7 @@
 
     " send any copied lines to the clipboard, too
     vnoremap y y:call SendViaOSC52(getreg('"'))<cr>
+    vnoremap <C-c> y:call SendViaOSC52(getreg('"'))<cr>
 " }
 
 " windows-style mappings {
@@ -223,14 +224,15 @@
         "show me the top of the "new" file
         autocmd VimEnter * normal lgg
 
-        set diffopt+=iwhite
+        set diffopt+=iwhiteall
         silent! set diffopt+=hiddenoff
         silent! set diffopt+=algorithm:patience
     endif
 " }
 
 " { Finger-savers:
-nnoremap bd :bn \| bd#<CR>
+    nnoremap <Leader>bd :bn \| bd#<CR>
+    nnoremap <Leader>gd :e %:h<CR>
 " }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
@@ -247,15 +249,14 @@ nnoremap bd :bn \| bd#<CR>
     nnoremap <Leader>dw :call DiffToggleWhitespace()<CR>
 
     function! DiffToggleWhitespace()
-       if &diffopt =~ 'iwhite'
-         set diffopt-=iwhite
+       if &diffopt =~ 'iwhiteall'
+         set diffopt-=iwhiteall
        else
-         set diffopt+=iwhite
+         set diffopt+=iwhiteall
        endif
     :endfunction
 " }
 "
-nnoremap <Leader>gd :e %:h<CR>
 
 " Pathogen: {
     " keep plugins nicely bundled in separate folders.
@@ -267,6 +268,17 @@ nnoremap <Leader>gd :e %:h<CR>
         runtime bundle_config.vim "give me a chance to configure the plugins
     endif
 " }
+
+
+" Vim 8 Packages {
+    " Load all plugins now.
+    " Plugins need to be added to runtimepath before helptags can be generated.
+    packloadall
+    " Load all of the helptags now, after plugins have been loaded.
+    " All messages and errors will be ignored.
+    silent! helptags ALL
+" }
+
 
 " extra, local settings {
 if filereadable($HOME . "/.vimrc.extra")

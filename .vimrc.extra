@@ -5,17 +5,17 @@ autocmd ColorScheme * hi Search cterm=reverse
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
-    set cursorline | set cursorcolumn
-
-    if ! &diff
-      autocmd WinEnter * setlocal   cursorline   cursorcolumn
-      autocmd WinLeave * setlocal nocursorline nocursorcolumn
-    endif
+"    set cursorline | set cursorcolumn
+"
+"    if ! &diff
+"      autocmd WinEnter * setlocal   cursorline   cursorcolumn
+"      autocmd WinLeave * setlocal nocursorline nocursorcolumn
+"    endif
 
     " Adjust highlight of cursor line and column.
     autocmd ColorScheme * hi CursorLine term=underline cterm=underline gui=underline guibg=NONE ctermbg=NONE
-    autocmd ColorScheme * hi CursorColumn term=underline cterm=underline gui=underline                                
-    autocmd ColorScheme * hi CursorColumn ctermbg=NONE guibg=NONE ctermfg=NONE guifg=NONE                      
+    autocmd ColorScheme * hi CursorColumn term=underline cterm=underline gui=underline
+    autocmd ColorScheme * hi CursorColumn ctermbg=NONE guibg=NONE ctermfg=NONE guifg=NONE
     doautocmd ColorScheme
 " }
 

@@ -31,9 +31,12 @@
     cmd = vimmerge $REMOTE $MERGED $LOCAL $BASE
 [push]
     default = current
+[pull]
+    ff = only
 [advice]
     detachedHead = false
 [alias]
+    master = !sh -exc 'git fetch origin && git checkout origin/master -B master'
     branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
         git config branch.`git branch-name`.upstream || \
@@ -63,10 +66,13 @@
     co = checkout
     ci = commit
     top = rev-parse --show-toplevel
-    gerrit = push origin HEAD:refs/for/master
+    gerrit-upstream = ! (git rev-parse --abbrev-ref m/master -- 2>/dev/null || echo origin/master) | sed -r 's@^[^/]*/+@@'
+    gerrit = !set -x && git push "$(git remote | head -n 1)" HEAD:refs/for/"$(git gerrit-upstream)"
+    s = status -s
+    topic = !set -x && git fetch origin master && git checkout FETCH_HEAD -b
 [http]
-	cookiefile = /home/bukzor/.gitcookies
+    cookiefile = ~/.gitcookies
 [include]
-    path = private-dotfiles/.gitconfig
+    path = ./private-dotfiles/.gitconfig
 
 # vim:sts=4:sw=4:et:

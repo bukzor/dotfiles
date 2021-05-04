@@ -1,2 +1,2 @@
 #!/bin/sh
-exec nvim -d "$@"
+exec vim -d "$@"
