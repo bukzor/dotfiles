@@ -92,15 +92,15 @@ configtable = {}
 configitem = registrar.configitem(configtable)
 
 configitem(
-    b'extdiff2',
-    br'opts\..*',
-    default=b'',
+    b"extdiff2",
+    br"opts\..*",
+    default=b"",
     generic=True,
 )
 
 configitem(
-    b'diff-tools',
-    br'.*\.diffargs$',
+    b"diff-tools",
+    br".*\.diffargs$",
     default=None,
     generic=True,
 )
@@ -109,34 +109,39 @@ configitem(
 def snapshot(ui, repo, files, node, tmproot, listsubrepos):
   """snapshot files as of some revision
 
-    if not using snapshot, -I/-X does not work and recursive diff
-    in tools like kdiff3 and meld displays too many files.
+  if not using snapshot, -I/-X does not work and recursive diff
+  in tools like kdiff3 and meld displays too many files.
   """
   dirname = os.path.basename(repo.root)
-  if dirname == b'':
-    dirname = b'root'
+  if dirname == b"":
+    dirname = b"root"
   if node is not None:
-    dirname = b'%s.%s' % (dirname, short(node))
+    dirname = b"%s.%s" % (dirname, short(node))
   base = os.path.join(tmproot, dirname)
   os.mkdir(base)
 
   if node is not None:
-    ui.note(_('making snapshot of %d files from rev %s\n') %
-            (len(files), short(node)))
+    ui.note(
+        _(b"making snapshot of %d files from rev %s\n")
+        % (len(files), short(node))
+    )
   else:
-    ui.note(_('making snapshot of %d files from working directory\n') %
-            (len(files)))
+    ui.note(
+        _(b"making snapshot of %d files from working directory\n")
+        % (len(files))
+    )
 
   if files:
-    repo.ui.setconfig(b'ui', b'archivemeta', False)
+    repo.ui.setconfig(b"ui", b"archivemeta", False)
 
     archival.archive(
         repo,
         base,
         node,
-        b'files',
+        b"files",
         match=scmutil.matchfiles(repo, files),
-        subrepos=listsubrepos)
+        subrepos=listsubrepos,
+    )
 
   return dirname
 
@@ -144,10 +149,10 @@ def snapshot(ui, repo, files, node, tmproot, listsubrepos):
 def dodiff(ui, repo, cmdline, pats, opts):
   """Do the actual diff."""
 
-  revs = opts.get(b'rev')
+  revs = opts.get(b"rev")
   old, new = scmutil.revpair(repo, revs)
 
-  subrepos = opts.get(b'subrepos')
+  subrepos = opts.get(b"subrepos")
 
   matcher = scmutil.match(new, pats, opts)
 
@@ -163,30 +168,31 @@ def dodiff(ui, repo, cmdline, pats, opts):
   if not paths_all:
     return 0
 
-  tmproot = pycompat.mkdtemp(prefix=b'extdiff2.')
+  tmproot = pycompat.mkdtemp(prefix=b"extdiff2.")
   try:
     # Always make a copy of old
     dir_old = snapshot(ui, repo, paths_old, old.node(), tmproot, subrepos)
     dir_old = os.path.join(tmproot, dir_old)
-    label_old = b'@%d' % old.rev()
+    label_old = b"@%d" % old.rev()
 
     # If new in not the wc, copy it
     if new.node():
       dir_new = snapshot(ui, repo, paths_new, new.node(), tmproot, subrepos)
-      label_new = b'@%d' % new.rev()
+      label_new = b"@%d" % new.rev()
     else:
       # This lets the diff tool open the changed file(s) directly
-      dir_new = b''
-      label_new = b''
+      dir_new = b""
+      label_new = b""
 
     # Diff the files instead of the directories
     # Handle bogus modifies correctly by checking if the files exist
-    for path in paths_new:
+    for path in sorted(paths_new):
       path = util.localpath(path)
       path_old = os.path.join(dir_old, copy.get(path, path))
       label_old = path + label_old
-      #if not os.path.isfile(path_old):
-      #path_old = os.devnull
+
+      if not os.path.isfile(path_old):
+        path_old = os.devnull.encode("US-ASCII")
 
       path_new = os.path.join(repo.root, path)
       if not dir_new:
@@ -195,11 +201,11 @@ def dodiff(ui, repo, cmdline, pats, opts):
 
       # Function to quote file/dir names in the argument string.
       replace = {
-          b'old': path_old,
-          b'olabel': label_old,
-          b'nlabel': label_new,
-          b'new': path_new,
-          b'root': repo.root
+          b"old": path_old,
+          b"olabel": label_old,
+          b"nlabel": label_new,
+          b"new": path_new,
+          b"root": repo.root,
       }
 
       def quote(match):
@@ -207,108 +213,121 @@ def dodiff(ui, repo, cmdline, pats, opts):
         key = match.group(3)
         return pre + procutil.shellquote(replace[key])
 
-      regex = (br"""(['"]?)([^\s'"$]*)""" br'\$(old|new|olabel|nlabel|root)\1')
+      regex = br"""(['"]?)([^\s'"$]*)""" br"\$(old|new|olabel|nlabel|root)\1"
       if not re.search(regex, cmdline):
-        cmdline2 = cmdline + b' $old $new'
+        cmdline2 = cmdline + b" $old $new"
       else:
         cmdline2 = cmdline
       cmdline3 = re.sub(regex, quote, cmdline2)
 
-      ui.write(pycompat.bytestr(cmdline3) + b'\n')
-      ui.system(cmdline3, blockedtag=b'extdiff2')
+      ui.write(pycompat.bytestr(cmdline3) + b"\n")
+      ui.system(cmdline3, blockedtag=b"extdiff2")
 
     return 1
   finally:
-    ui.note(_('cleaning up temp directory\n'))
+    ui.note(_(b"cleaning up temp directory\n"))
     shutil.rmtree(tmproot)
 
 
-extdiffopts = [
-    (b'o', b'option', [],
-     _('pass option to comparison program'), _('OPT')),
-    (b'r', b'rev', [], _('revision'), _('REV')),
-] + cmdutil.walkopts + cmdutil.subrepoopts
+extdiffopts = (
+    [
+        (
+            b"o",
+            b"option",
+            [],
+            _(b"pass option to comparison program"),
+            _(b"OPT"),
+        ),
+        (b"r", b"rev", [], _(b"revision"), _(b"REV")),
+    ]
+    + cmdutil.walkopts
+    + cmdutil.subrepoopts
+)
 
 
-@command(b'extdiff2',
-         [(b'p', b'program', b'', _('comparison program to run'), _('CMD')),
-         ] + extdiffopts,
-         _('hg extdiff2 [OPT]... [FILE]...'),
-         helpcategory=command.CATEGORY_FILE_CONTENTS,
-         inferrepo=True)
+@command(
+    b"extdiff2",
+    [
+        (b"p", b"program", b"", _(b"comparison program to run"), _(b"CMD")),
+    ]
+    + extdiffopts,
+    _(b"hg extdiff2 [OPT]... [FILE]..."),
+    helpcategory=command.CATEGORY_FILE_CONTENTS,
+    inferrepo=True,
+)
 def extdiff2(ui, repo, *pats, **opts):
   """use external program to diff repository (or selected files)
 
-    Show differences between revisions for the specified files, using
-    an external program. The default program used is diff, with
-    default options "-Npru".
+  Show differences between revisions for the specified files, using
+  an external program. The default program used is diff, with
+  default options "-Npru".
 
-    To select a different program, use the -p/--program option. The
-    program will be passed the names of two directories to compare. To
-    pass additional options to the program, use -o/--option. These
-    will be passed before the names of the directories to compare.
+  To select a different program, use the -p/--program option. The
+  program will be passed the names of two directories to compare. To
+  pass additional options to the program, use -o/--option. These
+  will be passed before the names of the directories to compare.
 
-    When two revision arguments are given, then changes are shown
-    between those revisions. If only one revision is specified then
-    that revision is compared to the working directory, and, when no
-    revisions are specified, the working directory files are compared
-    to its parent.
+  When two revision arguments are given, then changes are shown
+  between those revisions. If only one revision is specified then
+  that revision is compared to the working directory, and, when no
+  revisions are specified, the working directory files are compared
+  to its parent.
   """
   opts = pycompat.byteskwargs(opts)
-  program = opts.get(b'program')
-  option = opts.get(b'option')
+  program = opts.get(b"program")
+  option = opts.get(b"option")
   if not program:
-    program = b'diff'
-    option = option or [b'-Npru']
-  cmdline = b' '.join(map(procutil.shellquote, [program] + option))
+    program = b"diff"
+    option = option or [b"-Npru"]
+  cmdline = b" ".join(map(procutil.shellquote, [program] + option))
   return dodiff(ui, repo, cmdline, pats, opts)
 
 
 class savedcmd(object):
   """use external program to diff repository (or selected files)
 
-    Show differences between revisions for the specified files, using
-    the following program::
+  Show differences between revisions for the specified files, using
+  the following program::
 
-        %(path)s
+      %(path)s
 
-    When two revision arguments are given, then changes are shown
-    between those revisions. If only one revision is specified then
-    that revision is compared to the working directory, and, when no
-    revisions are specified, the working directory files are compared
-    to its parent.
-    """
+  When two revision arguments are given, then changes are shown
+  between those revisions. If only one revision is specified then
+  that revision is compared to the working directory, and, when no
+  revisions are specified, the working directory files are compared
+  to its parent.
+  """
 
   def __init__(self, path, cmdline):
     # We can't pass non-ASCII through docstrings (and path is
     # in an unknown encoding anyway), but avoid double separators on
     # Windows
-    docpath = stringutil.escapestr(path).replace(b'\\\\', b'\\')
-    self.__doc__ %= {r'path': pycompat.sysstr(stringutil.uirepr(docpath))}
+    docpath = stringutil.escapestr(path).replace(b"\\\\", b"\\")
+    self.__doc__ %= {r"path": pycompat.sysstr(stringutil.uirepr(docpath))}
     self._cmdline = cmdline
 
   def __call__(self, ui, repo, *pats, **opts):
     opts = pycompat.byteskwargs(opts)
-    options = b' '.join(map(procutil.shellquote, opts[b'option']))
+    options = b" ".join(map(procutil.shellquote, opts[b"option"]))
     if options:
-      options = b' ' + options
+      options = b" " + options
     return dodiff(ui, repo, self._cmdline + options, pats, opts)
 
 
 def uisetup(ui):
-  for cmd, path in ui.configitems(b'extdiff2'):
+  for cmd, path in ui.configitems(b"extdiff2"):
     path = util.expandpath(path)
-    if cmd.startswith(b'cmd.'):
+    if cmd.startswith(b"cmd."):
       cmd = cmd[4:]
       if not path:
         path = procutil.findexe(cmd)
         if path is None:
           path = filemerge.findexternaltool(ui, cmd) or cmd
-      diffopts = ui.config(b'extdiff2', b'opts.' + cmd)
+      diffopts = ui.config(b"extdiff2", b"opts." + cmd)
       cmdline = procutil.shellquote(path)
       if diffopts:
-        cmdline += b' ' + diffopts
-    elif cmd.startswith(b'opts.'):
+        cmdline += b" " + diffopts
+    elif cmd.startswith(b"opts."):
       continue
     else:
       if path:
@@ -324,13 +343,18 @@ def uisetup(ui):
         diffopts = False
     # look for diff arguments in [diff-tools] then [merge-tools]
     if not diffopts:
-      args = ui.config(b'diff-tools', cmd+b'.diffargs') or \
-             ui.config(b'merge-tools', cmd+b'.diffargs')
+      args = ui.config(b"diff-tools", cmd + b".diffargs") or ui.config(
+          b"merge-tools", cmd + b".diffargs"
+      )
       if args:
-        cmdline += b' ' + args
-    command(cmd, extdiffopts[:], _('hg %s [OPTION]... [FILE]...') % cmd,
-            helpcategory=command.CATEGORY_FILE_CONTENTS,
-            inferrepo=True)(savedcmd(path, cmdline))
+        cmdline += b" " + args
+    command(
+        cmd,
+        extdiffopts[:],
+        _(b"hg %s [OPTION]... [FILE]...") % cmd,
+        helpcategory=command.CATEGORY_FILE_CONTENTS,
+        inferrepo=True,
+    )(savedcmd(path, cmdline))
 
 
 # tell hggettext to extract docstrings from these functions:
