@@ -30,11 +30,11 @@ function! SendViaOSC52 (str)
   " Since tmux defaults to setting TERM=screen (ugh), we need to detect it here
   " specially.
   if !empty($TMUX)
-    let osc52 = s:get_OSC52_tmux(a:str)
+    let osc52 = OSC52_get_tmux(a:str)
   elseif match($TERM, 'screen') > -1
-    let osc52 = s:get_OSC52_DCS(a:str)
+    let osc52 = OSC52_get_DCS(a:str)
   else
-    let osc52 = s:get_OSC52(a:str)
+    let osc52 = OSC52_get(a:str)
   endif
 
   let len = strlen(osc52)
@@ -48,7 +48,7 @@ endfunction
 " This function base64's the entire string and wraps it in a single OSC52.
 "
 " It's appropriate when running in a raw terminal that supports OSC 52.
-function! s:get_OSC52 (str)
+function! OSC52_get (str)
   let b64 = s:b64encode(a:str, 0)
   let rv = "\e]52;c;" . b64 . "\x07"
   return rv
@@ -58,7 +58,7 @@ endfunction
 " tmux.
 "
 " This is for `tmux` sessions which filters OSC 52 locally.
-function! s:get_OSC52_tmux (str)
+function! OSC52_get_tmux (str)
   let b64 = s:b64encode(a:str, 0)
   let rv = "\ePtmux;\e\e]52;c;" . b64 . "\x07\e\\"
   return rv
@@ -70,7 +70,7 @@ endfunction
 " This is appropriate when running on `screen`.  Screen doesn't support OSC 52,
 " but will pass the contents of a DCS sequence to the outer terminal unmolested.
 " It imposes a small max length to DCS sequences, so we send in chunks.
-function! s:get_OSC52_DCS (str)
+function! OSC52_get_DCS (str)
   let b64 = s:b64encode(a:str, 76)
 
   " Remove the trailing newline.
@@ -93,7 +93,7 @@ endfunction
 
 " Echo a string to the terminal without munging the escape sequences.
 function! s:rawecho (str)
-  call system("echo -en " . shellescape(a:str) . " > /dev/tty")
+  call writefile([a:str], '/dev/fd/2', 'b')
 endfunction
 
 " Lookup table for s:b64encode.

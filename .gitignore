@@ -1,21 +1,2 @@
-# Ignore most things.
+# Automatically created by pytype
 *
-!.gitignore
-
-# But there are some things I'd like to keep track of.
-# These directories all have their own .gitignore file.
-!README
-!bin
-!docs
-!private-dotfiles.d
-!repo
-!.sh_lib
-!.vim
-!.sh_plugins.d
-!.ssh
-!.bash_completion.d
-!.subversion
-!.bashrc
-!.irssi
-!.zkbd/
-!.weechat/

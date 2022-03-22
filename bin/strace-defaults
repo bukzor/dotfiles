@@ -4,4 +4,17 @@ if ! [[ "$1" =~ ^- ]]; then
   set -- "-C" "$@"
 fi
 
-exec strace -f -tt -T -q -yy -r -e trace='!signal,memory' "$@"
+# for categories, see (for example):
+#   https://github.com/strace/strace/blob/fcd88d18/src/linux/64/syscallent.h#L181
+#   https://github.com/strace/strace/blob/fcd88d188/src/sysent_shorthand_defs.h#L51
+options=(
+  -f  # follow subprocesses
+  -q  # suppress "attached" messages
+  -yy # show what each file descriptor means
+  -tt # show human-readable timestamps
+  -r  # show time deltas for each line
+  -T  # show time spent in syscalls
+  -e 'trace=!signal,memory'  # suppress syscalls that are never useful
+)
+
+exec strace "${options[@]}" "$@"

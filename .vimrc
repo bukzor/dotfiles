@@ -9,7 +9,8 @@
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
-    colorscheme tomorrownight "change to taste. try `desert' or `evening'
+    colorscheme gruvbox "change to taste. try `desert' or `evening'
+    set background=dark
 
     set number
     set wrap                "wrap long lines
@@ -107,6 +108,7 @@
     "ctrl+A to select all
     noremap <c-a> ggVG
     imap <c-a> <esc><c-a>
+    noremap <c-s-a> <c-a>
     "ctrl+C to copy
     map <c-c> y
     "ctrl+Y to redo
@@ -154,6 +156,7 @@
     nmap <S-TAB> :bp<CR>
     set autoread            "auto-reload files, if there's no conflict
     set shortmess+=IA       "no intro message, no swap-file message
+    set shortmess-=F        "allow for debugging echo
 
     "replacement for CTRL-I, also known as <tab>
     noremap <C-P> <C-I>
@@ -203,11 +206,15 @@
 " }
 
 "extra filetypes {
-    au BufNewFile,BufRead *.js.tmpl set filetype=javascript
-    au BufNewFile,BufRead *.css.tmpl set filetype=css
-    au BufNewFile,BufRead *.pxi set filetype=pyrex
-    au BufNewFile,BufRead *.md set filetype=markdown
-    au BufNewFile,BufRead *.proto set filetype=proto
+augroup extra_filetypes
+    autocmd!
+    autocmd BufNewFile,BufRead *.js.tmpl     set filetype=javascript
+    autocmd BufNewFile,BufRead *.css.tmpl    set filetype=css
+    autocmd BufNewFile,BufRead *.pxi         set filetype=pyrex
+    autocmd BufNewFile,BufRead *.md          set filetype=markdown
+    autocmd BufNewFile,BufRead *.proto       set filetype=proto
+    autocmd FileType go set ts=2
+augroup end
 " }
 
 " tkdiff-like bindings for vimdiff {
@@ -223,12 +230,12 @@
 
         "show me the top of the "new" file
         autocmd VimEnter * normal lgg
-
-        set diffopt+=iwhiteall
-        silent! set diffopt+=hiddenoff
-        silent! set diffopt+=algorithm:patience
     endif
 " }
+
+set diffopt+=iwhiteall
+silent! set diffopt+=hiddenoff
+silent! set diffopt+=algorithm:patience
 
 " { Finger-savers:
     nnoremap <Leader>bd :bn \| bd#<CR>
@@ -280,6 +287,21 @@
 " }
 
 
+" ALE {
+  let g:ale_use_global_executables = 1
+  let g:ale_linters = {'python': ['mypy']}
+  let g:ale_fix_on_save = 1
+  let g:ale_lint_on_save = 1
+  let g:ale_lint_delay = 2000
+  let g:ale_lint_on_enter = 0
+  let g:ale_lint_on_text_changed = 'always'
+  let g:ale_virtualenv_dir_names = []
+
+  " black
+  let g:ale_fixers = {'python': ['black']}
+" }
+
+
 " extra, local settings {
 if filereadable($HOME . "/.vimrc.extra")
     source $HOME/.vimrc.extra
@@ -289,6 +311,7 @@ if filereadable($HOME . "/private-dotfiles/.vimrc")
 endif
 " }
 
+source $HOME/.vim/ftplugin/python.vim
 
 set exrc
 set secure

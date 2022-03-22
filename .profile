@@ -1,4 +1,5 @@
 # ~/.profile: executed by the command interpreter for login shells.
+. ~/.sh_basics
 
 # If not running interactively, don't do anything
 case $- in

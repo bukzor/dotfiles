@@ -3,15 +3,11 @@
 # commands that must be run just once for each new terminal
 # generally, this is environment variables
 # if your command needs to be run for each new *shell* use ~/.sh_rc
+. ~/.sh_basics
 
 # ensure access to private dotfiles
-if command -v prodcertstatus && ! prodcertstatus --check_remaining_hours 8; then
-  prodaccess
-fi
-
-# extra shell environment for work
-if [ -f ~/private-dotfiles/.sh_env ]; then
-    . ~/private-dotfiles/.sh_env
+if command -v gcertstatus && ! gcertstatus --check_remaining=8h; then
+  gcert
 fi
 
 # save/restore our $PATH, so that we can (re-)source this file idempotently
@@ -22,8 +18,12 @@ else
   PATH="$__orig_PATH"
 fi
 
+# extra shell environment for work
+if [ -f ~/private-dotfiles/.sh_env ]; then
+    . ~/private-dotfiles/.sh_env
+fi
+
 # set PATH so it includes user's private bin if it exists
-export PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
 export GOPATH=~/prefix/gopath
 export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
 export HOMEBREW_VERBOSE=1
@@ -93,8 +93,8 @@ export REPO=$HOME/repo
 export BOOT="$(sed 's/^btime //; t; d' /proc/stat)"
 
 # My very own python!
-activate() { . ~/venv/mypy/bin/activate; }
-if [ -f ~/venv/mypy/bin/activate ]; then
+activate() { . ~/venv/$USER-venv/bin/activate; }
+if [ -f ~/venv/$USER-venv/bin/activate ]; then
   activate
 fi
 

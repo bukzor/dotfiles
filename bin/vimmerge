@@ -86,7 +86,7 @@ fi
 
 # Fire up vimdiff
 vim -R \
-  -d "${MINE}" "$MERGED" "${base[@]}" "${THEIRS}" \
+  -d "${MINE}" "$MERGED" "${middle[@]}" "${THEIRS}" \
   -c ":tabfir |wincmd l |wincmd q |bo sp |b2 |set noro nodiff cursorbind"
 
 # :vim:textwidth=79:

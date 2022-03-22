@@ -24,11 +24,12 @@ __oncd() {
 
 # VCS detection
 __vcs() {
+  return 0  # too slow!
   candidate="$(git rev-parse --show-toplevel 2>&-)"
   if [ $? -eq 0 ]; then
     export VCS=git
   else
-    candidate="$(hg showconfig bundle.mainreporoot)"
+    candidate="$(hg showconfig bundle.mainreporoot)"  # Too slow!
     if [ $? -eq 0 ]; then
       export VCS=hg
     else
@@ -48,8 +49,9 @@ __vcs() {
 }
 
 __vcs_branch() {
+  return 0  # too slow!
   if [ "$VCS" = "git" ]; then
-    export VCS_BRANCH="$(git branch-name 2>/dev/null)"
+    export VCS_BRANCH="$(git branch-name 2>/dev/null)"  # too slow!
   elif [ "$VCS" = "hg" ]; then
     export VCS_BRANCH="{hg-branch})"
     # FIXME: hg too painfully slow. needs async, and hg optimization

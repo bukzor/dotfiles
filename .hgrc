@@ -36,6 +36,7 @@ git = True
 related(s) = closure(s::)
 closure(s) = ancestor(s)::s
 revisions(s) = allprecursors(s) + allsuccessors(s) + s
+base = heads(::. - draft())
 
 [commands]
 status.relative = True
@@ -49,13 +50,14 @@ l = ll -r tree -r 'ancestor(p4head, . % p4head)::. + .::head()'
 history = ll --hidden -rev 'closure(revisions(.))'
 xl = l -r smart
 
-#vimdiff = !hg-vimdiff "$@"
+stat = diff -r base --stat
+diff-base = vimdiff -r base
 difftool = vimdiff
 dt = difftool
 show = log -l1 -p -r
 ls-files = status -manc .
 hg = !/usr/games/cowsay -f stegosaurus $HG_ARGS | /usr/games/lolcat; $HG $@
-- = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)"
+- = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)" $@
 s = status
 
 [templates]
@@ -102,6 +104,9 @@ users = root
 [evolve]
 # Check out the tip after evolving?
 update = True
+
+[rewrite]
+empty-successor = skip
 
 
 %include private-dotfiles/.hgrc

@@ -1,5 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 hg status . -manc |
-    xargs -P10 -n10 \
+    xargs -r -P10 -n10 \
       grep --color --line-buffered --perl-regexp "$@"

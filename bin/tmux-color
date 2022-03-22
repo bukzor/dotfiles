@@ -1,24 +1,26 @@
 #!/bin/bash
 # Because i can never remember the proper tmux command.
 if [[ $1 ]]; then
-    BG="$1"
+  BG="$1"
+
+  if [[ $2 ]]; then
+      FG="$2"
+  else
+      FG=white
+  fi
+
+  set -x
+  # numbers must be prefixed with 'colour'
+  case "$BG" in [0-9]*) BG=colour"$BG"; esac
+  case "$FG" in [0-9]*) FG=colour"$FG"; esac
+
+  set -x
+  tmux -q set -s status-style "fg=$FG,bold,bg=$BG"
 else
-    # no arguments, show current value
-    colortest256
-    (tmux show -g; tmux show -s; tmux show -w; tmux show) | egrep '^(status-bg|status-fg)'
-    exit
+  # no arguments, show current value
+  set -x
+  colortest256
+  tmux show -g status-style
+  tmux show -s status-style
+  tmux show -w status-style
 fi
-
-if [[ $2 ]]; then
-    FG="$2"
-else
-    FG=white
-fi
-
-set -x
-# numbers must be prefixed with 'colour'
-case "$BG" in [0-9]*) BG=colour"$BG"; esac
-case "$FG" in [0-9]*) FG=colour"$FG"; esac
-
-tmux -q set status-bg "$BG"
-tmux -q set status-fg "$FG"

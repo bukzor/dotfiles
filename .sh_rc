@@ -181,13 +181,12 @@ esc() {
   echo -n "$PSLESC$1$PSRESC"
 }
 
-PS1="
+PS1="$(esc "$YELLOW")$PS1PWD
 "\
+"$(esc "$PURPLE")$PSDATE "\
 "$(esc "$BLUE")$PSUSER"\
 "$(esc "$RESET")@"\
 "$(esc "$GREEN")$PSHOST "\
-"$(esc "$YELLOW")$PS1PWD "\
-"$(esc "$PURPLE")$PSDATE"\
 "$(esc "$RED")$PS1END"\
 "$(esc "$RESET") "
 unset esc

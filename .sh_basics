@@ -1,8 +1,9 @@
+#!/sourceable/bash
 export USER HOME PATH SHELL
-USER="$(id -un)"
+USER="$(whoami)"
 HOME="$(echo ~)"
 if ! [[ "$PATH" ]]; then
-  PATH=/bin:/usr/bin:/sbin:/usr/sbin
+  PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$HOME/bin"
 fi
 PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
 if ! [[ "$TERM" ]]; then
