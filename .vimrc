@@ -16,7 +16,7 @@
     set wrap                "wrap long lines
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
-    set sidescrolloff=10    "keep cursor away from left and right edge, too
+    set sidescrolloff=8     "keep cursor away from left and right edge, too
     set ruler showcmd       "give line, column, and command in the status line
     set colorcolumn=80      "often I want to know when/if I've exceeded 80 columns
     set laststatus=2        "always show the status line
@@ -184,9 +184,6 @@
     "tab switching: ctrl+left/right
     nnoremap <C-PageUp> :tabp<CR>
     nnoremap <C-PageDown> :tabN<CR>
-
-    "paste the filename
-    noremap <Leader>pf :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
 " }
 
 "indentation options {
@@ -231,15 +228,22 @@ augroup end
         "show me the top of the "new" file
         autocmd VimEnter * normal lgg
     endif
+
+    " in case I start diff-mode while editting
+    set diffopt+=iwhiteall
+    silent! set diffopt+=hiddenoff
+    silent! set diffopt+=algorithm:patience
 " }
 
-set diffopt+=iwhiteall
-silent! set diffopt+=hiddenoff
-silent! set diffopt+=algorithm:patience
-
 " { Finger-savers:
+    " buffer delete
     nnoremap <Leader>bd :bn \| bd#<CR>
+    " goto directory
     nnoremap <Leader>gd :e %:h<CR>
+    " paste the filename
+    nnoremap <Leader>pf :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
+    " syntastic check
+    nnoremap <Leader>sc :w\|SyntasticCheck<CR>
 " }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
@@ -276,7 +280,6 @@ silent! set diffopt+=algorithm:patience
     endif
 " }
 
-
 " Vim 8 Packages {
     " Load all plugins now.
     " Plugins need to be added to runtimepath before helptags can be generated.
@@ -285,22 +288,6 @@ silent! set diffopt+=algorithm:patience
     " All messages and errors will be ignored.
     silent! helptags ALL
 " }
-
-
-" ALE {
-  let g:ale_use_global_executables = 1
-  let g:ale_linters = {'python': ['mypy']}
-  let g:ale_fix_on_save = 1
-  let g:ale_lint_on_save = 1
-  let g:ale_lint_delay = 2000
-  let g:ale_lint_on_enter = 0
-  let g:ale_lint_on_text_changed = 'always'
-  let g:ale_virtualenv_dir_names = []
-
-  " black
-  let g:ale_fixers = {'python': ['black']}
-" }
-
 
 " extra, local settings {
 if filereadable($HOME . "/.vimrc.extra")
@@ -311,7 +298,21 @@ if filereadable($HOME . "/private-dotfiles/.vimrc")
 endif
 " }
 
-source $HOME/.vim/ftplugin/python.vim
+" plugin: ALE {
+  let g:ale_use_global_executables = 1
+  let g:ale_fix_on_save = 1
+  let g:ale_lint_on_save = 1
+  let g:ale_lint_delay = 2000
+  let g:ale_lint_on_enter = 0
+  let g:ale_lint_on_text_changed = 'always'
+  let g:ale_virtualenv_dir_names = []
+  let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'javascript': ['eslint'],
+\   'python': ['black'],
+\}
+" } plugin: ALE
+
 
 set exrc
 set secure

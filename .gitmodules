@@ -4,9 +4,6 @@
 [submodule ".vim/bundle/puppet-syntax-vim"]
 	path = .vim/bundle/puppet-syntax-vim
 	url = https://github.com/puppetlabs/puppet-syntax-vim
-[submodule ".vim/bundle/rainbow_parenthesis"]
-	path = .vim/bundle/rainbow_parenthesis
-	url = https://github.com/kien/rainbow_parentheses.vim
 [submodule ".vim/bundle/VimClojure"]
 	path = .vim/bundle/VimClojure
 	url = git://github.com/vim-scripts/VimClojure.git
@@ -22,9 +19,6 @@
 [submodule ".vim/bundle/vim-bracketed-paste"]
 	path = .vim/bundle/vim-bracketed-paste
 	url = https://github.com/ConradIrwin/vim-bracketed-paste
-[submodule ".vim/bundle/elm"]
-	path = .vim/bundle/elm
-	url = git@github.com:ElmCast/elm-vim.git
 [submodule ".vim/bundle/terraform"]
 	path = .vim/bundle/terraform
 	url = https://github.com/hashivim/vim-terraform
@@ -37,3 +31,18 @@
 [submodule ".vim/pack/plugins/start/gruvbox"]
 	path = .vim/pack/plugins/start/gruvbox
 	url = https://github.com/morhetz/gruvbox.git
+[submodule ".vim/pack/plugins/start/elm-vim"]
+	path = .vim/pack/plugins/start/elm-vim
+	url = https://github.com/ElmCast/elm-vim.git
+[submodule ".vim/pack/plugins/start/rust"]
+	path = .vim/pack/plugins/start/rust
+	url = https://github.com/rust-lang/rust.vim
+[submodule ".vim/pack/plugins/start/vim-reason-plus"]
+	path = .vim/pack/plugins/start/vim-reason-plus
+	url = https://github.com/reasonml-editor/vim-reason-plus.git
+[submodule ".vim/pack/plugins/start/formality-vim"]
+	path = .vim/pack/plugins/start/formality-vim
+	url = https://gitlab.com/moonad/formality-vim
+[submodule "scratch"]
+	path = scratch
+	url = git@github.com:bukzor/scratch.git

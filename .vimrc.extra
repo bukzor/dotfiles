@@ -1,7 +1,5 @@
 set textwidth=79
 set colorcolumn=+1,+2,+3,+4,+5
-autocmd ColorScheme * hi ColorColumn ctermbg=black guibg=black
-autocmd ColorScheme * hi Search cterm=reverse
 
 " cursor highlight {
     " highlight my current line and my current column, but only in my current window.
@@ -13,9 +11,12 @@ autocmd ColorScheme * hi Search cterm=reverse
 "    endif
 
     " Adjust highlight of cursor line and column.
-    autocmd ColorScheme * hi CursorLine term=underline cterm=underline gui=underline guibg=NONE ctermbg=NONE
-    autocmd ColorScheme * hi CursorColumn term=underline cterm=underline gui=underline
-    autocmd ColorScheme * hi CursorColumn ctermbg=NONE guibg=NONE ctermfg=NONE guifg=NONE
+    autocmd ColorScheme * hi clear CursorLine CursorColumn ColorColumn Search
+    autocmd ColorScheme * hi CursorLine ctermbg=0 guibg=Black
+    autocmd ColorScheme * hi CursorColumn ctermbg=0 guibg=Black
+    autocmd ColorScheme * hi ColorColumn ctermbg=0 guibg=Black
+    autocmd ColorScheme * hi Search term=reverse cterm=reverse gui=reverse
+    autocmd ColorScheme * hi! link SpellBad IncSearch
     doautocmd ColorScheme
 " }
 
