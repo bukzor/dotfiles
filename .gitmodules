@@ -46,3 +46,6 @@
 [submodule "scratch"]
 	path = scratch
 	url = git@github.com:bukzor/scratch.git
+[submodule ".vim/pack/plugins/start/yats"]
+	path = .vim/pack/plugins/start/yats
+	url = https://github.com/HerringtonDarkholme/yats.vim
