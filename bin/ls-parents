@@ -1,9 +1,8 @@
 #!/bin/bash
 usage() {
   cat >&2 <<'EOF'
-
 Usage: ls-parents [PATH=$PWD]
-  or:  ls-parents [pattern=''] PATH...
+  or:  ls-parents [pattern=''] PATH ...
 
 With no arguments, list all parents of $PWD.
 Optionally, pass a path (or multiple) to analyze.
@@ -13,16 +12,19 @@ EOF
 trap usage ERR
 set -euo pipefail
 
-case "$#" in
-  0) set -- "$PWD" ;&
-  1) relpath="" ;;
-  *)
-    # normalize double-shlashes; remove any leading slash
-    relpath="$(sed -r 's@//+@/@g; s@^/@@;' <<< "$1")"
+if [[ $# -gt 1 ]]; then
+    relpath="${1-}"
     shift 1
-    ;;
-esac
+else
+    relpath=''
+fi
+if [[ $# -eq 0 ]]; then
+    set -- "$PWD"
+fi
 
+
+# normalize double-slashes; remove any leading slash
+relpath="$(sed -r 's@//+@/@g; s@^/@@;' <<< "$relpath")"
 if [[ "$relpath" ]]; then
     join=/
 else
@@ -32,9 +34,10 @@ fi
 for path in "$@"; do
   while true; do
     case $path in
-        /* ) echo $path$join$relpath; path=${path%/*};;
-        '' ) echo /$relpath; break;;
-        * ) path=$PWD/$path;;  # abspath, no output
+        /* ) echo "$path$join$relpath"; path=${path%/*};;
+        '' ) echo "/$relpath"; break;;
+        -h|--help ) usage; exit 0;;
+        * ) path="$PWD/$path";;  # abspath, no output
     esac
   done
 done

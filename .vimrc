@@ -1,3 +1,38 @@
+" plugins {
+  runtime autoload/plug.vim
+
+  if !exists('g:loaded_plug')
+    " Install vim-plug if not found
+    silent !curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs
+      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  endif
+
+  " Run PlugInstall if there are missing plugins
+  autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+    \| PlugInstall --sync | source $MYVIMRC
+  \| endif
+
+  " https://github.com/junegunn/vim-plug#readme
+  """runtime autoload/plug.vim
+  try
+    call plug#begin()
+        Plug 'prabirshrestha/vim-lsp'
+        Plug 'prabirshrestha/asyncomplete.vim'
+        Plug 'prabirshrestha/asyncomplete-lsp.vim'
+        Plug 'dense-analysis/ale'
+        Plug 'morhetz/gruvbox'
+        Plug 'vim-python/python-syntax'
+        Plug 'HerringtonDarkholme/yats.vim'
+        Plug 'tpope/vim-sensible'
+    call plug#end()
+  catch /Unknown function: plug#begin/
+    echoerr "vim-plug not installed!" | quitall
+  endtry
+  """"silent! PlugInstall               "install any missing plugins
+  """packloadall               "load the plugins, if possible
+  call plug#helptags()
+" }
+
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
     scriptencoding utf-8
@@ -289,15 +324,6 @@ augroup end
     silent! helptags ALL
 " }
 
-" extra, local settings {
-if filereadable($HOME . "/.vimrc.extra")
-    source $HOME/.vimrc.extra
-endif
-if filereadable($HOME . "/private-dotfiles/.vimrc")
-    source $HOME/private-dotfiles/.vimrc
-endif
-" }
-
 " plugin: ALE {
   let g:ale_use_global_executables = 1
   let g:ale_fix_on_save = 1
@@ -311,10 +337,92 @@ endif
 \   'javascript': ['eslint'],
 \   'python': ['black'],
 \}
+  let g:ale_echo_msg_format = '%code: %%s (%linter%)'
+  let g:ale_loclist_msg_format = '%code: %%s (%linter%)'
+
+  augroup ale_autocomplete
+    autocmd!
+    " Use ALE's function for asyncomplete defaults
+    " Provide your own overrides here
+    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#ale#get_source_options({
+        \ 'priority': 10,
+        \ }))
+  augroup END
 " } plugin: ALE
 
+" Send async completion requests.
+" WARNING: Might interfere with other completion plugins.
+let g:lsp_async_completion = 0
+" Enable UI for diagnostics
+" enable diagnostics signs in the gutter
+"""let g:lsp_signs_enabled = 0
+" enable echo under cursor when in normal mode
+"""let g:lsp_diagnostics_echo_cursor = 0
+" Automatically show completion options
+"""let g:lsp_preview_autoclose = 0
 
-set exrc
-set secure
-set modeline
-" vim:et:sts=4:sw=4
+let g:asyncomplete_smart_completion = 1
+let g:asyncomplete_auto_popup = 1
+
+
+"" Use Ctrl-j/k to cycle through the suggestions.
+inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
+" Force refresh completion.
+imap <C-space> <Plug>(asyncomplete_force_refresh)
+
+" Highlight references to the symbol under the cursor.
+let g:lsp_highlight_references_enabled = 1
+
+nnoremap <unique> <Leader>d :LspDefinition<CR>
+nnoremap <unique> <Leader>qd :LspPeekDefinition<CR>
+
+" i: interface
+nnoremap <unique> <Leader>i :LspDeclaration<CR>
+" Open Declaration in preview window.
+nnoremap <unique> <Leader>qi :LspPeekDeclaration<CR>
+
+nnoremap <unique> <Leader>I :LspImplementation<CR>
+nnoremap <unique> <Leader>qI :LspPeekImplementation<CR>
+
+nnoremap <unique> <Leader>s :LspDocumentSymbol<CR>
+" Show the status of the language server.
+nnoremap <unique> <Leader>S :LspStatus<CR>
+
+" Go to the type definition of the word under the cursor, and open in the current window.
+nnoremap <unique> <Leader>t :LspTypeDefinition<CR>
+nnoremap <unique> <Leader>qt :LspPeekTypeDefinition<CR>
+" View type hierarchy of the symbol under the cursor.
+nnoremap <unique> <Leader>T :LspTypeHierarchy<CR>
+
+" Displays hover information like documentation (h: help).
+nnoremap <unique> <Leader>h :LspHover<CR>
+" Gets a list of possible commands that can be applied to a file so it can be fixed.
+nnoremap <unique> <Leader>f :LspCodeAction<CR>
+nnoremap <unique> <Leader>r :LspRename<CR>
+
+" u: usage.
+nnoremap <unique> <Leader>u :LspReferences<CR>
+nnoremap <unique> <Leader>nu :LspNextReference<CR>
+nnoremap <unique> <Leader>pu :LspPreviousReference<CR>
+
+nnoremap <unique> <Leader>nw :LspNextWarning<CR>
+nnoremap <unique> <Leader>pw :LspPreviousWarning<CR>
+
+" Get current document diagnostics information.
+nnoremap <unique> <Leader>e :LspDocumentDiagnostics<CR>
+nnoremap <unique> <Leader>ne :LspNextError<CR>
+nnoremap <unique> <Leader>pe :LspPreviousError<CR>
+
+
+" extra, local settings {
+if filereadable($HOME . "/.vimrc.extra")
+    source $HOME/.vimrc.extra
+endif
+if filereadable($HOME . "/private-dotfiles/.vimrc")
+    source $HOME/private-dotfiles/.vimrc
+endif
+" }
+
+" vim:et:sts=2:sw=2

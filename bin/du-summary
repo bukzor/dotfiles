@@ -1,4 +1,19 @@
 #!/bin/bash
-shopt -s nullglob
-ls -d  * .[!.]* | xargs -r -d\\n -n1 -P10 du -xhs | sort -h
+fsid() {
+  stat --format='%d' "$@"
+}
+
+
+fsid="$(fsid .)"
+
+find . -mindepth 1 -maxdepth 1 -print0 |
+  while IFS= read -d '' -r f; do
+    if [[ "$(fsid "$f")" == "$fsid" ]]; then
+      echo -en "$f\0"
+    fi
+  done |
+  xargs -0r -n1 -P10 du -xhs |
+  sort -h \
+;
+
 df -h .

@@ -6,8 +6,8 @@ merge = vimmerge
 ignore=~/.hgignore_global
 
 [extensions]
-progress = 
-graphlog = 
+progress =
+graphlog =
 patience = ~/.config/hg/extensions/patience.py
 
 #git=/usr/local/lib/python2.7/dist-packages/hggit/
@@ -49,6 +49,7 @@ ll = log -G -T compact
 l = ll -r tree -r 'ancestor(p4head, . % p4head)::. + .::head()'
 history = ll --hidden -rev 'closure(revisions(.))'
 xl = l -r smart
+changed = status -n --rev base
 
 stat = diff -r base --stat
 diff-base = vimdiff -r base
