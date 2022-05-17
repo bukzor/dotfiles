@@ -61,8 +61,41 @@ hg = !/usr/games/cowsay -f stegosaurus $HG_ARGS | /usr/games/lolcat; $HG $@
 - = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)" $@
 s = status
 
+[command-templates]
+log = '{changeset_levels}'
+
 [templates]
-##mycompact = "{date|age}"
+changeset_levels = '{
+    ifeq(verbosity, 'quiet', '{changeset_quiet}',
+    ifeq(verbosity, 'verbose', '{changeset_verbose}',
+    ifeq(verbosity, 'debug', '{changeset_debug}',
+    '{changeset}'
+  )))}'
+
+# stolen from mercurial/templates/map-cmdline.compact
+changeset = '{lrev}{tags}{bookmarks}{parents}   {lnode}   {ldate}   {luser}\n  {ldescfirst}\n\n'
+changeset_quiet = '{lrev}:{lnode}\n'
+changeset_verbose = '{lrev}{tags}{parents}   {lnode}   {ldate}   {lauthor}\n  {ldesc}\n\n'
+changeset_debug = '{changeset_normal}'
+
+ldate = '{label("log.date", "{date|isodate}")}'
+ldesc = '{label('ui.note log.description', '{desc|strip}')}'
+ldescfirst = '{label('ui.note log.description', '{desc|firstline|strip}')}'
+lrev = '{label("log.changeset changeset.{phase}", "{rev}")}'
+lnode = '{label("log.node", "{node|short}")}'
+lauthor = '{label("log.user", "{author}")}'
+luser = '{label("log.user", "{author|user}")}'
+start_tags = '['
+tag = '{label("log.tag", "{tag},")}'
+last_tag = '{tag}]'
+start_parents = ':'
+parent = '{lrev},'
+last_parent = '{lrev}'
+start_bookmarks = '['
+bookmark = '{label("log.bookmark", "{bookmark},")}'
+last_bookmark = '{bookmark}]'
+
+
 
 [merge-tools]
 vimmerge.args = $local $output $other $base
