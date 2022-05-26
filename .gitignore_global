@@ -1,6 +1,17 @@
-.*.sw[a-z]
-tmp/
-venv/
-*.tmp
-pylintrc.stock
+# automatic temporary files
 *.py[cod]
+.*.sw[a-z]
+
+# ad-hoc backups
+tmp/
+*.tmp
+bak/
+*.bak
+
+# hacking
+mangle/
+foo
+foo.*
+
+# built stuff
+venv/

@@ -1,3 +1,5 @@
+# un-ignore everything
 !*
+
 weechat.log
 sec.conf

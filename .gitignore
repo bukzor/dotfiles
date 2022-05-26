@@ -1,2 +1,7 @@
-# Automatically created by pytype
+# ignore everything
 *
+**/*
+
+# except subdirectories with .gitignore
+!**/
+!**/.gitignore
