@@ -1,0 +1,20 @@
+[MAIN]
+enable-all-extensions=yes
+
+[REPORTS]
+output-format=colorized
+score=no
+
+[MESSAGES CONTROL]
+disable=
+	#raw-checker-failed,
+        bad-inline-option,
+        locally-disabled,
+        file-ignored,
+        suppressed-message,
+        useless-suppression,
+        deprecated-pragma,
+        use-symbolic-message-instead
+
+[BASIC]
+docstring-min-length=8

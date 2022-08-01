@@ -1,0 +1,11 @@
+# ignore everything
+**/*
+
+# except subdirectories with .gitignore
+!**/
+!**/.gitignore
+
+# known directories to ignore
+repo/
+.cache/
+.local/

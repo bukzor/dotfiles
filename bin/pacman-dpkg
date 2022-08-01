@@ -1,0 +1,22 @@
+#!/usr/bin/env python3.10
+from pipes import quote as sh_quote_word
+
+def sh_quote_cmd(words: tuple[str]) -> str:
+    return ' '.join(sh_quote_word(word) for word in words)
+
+def main():
+    from sys import argv
+    args = tuple(argv[1:])
+
+    match args:
+        case []:
+            return 'argument expected'
+        case ("-S", *args):
+            print(sh_quote_cmd(['pacman', '-Qo'] + args))
+        case ("-L", *args):
+            print(sh_quote_cmd(['pacman', '-Ql'] + args))
+        case [subcommand, *_]:
+            return f"command unknown: {subcommand!r}"
+
+if __name__ == '__main__':
+    exit(main())

@@ -1,0 +1,16 @@
+#!/usr/bin/env python3.10
+
+def main():
+    from sys import argv
+    args = argv[1:]
+
+    match argv[1:]:
+        case []:
+            return 'argument expected'
+        case ["update"]:
+            return 'pacman -Sy'
+        case [subcommand, *_]:
+            return f"command unknown: {subcommand!r}"
+
+if __name__ == '__main__':
+    exit(main())
