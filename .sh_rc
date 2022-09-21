@@ -38,7 +38,7 @@ noisy(){
 }
 
 # enable color support of ls and also add handy aliases
-if command -v dircolors > /dev/null; then
+if has dircolors; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
@@ -46,13 +46,13 @@ if command -v dircolors > /dev/null; then
 fi
 
 # busybox grep doesn't have --color=auto :(
-if grep --color=auto -q '' </dev/zero 2>/dev/null; then
+if echo | grep --color=auto -q '' 2>/dev/null; then
     alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
+    alias fgrep='grep -F --color=auto'
+    alias egrep='grep -E --color=auto'
 fi
 
-alias diff='diff -d'
+alias diff='diff --minimal --unified'
 alias info='info --vi-keys'
 alias ip='ip --color'
 
@@ -80,72 +80,41 @@ alert() {
   command alert "$@" "  (status: $?)"
 }
 
-mkdir -p $XDG_RUNTIME_DIR/tmux-env
+mkdir -p "$XDG_RUNTIME_DIR/tmux-env"
 tmux_env() {
-  if [ "$TMUX" ]; then
-    local var=$XDG_RUNTIME_DIR/tmux-env
-    local old=$var/old.$$
-    local new=$var/new
-    tmux show-env -s > $new
-    if test -e $old && cmp -s $old $new; then
-      :
-    else
-      mv $new $old
-      source $old
-    fi
+  if ! [ "$TMUX" ]; then
+    return 0
+  fi
+  local var=$XDG_RUNTIME_DIR/tmux-env
+  local old=$var/old.$$
+  local new=$var/new
+  tmux show-env -s > $new
+  if test -e $old && cmp -s $old $new; then
+    :
+  else
+    mv $new $old
+    . $old
   fi
 }
 # } aliases and functions
 
-
-if [ "${BASH:-}" ]; then
-  # enable precmd_functions, for zsh compatibility
-  source ~/.sh_lib/bash-precmd.sh
+if [ "$COLORTERM" ]; then
+  # set a fancy prompt
+  ansi_color() {
+    # terminfo will decide whether TERM is color capable
+    tput setaf "$@"
+  }
+  RESET="$(tput sgr0)"
+else
+  alias ansi_color=true
+  RESET=""
 fi
-
-# XKCD terminal colors
-# From: https://xkcd.com/color/rgb/
-# black red green yellow blue purple teal white
-# [
-#   "#070d0d",  # almost black
-#   "#8c000f",  # crimson
-#   "#15b01a",  # green
-#   "#b79400",  # yellow brown
-#   "#0504aa",  # royal blue
-#   "#7e1e9c",  # purple
-#   "#029386",  # teal
-#   "#a5a391",  # cement
-#   "#7d7f7c",  # medium grey
-#   "#ff000d",  # bright red
-#   "#01ff07",  # bright green
-#   "#ffff14",  # yellow
-#   "#0165fc",  # bright blue
-#   "#be03fd",  # bright purple
-#   "#01f9c6",  # bright teal
-#   "#ffffff"   # white
-# ]
-
-# set a fancy prompt
-case "$TERM" in
-*-256col*|*-col*|*-direct)
-  RESET="$(printf '\033[0m')"
-  ascii_color() {
-      printf '\033[0;3'"$1"'m'
-  }
-;;
-*)
-  RESET=''
-  ascii_color() {
-    true;
-  }
-;;
-esac
-   RED="$(ascii_color 1)"
- GREEN="$(ascii_color 2)"
-YELLOW="$(ascii_color 3)"
-  BLUE="$(ascii_color 4)"
-PURPLE="$(ascii_color 5)"
-  TEAL="$(ascii_color 6)"
+   RED="$(ansi_color 1)"
+ GREEN="$(ansi_color 2)"
+YELLOW="$(ansi_color 3)"
+  BLUE="$(ansi_color 4)"
+PURPLE="$(ansi_color 5)"
+  TEAL="$(ansi_color 6)"
 
 PROMPT_DIRTRIM=3
 if [ "${BASH:-}" ]; then
@@ -194,12 +163,8 @@ unset esc
 export PS1
 
 # extra shell settings for work
-if [ -f ~/private-dotfiles/.sh_rc ]; then
-    . ~/private-dotfiles/.sh_rc
-fi
+trysource ~/private-dotfiles/.sh_rc
+. ~/.sh_advanced_rc
 
-if command -v declare >/dev/null; then
-  . ~/.sh_advanced_rc
-fi
-
-tail -vn +1 $HOME/TODO.md
+echo "==> $HOME/TODO.md <=="
+cat "$HOME/TODO.md"

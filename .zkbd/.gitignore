@@ -1,4 +1,4 @@
-# un-ignore everything
-!*
+# un-ignore non-hidden files
+![!.]*
 
 *.tmp

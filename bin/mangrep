@@ -1,0 +1,6 @@
+#!/bin/sh
+# grep all manpages, quickly
+man -w |
+  tr ':' '\n' |
+  xargs -I {} find {} -type f -print0 |
+  xargs -0rn10 -P10 grep --color "$@"

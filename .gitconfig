@@ -70,6 +70,7 @@
     gerrit = !set -x && git push "$(git remote | head -n 1)" HEAD:refs/for/"$(git gerrit-upstream)"
     s = status -s
     topic = !set -x && git fetch origin master && git checkout FETCH_HEAD -b
+    top = rev-parse --show-toplevel
 [http]
     cookiefile = ~/.gitcookies
 [include]

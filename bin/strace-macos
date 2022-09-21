@@ -1,0 +1,23 @@
+#!/bin/dash
+# the closest I know how to get to strace under macos
+set -eu
+
+set -x
+which sh-quote
+sh-quote 1 "2 3"
+subcommand="$(sh-quote "$@")"
+
+: 'enable "job management"'
+set -m
+(
+  # wait for SIGUSR1, then replace the current process with the subcommand
+  trap "kill $sleep && exec $subcommand" USR1
+  sleep infinity &
+  sleep=$!
+  wait
+) &  # background the subcommand
+pid="$!"
+kill -SIGSTOP $pid  # pause it, as quickly as possible
+
+
+sudo /Applications/FileMonitor.app/Contents/MacOS/FileMonitor

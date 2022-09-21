@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+
+print('ohai')
+
+
+for i in range(0x100):
+  print(format(i, '_b').replace('_', ' '))

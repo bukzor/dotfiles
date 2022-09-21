@@ -1,6 +1,18 @@
 #!/not/executable/bash
+if ! has declare; then
+  # the below stuff needs arrays, but we don't have any: bail
+  return 0
+fi
+
 # completions for travis, added by travis gem
-[ -f ~/.travis/travis.sh ] && . ~/.travis/travis.sh
+source ~/.sh_lib/functions.d/trysource.sh
+trysource ~/.travis/travis.sh
+
+
+if [ "${BASH:-}" ]; then
+  # enable precmd_functions, for zsh compatibility
+  . ~/.sh_lib/bash-precmd.sh
+fi
 
 # Reset our state, so that we can (re-)source this file idempotently.
 # Anything that's mutated (rather than overwritten) should be listed here.
@@ -55,7 +67,7 @@ __vcs_branch() {
   elif [ "$VCS" = "hg" ]; then
     export VCS_BRANCH="{hg-branch})"
     # FIXME: hg too painfully slow. needs async, and hg optimization
-    #export VCS_BRANCH="$(hg id -btB | xargs -n1 | egrep -xv 'default|tip' | tr '\n' ' ')"
+    #export VCS_BRANCH="$(hg id -btB | xargs -n1 | grep -Exv 'default|tip' | tr '\n' ' ')"
   else
     unset VCS_BRANCH
   fi
@@ -72,19 +84,10 @@ __vcs_branch() {
 precmd_functions+=(__oncd tmux_env __vcs_branch)
 oncd_functions+=(__vcs)
 
-# Stolen from /etc/profile.
-if [ -d ~/.sh_plugins.d ]; then
-  for i in ~/.sh_plugins.d/*.sh; do
-    if [ -r $i ]; then
-      . $i
-    fi
-  done
-  unset i
-fi
+source ~/.sh_lib/functions.d/source_dir.sh
+source_dir ~/.sh_plugins.d
 
 # extra shell settings for work
-if [ -f ~/private-dotfiles/.sh_advanced_rc ]; then
-    . ~/private-dotfiles/.sh_advanced_rc
-fi
+trysource ~/private-dotfiles/.sh_advanced_rc
 
 # vim:ft=sh

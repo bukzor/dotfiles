@@ -13,7 +13,7 @@
 " limitations under the License.
 
 
-let s:plugin = maktaba#plugin#Get('codefmt')
+" let s:plugin = maktaba#plugin#Get('codefmt')
 
 
 ""
@@ -53,7 +53,7 @@ function! s:get_formatter() abort
 endfunction
 
 
-let s:codefmt_registry = maktaba#extension#GetRegistry('codefmt')
-call s:codefmt_registry.AddExtension(s:get_formatter())
+" let s:codefmt_registry = maktaba#extension#GetRegistry('codefmt')
+" call s:codefmt_registry.AddExtension(s:get_formatter())
 
-autocmd FileType terraform AutoFormatBuffer hclfmt
+" autocmd FileType terraform AutoFormatBuffer hclfmt

@@ -1,15 +1,25 @@
 #!/sourceable/bash
-export USER HOME PATH SHELL
-USER="$(whoami)"
-HOME="$(echo ~)"
-if ! [[ "$PATH" ]]; then
-  PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$HOME/bin"
+# bootstrap a shell with no environment with reasonable defaults
+# test: exec env -i $SHELL -l
+export PATH LOGNAME USER HOME LANG TERM SHELL
+if ! [ "$PATH" ]; then
+  PATH="$(getconf PATH)"
 fi
-PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
-if ! [[ "$TERM" ]]; then
+# these have only one correct value
+LOGNAME="$(whoami)"
+USER="$LOGNAME"
+HOME="$(echo ~)"
+if [ -z "$LANG" ]; then
+  LANG='en_US.UTF-8'
+fi
+if ! [ "$TERM" ]; then
   TERM=xterm-256color
 fi
-if ! [[ "$SHELL" ]]; then
-  export SHELL
-  SHELL="$(readlink /proc/$$/exe)"
+if ! [ "$SHELL" ]; then
+  if [ -d /proc ]; then
+    SHELL="$(readlink /proc/$$/exe)"
+  elif ! SHELL="$(ps -o exe= -p $$ 2>&1)"; then
+    echo 'macos: I am not a fan: '"$SHELL" >&2
+    unset SHELL
+  fi
 fi

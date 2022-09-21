@@ -22,7 +22,7 @@ export -f colorize
 colorize git fetch --all --prune --tags
 colorize git branch -q -a --merged "$UPSTREAM" |
     sed 's/^[[:space:]]*//; s/[[:space:]].*//' |
-    egrep -v "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" | 
+    grep -Ev "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" |
     xargs -r --replace bash --norc -ec '
         # only mess with branches where I am the last committer
         git log -1 --format=%ae "{}" | grep -Fxq "$GIT_COMMITER_EMAIL"

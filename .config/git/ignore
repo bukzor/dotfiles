@@ -1,2 +1,1 @@
-# silly vim
-.*.sw[a-z]
+../../.hgignore_global

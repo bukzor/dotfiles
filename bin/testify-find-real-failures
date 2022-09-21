@@ -19,7 +19,7 @@ function run_tests {
 	echo $OLD: re-run the failing tests
 	cat failures.$OLD.txt  | $run 2>&1 | tee testing.$NEW.log
 	echo $NEW: grep out the failures
-	egrep "(fail|error): yelp.tests" testing.$NEW.log |
+	grep -E "(fail|error): yelp.tests" testing.$NEW.log |
 		sed -r 's/.*(fail|error): yelp\.tests\./yelp.tests./' > failures.$NEW.txt
 }
 
@@ -35,4 +35,3 @@ echo
 cat failures.$OLD.txt
 echo
 echo DONE!
-

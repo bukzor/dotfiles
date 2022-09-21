@@ -1,0 +1,36 @@
+#!/bin/sh
+
+cat <<'EOF'
+'<,'>tac
+%s/^[^\t]\+\t[^\t]\+\t//
+%s/\/bin\/sh -c #(nop)	//
+%s/\/bin\/sh -c #(nop) //
+%s/\/bin\/sh -c /$ /
+%s/	[^\t]\+	$//
+%s/	/ /g
+s/file:[a-f0-9]\{16,\}
+s/file:[a-f0-9]\{16,\}/FILE/g
+%s/file:[a-f0-9]\{16,\}/FILE/g
+%s/dir:[a-f0-9]\{16,\}/DIR/g
+%s/^COPY
+%s/^COPY /# /g
+%s/^COPY /# COPY /g
+%s/^ /# COPY /g
+%s/^ENV /# &/g
+%s/^LABEL /### &/g
+%s/ && / && \\r        /g
+%s/ && / && \r        /g
+%s/ && /&\r        /g
+%s/ && /&\\\r        /g
+%s/ && / \&\&\r        /g
+%s/^$ echo /# : \&\&\r        /g
+%s/^$ \(echo \)/# : \&\&\r        \1/g
+%s/^$ \(echo\|apt-get\|dpkg \)/# : \&\&\r        \1/g
+%s/^$ \(echo\|apt-get\|dpkg\|rm\) /# : \&\&\r        \1 /g
+w
+e /etc/ske
+e ~/bin/docker-history
+EOF
+
+echo Error: TODO
+exit 1
