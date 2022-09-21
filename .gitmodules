@@ -49,6 +49,9 @@
 [submodule ".vim/pack/plugins/start/yats"]
 	path = .vim/pack/plugins/start/yats
 	url = https://github.com/HerringtonDarkholme/yats.vim
-[submodule "/usr/local/google/home/bukzor/.themes/gruvbox-dark-gtk"]
-	path = /usr/local/google/home/bukzor/.themes/gruvbox-dark-gtk
+[submodule ".themes/gruvbox-dark-gtk"]
+	path = .themes/gruvbox-dark-gtk
 	url = https://github.com/jmattheis/gruvbox-dark-gtk
+[submodule ".config/kitty/kitty-gruvbox-theme"]
+	path = .config/kitty/kitty-gruvbox-theme
+	url = git@github.com:bukzor-sentryio/kitty-gruvbox-theme.git

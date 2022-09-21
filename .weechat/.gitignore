@@ -1,5 +1,5 @@
-# un-ignore everything
-!*
+# un-ignore non-hidden files
+![!.]*
 
 weechat.log
 sec.conf

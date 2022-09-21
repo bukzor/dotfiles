@@ -1,1 +1,2 @@
-xargs | xargs -r --replace sh -c 'vim {} < /dev/tty'
+# NB: macos xargs doesn't support --replace
+xargs | xargs -r -I {} sh -c 'vim {} < /dev/tty'

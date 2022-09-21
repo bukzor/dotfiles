@@ -1,7 +1,14 @@
-# ignore everything
+# Ignore everything ...
 *
 **/*
 
-# except subdirectories with .gitignore
+# ... except subdirectories containing a .gitignore ...
+# NOTE: This causes a scan of all subdirectories, looking for .gitignore files.
+#   To prevent scans of huge/slow directories add a .gitignore to explicitly
+#   ignore all subdirectories, as in:
+#     ./Library/CloudStorage/.gitignore
 !**/
 !**/.gitignore
+
+# ... unless they're backup copies.
+**/*.bak/

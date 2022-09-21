@@ -1,0 +1,4 @@
+
+gcloud  iam roles list --format json |
+  jq '.[] | .name' |
+  xargs -n1 gcloud iam roles describe --format json

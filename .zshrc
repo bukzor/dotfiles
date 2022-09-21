@@ -1,4 +1,3 @@
-#
 # Executes commands at the start of any interactive session.
 # Shell options, functions, and aliases go here!
 # Environment variables do *not* go here. They go in .zprofile.
@@ -30,6 +29,7 @@ setopt INTERACTIVE_COMMENTS      # sometimes I copy-paste comments
 autoload -Uz compinit
 compinit
 zstyle ':completion:*' menu select insert-unambiguous
+fpath+=~/.zsh_functions
 
 HISTFILE="$HOME/.zsh_history"
 

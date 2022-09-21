@@ -35,12 +35,8 @@
 
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
+    set synmaxcol=300       "extra-long lines lose highlighting, for speed
     scriptencoding utf-8
-    " FIXME: set up personal termcaps
-    if empty(&t_8f)         "24bit color escapes; see ':help xterm-true-color'.
-        let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-        let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-    endif
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
@@ -49,6 +45,8 @@
 
     set number
     set wrap                "wrap long lines
+    set linebreak           "but not in the middle of a word, if possible
+
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
     set sidescrolloff=8     "keep cursor away from left and right edge, too
@@ -121,6 +119,7 @@
     "allow setting extra option directly in files
     "example: "vim: syntax=vim"
     set modeline
+    set modelines=2
 
     "use jj to escape insert mode
     inoremap jj <ESC>
@@ -275,10 +274,14 @@ augroup end
     nnoremap <Leader>bd :bn \| bd#<CR>
     " goto directory
     nnoremap <Leader>gd :e %:h<CR>
+    " chmod executable
+    nnoremap <Leader>cx :!set -x; chmod 755 %<CR>
     " paste the filename
     nnoremap <Leader>pf :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
     " syntastic check
     nnoremap <Leader>sc :w\|SyntasticCheck<CR>
+    " git add
+    nnoremap <Leader>ga :!set -x; git add %<CR>
 " }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
@@ -375,45 +378,45 @@ imap <C-space> <Plug>(asyncomplete_force_refresh)
 " Highlight references to the symbol under the cursor.
 let g:lsp_highlight_references_enabled = 1
 
-nnoremap <unique> <Leader>d :LspDefinition<CR>
-nnoremap <unique> <Leader>qd :LspPeekDefinition<CR>
+nnoremap <Leader>d :LspDefinition<CR>
+nnoremap <Leader>qd :LspPeekDefinition<CR>
 
 " i: interface
-nnoremap <unique> <Leader>i :LspDeclaration<CR>
+nnoremap <Leader>i :LspDeclaration<CR>
 " Open Declaration in preview window.
-nnoremap <unique> <Leader>qi :LspPeekDeclaration<CR>
+nnoremap <Leader>qi :LspPeekDeclaration<CR>
 
-nnoremap <unique> <Leader>I :LspImplementation<CR>
-nnoremap <unique> <Leader>qI :LspPeekImplementation<CR>
+nnoremap <Leader>I :LspImplementation<CR>
+nnoremap <Leader>qI :LspPeekImplementation<CR>
 
-nnoremap <unique> <Leader>s :LspDocumentSymbol<CR>
+nnoremap <Leader>s :LspDocumentSymbol<CR>
 " Show the status of the language server.
-nnoremap <unique> <Leader>S :LspStatus<CR>
+nnoremap <Leader>S :LspStatus<CR>
 
 " Go to the type definition of the word under the cursor, and open in the current window.
-nnoremap <unique> <Leader>t :LspTypeDefinition<CR>
-nnoremap <unique> <Leader>qt :LspPeekTypeDefinition<CR>
+nnoremap <Leader>t :LspTypeDefinition<CR>
+nnoremap <Leader>qt :LspPeekTypeDefinition<CR>
 " View type hierarchy of the symbol under the cursor.
-nnoremap <unique> <Leader>T :LspTypeHierarchy<CR>
+nnoremap <Leader>T :LspTypeHierarchy<CR>
 
 " Displays hover information like documentation (h: help).
-nnoremap <unique> <Leader>h :LspHover<CR>
+nnoremap <Leader>h :LspHover<CR>
 " Gets a list of possible commands that can be applied to a file so it can be fixed.
-nnoremap <unique> <Leader>f :LspCodeAction<CR>
-nnoremap <unique> <Leader>r :LspRename<CR>
+nnoremap <Leader>f :LspCodeAction<CR>
+nnoremap <Leader>r :LspRename<CR>
 
 " u: usage.
-nnoremap <unique> <Leader>u :LspReferences<CR>
-nnoremap <unique> <Leader>nu :LspNextReference<CR>
-nnoremap <unique> <Leader>pu :LspPreviousReference<CR>
+nnoremap <Leader>u :LspReferences<CR>
+nnoremap <Leader>nu :LspNextReference<CR>
+nnoremap <Leader>pu :LspPreviousReference<CR>
 
-nnoremap <unique> <Leader>nw :LspNextWarning<CR>
-nnoremap <unique> <Leader>pw :LspPreviousWarning<CR>
+nnoremap <Leader>nw :LspNextWarning<CR>
+nnoremap <Leader>pw :LspPreviousWarning<CR>
 
 " Get current document diagnostics information.
-nnoremap <unique> <Leader>e :LspDocumentDiagnostics<CR>
-nnoremap <unique> <Leader>ne :LspNextError<CR>
-nnoremap <unique> <Leader>pe :LspPreviousError<CR>
+nnoremap <Leader>e :LspDocumentDiagnostics<CR>
+nnoremap <Leader>ne :LspNextError<CR>
+nnoremap <Leader>pe :LspPreviousError<CR>
 
 
 " extra, local settings {

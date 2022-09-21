@@ -1,2 +1,2 @@
-# un-ignore everything
-!*
+# un-ignore shell scripts
+!*.sh

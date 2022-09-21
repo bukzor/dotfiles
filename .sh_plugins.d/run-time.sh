@@ -3,7 +3,10 @@
 SH_RUN_TIME_MINIMUM="$((50 * 1000 * 1000))"
 SH_RUN_TIME_FORMAT="duration: $GREEN\$duration$RESET"
 SH_RUN_TIME_PREEXEC=true
-_run_time_nanonow() { date +%s%N; }
+_run_time_nanonow() {
+  # NB macos date(1) formats %N as N
+  date "+%s%N" | sed 's/N$/000000000/'
+}
 SH_RUN_TIME_START="$(_run_time_nanonow)"
 
 _run_time_preexec() {

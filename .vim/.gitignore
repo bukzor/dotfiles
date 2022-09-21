@@ -1,5 +1,5 @@
-# un-ignore everything
-!*
+# un-ignore non-hidden files
+![!.]*
 
 # hacking
 mangle
@@ -8,3 +8,4 @@ mangle
 .netrwhist
 cache
 plugged
+shada/

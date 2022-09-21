@@ -1,0 +1,41 @@
+#!/bin/sh
+# create a centralized "gnubin" directory from currently-linked formulas
+# also handles man and info
+set -eu
+
+HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+# replace crappy macos userspace with homebrew "gnubin"
+if ! [ -d "$HOMEBREW_PREFIX" ]; then
+  echo "Please install Homebrew!" >&2
+  exit 1
+fi
+
+mkdir -p "$HOMEBREW_PREFIX/libexec/gnubin"
+PATH="$HOMEBREW_PREFIX/libexec/gnubin:$PATH"
+if [ "$(
+    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnubin/*" -print -quit
+)" ]; then
+    ln -sfn "$HOMEBREW_PREFIX"/opt/*/libexec/gnubin/* "$HOMEBREW_PREFIX/libexec/gnubin/"
+fi
+
+mkdir -p "$HOMEBREW_PREFIX/libexec/gnuman"
+MANPATH="$HOMEBREW_PREFIX/libexec/gnuman:${MANPATH:-}"
+if [ "$(
+    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuman/*/*" -print -quit
+)" ]; then
+    for mandir in "$HOMEBREW_PREFIX"/opt/*/libexec/gnuman/*; do
+      section="$(basename "$mandir")"
+      mkdir -p "$HOMEBREW_PREFIX/libexec/gnuman/$section"
+      ln -sfn "$mandir"/* "$HOMEBREW_PREFIX/libexec/gnuman/$section"
+    done
+fi
+
+mkdir -p "$HOMEBREW_PREFIX/libexec/gnuinfo"
+INFOPATH="$HOMEBREW_PREFIX/libexec/gnuinfo:${INFOPATH:-}"
+if [ "$(
+    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuinfo/*" -print -quit
+)" ]; then
+    ln -sfn "$HOMEBREW_PREFIX"/opt/*/libexec/gnuinfo/* "$HOMEBREW_PREFIX/libexec/gnuinfo/"
+fi
+
+# vim:ft=bash

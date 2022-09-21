@@ -7,10 +7,11 @@ case $- in
       *) return;;
 esac
 
-preferred_shell=/usr/bin/zsh
-if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
-  SHELL="$preferred_shell" exec "$preferred_shell" -l
-fi
+# for preferred_shell in /usr/bin/zsh /bin/zsh; do
+#   if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
+#     SHELL="$preferred_shell" exec "$preferred_shell" -xil
+#   fi
+# done
 
 # General shell environment, shared by zsh
 . ~/.sh_env
@@ -19,7 +20,7 @@ fi
 if [ -n "${BASH_VERSION:-}" ]; then
     . "$HOME/.bashrc"
 elif [ "$ZSH_VERSION" ]; then
-    : good to go.
+    : zsh will source .zshrc
 else
     . "$HOME/.sh_rc"
 fi
