@@ -1,0 +1,4 @@
+# contains non-portable host id
+config
+# why are people so confused about what "config" means...
+op-daemon.sock
