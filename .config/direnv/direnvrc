@@ -1,0 +1,21 @@
+.() {
+  set -x
+  builtin . "$@"
+  { set +x; } 2>/dev/null
+}
+
+
+return 0
+# to wrap/patch any of the direnv stdlib functions:
+
+keep_orig() {
+  function_name="$1"
+  eval orig_"$(declare -f "$function_name")"
+}
+keep_orig source_env
+source_env() {
+  echo + source_env "$*"
+  orig_source_env "$@"
+}
+
+# vim:ft=bash:

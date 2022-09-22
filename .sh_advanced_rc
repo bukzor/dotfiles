@@ -77,4 +77,19 @@ source_dir ~/.sh_plugins.d
 # extra shell settings for work
 trysource ~/private-dotfiles/.sh_advanced_rc
 
+
+DIRENV="$HOMEBREW_PREFIX/bin/direnv"
+_direnv_hook() {
+  if [[ -x "$DIRENV" ]]; then
+    trap -- '' SIGINT;
+    # They don't support 'export sh'. Weird.
+    eval "$("$DIRENV" export bash)";
+    trap - SIGINT;
+  fi
+}
+precmd_functions+=(_direnv_hook)
+# this is in the default zsh setup, but I can't see any reason for it:
+#chpwd_functions+=(_direnv_hook)
+
+
 # vim:ft=sh
