@@ -6,6 +6,7 @@ mangle
 
 # automatic temporary files
 .netrwhist
-cache
-plugged
+cache/
+plugged/
 shada/
+swap/
