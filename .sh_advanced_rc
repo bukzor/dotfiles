@@ -10,29 +10,16 @@ trysource ~/.travis/travis.sh
 
 
 if [ "${BASH:-}" ]; then
-  # enable precmd_functions, for zsh compatibility
+  # enable precmd_functions and chpwd_functions, for zsh compatibility
   . ~/.sh_lib/bash-precmd.sh
+  . ~/.sh_lib/bash-chpwd.sh
 fi
 
 # Reset our state, so that we can (re-)source this file idempotently.
 # Anything that's mutated (rather than overwritten) should be listed here.
 typeset -ga preexec_functions=()
 typeset -ga precmd_functions=()
-typeset -ga oncd_functions=()
-typeset -g __oncd_pwd="(no previous pwd)"
 
-# facility for running code "on cd"
-__oncd() {
-  if [ "$__oncd_pwd" = "$PWD" ]; then
-    return 0
-  fi
-  __oncd_pwd="$PWD"
-
-  local oncd_function
-  for oncd_function in "${oncd_functions[@]}"; do
-    "$oncd_function"
-  done
-}
 
 # VCS detection
 __vcs() {
@@ -81,8 +68,8 @@ __vcs_branch() {
   fi
 }
 
-precmd_functions+=(__oncd tmux_env __vcs_branch)
-oncd_functions+=(__vcs)
+precmd_functions+=(tmux_env __vcs_branch)
+chpwd_functions+=(__vcs)
 
 source ~/.sh_lib/functions.d/source_dir.sh
 source_dir ~/.sh_plugins.d
