@@ -55,3 +55,6 @@
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
 	url = git@github.com:bukzor-sentryio/kitty-gruvbox-theme.git
+[submodule ".vim/pack/plugins/start/vim-jq"]
+	path = .vim/pack/plugins/start/vim-jq
+	url = https://github.com/bfrg/vim-jq

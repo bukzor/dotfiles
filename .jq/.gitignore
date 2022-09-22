@@ -1,0 +1,2 @@
+# un-ignore jq source files
+!*.jq
