@@ -339,6 +339,7 @@ augroup end
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \   'javascript': ['eslint'],
 \   'python': ['black'],
+\   'terraform': ['terraform'],
 \}
   let g:ale_echo_msg_format = '%code: %%s (%linter%)'
   let g:ale_loclist_msg_format = '%code: %%s (%linter%)'
