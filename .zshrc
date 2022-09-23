@@ -46,7 +46,7 @@ function history() {
 zkbd_dir="${ZDOTDIR:-$HOME}/.zkbd"
 zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"
 ln -sf $zkbd_file $zkbd_dir/$TERM.tmp
-if ! source "$zkbd_file"; then
+if ! [[ "$(grep -c '^key\[' "$zkbd_file")" -eq 24 ]]; then
     autoload zkbd && zkbd
     source "$zkbd_file"
 fi
