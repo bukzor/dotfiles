@@ -25,12 +25,6 @@ setopt COMPLETE_IN_WORD          # tab in the middle of a word works correctly!
 setopt ALWAYS_TO_END
 setopt INTERACTIVE_COMMENTS      # sometimes I copy-paste comments
 
-# enable advanced completions
-autoload -Uz compinit
-compinit
-zstyle ':completion:*' menu select insert-unambiguous
-fpath+=~/.zsh_functions
-
 HISTFILE="$HOME/.zsh_history"
 
 function history() {
@@ -42,6 +36,16 @@ function history() {
 }
 
 . ~/.sh_rc
+
+# enable advanced completions; fpath must be set before "compinit"
+fpath+=(~/.zsh_completions $HOMEBREW_PREFIX/completions $HOMEBREW_PREFIX/share/zsh/site-functions)
+autoload -Uz compinit
+compinit
+zstyle ':completion:*' insert-unambiguous yes
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' select yes
+## this causes ambiguous completions:
+#zstyle ':completion:*' menu yes
 
 zkbd_dir="${ZDOTDIR:-$HOME}/.zkbd"
 zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"
@@ -111,23 +115,23 @@ bindkey -a '?' history-incremental-pattern-search-backward
 
 # up and down keys only search through the local history
 # use ctrl-P/N for shared history {
-    up-line-or-local-history() {
-        zle set-local-history -n 1
-        zle up-line-or-history
-        zle set-local-history -N
-    }
-    zle -N up-line-or-local-history
-    bindkey "$key[Up]" up-line-or-local-history
-    bindkey -a "k" up-line-or-local-history
+up-line-or-local-history() {
+    zle set-local-history -n 1
+    zle up-line-or-history
+    zle set-local-history -N
+}
+zle -N up-line-or-local-history
+bindkey "$key[Up]" up-line-or-local-history
+bindkey -a "k" up-line-or-local-history
 
-    down-line-or-local-history() {
-        zle set-local-history -n 1
-        zle down-line-or-history
-        zle set-local-history -N
-    }
-    zle -N down-line-or-local-history
-    bindkey "$key[Down]" down-line-or-local-history
-    bindkey -a "j" down-line-or-local-history
+down-line-or-local-history() {
+    zle set-local-history -n 1
+    zle down-line-or-history
+    zle set-local-history -N
+}
+zle -N down-line-or-local-history
+bindkey "$key[Down]" down-line-or-local-history
+bindkey -a "j" down-line-or-local-history
 
 # opam configuration
 if [ -r ~/.opam/opam-init/init.zsh ]; then

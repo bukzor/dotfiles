@@ -1,0 +1,4 @@
+# un-ignore source files
+!_*
+!*.sh
+!*.zsh

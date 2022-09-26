@@ -3,6 +3,15 @@
 # also handles man and info
 set -eu
 
+pattern() {
+  dirname="$1"
+  echo "$HOMEBREW_PREFIX/opt/*/libexec/{gnu$dirname,$dirname}/*"
+}
+gnu() {
+  dirname="$1"
+  echo "$HOMEBREW_PREFIX/libexec/gnu$dirname"
+}
+
 HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 # replace crappy macos userspace with homebrew "gnubin"
 if ! [ -d "$HOMEBREW_PREFIX" ]; then
@@ -10,32 +19,30 @@ if ! [ -d "$HOMEBREW_PREFIX" ]; then
   exit 1
 fi
 
-mkdir -p "$HOMEBREW_PREFIX/libexec/gnubin"
-PATH="$HOMEBREW_PREFIX/libexec/gnubin:$PATH"
-if [ "$(
-    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnubin/*" -print -quit
-)" ]; then
-    ln -sfn "$HOMEBREW_PREFIX"/opt/*/libexec/gnubin/* "$HOMEBREW_PREFIX/libexec/gnubin/"
-fi
+dest="$(gnu bin)"
+mkdir -p "$dest"
+PATH="$(gnu bin):$PATH"
+set -x
+find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern bin)" |
+  xargs -tr ln -sfn -t "$dest/"
 
-mkdir -p "$HOMEBREW_PREFIX/libexec/gnuman"
-MANPATH="$HOMEBREW_PREFIX/libexec/gnuman:${MANPATH:-}"
-if [ "$(
-    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuman/*/*" -print -quit
-)" ]; then
+dest="$(gnu man)"
+mkdir -p "$dest"
+MANPATH="$dest:${MANPATH:-}"
+
+found="$(find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuman/*/*" -print -quit)"
+if [ "$found" ]; then
     for mandir in "$HOMEBREW_PREFIX"/opt/*/libexec/gnuman/*; do
       section="$(basename "$mandir")"
-      mkdir -p "$HOMEBREW_PREFIX/libexec/gnuman/$section"
-      ln -sfn "$mandir"/* "$HOMEBREW_PREFIX/libexec/gnuman/$section"
+      mkdir -p "$dest/$section"
+      ln -sfn "$mandir"/* "$dest/$section"
     done
 fi
 
-mkdir -p "$HOMEBREW_PREFIX/libexec/gnuinfo"
-INFOPATH="$HOMEBREW_PREFIX/libexec/gnuinfo:${INFOPATH:-}"
-if [ "$(
-    find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuinfo/*" -print -quit
-)" ]; then
-    ln -sfn "$HOMEBREW_PREFIX"/opt/*/libexec/gnuinfo/* "$HOMEBREW_PREFIX/libexec/gnuinfo/"
-fi
+dest="$(gnu info)"
+mkdir -p "$dest"
+INFOPATH="$dest:${INFOPATH:-}"
+find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern info)" -print |
+  xargs -tr ln -sfn -t "$dest/"
 
 # vim:ft=bash
