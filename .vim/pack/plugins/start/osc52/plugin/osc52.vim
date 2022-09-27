@@ -26,20 +26,18 @@
 let g:max_osc52_sequence=100000
 
 " Send a string to the terminal's clipboard using the OSC 52 sequence.
-function! SendViaOSC52 (str)
-  " Since tmux defaults to setting TERM=screen (ugh), we need to detect it here
-  " specially.
-  if !empty($TMUX)
-    let osc52 = OSC52_get_tmux(a:str)
-  elseif match($TERM, 'screen') > -1
-    let osc52 = OSC52_get_DCS(a:str)
-  else
-    let osc52 = OSC52_get(a:str)
+function! g:SendViaOSC52 (str)
+  let len = strlen(a:str)
+  if len > g:max_osc52_sequence
+    echo "Selection too long to send to terminal: " . len
+    return 1
   endif
 
+  let osc52 = OSC52_get(a:str)
+
   let len = strlen(osc52)
-  if len < g:max_osc52_sequence
-    call s:rawecho(osc52)
+  if len <= g:max_osc52_sequence
+    call g:Rawecho(osc52)
   else
     echo "Selection too long to send to terminal: " . len
   endif
@@ -48,51 +46,13 @@ endfunction
 " This function base64's the entire string and wraps it in a single OSC52.
 "
 " It's appropriate when running in a raw terminal that supports OSC 52.
-function! OSC52_get (str)
+function! g:OSC52_get (str)
   let b64 = s:b64encode(a:str, 0)
   let rv = "\e]52;c;" . b64 . "\x07"
   return rv
 endfunction
-
-" This function base64's the entire string and wraps it in a single OSC52 for
-" tmux.
-"
-" This is for `tmux` sessions which filters OSC 52 locally.
-function! OSC52_get_tmux (str)
-  let b64 = s:b64encode(a:str, 0)
-  let rv = "\ePtmux;\e\e]52;c;" . b64 . "\x07\e\\"
-  return rv
-endfunction
-
-" This function base64's the entire source, wraps it in a single OSC52, and then
-" breaks the result in small chunks which are each wrapped in a DCS sequence.
-"
-" This is appropriate when running on `screen`.  Screen doesn't support OSC 52,
-" but will pass the contents of a DCS sequence to the outer terminal unmolested.
-" It imposes a small max length to DCS sequences, so we send in chunks.
-function! OSC52_get_DCS (str)
-  let b64 = s:b64encode(a:str, 76)
-
-  " Remove the trailing newline.
-  let b64 = substitute(b64, '\n*$', '', '')
-
-  " Replace each newline with an <end-dcs><start-dcs> pair.
-  let b64 = substitute(b64, '\n', "\e/\eP", "g")
-
-  " (except end-of-dcs is "ESC \", begin is "ESC P", and I can't figure out
-  "  how to express "ESC \ ESC P" in a single string.  So, the first substitute
-  "  uses "ESC / ESC P", and the second one swaps out the "/".  It seems like
-  "  there should be a better way.)
-  let b64 = substitute(b64, '/', '\', 'g')
-
-  " Now wrap the whole thing in <start-dcs><start-osc52>...<end-osc52><end-dcs>.
-  let b64 = "\eP\e]52;c;" . b64 . "\x07\e\x5c"
-
-  return b64
-endfunction
-
 " Echo a string to the terminal without munging the escape sequences.
-function! s:rawecho (str)
+function! g:Rawecho (str)
   call writefile([a:str], '/dev/fd/2', 'b')
 endfunction
 
@@ -108,7 +68,7 @@ let s:b64_table = [
 " autoload/base64.vim
 " If size is > 0 the output will be line wrapped every `size` chars.
 function! s:b64encode(str, size)
-  let bytes = s:str2bytes(a:str)
+  let bytes = g:Str2bytes(a:str)
   let b64 = []
 
   for i in range(0, len(bytes) - 1, 3)
@@ -143,6 +103,6 @@ function! s:b64encode(str, size)
   return chunked
 endfunction
 
-function! s:str2bytes(str)
+function! g:Str2bytes(str)
   return map(range(len(a:str)), 'char2nr(a:str[v:val])')
 endfunction
