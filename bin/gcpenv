@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 set -euo pipefail
 
 case $# in
@@ -14,6 +14,12 @@ case $# in
 esac
 
 eval "$(gcloud config list --format 'get(compute,container)')"
-flock $HOME/.kube/config \
-  gcloud container clusters get-credentials --region "$region" "$cluster"
-kubectl config current-context >&2
+
+if [[ -d $HOME/.kube && "$region" && "$cluster" ]]; then
+  flock $HOME/.kube/config \
+    gcloud container clusters get-credentials --region "$region" "$cluster"
+
+  if has kubectl; then
+    kubectl config current-context >&2
+  fi
+fi
