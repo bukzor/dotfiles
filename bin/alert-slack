@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ "$#" -eq 0 ]]; then
+  set "It's done!"
+fi
+
+# Yes, this is a secret, but it only has permissiosn to post to private,
+# invited channels. If you can use it for nefarious purposes, feel free. I'll
+# deal with it when the key is disabled.
+
+# To make your own:
+#   1. https://api.slack.com/tutorials/tracks/posting-messages-with-curl
+#   2. https://api.slack.com/apps/$APP_ID/oauth
+
+SLACK_BOT="${SLACK_BOT:-xoxb-4158456419795-4182879981232-vA98hMyujVNtEfG7D0yjhqnH}"
+# my private channel in my private workspace:
+SLACK_CHANNEL="${SLACK_CHANNEL:-C04515GTLNM}"
+
+curl \
+  -H "Authorization: Bearer $SLACK_BOT" \
+  -d "text=$*" \
+  -d "channel=$SLACK_CHANNEL" \
+  https://slack.com/api/chat.postMessage \
+;
