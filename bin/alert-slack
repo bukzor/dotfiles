@@ -5,20 +5,25 @@ if [[ "$#" -eq 0 ]]; then
   set "It's done!"
 fi
 
-# Yes, this is a secret, but it only has permissiosn to post to private,
-# invited channels. If you can use it for nefarious purposes, feel free. I'll
-# deal with it when the key is disabled.
+# Black magic detected!
+# If I inline the secret here (I know) it gets disabled the *instant* that I
+# push to github. How can it possibly be that fast?
+if ! [[ "${ALERT_SLACK_AUTH:-}" ]]; then
+  cat >&2 <<'EOF'
+Necessary slack auth not found. To make your own:
 
-# To make your own:
-#   1. https://api.slack.com/tutorials/tracks/posting-messages-with-curl
-#   2. https://api.slack.com/apps/$APP_ID/oauth
+  1. https://api.slack.com/tutorials/tracks/posting-messages-with-curl
+  2. https://api.slack.com/apps/$APP_ID/oauth
+  3. export ALERT_SLACK_AUTH=xoxb-1111111111111-2222222222222-xxxxxxxxxxxxxxxxxxxxxxxx"
 
-SLACK_BOT="${SLACK_BOT:-xoxb-4158456419795-4182879981232-sMXzsDS0BaiOeyYg7se0RCCZ}"
+EOF
+  exit 1
+fi
+
 # my private channel in my private workspace:
 SLACK_CHANNEL="${SLACK_CHANNEL:-C04515GTLNM}"
-
 curl \
-  -H "Authorization: Bearer $SLACK_BOT" \
+  -H "Authorization: Bearer $ALERT_SLACK_AUTH" \
   -d "text=$*" \
   -d "channel=$SLACK_CHANNEL" \
   https://slack.com/api/chat.postMessage \
