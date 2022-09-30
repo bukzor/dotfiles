@@ -13,7 +13,7 @@ fi
 #   1. https://api.slack.com/tutorials/tracks/posting-messages-with-curl
 #   2. https://api.slack.com/apps/$APP_ID/oauth
 
-SLACK_BOT="${SLACK_BOT:-xoxb-4158456419795-4182879981232-vA98hMyujVNtEfG7D0yjhqnH}"
+SLACK_BOT="${SLACK_BOT:-xoxb-4158456419795-4182879981232-sMXzsDS0BaiOeyYg7se0RCCZ}"
 # my private channel in my private workspace:
 SLACK_CHANNEL="${SLACK_CHANNEL:-C04515GTLNM}"
 
