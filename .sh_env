@@ -40,6 +40,11 @@ export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX";
 export PATH="${PATH+$PATH:}$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
 export MANPATH="${MANPATH+$MANPATH:}$HOMEBREW_PREFIX/share/man:";
 export INFOPATH="${INFOPATH+$INFOPATH:}$HOMEBREW_PREFIX/share/info:";
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+export CLOUDSDK_ROOT_DIR="$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk"
+export CLOUDSDK_PYTHON_PREFIX="$CLOUDSDK_ROOT_DIR/latest/google-cloud-sdk/platform/bundledpythonunix"
+export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
 
 
 homebrew-handle-gnubin
@@ -178,6 +183,12 @@ else
 fi
 
 . ~/.sh_plugins.d/xdg.sh
+
+export PYENV_ROOT="$XDG_CACHE_HOME/pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if has pyenv; then
+  eval "$(pyenv init -)"
+fi
 
 # added by travis gem
 trysource ~/.travis/travis.sh

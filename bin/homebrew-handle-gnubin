@@ -1,40 +1,81 @@
-#!/bin/sh
-# create a centralized "gnubin" directory from currently-linked formulas
-# also handles man and info
-set -eu
+#!/usr/bin/python3
+"""
+create a centralized "gnubin" directory from currently-linked formulas
+also handles man and info
+"""
+from os import getenv
+from pathlib import Path
 
-pattern() {
-  dirname="$1"
-  echo "$HOMEBREW_PREFIX/opt/*/libexec/{gnu$dirname,$dirname}/*"
-}
-gnu() {
-  dirname="$1"
-  echo "$HOMEBREW_PREFIX/libexec/gnu$dirname"
-}
+HOMEBREW_PREFIX=Path(getenv("HOMEBREW_PREFIX", "/opt/homebrew"))
 
-HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+exit(0)
+
+def pattern(dirname):
+  return f"^{HOMEBREW_PREFIX}/opt/[^/]+/libexec/(gnu$dirname|$dirname)/[^/]+"
+
+def gnu(dirname):
+  return "$HOMEBREW_PREFIX/libexec/gnu$dirname"
+
+"""!sh
 # replace crappy macos userspace with homebrew "gnubin"
 if ! [ -d "$HOMEBREW_PREFIX" ]; then
   echo "Please install Homebrew!" >&2
   exit 1
 fi
 
+echo -n "processing Homebrew gnubin hook..."
+
 dest="$(gnu bin)"
 mkdir -p "$dest"
-PATH="$(gnu bin):$PATH"
-set -x
-find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern bin)" |
+# TESTING: pretend there's nothing installed to homebrew
+#PATH="$(gnu bin):$PATH"
+find "$HOMEBREW_PREFIX/opt" -follow -mindepth 1 -maxdepth 1 -type d |
+  xargs readlink -f |
+  sort -u |
+  ( while IFS= read -r pkg; do
+      cd "$pkg"
+      if ! [ -d libexec ]; then
+        continue
+      fi
+      echo PKG "$pkg"
+      cd libexec
+      find . -type l |
+        ( while IFS= read -r symlink; do
+            name="$(basename "$symlink")"
+            if [[ "$(readlink "$symlink")" =~ ^\.\./.*/g$name$ ]]; then
+              if ! [[ "$(readlink "$symlink")" =~ ^\.\./\.\./.*/g$name$ ]]; then
+                echo WAT
+              fi
+
+              echo "GNULINK: $symlink -> $(readlink $symlink)"
+            fi
+          done
+        )
+    done
+  )
+exit 0
+
+
+find "$HOMEBREW_PREFIX/opt" -follow -type f |
   xargs -tr ln -sfn -t "$dest/"
 
 dest="$(gnu man)"
 mkdir -p "$dest"
 MANPATH="$dest:${MANPATH:-}"
 
-found="$(find "$HOMEBREW_PREFIX/opt" -follow -path "$HOMEBREW_PREFIX/opt/*/libexec/gnuman/*/*" -print -quit)"
-if [ "$found" ]; then
+find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern man)" |
+  sed -r "s@$HOMEBREW_PREFIX/[^/]+@$dest@" |
+  xargs -tr ls -ld
+
+exit 0
+  xargs -tr dirname |
+  xargs -trn1 basename |
+  sort -u |
+  xargs -tr -I{} mkdir -p "$dest/{}"
+
+find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern man)" |
     for mandir in "$HOMEBREW_PREFIX"/opt/*/libexec/gnuman/*; do
       section="$(basename "$mandir")"
-      mkdir -p "$dest/$section"
       ln -sfn "$mandir"/* "$dest/$section"
     done
 fi
@@ -45,4 +86,6 @@ INFOPATH="$dest:${INFOPATH:-}"
 find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern info)" -print |
   xargs -tr ln -sfn -t "$dest/"
 
-# vim:ft=bash
+echo "done"
+
+"""

@@ -3,56 +3,93 @@
 from collections import namedtuple
 
 
-class Color(namedtuple('Color', 'r g b')):
-  """values are 0 to 1"""
+class Color(namedtuple("Color", "r g b")):
+    """values are 0 to 1"""
 
-  @classmethod
-  def from_rgb(cls, r, g, b):
-    return cls(r, g, b)
+    @classmethod
+    def from_rgb(cls, r, g, b):
+        return cls(r, g, b)
 
-  @classmethod
-  def from_hsl(cls, h, s, l):
-    from colorsys import hls_to_rgb
-    return cls(*hls_to_rgb(h, l, s))
+    @classmethod
+    def from_hsl(cls, h, s, l):
+        from colorsys import hls_to_rgb
+        return cls(*hls_to_rgb(h, l, s))
 
-  def show(color):  # pylint: disable=no-self-argument
-    color = [int(x * 255) for x in color]
-    code = ';'.join(str(x) for x in color)
-    # #repr = ''.join(format(x, '02x') for x in color)
-    return '\x1b[48;2;%sm ' % code
+    def show(color):  # pylint: disable=no-self-argument
+        color = [int(x * 255) for x in color]
+        code = ";".join(str(x) for x in color)
+        # #repr = ''.join(format(x, '02x') for x in color)
+        return "\x1b[48;2;%sm " % code
+
 
 def white_fg():
-  return '\x1b[1;38;5;231m'
+    return "\x1b[1;38;5;231m"
+
 
 def black_fg():
-  return '\x1b[1;38;5;232m'
+    return "\x1b[1;38;5;232m"
 
-def reset(end='\n'):
-  return '\x1b[0m' + end
+
+def reset(end="\n"):
+    return "\x1b[0m" + end
 
 
 def frange(start, stop, step):
-  from sys import float_info
-  curr = start
-  while stop - curr > -float_info.epsilon:
-    yield curr
-    curr += step
+    """return the range between stop and start, inclusive (approximately)."""
+
+    start = float(start)
+    stop = float(stop)
+
+    curr = float(start)
+    while curr <= stop:
+        yield curr
+        curr += step
+
+    from sys import float_info
+    if curr <= stop + 15 * float_info.epsilon:
+        yield stop
+
+
+def flatten(lightness):
+    # problem statement: convert lightness(0-1) to x(0-1)
+    # assumptions:
+    #   lightness(x=0) = 0
+    #   lightness(x=0.5) = 0.5
+    #   lightness(x=1) = 1
+    #   dlightness/dx ≈ 1 + cos(x * 2 * pi)
+    import math
+
+    if lightness <= 0.5:
+        tmp = lightness
+    else:
+        tmp = 1 - lightness
+
+    sin = tmp * 2
+    sin = sin ** (1.1)
+    # sin = sin ** (1 / 3)
+
+    x = math.asin(sin) / math.pi
+    if lightness > 0.5:
+        x = 1 - x
+
+    return x
 
 
 def colortest_truecolor(outfile, rows, columns):
-  for h in frange(0, 1.0, 1.0/(rows - 3)):
-    for l in frange(0, 1.0, 1.0/(columns - 1)):
-      outfile.write(Color.from_hsl(h, 1.0, l).show())
-    outfile.write(reset())
+    for h in frange(0, 1, 1 / (rows - 3)):
+        for l in frange(0, 1, 1 / (columns - 1)):
+            l = flatten(l)
+            outfile.write(Color.from_hsl(h, 1, l).show())
+        outfile.write(reset())
 
 
 def main():
-  import shutil as S
-  columns, rows = S.get_terminal_size((80, 20))
+    import shutil as S
+    columns, rows = S.get_terminal_size((80, 20))
 
-  import sys as S
-  colortest_truecolor(S.stdout, rows - 3, columns - 1)
+    import sys as S
+    colortest_truecolor(S.stdout, rows - 3, columns - 1)
 
 
-if __name__ == '__main__':
-  exit(main())
+if __name__ == "__main__":
+    exit(main())

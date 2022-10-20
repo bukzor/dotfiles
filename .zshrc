@@ -37,8 +37,12 @@ function history() {
 
 . ~/.sh_rc
 
-# enable advanced completions; fpath must be set before "compinit"
-fpath+=(~/.zsh_completions $HOMEBREW_PREFIX/completions $HOMEBREW_PREFIX/share/zsh/site-functions)
+# enable advanced command completion: fpath must be set before "compinit"
+fpath+=(
+  ~/.zsh_completion
+  "$HOMEBREW_PREFIX"/completions/zsh
+  "$HOMEBREW_PREFIX"/share/zsh/site-functions
+)
 autoload -Uz compinit
 compinit
 zstyle ':completion:*' insert-unambiguous yes
@@ -52,9 +56,10 @@ zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"
 ln -sf $zkbd_file $zkbd_dir/$TERM.tmp
 if ! [[ "$(grep -c '^key\[' "$zkbd_file")" -eq 24 ]]; then
     autoload zkbd && zkbd
-    source "$zkbd_file"
 fi
-unset zkbd_file
+if [[ -e "$zkbd_file" ]]; then
+  source "$zkbd_file"
+fi
 
 # reset and enable vim bindings
 bindkey -d

@@ -24,6 +24,8 @@
         Plug 'vim-python/python-syntax'
         Plug 'HerringtonDarkholme/yats.vim'
         Plug 'tpope/vim-sensible'
+        " sensible behavior for zoom (AKA ctrl-w_o, AKA :only)
+        Plug 'troydm/zoomwintab.vim'
     call plug#end()
   catch /Unknown function: plug#begin/
     echoerr "vim-plug not installed!" | quitall
@@ -35,7 +37,7 @@
 
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
-    set synmaxcol=300       "extra-long lines lose highlighting, for speed
+    set synmaxcol=3000      "extra-long lines lose highlighting, for speed
     scriptencoding utf-8
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
@@ -215,7 +217,7 @@
       augroup END
     endif
 
-    "tab switching: ctrl+left/right
+    "tab switching: ctrl+pageup/pagedown
     nnoremap <C-PageUp> :tabp<CR>
     nnoremap <C-PageDown> :tabN<CR>
 " }
@@ -287,7 +289,7 @@ augroup end
 " { from http://www.bestofvim.com/tip/diff-diff/
     nnoremap <Leader>df :call DiffToggle()<CR>
 
-    function! DiffToggle()
+    function! DiffToggle() abort
         if &diff
             diffoff
         else
@@ -297,7 +299,7 @@ augroup end
 
     nnoremap <Leader>dw :call DiffToggleWhitespace()<CR>
 
-    function! DiffToggleWhitespace()
+    function! DiffToggleWhitespace() abort
        if &diffopt =~ 'iwhiteall'
          set diffopt-=iwhiteall
        else

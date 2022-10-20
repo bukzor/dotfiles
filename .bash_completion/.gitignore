@@ -1,0 +1,2 @@
+# don't ignore (non-hidden) .sh files
+![!.]*.sh

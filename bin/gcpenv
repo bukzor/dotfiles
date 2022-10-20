@@ -15,7 +15,7 @@ esac
 
 eval "$(gcloud config list --format 'get(compute,container)')"
 
-if [[ -d $HOME/.kube && "$region" && "$cluster" ]]; then
+if [[ -d $HOME/.kube && "${region:-}" && "${cluster:-}" ]]; then
   flock $HOME/.kube/config \
     gcloud container clusters get-credentials --region "$region" "$cluster"
 

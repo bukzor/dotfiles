@@ -52,6 +52,7 @@ if echo | grep --color=auto -q '' 2>/dev/null; then
     alias egrep='grep -E --color=auto'
 fi
 
+alias diffstat='diffstat -C'
 alias diff='diff --minimal --unified'
 alias info='info --vi-keys'
 alias ip='ip --color'
@@ -77,7 +78,7 @@ title() {
 }
 
 alert() {
-  command alert "$@" "  (status: $?)"
+  command alert "${*:-It"'"s done!}" "  (status: $?)"
 }
 
 mkdir -p "$XDG_RUNTIME_DIR/tmux-env"
@@ -163,6 +164,7 @@ unset esc
 export PS1
 
 # extra shell settings for work
+. ~/.sh_lib/functions.d/trysource.sh
 trysource ~/private-dotfiles/.sh_rc
 . ~/.sh_advanced_rc
 

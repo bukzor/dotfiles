@@ -4,7 +4,8 @@
 # for examples
 
 # If not running interactively, don't do anything
-case $- in
+# coshells are "interactive" (ish)
+case "$-${COSHELL_VERSION:+i}" in
     *i*) ;;
       *) return;;
 esac
@@ -35,12 +36,15 @@ shopt -s extglob
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
-  if [ -f ~/prefix/brew/etc/bash_completion ]; then
-    . ~/prefix/brew/etc/bash_completion
+  if [ -f "$HOMEBREW_PREFIX"/etc/bash_completion ]; then
+    . "$HOMEBREW_PREFIX"/etc/bash_completion
   elif [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
+
+  . ~/.sh_lib/functions.d/source_dir.sh
+  source_dir ~/.bash_completion/
 fi
 # vim:et:sw=2:sts=2:

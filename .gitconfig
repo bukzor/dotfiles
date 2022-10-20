@@ -14,6 +14,12 @@
     algorithm = histogram
     # detect renames and copies by default
     renames = copy
+    color-moved = zebra
+    relative = false  # break git-vimdiff otherwise
+    # SADFACE: these don't work (yet?)
+    find-renames = 0.1
+    find-copies =  0.1
+    find-copies-harder = true
 [difftool]
     prompt = false
 [difftool "vimdiff"]
@@ -21,6 +27,7 @@
     # except missing a -R (readonly) option.
     cmd = vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
 [merge]
+    renamelimit = 0
     tool = vimmerge
     conflictstyle = diff3
 [mergetool]
@@ -37,6 +44,7 @@
     detachedHead = false
 [alias]
     master = !sh -exc 'git fetch origin && git checkout origin/master -B master'
+    main   = !sh -exc 'git fetch origin && git checkout origin/main   -B main'
     branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
     upstream = !sh -c '\
         git config branch.`git branch-name`.upstream || \

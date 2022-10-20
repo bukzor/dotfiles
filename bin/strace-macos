@@ -1,23 +1,17 @@
-#!/bin/dash
+#!/bin/zsh
 # the closest I know how to get to strace under macos
 set -eu
 
 set -x
-which sh-quote
-sh-quote 1 "2 3"
-subcommand="$(sh-quote "$@")"
+: keep a copy of original stdin, for use in subshell
+exec stdin<&1
+: stdin="$stdin"
 
-: 'enable "job management"'
-set -m
 (
-  # wait for SIGUSR1, then replace the current process with the subcommand
-  trap "kill $sleep && exec $subcommand" USR1
-  sleep infinity &
-  sleep=$!
-  wait
-) &  # background the subcommand
-pid="$!"
-kill -SIGSTOP $pid  # pause it, as quickly as possible
-
-
-sudo /Applications/FileMonitor.app/Contents/MacOS/FileMonitor
+  sudo -k /Applications/FileMonitor.app/Contents/MacOS/FileMonitor <&- |
+    ( : wait until Filemonitor prints at least one line
+      grep -qm1 '}'
+      : then execute the wrapped command, with stdin attached
+      exec "$@" <"$stdin"
+    )
+) | head -n20

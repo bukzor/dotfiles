@@ -5,7 +5,7 @@ if ! has declare; then
 fi
 
 # completions for travis, added by travis gem
-source ~/.sh_lib/functions.d/trysource.sh
+. ~/.sh_lib/functions.d/trysource.sh
 trysource ~/.travis/travis.sh
 
 
@@ -71,7 +71,7 @@ __vcs_branch() {
 precmd_functions+=(tmux_env __vcs_branch)
 chpwd_functions+=(__vcs)
 
-source ~/.sh_lib/functions.d/source_dir.sh
+. ~/.sh_lib/functions.d/source_dir.sh
 source_dir ~/.sh_plugins.d
 
 # extra shell settings for work
@@ -79,6 +79,14 @@ trysource ~/private-dotfiles/.sh_advanced_rc
 
 
 DIRENV="$HOMEBREW_PREFIX/bin/direnv"
+if ! [[ -x "$DIRENV" ]]; then
+  cat >&2 <<'EOF'
+NOTE: `direnv` is not installed. To fix:
+
+  brew install direnv
+
+EOF
+fi
 _direnv_hook() {
   if [[ -x "$DIRENV" ]]; then
     trap -- '' SIGINT;
@@ -87,6 +95,7 @@ _direnv_hook() {
     trap - SIGINT;
   fi
 }
+# always install the hook, so `brew install direnv` will "just work"
 precmd_functions+=(_direnv_hook)
 # this is in the default zsh setup, but I can't see any reason for it:
 #chpwd_functions+=(_direnv_hook)

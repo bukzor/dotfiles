@@ -1,0 +1,62 @@
+#!/bin/zsh
+set -eu
+
+
+has() {
+  command -v "$1" 2>/dev/null
+}
+eval "$(brew shellenv)"
+
+set -x
+if ! has gcloud; then
+  brew install --cask google-cloud-sdk
+fi
+
+# e.g. /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk
+export CLOUDSDK_ROOT_DIR="${CLOUDSDK_ROOT_DIR:-"$(gcloud info --format json | jq .config.paths.sdk_root -r)"}"
+export CLOUDSDK_PYTHON_PREFIX="$CLOUDSDK_ROOT_DIR/latest/google-cloud-sdk/platform/bundledpythonunix"
+export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
+
+: make a python for google-cloud-sdk\'s sole use
+if ! [[ -d ~/repo/cpython/.git ]]; then
+  mkdir -p ~/repo
+  git clone https://github.com/python/cpython ~/repo/cpython --filter=blob:none
+fi
+cd ~/repo/cpython
+
+
+: checkout the latest stable 3.8 tag
+git tag |
+  grep 3.8 |
+  # exclude alpha, beta, rc nd such
+  grep -v '^v.*[a-z]' |
+  # reverse version-sort
+  sort -rV |
+  head -n1 |
+  xargs git checkout \
+;
+
+: get build deps
+brew install --build-from-source --only-dependencies python3
+
+# build, while under the homebrew build environment
+brew sh --cmd='
+  set -eux
+  ./configure \
+    --prefix '"'$CLOUDSDK_PYTHON_PREFIX'"' \
+    --enable-optimizations \
+  ;
+  make -j20
+  make install
+'
+
+: modernize a bit
+"$CLOUDSDK_PYTHON" -m pip install --upgrade pip
+"$CLOUDSDK_PYTHON" -m pip install --upgrade setuptools wheel
+: gcloud wants this for '`gcloud logging tail`'
+"$CLOUDSDK_PYTHON" -m pip install grpcio
+
+: don\'t forget: ensure this is part of your default environment:
+:
+:       export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
+:
