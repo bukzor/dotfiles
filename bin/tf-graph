@@ -2,38 +2,54 @@
 set -uo pipefail
 umask 022
 
-graph="${1:-$(date +%R)}".svg
+time="$(date +%R)"
+graph="${1:-$time}".svg
 path="$(date +%F)"
 dir="${TMPDIR:-/tmp}/tf-graphs/$path"
 
 set -ex
 mkdir --mode 755 -p "$dir"
 
-terraform graph -draw-cycles > $dir/tmp.dot
+terraform graph -draw-cycles > "$dir/$time.0.dot"
 
-sed -ri '
-  / meta\.count-boundary / d
-  /\(close\)/ d
-  s/module\.//g
-  s/\[root\] //g
-  /"provider\.null"/ d
-  # FIXME: Auto-calculate uninteresting vars:
-  /\.var\.(machine_type|max_node_count|huge|can_reboot|workload)"/ d
-  s/([^ ].*) -> (.*)/\2 -> \1/
-  #s/([^."]*--[^."]*)\./\1\\n/g
-  s/\.((data|var|local|output)\.)/\\n\1/g
-' $dir/tmp.dot
+sed -r '
+    /^digraph \{/ {
+      p
+      i\
+      dpi=40\
+      rankdir="LR"\
+      splines=false\
+      ranksep=-1\
+      nodesep=-1\
+
+      ;
+      d
+    }
+    / meta\.count-boundary / d
+    /\(close\)/ d
+    s/module\.//g
+    s/\[root\] //g
+    /"provider\.null"/ d
+    # FIXME: Auto-calculate uninteresting vars:
+    /\.var\.(machine_type|max_node_count|huge|can_reboot|workload)"/ d
+    s/([^ ].*) -> (.*)/\2 -> \1/
+    #s/([^."]*--[^."]*)\./\1\\n/g
+    s/\.((data|var|local|output)\.)/\\n\1/g
+  ' \
+  < "$dir/$time.0.dot" \
+  > "$dir/$time.1.dot" \
+  ;
 
 dot \
   -Tsvg \
-  -Gdpi=40 \
-  -Grankdir=LR \
-  -Gsplines=false \
-  -Granksep=-1 \
-  -Gnodesep=-1 \
-  $dir/tmp.dot \
-> $dir/$graph
+  "$dir/$time.1.dot" \
+> "$dir/$graph"
 
-chmod 644 $dir/$graph
-: Now have a look at http://$(hostname -f):9991/$path/$graph
-(cd $dir && python3 -m http.server 9991) &
+chmod 644 "$dir/$graph"
+: Now have a look at "http://$(hostname -f):9991/$path/$graph"
+(
+  cd "$dir/.."
+  flock -nF http-server.lock \
+    python3 -m http.server 9991 \
+  ;
+) &
