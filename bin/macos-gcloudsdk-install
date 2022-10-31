@@ -58,5 +58,8 @@ brew sh --cmd='
 
 : don\'t forget: ensure this is part of your default environment:
 :
-:       export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
+:   export CLOUDSDK_ROOT_DIR="$CLOUDSDK_ROOT_DIR"
+:   export CLOUDSDK_PYTHON_PREFIX='$CLOUDSDK_ROOT_DIR'/latest/google-cloud-sdk/platform/bundledpythonunix
+:   export CLOUDSDK_PYTHON='$CLOUDSDK_PYTHON_PREFIX'/bin/python3
+:   export CLOUDSDK_PYTHON_SITEPACKAGES=1
 :

@@ -31,28 +31,28 @@ export GDK_SCALE=2
 export HOMEBREW="$(command -v brew)"
 export HOMEBREW_VERBOSE=1
 export HOMEBREW_DEVELOPER=1
-
-# append homebrew -- prepending causes too many issues
-# instead of: eval "$("$HOMEBREW" shellenv)"
 export HOMEBREW_PREFIX="/opt/homebrew";
 export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar";
 export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX";
-export PATH="${PATH+$PATH:}$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
-export MANPATH="${MANPATH+$MANPATH:}$HOMEBREW_PREFIX/share/man:";
-export INFOPATH="${INFOPATH+$INFOPATH:}$HOMEBREW_PREFIX/share/info:";
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 export CLOUDSDK_ROOT_DIR="$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk"
 export CLOUDSDK_PYTHON_PREFIX="$CLOUDSDK_ROOT_DIR/latest/google-cloud-sdk/platform/bundledpythonunix"
 export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
-
+export CLOUDSDK_PYTHON_SITEPACKAGES=1
 
 homebrew-handle-gnubin
 if echo "$OSTYPE" | grep -q '^darwin'; then
   # override crappy macos userspace with homebrew "gnubin"
-  PATH="$HOMEBREW_PREFIX/libexec/gnubin:$PATH"
-  MANPATH="$HOMEBREW_PREFIX/libexec/gnuman:$MANPATH"
-  INFOPATH="$HOMEBREW_PREFIX/libexec/gnuinfo:$INFOPATH"
+  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$HOMEBREW_PREFIX/libexec/gnubin:$PATH";
+  export MANPATH="$HOMEBREW_PREFIX/share/man:$HOMEBREW_PREFIX/libexec/gnuman:$MANPATH";
+  export INFOPATH="$HOMEBREW_PREFIX/share/info:$HOMEBREW_PREFIX/libexec/gnuinfo:$INFOPATH";
+else # linux
+  # append homebrew -- prepending caused too many issues
+  # instead of: eval "$("$HOMEBREW" shellenv)"
+  export PATH="${PATH+$PATH:}$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
+  export MANPATH="${MANPATH+$MANPATH:}$HOMEBREW_PREFIX/share/man:";
+  export INFOPATH="${INFOPATH+$INFOPATH:}$HOMEBREW_PREFIX/share/info:";
 fi
 
 if has nproc; then

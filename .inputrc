@@ -18,6 +18,9 @@ set convert-meta Off
 # Keep the 8th bit for display
 set output-meta On
 
+# tab completion!
+tab: complete
+
 # All of the following map the escape sequence of the
 # value contained inside the 1st argument to the
 # readline specific functions
@@ -36,3 +39,14 @@ set output-meta On
 # for xterm
 "\eOH": beginning-of-line
 "\eOF": end-of-line
+
+# the useful bits of the default "emacs style" bash keymap:
+# bash --norc -c 'bind -pm emacs' | grep -Ev 'not bound|self-insert|do-lowercase'
+"\C-s": forward-search-history
+"\C-n": next-history
+"\eOB": next-history
+"\e[B": next-history
+"\C-p": previous-history
+"\eOA": previous-history
+"\e[A": previous-history
+"\C-r": reverse-search-history

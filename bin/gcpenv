@@ -1,6 +1,10 @@
 #!/bin/zsh
 set -euo pipefail
 
+has() {
+  command -v "$1" > /dev/null
+}
+
 case $# in
   0) exec gcloud config configurations list;;
   1)
@@ -15,11 +19,25 @@ esac
 
 eval "$(gcloud config list --format 'get(compute,container)')"
 
-if [[ -d $HOME/.kube && "${region:-}" && "${cluster:-}" ]]; then
+if [[ "${region:-}" && "${cluster:-}" ]]; then
+  # Authenticate with the configured cluster, use it to configure a kubectl
+  # context of the same name (as the gcloud configuration), then activate it.
+  mkdir -p $HOME/.kube
   flock $HOME/.kube/config \
     gcloud container clusters get-credentials --region "$region" "$cluster"
 
-  if has kubectl; then
-    kubectl config current-context >&2
-  fi
+  gcloud_configuration="$(cat ~/.config/gcloud/active_config)"
+  gke_context="$(kubectl config current-context)"
+
+  kubectl config view -o json |
+    jq '
+      .contexts[]
+      | select(.name == "'"$gke_context"'").context
+      | to_entries
+      | map("--\(.key)=\(.value)")
+      | join(" ")
+    ' -r |
+  xargs -r kubectl config set-context "$gcloud_configuration"
+
+  kubectl config use-context "$gcloud_configuration"
 fi
