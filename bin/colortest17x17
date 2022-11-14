@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+#   This file echoes a bunch of color codes to the
+#   terminal to demonstrate what's available.  Each
+#   line is the color code of one forground color,
+#   out of 17 (default + 16 escapes), followed by a
+#   test use of that color on all nine background
+#   colors (default + 8 escapes).
+#
+
+T='1il'   # The test text
+BGs='40m 100m 41m 101m 42m 102m 43m 103m 44m 104m 45m 105m 46m 106m 47m 107m'
+FGs='0m 30m 90m 31m 91m 32m 92m 33m 93m 34m 94m 35m 95m 36m 96m 37m 97m'
+
+printf '            '
+for BG in $BGs; do
+  printf ' %7s' "$BG"
+done
+echo
+
+for FG in $FGs; do
+  for bold in '' '1;'; do
+    fg="$bold$FG"
+    printf ' %5s \033[%s  %s  ' "$fg"  "$fg" "$T"
+    for BG in $BGs; do
+      printf ' \033[%s\033[%s  %s  \033[0m' "$fg" "$BG" "$T"
+    done
+    echo
+  done
+done
