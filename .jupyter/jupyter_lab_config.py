@@ -532,8 +532,8 @@
 # c.LabApp.tree_url = ''
 
 ## The directory for user settings.
-#  Default: '/usr/local/google/home/bukzor/.jupyter/lab/user-settings'
-# c.LabApp.user_settings_dir = '/usr/local/google/home/bukzor/.jupyter/lab/user-settings'
+#  Default: '~/.jupyter/lab/user-settings'
+# c.LabApp.user_settings_dir = '~/.jupyter/lab/user-settings'
 
 ## Whether to serve the app in watch mode
 #  Default: False
@@ -548,8 +548,8 @@
 # c.LabApp.workspaces_api_url = ''
 
 ## The directory for workspaces
-#  Default: '/usr/local/google/home/bukzor/.jupyter/lab/workspaces'
-# c.LabApp.workspaces_dir = '/usr/local/google/home/bukzor/.jupyter/lab/workspaces'
+#  Default: '~/.jupyter/lab/workspaces'
+# c.LabApp.workspaces_dir = '~/.jupyter/lab/workspaces'
 
 # ------------------------------------------------------------------------------
 # ServerApp(JupyterApp) configuration

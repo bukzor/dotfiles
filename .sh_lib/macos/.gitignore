@@ -1,0 +1,5 @@
+*.log
+pidpath
+getsid
+getproc
+getsid2

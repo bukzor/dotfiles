@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+  cat >&2 <<'EOF'
+Print from `gcloud logging read` without escaping.
+This allows unicode and color codes to be seen correctly.
+
+Useful arguments:
+
+  gcloud-logging-cat \
+    'resource.labels.instance_id="6684811291654637370"' \
+    --freshness=10h \
+    --limit=10 \
+  ;
+
+EOF
+  exit 0
+fi
+
+
+
+
+set -x
+gcloud logging read \
+    --flatten=textPayload \
+    --format='value(textPayload)' \
+    "$@" |
+  unescape \
+;

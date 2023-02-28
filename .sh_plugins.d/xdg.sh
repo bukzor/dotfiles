@@ -9,22 +9,29 @@ if [ "$__sh_plugin_xdg" ]; then
 else
   export __sh_plugin_xdg=1
 fi
+umask 022
 
 # NB: macos mkdir doesn't support long option --mode, nor appended options
 export XDG_DATA_HOME
 if ! [ "$XDG_DATA_HOME" ]; then
   XDG_DATA_HOME="$HOME/.local/share"
-  mkdir -m 700 -p $XDG_DATA_HOME
+  if ! [ -d "$XDG_DATA_HOME" ]; then
+    mkdir -p "$XDG_DATA_HOME"
+    chmod 700 "$XDG_DATA_HOME"
+  fi
 fi
 
 export XDG_CONFIG_HOME
 if ! [ "$XDG_CONFIG_HOME" ]; then
   XDG_CONFIG_HOME="$HOME/.config"
-  mkdir -m 700 -p $XDG_CONFIG_HOME
+  if ! [ -d "$XDG_CONFIG_HOME" ]; then
+    mkdir -p "$XDG_CONFIG_HOME"
+    chmod 700 "$XDG_CONFIG_HOME"
+  fi
 fi
 
 export XDG_DATA_DIRS
-XDG_DATA_DIRS="${XDG_DATA_DIRS:-usr/local/share/:/usr/share/}"
+XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share/:/usr/share/}"
 
 export XDG_CONFIG_DIRS
 XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
@@ -32,14 +39,18 @@ XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
 export XDG_CACHE_HOME
 if ! [ "$XDG_CACHE_HOME" ]; then
   XDG_CACHE_HOME="$HOME/.cache"
-  mkdir -m 700 -p $XDG_CACHE_HOME
+  if ! [ -d "$XDG_CACHE_HOME" ]; then
+    mkdir -p "$XDG_CACHE_HOME"
+    chmod 700 "$XDG_CACHE_HOME"
+  fi
 fi
 
 export XDG_RUNTIME_DIR
 if ! [ "$XDG_RUNTIME_DIR" ]; then
   XDG_RUNTIME_DIR="$TMPDIR/runtime-$USER-$BOOT"
 
-  mkdir -m 700 -p "$XDG_RUNTIME_DIR"
+  mkdir -p "$XDG_RUNTIME_DIR"
+  chmod 700 "$XDG_RUNTIME_DIR"
   if has setsid && has flock; then
     # prevent tmpwatch (or similar) from cleaning up our XDG_RUNTIME_DIR, till
     # we're done with it:

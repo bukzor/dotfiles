@@ -1,0 +1,13 @@
+# use a very verbose default format for query results
+.headers on
+.mode line
+
+# informational messages on stderr
+.log stderr
+
+# show the schema on startup
+.output stderr
+.schema
+
+# normal query output on stdout
+.output stdout

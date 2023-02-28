@@ -10,5 +10,6 @@
 !**/
 !**/.gitignore
 
-# ... unless they're backup copies.
-**/*.bak/
+# these have to be explicitly ignored because they sometimes contain git repos
+.cache/
+.opam/

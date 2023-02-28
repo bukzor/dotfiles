@@ -1,0 +1,5 @@
+
+# these change during the course of normal use -- they should be elsewhere
+saved-breakpoints*
+internal-cmdline-history.txt
+shell-history

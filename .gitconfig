@@ -1,8 +1,11 @@
 [user]
     name = Buck Evan
     email = buck.2019@gmail.com
+	signingkey = 53EB531B7135B49D
 [core]
     excludesfile = ~/.gitignore_global
+[init]
+	defaultBranch = main
 [color]
     ui = auto
 [pack]
@@ -23,9 +26,15 @@
 [difftool]
     prompt = false
 [difftool "vimdiff"]
-    # This is the same as the default command git would use,
-    # except missing a -R (readonly) option.
-    cmd = vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
+    # unset GIT_EXTERNAL_DIFF, to allow :!git diff to work
+    # unset GIT_DIR and GIT_WORK_TREE, because it confuses GitSigns badly
+    # The `vim` command is the same that git would use by default, except
+    # missing a -R (readonly) option.
+    cmd = env \
+        --unset=GIT_EXTERNAL_DIFF \
+        --unset=GIT_DIR \
+        --unset=GIT_WORK_TREE \
+        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
 [merge]
     renamelimit = 0
     tool = vimmerge
@@ -43,39 +52,26 @@
 [advice]
     detachedHead = false
 [alias]
+    ff = !sh -exc 'git pull --ff "$@"' -
     master = !sh -exc 'git fetch origin && git checkout origin/master -B master'
     main   = !sh -exc 'git fetch origin && git checkout origin/main   -B main'
-    branch-name = !sh -c 'git symbolic-ref HEAD|sed s@^refs/heads/@@'
-    upstream = !sh -c '\
-        git config branch.`git branch-name`.upstream || \
-        branch=`git branch-name` && \
-        remote=`git config \"branch.$branch.remote\"` && \
-        merge=`git config \"branch.$branch.merge\"|sed s@^refs/heads/@@`&& \
-        echo $remote/$merge\
-    '
-    base = !git merge-base `git upstream` HEAD
-    diffbase = !sh -c 'git dt `git base` "$@"' -
-    lol = !git log --oneline --graph --decorate --color=always --pretty=format:'%C(auto)%h %C(bold blue)%aE %Cgreen(%cr)%C(auto)%d%Creset %s' "$@" | \
-        sed -r 's/(@[^.]*)\\.com /\\1 /g' | \
-        sed -r 's/(buck@yelp|bukzor@google|(buck.2019|workitharder)@gmail) /bukzor /' | \
-        less -XLFR && true
-    l = !git lol
-    xl = !git lol --all
-    fetch1 = !sh -c 'colorize git fetch "$0" "$1":refs/remotes/"$0"/"$1"'
-    fetchdev = !sh -c 'colorize git fetch -f "ssh://git@git.yelpcorp.com/devs/$0" "$1":refs/remotes/"$0"/"$1"'
-
-    branch1 = !sh -c 'git fetch1 canon master && git checkout canon/master -B "$0" && mm && USER="${1-buck}" alert-irc new branch "$0"'
+    branch-name = symbolic-ref -q --short HEAD
+  base = !echo sh -exc 'git merge-base "$$(git upstream)" HEAD'
+    diffbase = !git dt $(git base)
+    lol = log --oneline --graph --decorate --color=always --pretty=format:\"%C(auto)%h %C(bold blue)%aL %Cgreen(%cr)%C(auto)%d%Creset %s\"
+    l = lol
+    xl = lol --all
+    branch1 = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git remote update && git branch "$b" "$@" origin/master && git checkout "$b"' -
     vimdiff = difftool
     dt = difftool
     d = diff
     mt = mergetool
     wip = commit -m 'WIP' --no-verify
     amend = commit --amend --no-edit
+    amendall = amend --all
     co = checkout
     ci = commit
     top = rev-parse --show-toplevel
-    gerrit-upstream = ! (git rev-parse --abbrev-ref m/master -- 2>/dev/null || echo origin/master) | sed -r 's@^[^/]*/+@@'
-    gerrit = !set -x && git push "$(git remote | head -n 1)" HEAD:refs/for/"$(git gerrit-upstream)"
     s = status -s
     topic = !set -x && git fetch origin master && git checkout FETCH_HEAD -b
     top = rev-parse --show-toplevel

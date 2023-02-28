@@ -1,60 +1,15 @@
-[submodule ".vim/bundle/Syntastic"]
-	path = .vim/bundle/Syntastic
-	url = https://github.com/scrooloose/syntastic.git
-[submodule ".vim/bundle/puppet-syntax-vim"]
-	path = .vim/bundle/puppet-syntax-vim
-	url = https://github.com/puppetlabs/puppet-syntax-vim
-[submodule ".vim/bundle/VimClojure"]
-	path = .vim/bundle/VimClojure
-	url = git://github.com/vim-scripts/VimClojure.git
-[submodule ".vim/bundle/vim-vimlint"]
-	path = .vim/bundle/vim-vimlint
-	url = https://github.com/syngan/vim-vimlint.git
-[submodule ".vim/bundle/vim-vimlparser"]
-	path = .vim/bundle/vim-vimlparser
-	url = https://github.com/ynkdir/vim-vimlparser.git
-[submodule ".vim/bundle/EditorConfig"]
-	path = .vim/bundle/EditorConfig
-	url = https://github.com/editorconfig/editorconfig-vim.git
-[submodule ".vim/bundle/vim-bracketed-paste"]
-	path = .vim/bundle/vim-bracketed-paste
-	url = https://github.com/ConradIrwin/vim-bracketed-paste
-[submodule ".vim/bundle/terraform"]
-	path = .vim/bundle/terraform
-	url = https://github.com/hashivim/vim-terraform
-[submodule ".vim/bundle/vim-dirdiff"]
-	path = .vim/bundle/vim-dirdiff
-	url = https://github.com/will133/vim-dirdiff
-[submodule ".vim/pack/plugins/start/ale"]
-	path = .vim/pack/plugins/start/ale
-	url = https://github.com/dense-analysis/ale.git
-[submodule ".vim/pack/plugins/start/gruvbox"]
-	path = .vim/pack/plugins/start/gruvbox
-	url = https://github.com/morhetz/gruvbox.git
-[submodule ".vim/pack/plugins/start/elm-vim"]
-	path = .vim/pack/plugins/start/elm-vim
-	url = https://github.com/ElmCast/elm-vim.git
-[submodule ".vim/pack/plugins/start/rust"]
-	path = .vim/pack/plugins/start/rust
-	url = https://github.com/rust-lang/rust.vim
-[submodule ".vim/pack/plugins/start/vim-reason-plus"]
-	path = .vim/pack/plugins/start/vim-reason-plus
-	url = https://github.com/reasonml-editor/vim-reason-plus.git
-[submodule ".vim/pack/plugins/start/formality-vim"]
-	path = .vim/pack/plugins/start/formality-vim
-	url = https://gitlab.com/moonad/formality-vim
+[submodule ".vim/AstroNvim"]
+	path = .local/share/astronvim
+	url = https://github.com/AstroNvim/AstroNvim
 [submodule "scratch"]
 	path = scratch
 	url = git@github.com:bukzor/scratch.git
-[submodule ".vim/pack/plugins/start/yats"]
-	path = .vim/pack/plugins/start/yats
-	url = https://github.com/HerringtonDarkholme/yats.vim
 [submodule ".themes/gruvbox-dark-gtk"]
 	path = .themes/gruvbox-dark-gtk
 	url = https://github.com/jmattheis/gruvbox-dark-gtk
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
 	url = git@github.com:bukzor-sentryio/kitty-gruvbox-theme.git
-[submodule ".vim/pack/plugins/start/vim-jq"]
-	path = .vim/pack/plugins/start/vim-jq
-	url = https://github.com/bfrg/vim-jq
+[submodule ".vim/pack/plugins/start/vim-pathogen"]
+	path = .vim/pack/plugins/start/pathogen
+	url = https://github.com/tpope/vim-pathogen

@@ -1,0 +1,10 @@
+#!/usr/bin/env sed -rf
+
+s/\o033[^a-zA-Z]*[a-zA-Z]//g
+/Error: Cycle: / {
+  s/^.*Error: Cycle: //
+  s/module\.//g
+  s/, /\n/g
+  p
+}
+d

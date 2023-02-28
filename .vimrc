@@ -1,40 +1,3 @@
-" plugins {
-  runtime autoload/plug.vim
-
-  if !exists('g:loaded_plug')
-    " Install vim-plug if not found
-    silent !curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs
-      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  endif
-
-  " Run PlugInstall if there are missing plugins
-  autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-    \| PlugInstall --sync | source $MYVIMRC
-  \| endif
-
-  " https://github.com/junegunn/vim-plug#readme
-  """runtime autoload/plug.vim
-  try
-    call plug#begin()
-        Plug 'prabirshrestha/vim-lsp'
-        Plug 'prabirshrestha/asyncomplete.vim'
-        Plug 'prabirshrestha/asyncomplete-lsp.vim'
-        Plug 'dense-analysis/ale'
-        Plug 'morhetz/gruvbox'
-        Plug 'vim-python/python-syntax'
-        Plug 'HerringtonDarkholme/yats.vim'
-        Plug 'tpope/vim-sensible'
-        " sensible behavior for zoom (AKA ctrl-w_o, AKA :only)
-        Plug 'troydm/zoomwintab.vim'
-    call plug#end()
-  catch /Unknown function: plug#begin/
-    echoerr "vim-plug not installed!" | quitall
-  endtry
-  """"silent! PlugInstall               "install any missing plugins
-  """packloadall               "load the plugins, if possible
-  call plug#helptags()
-" }
-
 " display options {
     syntax on               "syntax coloring is a first-cut debugging tool
     set synmaxcol=3000      "extra-long lines lose highlighting, for speed
@@ -42,24 +5,29 @@
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
-    colorscheme gruvbox "change to taste. try `desert' or `evening'
+
     set background=dark
+    colorscheme gruvbox "change to taste. try `desert' or `evening'
 
     set number
+    set norelativenumber
     set wrap                "wrap long lines
-    set linebreak           "but not in the middle of a word, if possible
+    " this makes vim's column-counting go weird:
+    """set linebreak           "but not in the middle of a word, if possible
 
     set display+=lastline   "show huge lines even when they don't completely fit
     set scrolloff=3         "keep three lines visible above and below
     set sidescrolloff=8     "keep cursor away from left and right edge, too
-    set ruler showcmd       "give line, column, and command in the status line
+    "set ruler showcmd       "give line, column, and command in the status line
     set colorcolumn=80      "often I want to know when/if I've exceeded 80 columns
     set laststatus=2        "always show the status line
+    "set laststatus=3        "global status line
                             "make filename-completion more terminal-like
     set wildmode=longest:full
     set wildmenu            "a menu for resolving ambiguous tab-completion
                             "files we never want to edit
     set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
+    set updatetime=1000     "CursorHold (show type) after 1s (down from 4s)
 
     " Make whitespace characters look nice when shown.
     set listchars=tab:→\ ,extends:»,precedes:«,nbsp:␠,trail:␠
@@ -123,8 +91,8 @@
     set modeline
     set modelines=2
 
-    "use jj to escape insert mode
-    inoremap jj <ESC>
+    """ use jj to escape insert mode
+    """inoremap jj <ESC>
 
     "don't clobber the buffer when pasting in visual mode
     vmap P p
@@ -176,7 +144,7 @@
     " nmap q: :q
 
     "never use Ex mode -- I never *mean* to press it
-    nnoremap Q <ESC>
+    """astro"""nnoremap Q <ESC>
 
     "never use F1 -- I'm reaching for escape
     noremap  <F1> <ESC>
@@ -226,19 +194,27 @@
     set expandtab                       "use spaces, not tabs
     set softtabstop=2 shiftwidth=2      "2-space indents
 
-
     set shiftround                      "always use a multiple of 4 for indents
     set smarttab                        "backspace to remove space-indents
     set autoindent                      "auto-indent for code blocks
     "DONT USE: smartindent              "it does stupid things with comments
 
-    "smart indenting by filetype, better than smartindent
+    " smart indenting by filetype, better than smartindent
     filetype on
     filetype indent on
     filetype plugin on
 " }
 
 "extra filetypes {
+function! g:RegexFiletype(regex, ft) abort
+  if did_filetype()
+    return
+  endif
+  if getline(1) =~# a:regex
+    exec "set ft=" . a:ft
+  endif
+endfunction
+
 augroup extra_filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.js.tmpl     set filetype=javascript
@@ -246,6 +222,12 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.pxi         set filetype=pyrex
     autocmd BufNewFile,BufRead *.md          set filetype=markdown
     autocmd BufNewFile,BufRead *.proto       set filetype=proto
+    autocmd BufNewFile,BufRead *.hcl         set filetype=terraform
+    autocmd BufNewFile,BufRead .envrc        set filetype=bash
+    autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
+
+    autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
+
     autocmd FileType go set ts=2
 augroup end
 " }
@@ -272,18 +254,17 @@ augroup end
 " }
 
 " { Finger-savers:
+    let mapleader = '\'
     " buffer delete
     nnoremap <Leader>bd :bn \| bd#<CR>
     " goto directory
-    nnoremap <Leader>gd :e %:h<CR>
+    nnoremap <Leader>gD :e %:h<CR>
     " chmod executable
     nnoremap <Leader>cx :!set -x; chmod 755 %<CR>
     " paste the filename
     nnoremap <Leader>pf :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
-    " syntastic check
-    nnoremap <Leader>sc :w\|SyntasticCheck<CR>
     " git add
-    nnoremap <Leader>ga :!set -x; git add %<CR>
+    """nnoremap <Leader>ga :!set -x; git add %<CR>
 " }
 
 " { from http://www.bestofvim.com/tip/diff-diff/
@@ -329,97 +310,63 @@ augroup end
     silent! helptags ALL
 " }
 
-" plugin: ALE {
-  let g:ale_use_global_executables = 1
-  let g:ale_fix_on_save = 1
-  let g:ale_lint_on_save = 1
-  let g:ale_lint_delay = 2000
-  let g:ale_lint_on_enter = 0
-  let g:ale_lint_on_text_changed = 'always'
-  let g:ale_virtualenv_dir_names = []
-  let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'javascript': ['eslint'],
-\   'python': ['black'],
-\   'terraform': ['terraform'],
-\}
-  let g:ale_echo_msg_format = '%code: %%s (%linter%)'
-  let g:ale_loclist_msg_format = '%code: %%s (%linter%)'
+""" " Use Ctrl-j/k to cycle through the suggestions.
+""" inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+""" inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
+""" inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
+""" " Force refresh completion.
+""" imap <C-space> <Plug>(asyncomplete_force_refresh)
 
-  augroup ale_autocomplete
-    autocmd!
-    " Use ALE's function for asyncomplete defaults
-    " Provide your own overrides here
-    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#ale#get_source_options({
-        \ 'priority': 10,
-        \ }))
-  augroup END
-" } plugin: ALE
+""" nnoremap <Leader>d :LspDefinition<CR>
+"""nnoremap <Leader>qd :LspPeekDefinition<CR>
+"""
+"""" i: interface
+"""nnoremap <Leader>i :LspDeclaration<CR>
+"""" Open Declaration in preview window.
+"""nnoremap <Leader>qi :LspPeekDeclaration<CR>
+"""
+"""nnoremap <Leader>I :LspImplementation<CR>
+"""nnoremap <Leader>qI :LspPeekImplementation<CR>
+"""
+""""""astro"""nnoremap <Leader>s :LspDocumentSymbol<CR>
+"""" Show the status of the language server.
+"""""""astro"""nnoremap <Leader>S :LspStatus<CR>
+"""
+"""" Go to the type definition of the word under the cursor, and open in the current window.
+""""""astro"""nnoremap <Leader>t :LspTypeDefinition<CR>
+"""nnoremap <Leader>qt :LspPeekTypeDefinition<CR>
+"""" View type hierarchy of the symbol under the cursor.
+""""""astro"""nnoremap <Leader>T :LspTypeHierarchy<CR>
+"""
+"""" Displays hover information like documentation (h: help).
+"""nnoremap <Leader>h :LspHover<CR>
+"""" Gets a list of possible commands that can be applied to a file so it can be fixed.
+""""""astro"""nnoremap <Leader>f :LspCodeAction<CR>
+"""nnoremap <Leader>r :LspRename<CR>
+"""
+"""" u: usage.
+""""""astro"""nnoremap <Leader>u :LspReferences<CR>
+"""nnoremap <Leader>nu :LspNextReference<CR>
+"""nnoremap <Leader>pu :LspPreviousReference<CR>
+"""
+"""nnoremap <Leader>nw :LspNextWarning<CR>
+"""nnoremap <Leader>pw :LspPreviousWarning<CR>
+"""
+"""" Get current document diagnostics information.
+"""nnoremap <Leader>e :LspDocumentDiagnostics<CR>
+"""nnoremap <Leader>ne :LspNextError<CR>
+"""nnoremap <Leader>pe :LspPreviousError<CR>
 
-" Send async completion requests.
-" WARNING: Might interfere with other completion plugins.
-let g:lsp_async_completion = 0
-" Enable UI for diagnostics
-" enable diagnostics signs in the gutter
-"""let g:lsp_signs_enabled = 0
-" enable echo under cursor when in normal mode
-"""let g:lsp_diagnostics_echo_cursor = 0
-" Automatically show completion options
-"""let g:lsp_preview_autoclose = 0
-
-let g:asyncomplete_smart_completion = 1
-let g:asyncomplete_auto_popup = 1
-
-
-"" Use Ctrl-j/k to cycle through the suggestions.
-inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
-" Force refresh completion.
-imap <C-space> <Plug>(asyncomplete_force_refresh)
-
-" Highlight references to the symbol under the cursor.
-let g:lsp_highlight_references_enabled = 1
-
-nnoremap <Leader>d :LspDefinition<CR>
-nnoremap <Leader>qd :LspPeekDefinition<CR>
-
-" i: interface
-nnoremap <Leader>i :LspDeclaration<CR>
-" Open Declaration in preview window.
-nnoremap <Leader>qi :LspPeekDeclaration<CR>
-
-nnoremap <Leader>I :LspImplementation<CR>
-nnoremap <Leader>qI :LspPeekImplementation<CR>
-
-nnoremap <Leader>s :LspDocumentSymbol<CR>
-" Show the status of the language server.
-nnoremap <Leader>S :LspStatus<CR>
-
-" Go to the type definition of the word under the cursor, and open in the current window.
-nnoremap <Leader>t :LspTypeDefinition<CR>
-nnoremap <Leader>qt :LspPeekTypeDefinition<CR>
-" View type hierarchy of the symbol under the cursor.
-nnoremap <Leader>T :LspTypeHierarchy<CR>
-
-" Displays hover information like documentation (h: help).
-nnoremap <Leader>h :LspHover<CR>
-" Gets a list of possible commands that can be applied to a file so it can be fixed.
-nnoremap <Leader>f :LspCodeAction<CR>
-nnoremap <Leader>r :LspRename<CR>
-
-" u: usage.
-nnoremap <Leader>u :LspReferences<CR>
-nnoremap <Leader>nu :LspNextReference<CR>
-nnoremap <Leader>pu :LspPreviousReference<CR>
-
-nnoremap <Leader>nw :LspNextWarning<CR>
-nnoremap <Leader>pw :LspPreviousWarning<CR>
-
-" Get current document diagnostics information.
-nnoremap <Leader>e :LspDocumentDiagnostics<CR>
-nnoremap <Leader>ne :LspNextError<CR>
-nnoremap <Leader>pe :LspPreviousError<CR>
+hi! link LspReferenceText Search
+hi! link LspReferenceRead CurSearch
+hi! link LspReferenceWrite IncSearch
+augroup lsp_stuff
+  autocmd!
+  autocmd BufEnter,CursorHold,InsertLeave lua vim.lsp.codelens.refresh()
+  autocmd CursorHold  lua vim.lsp.buf.document_highlight()
+  autocmd CursorHoldI lua vim.lsp.buf.document_highlight()
+  autocmd CursorMoved lua vim.lsp.buf.clear_references()
+augroup END
 
 
 " extra, local settings {

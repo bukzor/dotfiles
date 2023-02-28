@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+
+
+gcloud_info="$(gcloud info --format=json)"
+python=$(jq '.basic.python_location' -r <<< "$gcloud_info")
+
+pythonpath=$(jq '.installation.python_path | join(":")' -r <<< "$gcloud_info")
+export PYTHONPATH
+
+set -x
+PYTHONPATH="$pythonpath"
+exec "$python" "$@"

@@ -1,0 +1,11 @@
+#!/usr/bin/sed -rf
+# currently this is "good enough" for use with `gcloud --format=json`
+
+# delete first two columns of characters
+s/^.{1,2}//
+
+# remove top-level trailing comma
+s/^([]}]),$/\1/
+
+# skip (now) blank lines
+/^$/ d

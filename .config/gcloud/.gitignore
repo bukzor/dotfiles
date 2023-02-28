@@ -1,0 +1,15 @@
+# It's very silly how they mixed all this stuff together under "config".
+
+# too easy to put secrets in there
+configurations/
+
+# these changes during the course of normal use -- they should be elsewhere
+cache/
+logs/
+active_config
+
+# these are secrets -- they should be elsewhere
+access_tokens.db
+application_default_credentials.json
+credentials.db
+*credential*

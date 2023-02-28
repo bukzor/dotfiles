@@ -13,6 +13,7 @@ class Color(namedtuple("Color", "r g b")):
     @classmethod
     def from_hsl(cls, h, s, l):
         from colorsys import hls_to_rgb
+
         return cls(*hls_to_rgb(h, l, s))
 
     def show(color):  # pylint: disable=no-self-argument
@@ -46,6 +47,7 @@ def frange(start, stop, step):
         curr += step
 
     from sys import float_info
+
     if curr <= stop + 15 * float_info.epsilon:
         yield stop
 
@@ -85,9 +87,11 @@ def colortest_truecolor(outfile, rows, columns):
 
 def main():
     import shutil as S
+
     columns, rows = S.get_terminal_size((80, 20))
 
     import sys as S
+
     colortest_truecolor(S.stdout, rows - 3, columns - 1)
 
 

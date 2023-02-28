@@ -1,20 +1,42 @@
-#!/usr/bin/env python3
-TEST_TEXT = 'il1'
+#!/usr/bin/env PYTHONIOENCODING=latin1 LANG=en_US.latin1 python3 -X utf8=0 -SOOsu
+
+TEST_TEXT = "1lI"
 COLOR0 = (30, 90, 40, 100)
+
+
+def shuffle(s: str) -> str:
+    from random import shuffle
+
+    as_list = list(s)
+    shuffle(as_list)
+    return "".join(as_list)
+
 
 def colortest(test_text=TEST_TEXT):
     for color0 in COLOR0:
-        for bold in '', '1;':
-            for base_color in range(color0, color0 + 8):
-                base_color = str(base_color)
-                color = bold + base_color
-                text = f'{color} {test_text}'
-                print(f'\033[{color}m{color:>6} {test_text} ', end='')
-            print('\033[m')
+        for inverse in (), (7,):
+            if inverse:
+                if color0 in (30, 90):
+                    continue
+                else:
+                    color0 -= 10
+            for bold in (), (1,):
+                for base_color in range(color0, color0 + 8):
+                    color = bold + inverse + (base_color,)
+                    color = (str(x) for x in color)
+                    color = ";".join(color)
+                    print(
+                        f"\033[{color}m{color:>7} {shuffle(test_text)} ",
+                        end="\033[m",
+                    )
+                print()
+
 
 def main():
     from sys import argv
+
     return colortest(*argv[1:])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     raise SystemExit(main())

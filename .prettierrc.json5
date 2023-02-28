@@ -1,0 +1,2 @@
+// this is the only thing that can't be done in the .editorconfig
+{ "proseWrap": "always" }

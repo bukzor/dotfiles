@@ -1,16 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 set -uo pipefail
 umask 022
 
 time="$(date +%R)"
 graph="${1:-$time}".svg
-path="$(date +%F)"
-dir="${TMPDIR:-/tmp}/tf-graphs/$path"
+subpath="$(date +%F)"
+dir="${TMPDIR:-/tmp}/tf-graphs/$subpath"
 
+nop2() {
+  neato -n2 "$@"
+}
+
+PS4='%1x:%i [1;34m$[0m '
+PS4='[1;34m$[0m '
 set -ex
 mkdir --mode 755 -p "$dir"
 
-terraform graph -draw-cycles > "$dir/$time.0.dot"
+terraform graph -draw-cycles -type=apply > "$dir/$time.0.dot"
 
 sed -r '
     /^digraph \{/ {
@@ -18,38 +24,50 @@ sed -r '
       i\
       dpi=40\
       rankdir="LR"\
-      splines=false\
+      # splines=false\
       ranksep=-1\
-      nodesep=-1\
+      # nodesep=-1\
 
       ;
       d
     }
-    / meta\.count-boundary / d
-    /\(close\)/ d
-    s/module\.//g
-    s/\[root\] //g
-    /"provider\.null"/ d
-    # FIXME: Auto-calculate uninteresting vars:
-    /\.var\.(machine_type|max_node_count|huge|can_reboot|workload)"/ d
-    s/([^ ].*) -> (.*)/\2 -> \1/
-    #s/([^."]*--[^."]*)\./\1\\n/g
-    s/\.((data|var|local|output)\.)/\\n\1/g
+    # / meta\.count-boundary / d
+    # /\(close\)/ d
+    s@\.module\.@/@g
+    s@module\.@/@g
+    s@\[root\] @/@g
+    # /"provider\.null"/ d
+    # # FIXME: Auto-calculate uninteresting vars:
+    # /\.var\.(machine_type|max_node_count|huge|can_reboot|workload)"/ d
+    # s/([^ ].*) -> (.*)/\2 -> \1/
+    # #s/([^."]*--[^."]*)\./\1\\n/g
+    # s/\.((data|var|local|output)\.)/\\n\1/g
   ' \
   < "$dir/$time.0.dot" \
   > "$dir/$time.1.dot" \
   ;
 
-dot \
-  -Tsvg \
-  "$dir/$time.1.dot" \
-> "$dir/$graph"
+tred < "$dir/$time.1.dot" |
+  dot |
+  neato -n1 |
+  edgepaint \
+  > "$dir/$time.2.dot" \
+;
+
+
+neato -n2 -Tsvg < "$dir/$time.2.dot" > "$dir/$graph"
 
 chmod 644 "$dir/$graph"
-: Now have a look at "http://$(hostname -f):9991/$path/$graph"
-(
-  cd "$dir/.."
-  flock -nF http-server.lock \
-    python3 -m http.server 9991 \
-  ;
-) &
+ls -ld "$dir/$time"*
+
+: some metadata
+ccomps -sv < "$dir/$time.2.dot"
+acyclic -nv < "$dir/$time.2.dot"
+: Now have a look at "file://$dir/$graph"
+
+exit 0
+: Now have a look at "http://$(hostname -f):9991/$subpath/$graph"
+cd "$dir/.."
+exec flock -nF http-server.lock \
+  python3 -m http.server 9991 \
+;

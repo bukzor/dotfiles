@@ -1,0 +1,13 @@
+#!/bin/sh
+
+sed '
+    s@\<0x[0-9a-z]+@$ADDR@g
+    '\''
+    s@\<0x[0-9a-z]+@$ADDR@g
+'
+# hooha
+wat 's@\<0x[0-9a-z]+@$ADDR@g'
+wut 's@\<0x[0-9a-z]+@$ADDR@g'
+wot 's@\<0x[0-9a-z]+@$ADDR@g'
+
+awk 'BEGIN{ print $1 } END {print $2}'

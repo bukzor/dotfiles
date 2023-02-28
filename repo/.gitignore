@@ -1,4 +1,5 @@
-# ignore everything
+# Ignore everything, regardless of their gitigore
 *
 
+# ... except don't ignore my stuff
 !mine

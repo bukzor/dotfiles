@@ -1,91 +1,133 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 create a centralized "gnubin" directory from currently-linked formulas
 also handles man and info
 """
 from os import getenv
-from pathlib import Path
+from pathlib import Path, PurePath
 
-HOMEBREW_PREFIX=Path(getenv("HOMEBREW_PREFIX", "/opt/homebrew"))
+HOMEBREW_PREFIX = Path(getenv("HOMEBREW_PREFIX", "/opt/homebrew"))
+DEBUG = getenv("DEBUG")
 
-exit(0)
 
 def pattern(dirname):
-  return f"^{HOMEBREW_PREFIX}/opt/[^/]+/libexec/(gnu$dirname|$dirname)/[^/]+"
+    return f"^{HOMEBREW_PREFIX}/opt/[^/]+/libexec/(gnu$dirname|$dirname)/[^/]+"
 
-def gnu(dirname):
-  return "$HOMEBREW_PREFIX/libexec/gnu$dirname"
 
-"""!sh
-# replace crappy macos userspace with homebrew "gnubin"
-if ! [ -d "$HOMEBREW_PREFIX" ]; then
-  echo "Please install Homebrew!" >&2
-  exit 1
-fi
+def gnu(dirname) -> Path:
+    return HOMEBREW_PREFIX / "libexec/gnu" / dirname
 
-echo -n "processing Homebrew gnubin hook..."
 
-dest="$(gnu bin)"
-mkdir -p "$dest"
-# TESTING: pretend there's nothing installed to homebrew
-#PATH="$(gnu bin):$PATH"
-find "$HOMEBREW_PREFIX/opt" -follow -mindepth 1 -maxdepth 1 -type d |
-  xargs readlink -f |
-  sort -u |
-  ( while IFS= read -r pkg; do
-      cd "$pkg"
-      if ! [ -d libexec ]; then
-        continue
-      fi
-      echo PKG "$pkg"
-      cd libexec
-      find . -type l |
-        ( while IFS= read -r symlink; do
-            name="$(basename "$symlink")"
-            if [[ "$(readlink "$symlink")" =~ ^\.\./.*/g$name$ ]]; then
-              if ! [[ "$(readlink "$symlink")" =~ ^\.\./\.\./.*/g$name$ ]]; then
-                echo WAT
-              fi
+def info(*print_args, **print_kwargs):
+    from sys import stderr
 
-              echo "GNULINK: $symlink -> $(readlink $symlink)"
-            fi
-          done
+    print(*print_args, **print_kwargs, file=stderr)
+
+
+def noop(*args, **kwargs):
+    del args, kwargs
+
+
+if DEBUG:
+    debug = info
+else:
+    debug = noop
+
+
+def mkdirp(path: Path):
+    return path.mkdir(parents=True, exist_ok=True)
+
+
+def cmd_lines(cmd):
+    cmd = tuple(str(arg) for arg in cmd)
+
+    import subprocess as S
+
+    proc = S.Popen(cmd, stdout=S.PIPE)
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        yield line.decode("US-ASCII").rstrip("\n")
+    if returncode := proc.wait():
+        raise S.CalledProcessError(returncode, cmd)
+
+
+def readlink(p: Path) -> Path:
+    from os import readlink
+
+    return Path(readlink(p))
+
+
+def main():
+    # replace crappy macos userspace with homebrew "gnubin"
+    if not HOMEBREW_PREFIX.is_dir():
+        info("Please install Homebrew!")
+        return 1
+
+    info("processing Homebrew gnubin hook...", end="", flush=True)
+
+    # find "$HOMEBREW_PREFIX/opt" -follow -mindepth 1 -maxdepth 1 -type d |
+    packages = tuple(
+        sorted(
+            set(pkg.resolve() for pkg in HOMEBREW_PREFIX.glob("opt/[!.]*/"))
         )
-    done
-  )
-exit 0
+    )
+    for package in packages:
+        debug("PKG:", package)
+        for symlink in cmd_lines(("find", package, "-type", "l")):
+            symlink = Path(symlink)
+            symdest = readlink(symlink)
+            relsymlink = symlink.relative_to(package)
+
+            if symdest.name == "g" + symlink.name:
+                name = symlink.name
+            elif "g" + symdest.name == symlink.name:
+                name = symdest.name
+            else:
+                continue
+
+            src = symlink.parent / symdest
+            if relsymlink.parts[0] == "libexec":
+                if relsymlink.parts[1].startswith("gnu"):
+                    dest = relsymlink
+                else:
+                    dest = Path(
+                        relsymlink.parts[0],
+                        "gnu" + relsymlink.parts[1],
+                        *relsymlink.parts[2:],
+                    )
+            elif relsymlink.parts[0] == "share":
+                dest = Path(
+                    "libexec",
+                    "gnu" + relsymlink.parts[1],
+                    *relsymlink.parts[2:],
+                )
+
+            else:
+                dest = Path(
+                    "libexec",
+                    "gnu" + relsymlink.parts[0],
+                    *relsymlink.parts[1:],
+                )
+
+            dest = HOMEBREW_PREFIX / dest.parent / name
+            from os.path import relpath
+
+            src = Path(relpath(src, dest.parent))
+
+            debug("  SRC:", src)
+            debug("  DST:", dest)
+            try:
+                oldsrc = readlink(dest)
+            except FileNotFoundError:
+                mkdirp(dest.parent)
+            else:
+                if oldsrc == src:
+                    continue
+                else:
+                    dest.unlink()
+            dest.symlink_to(src)
+    info("DONE")
 
 
-find "$HOMEBREW_PREFIX/opt" -follow -type f |
-  xargs -tr ln -sfn -t "$dest/"
-
-dest="$(gnu man)"
-mkdir -p "$dest"
-MANPATH="$dest:${MANPATH:-}"
-
-find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern man)" |
-  sed -r "s@$HOMEBREW_PREFIX/[^/]+@$dest@" |
-  xargs -tr ls -ld
-
-exit 0
-  xargs -tr dirname |
-  xargs -trn1 basename |
-  sort -u |
-  xargs -tr -I{} mkdir -p "$dest/{}"
-
-find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern man)" |
-    for mandir in "$HOMEBREW_PREFIX"/opt/*/libexec/gnuman/*; do
-      section="$(basename "$mandir")"
-      ln -sfn "$mandir"/* "$dest/$section"
-    done
-fi
-
-dest="$(gnu info)"
-mkdir -p "$dest"
-INFOPATH="$dest:${INFOPATH:-}"
-find "$HOMEBREW_PREFIX/opt" -follow -path "$(pattern info)" -print |
-  xargs -tr ln -sfn -t "$dest/"
-
-echo "done"
-
-"""
+if __name__ == "__main__":
+    raise SystemExit(main())

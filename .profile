@@ -1,10 +1,17 @@
-# ~/.profile: executed by the command interpreter for login shells.
-. ~/.sh_basics
+# ~/.profile: executed for all login shells.
+# shellcheck disable=SC2006  # allow backticks for hecka-ancient shells
+home=`sh -c 'unset HOME; echo ~'`
+if [ -d "$home" ]; then
+  export HOME="$home"
+fi
 
 # If not running interactively, don't do anything
 case $- in
-    *i*) ;;
-      *) return;;
+*i*) ;;
+*)
+  . "$HOME"/.sh_plugins.d/basics.sh
+  return
+  ;;
 esac
 
 # for preferred_shell in /usr/bin/zsh /bin/zsh; do
@@ -14,13 +21,16 @@ esac
 # done
 
 # General shell environment, shared by zsh
-. ~/.sh_env
+. "$HOME"/.sh_env
 
 # if running bash
 if [ -n "${BASH_VERSION:-}" ]; then
-    . "$HOME/.bashrc"
+  . "$HOME"/.bashrc
 elif [ "$ZSH_VERSION" ]; then
-    : zsh will source .zshrc
+  : zsh will source .zshrc
 else
-    . "$HOME/.sh_rc"
+  . "$HOME"/.sh_rc
 fi
+# It is assumed that pyenv is installed via Brew, so this is all we need to do.
+eval "$(pyenv init --path)"
+eval "$(/opt/homebrew/bin/brew shellenv)"

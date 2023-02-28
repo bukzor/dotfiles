@@ -1,0 +1,3 @@
+#!/bin/sh
+# shim for https://graphviz.org/docs/layouts/nop2/
+exec neato -n2 "$@"

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if ! [[ $# -eq 3 ]]; then
+  cat <<EOF
+usage: $0 REMOTE BASE LOCAL
+       $0 OURS BASE THEIRS
+       $0 MYFILE OLDFILE YOURFILE
+EOF
+
+git merge-file -p --diff3 "$1" "$2" "$3"

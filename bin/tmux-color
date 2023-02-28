@@ -5,17 +5,34 @@ if [[ $1 ]]; then
 
   if [[ $2 ]]; then
       FG="$2"
+  elif [[ "$BG" -le 15 ]]; then
+      FG="bg"
   else
-      FG=white
+      FG="terminal"
   fi
 
-  set -x
   # numbers must be prefixed with 'colour'
   case "$BG" in [0-9]*) BG=colour"$BG"; esac
   case "$FG" in [0-9]*) FG=colour"$FG"; esac
 
+  if [[ "$FG" = "bg" || "$BG" = "fg" ]]; then
+    style=reverse,bold
+    tmp_bg="$BG"
+    BG="$FG"
+    FG="$tmp_bg"
+  else
+    style=bold
+  fi
+
+  if [[ "$BG" = "bg" ]]; then
+    BG=terminal
+  fi
+  if [[ "$FG" = "fg" ]]; then
+    FG=terminal
+  fi
+
   set -x
-  tmux -q set -s status-style "fg=$FG,bold,bg=$BG"
+  tmux -q set -s status-style "$style,fg=$FG,bg=$BG"
 else
   # no arguments, show current value
   set -x

@@ -1,0 +1,10 @@
+# when in doubt, treat sourced files as file-relative
+source-path=SCRIPTDIR
+
+
+# I'll use printf when I want format handling
+disable=SC2028
+# I know that hard-quotes print $ literally...
+disable=SC2016
+# I like sed and dislike ${//}
+disable=SC2001

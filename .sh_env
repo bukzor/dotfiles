@@ -6,7 +6,7 @@
 # basics are already handled in .(z)profile, for noninteractive shells
 
 # ensure access to private dotfiles
-. ~/.sh_lib/functions.d/has.sh
+. "$HOME"/.sh_lib/functions.d/has.sh
 if has private-dotfiles-check && ! private-dotfiles-check; then
   private-dotfiles-mount
 fi
@@ -19,49 +19,64 @@ else
   PATH="$__orig_PATH"
 fi
 
+# note: "MACHTYPE" is the compile-time CPU architecture
+export CPUTYPE OSTYPE
+CPUTYPE="$(uname -m)"
+OSTYPE="$(uname -sr | tr -d ' ' | tr '[:upper:]' '[:lower:]' | sed 's/\..*//')"
+
 # extra shell environment for work
-. ~/.sh_lib/functions.d/trysource.sh
+. "$HOME"/.sh_lib/functions.d/trysource.sh
 trysource ~/private-dotfiles/.sh_env
+
+export HOMEBREW
+HOMEBREW="$(command -v brew)"
+export HOMEBREW_VERBOSE=1
+export HOMEBREW_DEVELOPER=1
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
+# this makes brew-desc not complain:
+export HOMEBREW_EVAL_ALL=1
+
+if echo "$OSTYPE" | grep -q '^darwin'; then
+  # override crappy macos userspace with homebrew "gnubin"
+  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$HOMEBREW_PREFIX/libexec/gnubin:$PATH"
+  export MANPATH="$HOMEBREW_PREFIX/share/man:$HOMEBREW_PREFIX/libexec/gnuman:$MANPATH"
+  export INFOPATH="$HOMEBREW_PREFIX/share/info:$HOMEBREW_PREFIX/libexec/gnuinfo:$INFOPATH"
+else # linux
+  # append homebrew -- prepending caused too many issues
+  # instead of: eval "$("$HOMEBREW" shellenv)"
+  export PATH="${PATH+$PATH:}$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
+  export MANPATH="${MANPATH+$MANPATH:}$HOMEBREW_PREFIX/share/man:"
+  export INFOPATH="${INFOPATH+$INFOPATH:}$HOMEBREW_PREFIX/share/info:"
+fi
+
+warn() { echo "[1;33mWARNING: [22m$*[0m" >&2; }
+abspath() { (cd "$1" && pwd); } # absolute, but avoid dereferencing symlinks
+if has nproc; then
+  export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
+else
+  warn "please brew install coreutils"
+fi
 
 # set PATH so it includes user's personal bin if it exists (or is created)
 export PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
 export GOPATH=~/prefix/gopath
 export GDK_SCALE=2
-
-export HOMEBREW="$(command -v brew)"
-export HOMEBREW_VERBOSE=1
-export HOMEBREW_DEVELOPER=1
-export HOMEBREW_PREFIX="/opt/homebrew";
-export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar";
-export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX";
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 export CLOUDSDK_ROOT_DIR="$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk"
 export CLOUDSDK_PYTHON_PREFIX="$CLOUDSDK_ROOT_DIR/latest/google-cloud-sdk/platform/bundledpythonunix"
 export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
 export CLOUDSDK_PYTHON_SITEPACKAGES=1
+export USE_GKE_GCLOUD_AUTH_PLUGIN=1
 
-homebrew-handle-gnubin
-if echo "$OSTYPE" | grep -q '^darwin'; then
-  # override crappy macos userspace with homebrew "gnubin"
-  export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$HOMEBREW_PREFIX/libexec/gnubin:$PATH";
-  export MANPATH="$HOMEBREW_PREFIX/share/man:$HOMEBREW_PREFIX/libexec/gnuman:$MANPATH";
-  export INFOPATH="$HOMEBREW_PREFIX/share/info:$HOMEBREW_PREFIX/libexec/gnuinfo:$INFOPATH";
-else # linux
-  # append homebrew -- prepending caused too many issues
-  # instead of: eval "$("$HOMEBREW" shellenv)"
-  export PATH="${PATH+$PATH:}$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
-  export MANPATH="${MANPATH+$MANPATH:}$HOMEBREW_PREFIX/share/man:";
-  export INFOPATH="${INFOPATH+$INFOPATH:}$HOMEBREW_PREFIX/share/info:";
-fi
+# https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+export SENTRY_INSTRUMENTATION=1
+export SENTRY_POST_MERGE_AUTO_UPDATE=1
+export SENTRY_SPA_DSN=https://863de587a34a48c4a4ef1a9238fdb0b1@o19635.ingest.sentry.io/5270453
 
-if has nproc; then
-  export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
-else
-  echo "please brew install coreutils" >&2
-fi
-
-. ~/.sh_lib/functions.d/bootstamp.sh
+. "$HOME"/.sh_lib/functions.d/bootstamp.sh
 export BOOT
 BOOT=$(bootstamp)
 
@@ -73,8 +88,10 @@ export EDITOR=vim
 export VISUAL=$EDITOR
 export GIT_EDITOR=$EDITOR
 export P4DIFFOPTS="-u --color"
-export P4DIFF="~/bin/p4-difftool"
+export P4DIFF=~/bin/p4-difftool
 export PYTHONSTARTUP=~/.pythonrc.py
+export EMAIL
+EMAIL="$(git config user.email)"
 
 if [ -z "$LANG" ]; then
   export LANG='en_US.UTF-8'
@@ -107,38 +124,45 @@ psget() {
 
 # fix up TERM values
 # get the session-leader's parent
-terminal="$(psget ppid "$(psget sess $$)")"
-if [ "$?" -ne 0 -o -z "$terminal" ]; then
+
+if ! terminal="$(psget ppid "$(psget sess $$)")" || [ -z "$terminal" ]; then
   : refuse the tempation to guess what went wrong
 elif [ "$terminal" -gt 0 ]; then
   #use the basename of its arg[0]
-  terminal="$(basename "$(head -zn1 /proc/$terminal/cmdline | tr -d '\0')")"
+  terminal="$(basename "$(head -zn1 "/proc/$terminal/cmdline" | tr -d '\0')")"
 else
   # if our session-leader doesn't have a real parent (pid:0) then we're running as init
   terminal=init
 fi
 case "$terminal" in
-lxterminal|gnome-terminal|xfce4-terminal)
+lxterminal | gnome-terminal | xfce4-terminal)
   export TERM=xterm-256color
   ;;
-tmux|"tmux: server")
+tmux | "tmux: server")
   export TERM=screen-256color
   ;;
 init)
   if [ "$TERM" != "linux" ]; then
-    echo 'Warning, unknown terminal: "'"$terminal"'" (TERM='"$TERM)" >&2
+    warn 'unknown terminal: "'"$terminal"'" (TERM='"$TERM)"
+  fi
+  ;;
+'')
+  if ! [ "$TERM" ]; then
+    export TERM=xterm-256color
+    warn '$TERM unset. Guessing: TERM='"$TERM"
   fi
   ;;
 *)
   if ! echo "$OSTYPE" | grep -q '^darwin' &&
-     ! echo "$TERM" | grep -Eq '^(xterm|screen)-256color$'; then
-    echo 'Warning, unknown terminal: "'"$terminal"'" (TERM='"$TERM)" >&2
+    ! echo "$TERM" | grep -Eq '^(xterm|screen)-256color$'; then
+    warn 'unknown terminal: "'"$terminal"'" (TERM='"$TERM)"
   fi
   ;;
 esac
 
 # Further environment
-export PREFIX="$(cd "$HOME/../.."; pwd)"
+export PREFIX
+PREFIX="$(abspath "$HOME/../..")"
 export GEM_HOME=~/prefix/rubygems
 export REPO=$HOME/repo
 
@@ -148,24 +172,24 @@ if infocmp -1GLx | grep -Eq '^\s*(Tc|set_a_foreground|setrgbf)[=,]'; then
   export CLICOLOR=1
   export COLORTERM=1
 fi
+export TERM_ITALICS=1
 
 # My very own python!
-activate() { trysource ~/venv/$USER-venv/bin/activate; }
+activate() { trysource ~/venv/"$USER"-venv/bin/activate; }
 activate
 
 export TMPDIR
 # NB: macos date(1) doesn't support -I nor -Id
 date="$(date -Idate)"
 for TMPDIR in \
-    "$TMPDIR" \
-    "$PREFIX/tmp/$USER/$BOOT/$date" \
-    "/tmp/$USER/$BOOT/$date" \
-    "/tmp" \
-    "$HOME/tmp/$BOOT/$date" \
-    "$HOME/tmp" \
-; do
+  "$TMPDIR" \
+  "$PREFIX/tmp/$USER/$BOOT/$date" \
+  "/tmp/$USER/$BOOT/$date" \
+  "/tmp" \
+  "$HOME/tmp/$BOOT/$date" \
+  "$HOME/tmp"; do
   if [ "$TMPDIR" ]; then
-    mkdir -p -m 700 "$TMPDIR" 2>/dev/null
+    mkdir -p "$TMPDIR" 2>/dev/null
     chmod -f 700 "$TMPDIR"
     if [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
       break
@@ -174,15 +198,14 @@ for TMPDIR in \
 done
 unset date
 
-warn() { echo "[1;33mWARNING: [22m$@[0m"; }
 if [ "$TMPDIR" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
-  TMPDIR="$(cd $TMPDIR; pwd)"
+  TMPDIR="$(abspath "$TMPDIR")"
 else
   unset TMPDIR
-  warn 'No writable TMPDIR!' >&2
+  warn 'No writable TMPDIR!'
 fi
 
-. ~/.sh_plugins.d/xdg.sh
+. "$HOME"/.sh_plugins.d/xdg.sh
 
 export PYENV_ROOT="$XDG_CACHE_HOME/pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
@@ -195,5 +218,7 @@ trysource ~/.travis/travis.sh
 if has aactivator; then
   eval "$(aactivator init)"
 fi
+
+trysource "$HOMEBREW_PREFIX/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
 
 # vim:et:sw=2:sts=2:

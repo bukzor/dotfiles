@@ -25,8 +25,13 @@
 " sent to the terminal.
 let g:max_osc52_sequence=100000
 
+function! g:SendClipboardViaOSC52 (lines, regtype)
+    return g:SendViaOSC52(join(a:lines, "\n"))
+endfunction
+
 " Send a string to the terminal's clipboard using the OSC 52 sequence.
 function! g:SendViaOSC52 (str)
+  echom "OSC52: sent"
   let len = strlen(a:str)
   if len > g:max_osc52_sequence
     echo "Selection too long to send to terminal: " . len

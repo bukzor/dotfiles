@@ -2,14 +2,14 @@
 
 sed -r '
 # Remove ANSI escapes.
-s/\c[[^[:alpha:]]*[[:alpha:]]//g
+s/[^[:alpha:]]*[[:alpha:]]//g
 
 # Remove CRLF endings.
-s/\cM+$//g
+s/M+$//g
 
 # Take care of backspaces:
-s/^\cH+//
+s/^H+//
 : while
-s/[^\cH]\cH//g
+s/[^H]H//g
 t while
 '
