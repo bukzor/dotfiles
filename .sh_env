@@ -22,7 +22,7 @@ fi
 # note: "MACHTYPE" is the compile-time CPU architecture
 export CPUTYPE OSTYPE
 CPUTYPE="$(uname -m)"
-OSTYPE="$(uname -sr | tr -d ' ' | tr '[:upper:]' '[:lower:]' | sed 's/\..*//')"
+OSTYPE="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 # extra shell environment for work
 . "$HOME"/.sh_lib/functions.d/trysource.sh

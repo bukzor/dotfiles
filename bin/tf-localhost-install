@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+
+tf_localhost="$HOME/prefix/tf-localhost"
+
+HOSTNAME=localhost
+NAMESPACE="$(git remote get-url origin | xargs dirname | xargs basename)"
+TYPE="$(git remote get-url origin | xargs basename --suffix=.git)"
+TYPE="$(sed 's/^terraform-provider-//' <<< "$TYPE")"
+
+VERSION="$(git tag --contains HEAD)"
+if ! [[ "$VERSION" ]]; then
+    VERSION="$(git tag -l --merged HEAD --sort '-version:refname' | head -n1)-dirty"
+fi
+# invalid version "v0.0.2": a "v" prefix should not be used
+VERSION="$(sed 's/^v//' <<< "$VERSION")"
+
+OSTYPE="$(uname -s | tr '[:upper:]' '[:lower:]')"
+CPUTYPE="$(uname -m)"
+TARGET="${OSTYPE}_$CPUTYPE"
+
+tmp="$(mktemp -d)"
+# https://developer.hashicorp.com/terraform/cli/config/config-file#filesystem_mirror
+dst="$tf_localhost/$HOSTNAME/$NAMESPACE/$TYPE/$VERSION/$TARGET"
+mkdir -p "$dst"
+
+set -x
+GOBIN="$tmp" go install
+mv "$tmp"/* -t "$dst"
+rmdir "$tmp"
