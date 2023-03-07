@@ -1,6 +1,6 @@
-#!/bin/sh
-set -e
-branch=$(git branch-name)
-remote=$(git config "branch.$branch.remote")
-merge=$(git config "branch.$branch.merge"|sed s@^refs/heads/@@)
-echo "$remote/$merge"
+#!/bin/bash
+set -euo pipefail
+remote=$(git-remote-upstream)
+
+set -x
+git symbolic-ref --short refs/remotes/"$remote"/HEAD

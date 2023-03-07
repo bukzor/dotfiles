@@ -53,15 +53,14 @@
     detachedHead = false
 [alias]
     ff = !sh -exc 'git pull --ff "$@"' -
-    master = !sh -exc 'git fetch origin && git checkout origin/master -B master'
-    main   = !sh -exc 'git fetch origin && git checkout origin/main   -B main'
     branch-name = symbolic-ref -q --short HEAD
-  base = !echo sh -exc 'git merge-base "$$(git upstream)" HEAD'
+    tag-name = !sh -exc 'git tag -l --points-at ${1:-HEAD}' -
+    base = !sh -exc 'git merge-base "$(git upstream)" ${1:-HEAD}' -
     diffbase = !git dt $(git base)
     lol = log --oneline --graph --decorate --color=always --pretty=format:\"%C(auto)%h %C(bold blue)%aL %Cgreen(%cr)%C(auto)%d%Creset %s\"
     l = lol
     xl = lol --all
-    branch1 = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git remote update && git branch "$b" "$@" origin/master && git checkout "$b"' -
+    feature = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git master && git checkout -b "$b" "$@"' -
     vimdiff = difftool
     dt = difftool
     d = diff
