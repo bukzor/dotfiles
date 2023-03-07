@@ -1,3 +1,0 @@
-typeset -g -A key
-
-autoload zkbd && zkbd  # redo incomplete mapping

@@ -1,8 +1,0 @@
-typeset -g -A key
-
-key[F1]='^[OP'
-key[F2]='^[OQ'
-key[F3]='^[OR'
-key[F4]='^[OS'
-key[F5]='^[[15~'
-key[F6]='^[[17~'
