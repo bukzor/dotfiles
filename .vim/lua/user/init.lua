@@ -51,7 +51,7 @@ local config = {
 		opt = {
 			-- set to true or false etc.
 			spell = false, -- sets vim.opt.spell
-			-- basic display options {
+			-- basic display options
 			number = true, -- show line numbers
 			relativenumber = false, -- show *absolute* line numbers
 			signcolumn = "auto", -- only show lint column on fail
@@ -273,53 +273,17 @@ local config = {
 			-- autoconfiguration via https://editorconfig.org/
 			["editorconfig/editorconfig-vim"] = {},
 			-- debugging for nvim lua
-			["jbyuki/one-small-step-for-vimkind"] = {},
+			["jbyuki/one-small-step-for-vimkind"] = {
+				requires = { "nvim-dap" },
+				module = "osv",
+			},
 			-- the One True Colorscheme
 			["morhetz/gruvbox"] = {},
 			-- sensible behavior for zoom (AKA ctrl-w_o, AKA :only)
 			["troydm/zoomwintab.vim"] = {},
+
 			-- movements integrated with treesitter
-			--
-			["nvim-treesitter/nvim-treesitter-textobjects"] = {
-				config = function()
-					require("nvim-treesitter.configs").setup({
-						textobjects = {
-							select = {
-								enable = true,
-								-- Automatically jump forward to textobj, similar to targets.vim
-								lookahead = true,
-								keymaps = {
-									-- You can use the capture groups defined in textobjects.scm
-									["af"] = "@function.outer",
-									["if"] = "@function.inner",
-									["ac"] = "@class.outer",
-									["ic"] = "@class.inner",
-								},
-							},
-							move = {
-								enable = true,
-								set_jumps = true,
-								goto_next_start = {
-									["]m"] = "@function.outer",
-									["]]"] = "@class.outer",
-								},
-								goto_next_end = {
-									["]M"] = "@function.outer",
-									["]["] = "@class.outer",
-								},
-								goto_previous_start = {
-									["[m"] = "@function.outer",
-									["[["] = "@class.outer",
-								},
-								goto_previous_end = {
-									["[M"] = "@function.outer",
-									["[]"] = "@class.outer",
-								},
-							},
-						},
-					})
-				end,
-			},
+			["nvim-treesitter/nvim-treesitter-textobjects"] = { after = "nvim-treesitter" },
 
 			-- We also support a key value style plugin definition similar to NvChad:
 			-- ["ray-x/lsp_signature.nvim"] = {
@@ -405,6 +369,49 @@ local config = {
 		-- },
 		treesitter = { -- overrides `require("treesitter").setup(...)`
 			ensure_installed = { "python", "lua", "terraform", "vim" },
+			indent = { enable = true, disable = { "python" } },
+			rainbow = {
+				enable = true,
+				disable = {}, -- list of languages you want to disable the plugin for
+				extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+				max_file_lines = 99999, -- Do not enable for files with more than n lines, int
+				-- colors = {}, -- table of hex strings
+				-- termcolors = {} -- table of colour name strings
+			},
+			textobjects = {
+				select = {
+					enable = true,
+					-- Automatically jump forward to textobj, similar to targets.vim
+					lookahead = true,
+					keymaps = {
+						-- You can use the capture groups defined in textobjects.scm
+						["af"] = "@function.outer",
+						["if"] = "@function.inner",
+						["ac"] = "@class.outer",
+						["ic"] = "@class.inner",
+					},
+				},
+				move = {
+					enable = true,
+					set_jumps = true,
+					goto_next_start = {
+						["]m"] = "@function.outer",
+						["]]"] = "@class.outer",
+					},
+					goto_next_end = {
+						["]M"] = "@function.outer",
+						["]["] = "@class.outer",
+					},
+					goto_previous_start = {
+						["[m"] = "@function.outer",
+						["[["] = "@class.outer",
+					},
+					goto_previous_end = {
+						["[M"] = "@function.outer",
+						["[]"] = "@class.outer",
+					},
+				},
+			},
 		},
 		-- use mason-lspconfig to configure LSP installations
 		["mason-lspconfig"] = { -- overrides `require("mason-lspconfig").setup(...)`
@@ -546,6 +553,7 @@ local config = {
 				proto = "proto",
 				hcl = "terraform",
 				tfvars = "terraform",
+				jq = "jq",
 			},
 			filename = {
 				[".envrc"] = "bash",
