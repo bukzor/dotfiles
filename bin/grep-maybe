@@ -9,9 +9,9 @@ set -e
 trap 'echo ERROR: $?' ERR
 
 if [ $status -eq 1 ] || [ $status -eq 0 ]; then
-  # No matches is okay, actually.
-  exit 0
+    # No matches is okay, actually.
+    exit 0
 else
-  echo 'STATUS:' $status
-  exit $status
+    echo 'STATUS:' $status
+    exit $status
 fi

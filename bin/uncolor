@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env sed -uf
 
-sed -r '
+# NOTE: \x1b is the ANSI escape code
 # Remove ANSI escapes.
-s/[^[:alpha:]]*[[:alpha:]]//g
+s/\x1b[^[:alpha:]]*[[:alpha:]]//g
 
 # Remove CRLF endings.
-s/M+$//g
+s/\x1bM+$//g
 
+# NOTE: \x08 is the ANSI backspace code
 # Take care of backspaces:
-s/^H+//
 : while
-s/[^H]H//g
+s/^\x08+//
+s/[^\x08]\x08//g
 t while
-'
