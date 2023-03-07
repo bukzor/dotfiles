@@ -1,0 +1,17 @@
+#!/usr/bin/env -S jq -f
+
+. as $role
+| $role.includedPermissions as $perms
+| select(
+  $perms
+  | map(
+    IN("resourcemanager.folders.getIamPolicy")
+  )
+  | all
+)
+| select(
+  .includedPermissions
+  | map(test("\\.set"))
+  | any
+  | not
+)
