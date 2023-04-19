@@ -1,0 +1,39 @@
+#!/bin/bash
+set -euo pipefail
+
+set -x
+
+my_org="$(gcloud organizations list --format=json | jq '.[].name' -r)"
+
+rm org-policy.json -f
+gcloud organizations get-iam-policy "$my_org" --format=json > org-policy.json
+
+rm *.project-policy.json -f
+gcloud projects list --format=json | json-to-jq  > projects.list.json
+< projects.list.json jq .projectId -r |
+  xargs -P20 -rn1 sh -ec '
+    project="$1"
+    set -x
+    gcloud projects get-iam-policy "$project" --format=json > "$project".project-policy.json
+  ' -
+
+rm -rf folders/
+mkdir folders/
+./get-folders "$my_org"
+
+< projects.list.json jq .projectId -r |
+  xargs -P20 -rn1 sh -ec '
+    project="$1"
+    set -x
+    gcloud projects get-iam-policy "$project" --format=json > "$project".project-policy.json
+  ' -
+
+cat folders/*.json |
+  jq .name -r |
+  sed 's@^folders/@@' |
+  xargs -P20 -rn1 sh -ec '
+    folder="$1"
+    set -x
+    gcloud resource-manager folders get-iam-policy "$folder" --format=json \
+      > "$folder".folder-policy.json
+  ' -

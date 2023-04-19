@@ -1,0 +1,3 @@
+# If you want all your transfers to default to comparing nanoseconds, you can create a ~/.popt file and put these lines in it:
+rsync alias -a -a@-1
+rsync alias -t -t@-1

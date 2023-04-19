@@ -23,9 +23,9 @@ reset() {
 }
 
 login() {
-  . ~/.profile
+  . "$HOME/.profile"
   if [ "$ZSH_VERSION" ]; then
-    . ~/.zshrc
+    . "$HOME/.zshrc"
   fi
 }
 
@@ -33,13 +33,17 @@ silent(){
   "$@" >/dev/null 2>&1
 }
 noisy(){
-  echo "+$@" >&2
+  echo "+$*" >&2
   "$@"
 }
 
 # enable color support of ls and also add handy aliases
 if has dircolors; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    if test -r ~/.dircolors; then
+        eval "$(dircolors -b ~/.dircolors)"
+    else
+        eval "$(dircolors -b)"
+    fi
     alias ls='ls --color=auto'
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
@@ -74,7 +78,7 @@ alias .......='noisy cd ../../../../../..'
 
 # http://superuser.com/a/599156/50425
 title() {
-    echo -n "]0;"$*""
+    echo -n "]0;$*"
 }
 
 alert() {
@@ -89,17 +93,17 @@ tmux_env() {
   local var=$XDG_RUNTIME_DIR/tmux-env
   local old=$var/old.$$
   local new=$var/new
-  tmux show-env -s > $new
-  if test -e $old && cmp -s $old $new; then
+  tmux show-env -s > "$new"
+  if test -e "$old" && cmp -s "$old" "$new"; then
     :
   else
-    mv $new $old
-    . $old
+    mv "$new" "$old"
+    . "$old"
   fi
 }
 # } aliases and functions
 
-if [ "$COLORTERM" ]; then
+if [[ "$COLORTERM" ]]; then
   # set a fancy prompt
   ansi_color() {
     # terminfo will decide whether TERM is color capable
@@ -107,7 +111,7 @@ if [ "$COLORTERM" ]; then
   }
   RESET="$(tput sgr0)"
 else
-  alias ansi_color=true
+  ansi_color() { :; }
   RESET=""
 fi
    RED="$(ansi_color 1)"
@@ -164,9 +168,9 @@ unset esc
 export PS1
 
 # extra shell settings for work
-. ~/.sh_lib/functions.d/trysource.sh
+. "$HOME/.sh_lib/functions.d/trysource.sh"
 trysource ~/private-dotfiles/.sh_rc
-. ~/.sh_advanced_rc
+. "$HOME/.sh_advanced_rc"
 
 echo "==> $HOME/TODO.md <=="
 cat "$HOME/TODO.md"

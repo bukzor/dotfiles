@@ -1,6 +1,3 @@
-[submodule ".vim/AstroNvim"]
-	path = .local/share/astronvim
-	url = https://github.com/AstroNvim/AstroNvim
 [submodule "scratch"]
 	path = scratch
 	url = git@github.com:bukzor/scratch.git
@@ -10,6 +7,3 @@
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
 	url = git@github.com:bukzor-sentryio/kitty-gruvbox-theme.git
-[submodule ".vim/pack/plugins/start/vim-pathogen"]
-	path = .vim/pack/plugins/start/pathogen
-	url = https://github.com/tpope/vim-pathogen

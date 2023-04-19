@@ -1,15 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
-
-PS4=$'\n$ '
-has() {
-  command -v "$1" > /dev/null
-}
-show() {
-  set -x
-  "$@"
-  { set  +x } 2> /dev/null
-}
+. ~/.sh_lib/minimal.sh
+minimal_init
 
 case $# in
   0)

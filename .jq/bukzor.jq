@@ -1,3 +1,18 @@
+def objmap(f):
+    [to_entries[] | f];
+
+def count_by(s):
+    reduce .[] as $x ({}; .[$x | s | tostring] += 1);
+
+def count:
+    count_by(.);
+
+def invert:
+    objmap([.value, .key]);
+
+def histogram:
+    count | invert | sort_by(-.[0]) | map(join(" "))[];
+
 def sh_quote:
   tostring
   | if . | test("^[a-zA-Z_0-9-]*$")

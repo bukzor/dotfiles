@@ -1,0 +1,13 @@
+#!/usr/bin/env jq -f
+# given a terraform plan json, 
+
+def tf_modules:
+    (.child_modules[]? | tf_modules)
+  , . | del(.child_modules)
+;
+
+  .prior_state.values.root_module
+| tf_modules
+| .resources[]
+# throw away outdated values, to minimize confusion
+| { address, depends_on }

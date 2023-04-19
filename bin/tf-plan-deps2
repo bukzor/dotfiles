@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+
+
+def all_prior_modules(module):
+    module = module.copy()
+    child_modules = module.pop("child_modules", ())
+    yield module
+    for child_module in child_modules:
+        yield from all_prior_modules(child_module)
+
+
+def old_deps(plan):
+    if "prior_state" not in plan:
+        return
+
+    for module in all_prior_modules(plan["prior_state"]["values"]["root_module"]):
+        for resource in module["resources"]:
+            if "address" not in resource:
+                print("address!?:", resource)
+                continue
+            yield dict(
+                address=resource["address"], depends_on=resource.get("depends_on")
+            )
+
+
+def all_config_modules(module, module_path=()):
+    module = module.copy()
+    module_calls = module.pop("module_calls", {})
+    module["module_path"] = module_path
+    module["address"] = ".".join(f"module.{module}" for module in module_path)
+    yield module
+    for submodule_name, submodule in module_calls.items():
+        submodule_path = module_path + (submodule_name,)
+        yield from all_config_modules(submodule, submodule_path)
+
+
+def new_deps(plan):
+    root = plan["configuration"]["root_module"]
+    yield from all_config_modules(root)
+
+
+def tf_plan_deps(plan):
+    # yield from old_deps(plan)
+    yield from new_deps(plan)
+
+
+def main():
+    from sys import stdin, stdout
+    from json import load, dump
+
+    plan = load(stdin)
+    for dep in tf_plan_deps(plan):
+        dump(dep, stdout)
+        stdout.write("\n")
+        stdout.flush()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

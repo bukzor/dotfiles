@@ -4,6 +4,7 @@ umask 022
 
 time="$(date +%R)"
 graph="${1:-$time}".svg
+shift 1
 subpath="$(date +%F)"
 dir="${TMPDIR:-/tmp}/tf-graphs/$subpath"
 
@@ -16,40 +17,46 @@ PS4='[1;34m$[0m '
 set -ex
 mkdir --mode 755 -p "$dir"
 
-terraform graph -draw-cycles -type=apply > "$dir/$time.0.dot"
+terraform graph -draw-cycles "$@" > "$dir/$time.0.dot"
+if ! nop < "$dir/$time.0.dot" > /dev/null; then
+  cat "$dir/$time.0.dot" >&2
+  exit 1
+fi
 
-sed -r '
-    /^digraph \{/ {
-      p
-      i\
-      dpi=40\
-      rankdir="LR"\
-      # splines=false\
-      ranksep=-1\
-      # nodesep=-1\
+  # this sed "clean up" is optional, but makes the graph a lot more readable
+  sed -r '
+    # clean up messy notation:
+    s@\[root] @@g # meaningless
+    s/\t//g       # tabs! ick.
 
-      ;
-      d
-    }
-    # / meta\.count-boundary / d
-    # /\(close\)/ d
-    s@\.module\.@/@g
-    s@module\.@/@g
-    s@\[root\] @/@g
-    # /"provider\.null"/ d
-    # # FIXME: Auto-calculate uninteresting vars:
-    # /\.var\.(machine_type|max_node_count|huge|can_reboot|workload)"/ d
-    # s/([^ ].*) -> (.*)/\2 -> \1/
-    # #s/([^."]*--[^."]*)\./\1\\n/g
-    # s/\.((data|var|local|output)\.)/\\n\1/g
-  ' \
+    # separate module names by a temporary character, replaced by . later
+    s@\.module\.@\x1f@g
+    s@"module\.@"\x1f@g
+
+    # thats the default...
+    s@\\"registry.terraform.io/hashicorp/@\\"@g
+
+    # the first remaining . divides the module from its object
+    s@\x1f([^[".]*)\.@\x1f\1 @g
+
+    # separate submodules by dots, again
+    s@"\x1f@"@g
+    s@\x1f@.@g
+
+    s@ \(expand\)"@*"@g  # meaningless?
+  ' |
   < "$dir/$time.0.dot" \
   > "$dir/$time.1.dot" \
   ;
 
 tred < "$dir/$time.1.dot" |
-  dot |
-  neato -n1 |
+  dot \
+    -G'dpi=40' \
+    -G'rankdir=RL' \
+    -G'ranksep=0.3' \
+    -G'nodesep=0.3' \
+    -E'dir=back' \
+  |
   edgepaint \
   > "$dir/$time.2.dot" \
 ;

@@ -168,9 +168,15 @@ export REPO=$HOME/repo
 
 # ask terminfo whether we have a color terminal
 # tput is more appropriate for this but harder to use
-if infocmp -1GLx | grep -Eq '^\s*(Tc|set_a_foreground|setrgbf)[=,]'; then
+if infocmp -1GLx | grep -Eq '^\s*(Tc|setrgbf)[=,]'; then
+  export CLICOLOR=truecolor
+  export COLORTERM=truecolor
+elif infocmp -1GLx | grep -Eq '^\s*(set_a_foreground)[=,]'; then
   export CLICOLOR=1
   export COLORTERM=1
+else
+  unset CLICOLOR
+  unset COLORTERM
 fi
 export TERM_ITALICS=1
 

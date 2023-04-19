@@ -18,6 +18,13 @@ path_add() {
   set -x
 }
 
+keep_orig source_up_if_exists
+source_up_if_exists() {
+  { set +x; } 2>/dev/null
+  orig_source_up_if_exists "$@"
+  set -x
+}
+
 ## automatically look at parent .envrc, too:
 #keep_orig source_env
 #source_env() {

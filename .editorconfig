@@ -1,19 +1,18 @@
-# https://editorconfig.org/
+# EditorConfig is awesome: https://EditorConfig.org
+# https://prettier.io/docs/en/configuration.html#editorconfig
 
 # top-most EditorConfig file
 root = true
 
-# https://prettier.io/docs/en/configuration.html#editorconfig
 [*]
 charset = utf-8
 max_line_length = 80
 indent_style = space
-indent_size = 4
+indent_size = 2
 end_of_line = lf
 insert_final_newline = true
-
-[*.{tf,js}]
-indent_size = 2
+# otherwise it defaults to 2, derp
+tab_width = 8
 
 [Makefile*]
 indent_style = tab

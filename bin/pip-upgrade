@@ -1,0 +1,2 @@
+#!/bin/sh
+pip list --format json | jq '.[] | .["name"]' -r | xargs pip install --upgrade

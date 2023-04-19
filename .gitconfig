@@ -18,7 +18,8 @@
     # detect renames and copies by default
     renames = copy
     color-moved = zebra
-    relative = false  # break git-vimdiff otherwise
+    # relative = false  # break git-vimdiff otherwise
+    relative = true  # less useful otherwise
     # SADFACE: these don't work (yet?)
     find-renames = 0.1
     find-copies =  0.1
