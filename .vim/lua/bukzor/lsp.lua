@@ -2,20 +2,18 @@ local M = {}
 
 M.au_attach = "BukzorLspAttach"
 M.au_format = "BukzorLspFormat"
-M.au_other = "BukzorLspOther"
 
 function M.setup()
   vim.api.nvim_create_augroup(M.au_attach, { clear = true })
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
-  vim.api.nvim_create_augroup(M.au_other, { clear = true })
+  vim.api.nvim_create_augroup("END", { clear = true })
 
   M.setup_mason()
   M.setup_lspconfig()
   M.setup_mason_lspconfig()
   M.setup_null_ls()
-
-  vim.api.nvim_create_augroup("END", { clear = true })
 end
+
 function M.setup_mason()
   require("mason").setup({
     ui = {
@@ -30,10 +28,12 @@ end
 
 function M.setup_lspconfig()
   -- https://github.com/neovim/nvim-lspconfig/tree/master#suggested-configuration
-  vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
-  vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
-  vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
+  vim.keymap.set("n", "<leader>ll", vim.diagnostic.open_float)
+  vim.keymap.set("n", "[l", vim.diagnostic.goto_prev)
+  vim.keymap.set("n", "]l", vim.diagnostic.goto_next)
+  vim.keymap.set("n", "ge", vim.diagnostic.goto_next)
+  vim.keymap.set("n", "gE", vim.diagnostic.goto_prev)
+  vim.keymap.set("n", "<leader>lw", vim.diagnostic.setloclist)
 
   -- Use LspAttach autocommand to only map the following keys
   -- after the language server attaches to the current buffer
@@ -45,16 +45,23 @@ function M.setup_lspconfig()
 end
 
 function M.on_attach_lsp(ev)
+  --print("LSP EV:", ev)
   vim.api.nvim_clear_autocmds({ group = M.au_attach, buffer = ev.buf })
+
+  -- prevent jittery rendering by just always showing the sign column
+  vim.opt_local.signcolumn = "yes:1"
 
   -- Enable completion triggered by <c-x><c-o>
   vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+  vim.bo[ev.buf].tagfunc = "v:lua.vim.lsp.tagfunc"
+  vim.bo[ev.buf].formatexpr = ""
 
   -- Buffer local mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   local opts = { buffer = ev.buf }
-  vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+  vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+  vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
   vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
   vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
   vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
@@ -63,13 +70,36 @@ function M.on_attach_lsp(ev)
   vim.keymap.set("n", "<leader>wl", function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, opts)
-  vim.keymap.set("n", "<leader>D", vim.lsp.buf.type_definition, opts)
-  vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-  vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+  vim.keymap.set("n", "<leader>lR", vim.lsp.buf.rename, opts)
+  vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, opts)
   vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-  vim.keymap.set("n", "<leader>f", function()
-    vim.lsp.buf.format({ async = true })
-  end, opts)
+  vim.keymap.set("n", "gs", vim.lsp.buf.document_symbol, opts)
+  vim.keymap.set("n", "gs", vim.lsp.buf.document_symbol, opts)
+
+  ---TODO:
+  ---" Get current document diagnostics information.
+  ---nnoremap <Leader>li :LspDocumentDiagnostics<CR>
+  ---nnoremap <Leader>lS :LspStatus<CR>
+  ---nnoremap <Leader>lpd :LspPeekDefinition<CR>
+  ---nnoremap <Leader>lD :LspDeclaration<CR>
+  ---nnoremap <Leader>lpD :LspPeekDeclaration<CR>
+  ---nnoremap <Leader>lpi :LspPeekImplementation<CR>
+  ---" Go to the type definition of the word under the cursor, and open in the current window.
+  ---nnoremap <Leader>lt :LspTypeDefinition<CR>
+  ---nnoremap <Leader>lpt :LspPeekTypeDefinition<CR>
+  ---" View type hierarchy of the symbol under the cursor.
+  ---nnoremap <Leader>lT :LspTypeHierarchy<CR>
+  ---" Gets a list of possible commands that can be applied to a file so it can be fixed.
+  ---nnoremap <Leader>la :LspCodeAction<CR>
+  ---nnoremap <Leader>lr :LspReferences<CR>
+  ---augroup lsp_stuff
+  ---  autocmd!
+  ---  autocmd BufEnter,CursorHold,InsertLeave lua vim.lsp.codelens.refresh()
+  ---  autocmd CursorHold  lua vim.lsp.buf.document_highlight()
+  ---  autocmd CursorHoldI lua vim.lsp.buf.document_highlight()
+  ---  autocmd CursorMoved lua vim.lsp.buf.clear_references()
+  ---  autocmd User lsp_buffer_enabled call g:OnLspBufferEnabled()
+  ---augroup END
 end
 
 function M.setup_mason_lspconfig()
@@ -82,17 +112,6 @@ function M.setup_mason_lspconfig()
   })
 end
 
-function M.setup_null_ls_handler(source, types)
-  -- same as mason-null-ls.automatic_setup, but without memoize =.=
-  -- DELETEME: pending https://github.com/jay-babu/mason-null-ls.nvim/pull/62
-  local null_ls = require("null-ls")
-  if not null_ls.is_registered(source) then
-    vim.tbl_map(function(type)
-      null_ls.register(null_ls.builtins[type][source])
-    end, types)
-  end
-end
-
 function M.setup_null_ls()
   -- https://github.com/jay-babu/mason-null-ls.nvim#example-config
 
@@ -101,9 +120,8 @@ function M.setup_null_ls()
   require("mason-null-ls").setup({
     ensure_installed = { "stylua", "jq", "blackd-client", "pyright" },
     automatic_installation = true,
-    handlers = { M.setup_null_ls_handler },
-    -- once they unmemoize:
-    --handlers = { require("mason-null-ls").default_setup },
+    -- pending https://github.com/jay-babu/mason-null-ls.nvim/pull/64
+    handlers = { require("mason-null-ls").default_setup },
   })
 end
 

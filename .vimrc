@@ -1,30 +1,18 @@
-"""function! g:VimReset() abort
-"""  " get vim back to a blank-slate state, as if we just started
-"  set background=dark
-"""  highlight clear       " Uses the current value of 'background' to decide which default colors to use.
-"""  syntax clear          " The command also deletes the "b:current_syntax" variable
-"""  syntax on
-"""
-"""  """ if exists('lsp#disable')
-"""  """   call lsp#disable()
-"""  """   call lsp#enable()
-"""  """ endif
-"""endfunction  # VimReset
-"""command! VimReset call g:VimReset()
-
-messages clear
+function! g:VimReset() abort
+  " get vim back to a blank-slate state, as if we just started
+  messages clear
+  set background=dark
+  highlight clear       " Uses the current value of 'background' to decide which default colors to use.
+  syntax clear          " The command also deletes the 'b:current_syntax' variable
+  syntax on
+endfunction  # VimReset
+command! VimReset call g:VimReset()
+VimReset
 
 " plugins {
   call bukzor#plug#bootstrap()
   " https://github.com/junegunn/vim-plug#readme
   call plug#begin()
-    """ Plug 'prabirshrestha/vim-lsp'
-    """ Plug 'mattn/vim-lsp-settings'
-    """ " TBD: do we need/want ale?
-    """ Plug 'dense-analysis/ale'
-    """ Plug 'rhysd/vim-lsp-ale'
-
-
     " the only color scheme
     Plug 'morhetz/gruvbox'
 
@@ -44,7 +32,9 @@ messages clear
       Plug 'neovim/nvim-lspconfig'
 
       " https://github.com/jay-babu/mason-null-ls.nvim#vim-plug
-      Plug 'jose-elias-alvarez/null-ls.nvim'
+      " pending https://github.com/jose-elias-alvarez/null-ls.nvim/pull/1524
+      Plug 'bukzor-sentryio/null-ls.nvim', { 'branch': 'selene-cwd' }
+      "Plug 'jose-elias-alvarez/null-ls.nvim'
       Plug 'jay-babu/mason-null-ls.nvim'
 
       " implicit dep of null-ls
@@ -52,6 +42,12 @@ messages clear
     else
       " :CheckHealth like in nvim
       Plug 'rhysd/vim-healthcheck'
+
+      """ Plug 'prabirshrestha/vim-lsp'
+      """ Plug 'mattn/vim-lsp-settings'
+      """ " TBD: do we need/want ale?
+      """ Plug 'dense-analysis/ale'
+      """ Plug 'rhysd/vim-lsp-ale'
     end
 
     " migrated from pathogen
@@ -60,7 +56,7 @@ messages clear
     Plug 'will133/vim-dirdiff'
     Plug 'tpope/vim-sensible'
   call plug#end()
-  call bukzor#plug#sync()
+  call bukzor#plug#lazy_sync()
 " } plugins
 
 
@@ -298,27 +294,6 @@ augroup extra_filetypes
 augroup end
 " }
 
-" tkdiff-like bindings for vimdiff {
-    if &diff
-        "refresh the diff
-        nnoremap R :w\|set nodiff\|set diff<cr>
-        "quit, both panes
-        nnoremap q :qall<cr>
-
-        "show me the top of the "new" file
-        autocmd VimEnter * normal lgg
-    endif
-
-    " in case I start diff-mode while editting
-    "next diff
-    nnoremap gd ]cz.
-    "previous diff
-    nnoremap gD [cz.
-    set diffopt+=iwhiteall
-    silent! set diffopt+=hiddenoff
-    silent! set diffopt+=algorithm:patience
-" }
-
 " { Finger-savers:
     let mapleader = '\'
     " buffer delete
@@ -331,28 +306,6 @@ augroup end
     nnoremap <Leader>fp :<C-U>put =expand(v:count ? \"#\" . v:count : \"%\")<CR>
     " git add
     nnoremap <Leader>ga :!git add %<CR>
-" }
-
-" { from http://www.bestofvim.com/tip/diff-diff/
-    nnoremap <Leader>df :call DiffToggle()<CR>
-
-    function! DiffToggle() abort
-        if &diff
-            diffoff
-        else
-            diffthis
-        endif
-    :endfunction
-
-    nnoremap <Leader>dw :call DiffToggleWhitespace()<CR>
-
-    function! DiffToggleWhitespace() abort
-       if &diffopt =~ 'iwhiteall'
-         set diffopt-=iwhiteall
-       else
-         set diffopt+=iwhiteall
-       endif
-    :endfunction
 " }
 
 " Vim 8 Packages {
@@ -369,108 +322,12 @@ if has('nvim')
   lua require("bukzor.plugins").setup()
 endif
 
-""" " plugin ale-lsp {
-"""   let g:lsp_ale_auto_config_ale = v:true
-"""   let g:lsp_ale_auto_config_vim_lsp = v:true
-"""   let g:lsp_ale_auto_enable_linter = v:true
-"""   if exists('lsp#ale#enable') | call lsp#ale#enable() | endif
-""" " } ale-lsp
-""" 
-""" " plugin: ALE {
-"""   let g:ale_disable_lsp = 1
-"""   let g:ale_use_global_executables = 1
-"""   let g:ale_fix_on_save = 1
-"""   let g:ale_lint_on_save = 1
-"""   let g:ale_lint_delay = 2000
-"""   let g:ale_lint_on_enter = 0
-"""   let g:ale_lint_on_text_changed = 'always'
-"""   let g:ale_virtualenv_dir_names = []
-"""   let g:ale_fixers = {
-""" \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-""" \   'javascript': ['eslint'],
-""" \   'python': ['black'],
-""" \   'terraform': ['terraform'],
-""" \}
-"""   "let g:ale_echo_msg_format = '%s (%linter% %code%)1'
-"""   "let g:ale_loclist_msg_format = 'wtfbro2%code: %%s (%linter%)'
-"""   "let g:ale_lsp_show_message_format = 'wtfbro3%code: %%s (%linter%)'
-"""   "let g:ale_virtualtext_prefix = '%type%:'
-"""   let g:ale_completion_enabled = 1
-"""   let g:ale_completion_delay = 333
-"""   " Use ALE's function for omnicompletion.
-"""   set omnifunc=ale#completion#OmniFunc
-"""   imap <C-Space> <Plug>(ale_complete)
-""" 
-"""   """ " ALE automatic completion will interfere with default insert completion with
-"""   """ " `CTRL-N` and so on (|compl-vim|). You can write your own keybinds and a
-"""   """ " function in your |vimrc| file to force insert completion instead, like so: >
-"""   """ function! SmartInsertCompletion() abort
-"""   """   " Use the default CTRL-N in completion menus
-"""   """   if pumvisible()
-"""   """     return "\<C-n>"
-"""   """   endif
-"""   """   " Exit and re-enter insert mode, and use insert completion
-"""   """   return "\<C-c>a\<C-n>"
-"""   """ endfunction
-"""   """ inoremap <silent> <C-n> <C-R>=SmartInsertCompletion()<CR>
-""" 
-""" " } plugin: ALE
-
-""" " Use Ctrl-j/k to cycle through the suggestions.
-""" inoremap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
-""" inoremap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
-""" inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
-""" " Force refresh completion.
-""" imap <C-space> <Plug>(asyncomplete_force_refresh)
-
 function! g:OnLspBufferEnabled() abort
-    setlocal omnifunc=lsp#complete
-    setlocal signcolumn=yes
-    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
-    nmap <buffer> gd <plug>(lsp-definition)
-    nmap <buffer> gs <plug>(lsp-document-symbol-search)
-    nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
-    nmap <buffer> gr <plug>(lsp-references)
-    nmap <buffer> gi <plug>(lsp-implementation)
-    nmap <buffer> gt <plug>(lsp-type-definition)
-    nmap <buffer> <leader>lr <plug>(lsp-rename)
-    nmap <buffer> ge <plug>(lsp-next-diagnostic)
-    nmap <buffer> gE <plug>(lsp-previous-diagnostic)
-    nmap <buffer> K <plug>(lsp-hover)
-    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
-    nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
-
     """ let g:lsp_format_sync_timeout = 1000
     """ autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
 
     " refer to doc to add more commands
-    """ TODO:
-    """ " Get current document diagnostics information.
-    """ nnoremap <Leader>li :LspDocumentDiagnostics<CR>
-    """ nnoremap <Leader>lS :LspStatus<CR>
-    """ nnoremap <Leader>lpd :LspPeekDefinition<CR>
-    """ nnoremap <Leader>lD :LspDeclaration<CR>
-    """ nnoremap <Leader>lpD :LspPeekDeclaration<CR>
-    """ nnoremap <Leader>lpi :LspPeekImplementation<CR>
-    """ " Go to the type definition of the word under the cursor, and open in the current window.
-    """ nnoremap <Leader>lt :LspTypeDefinition<CR>
-    """ nnoremap <Leader>lpt :LspPeekTypeDefinition<CR>
-    """ " View type hierarchy of the symbol under the cursor.
-    """ nnoremap <Leader>lT :LspTypeHierarchy<CR>
-    """ " Gets a list of possible commands that can be applied to a file so it can be fixed.
-    """ nnoremap <Leader>la :LspCodeAction<CR>
-    """ nnoremap <Leader>lr :LspReferences<CR>
 endfunction
-""" augroup lsp_stuff
-"""   autocmd!
-"""   autocmd BufEnter,CursorHold,InsertLeave lua vim.lsp.codelens.refresh()
-"""   autocmd CursorHold  lua vim.lsp.buf.document_highlight()
-"""   autocmd CursorHoldI lua vim.lsp.buf.document_highlight()
-"""   autocmd CursorMoved lua vim.lsp.buf.clear_references()
-"""   autocmd User lsp_buffer_enabled call g:OnLspBufferEnabled()
-""" augroup END
-""" 
-""" 
 
 hi! link LspReference CursorColumn
 hi! link LspReferenceText Search

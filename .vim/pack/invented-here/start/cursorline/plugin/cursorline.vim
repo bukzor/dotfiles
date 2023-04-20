@@ -6,14 +6,14 @@ set cursorlineopt=number,screenline
 
 
 function! CursorLineEnter() abort
-  set cursorline cursorcolumn
+  setlocal cursorline cursorcolumn
 endfunction
 
 function! CursorLineLeave() abort
   if &cursorbind
-    set cursorline nocursorcolumn
+    setlocal cursorline nocursorcolumn
   else
-    set nocursorline nocursorcolumn
+    setlocal nocursorline nocursorcolumn
   endif
 endfunction
 

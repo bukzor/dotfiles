@@ -1,5 +1,5 @@
+" ensure that vim-plug is installed.
 function! bukzor#plug#bootstrap() abort
-  " Install vim-plug if not found
   runtime autoload/plug.vim
   if !exists('g:loaded_plug')
     silent !curl -fsSLo "$HOME"/.vim/autoload/plug.vim --create-dirs
@@ -7,15 +7,23 @@ function! bukzor#plug#bootstrap() abort
   endif
 endfunction
 
-" bring actually-installed plugins into sync with config
+" force all plugins into configured state, and build their help while we're at it
 function! bukzor#plug#sync() abort
-  call plug#helptags()
-  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
-    PlugInstall
-  endif
-
-  let installed = map(split(globpath(g:plug_home, "*/"), "\n"), 'fnamemodify(v:val, ":h:t")')
-  if len(filter(installed, "!has_key(g:plugs, v:val)"))
     PlugClean
+    PlugUpdate
+    call plug#helptags()
+endfunction
+command! PlugSync call bukzor#plug#sync()
+
+" list of installed plugins, according to the filesystem
+function! bukzor#plug#get_installed() abort
+  return map(split(globpath(g:plug_home, "*/"), "\n"), 'fnamemodify(v:val, ":h:t")')
+endfunction
+
+" sync plugins, but only if needed
+function! bukzor#plug#lazy_sync() abort
+  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+\ || len(filter(bukzor#plug#get_installed(), "!has_key(g:plugs, v:val)"))
+    PlugSync
   endif
 endfunction
