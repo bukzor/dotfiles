@@ -1,10 +1,12 @@
+local log = require("mason-core.log")
+
 local M = {}
 
-M.au_attach = "BukzorLspAttach"
 M.au_format = "BukzorLspFormat"
+M.lsp_attached = {}
+M.lsp_formatting = {}
 
 function M.setup()
-  vim.api.nvim_create_augroup(M.au_attach, { clear = true })
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
   vim.api.nvim_create_augroup("END", { clear = true })
 
@@ -16,6 +18,7 @@ end
 
 function M.setup_mason()
   require("mason").setup({
+    log_level = vim.log.levels.INFO,
     ui = {
       icons = {
         package_installed = "✓",
@@ -34,31 +37,24 @@ function M.setup_lspconfig()
   vim.keymap.set("n", "ge", vim.diagnostic.goto_next)
   vim.keymap.set("n", "gE", vim.diagnostic.goto_prev)
   vim.keymap.set("n", "<leader>lw", vim.diagnostic.setloclist)
-
-  -- Use LspAttach autocommand to only map the following keys
-  -- after the language server attaches to the current buffer
-  vim.api.nvim_create_autocmd("LspAttach", {
-    group = M.au_attach,
-    callback = M.on_attach_lsp,
-    desc = "lsp key bindings",
-  })
 end
 
-function M.on_attach_lsp(ev)
-  --print("LSP EV:", ev)
-  vim.api.nvim_clear_autocmds({ group = M.au_attach, buffer = ev.buf })
+function M.on_attach(client, bufnr)
+  log.fmt_debug("LSP EV: 1", client.name, bufnr)
+  M.autoformat(client, bufnr)
+  log.fmt_debug("LSP EV: 2", client.name, bufnr)
 
   -- prevent jittery rendering by just always showing the sign column
   vim.opt_local.signcolumn = "yes:1"
 
   -- Enable completion triggered by <c-x><c-o>
-  vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-  vim.bo[ev.buf].tagfunc = "v:lua.vim.lsp.tagfunc"
-  vim.bo[ev.buf].formatexpr = ""
+  vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+  vim.bo[bufnr].tagfunc = "v:lua.vim.lsp.tagfunc"
+  vim.bo[bufnr].formatexpr = ""
 
   -- Buffer local mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
-  local opts = { buffer = ev.buf }
+  local opts = { buffer = bufnr }
   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
   vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
   vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
@@ -105,28 +101,63 @@ end
 function M.setup_mason_lspconfig()
   local mason_lspconfig = require("mason-lspconfig")
   mason_lspconfig.setup()
-  mason_lspconfig.setup_handlers({
-    function(server_name) -- default handler (optional)
-      require("lspconfig")[server_name].setup({})
-    end,
+  mason_lspconfig.setup_handlers({ M.mason_lspconfig_handler })
+end
+
+function M.mason_lspconfig_handler(server_name) -- default handler (optional)
+  M.lsp_attached[server_name] = "lspconfig"
+  log.fmt_trace("lspconfig handler: %s", server_name)
+  require("lspconfig")[server_name].setup({
+    on_attach = M.on_attach,
   })
 end
 
 function M.setup_null_ls()
   -- https://github.com/jay-babu/mason-null-ls.nvim#example-config
-
   -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Formatting-on-save#code
-  require("null-ls").setup({ on_attach = M.on_attach_null_ls })
+  --require("null-ls").setup()
+  require("null-ls").setup({ on_attach = M.autoformat })
   require("mason-null-ls").setup({
     ensure_installed = { "stylua", "jq", "blackd-client", "pyright" },
     automatic_installation = true,
     -- pending https://github.com/jay-babu/mason-null-ls.nvim/pull/64
-    handlers = { require("mason-null-ls").default_setup },
+    handlers = { M.null_ls_handler },
   })
 end
 
-function M.on_attach_null_ls(client, bufnr)
+function M.null_ls_handler(source, types)
+  -- `types` is a list with "diagnostics" "formatting" etc.
+  local configured_by = M.lsp_attached[source]
+  if configured_by ~= nil then
+    log.fmt_trace(
+      "null-ls handler: %s already configured: %s",
+      source,
+      configured_by
+    )
+    return
+  end
+
+  -- initially copied from mason-null-ls.automatic_setup
+  local null_ls = require("null-ls")
+  vim.tbl_map(function(type)
+    local builtin = null_ls.builtins[type][source]
+    if builtin == nil then
+      log.fmt_trace("null-ls handler: unknown: %s %s", source, type)
+    else
+      null_ls.register(builtin)
+      M.lsp_attached[source] = "null-ls"
+      log.fmt_trace("null-ls handler: configured: %s %s", source, type)
+    end
+  end, types)
+end
+
+function M.autoformat(client, bufnr)
+  if M.lsp_formatting[bufnr] ~= nil then
+    log.fmt_trace("formatting: %s: %s (dup: %s)", bufnr, client.name, M.lsp_formatting[bufnr])
+  end
+
   if client.supports_method("textDocument/formatting") then
+
     vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
     vim.api.nvim_create_autocmd("BufWritePre", {
       group = M.au_format,
@@ -134,15 +165,20 @@ function M.on_attach_null_ls(client, bufnr)
       callback = function()
         vim.lsp.buf.format({ bufnr = bufnr })
       end,
-      desc = "null-ls format on save",
+      desc = "format on save: " .. client.name,
     })
+    M.lsp_formatting[bufnr] = client.name
+    log.fmt_trace("formatting: %s: %s ", bufnr, M.lsp_formatting[bufnr])
+  else
+    log.fmt_trace("formatting: no support: %s", client.name)
   end
 end
 
 function M.unload()
-  vim.api.nvim_del_augroup_by_name(M.au_attach)
   vim.api.nvim_del_augroup_by_name(M.au_format)
   require("null-ls.config").reset() -- otherwise it refuses to be configured
+  M.lsp_attached = {}
+  M.lsp_formatting = {}
 end
 
 return M
