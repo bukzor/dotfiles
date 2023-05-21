@@ -1,0 +1,2 @@
+#!/bin/sh
+brew search "$@" | sed '$d' | xargs brew desc

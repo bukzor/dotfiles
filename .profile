@@ -31,6 +31,3 @@ elif [ "$ZSH_VERSION" ]; then
 else
   . "$HOME"/.sh_rc
 fi
-# It is assumed that pyenv is installed via Brew, so this is all we need to do.
-eval "$(pyenv init --path)"
-eval "$(/opt/homebrew/bin/brew shellenv)"

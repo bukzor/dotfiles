@@ -16,6 +16,7 @@ swap/
 mason/
 site/pack/packer
 sessions/
+tree-sitters/
 
 telescope_history
 packer_compiled.lua

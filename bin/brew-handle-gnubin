@@ -67,12 +67,13 @@ def main():
 
     # find "$HOMEBREW_PREFIX/opt" -follow -mindepth 1 -maxdepth 1 -type d |
     packages = tuple(
-        sorted(
-            set(pkg.resolve() for pkg in HOMEBREW_PREFIX.glob("opt/[!.]*/"))
-        )
+        sorted(set(pkg.resolve() for pkg in HOMEBREW_PREFIX.glob("opt/[!.]*/")))
     )
     for package in packages:
         debug("PKG:", package)
+        if not package.is_dir():
+            debug("BAD LINK?:", package)
+            continue
         for symlink in cmd_lines(("find", package, "-type", "l")):
             symlink = Path(symlink)
             symdest = readlink(symlink)

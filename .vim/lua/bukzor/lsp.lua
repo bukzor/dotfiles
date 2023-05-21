@@ -118,7 +118,13 @@ function M.setup_null_ls()
   --require("null-ls").setup()
   require("null-ls").setup({ on_attach = M.autoformat })
   require("mason-null-ls").setup({
-    ensure_installed = { "stylua", "jq", "blackd-client", "pyright" },
+    ensure_installed = {
+      "stylua",
+      "jq",
+      "black",
+      "pyright",
+      "rust-analyzer",
+    },
     automatic_installation = true,
     -- pending https://github.com/jay-babu/mason-null-ls.nvim/pull/64
     handlers = { M.null_ls_handler },
@@ -153,11 +159,15 @@ end
 
 function M.autoformat(client, bufnr)
   if M.lsp_formatting[bufnr] ~= nil then
-    log.fmt_trace("formatting: %s: %s (dup: %s)", bufnr, client.name, M.lsp_formatting[bufnr])
+    log.fmt_trace(
+      "formatting: %s: %s (dup: %s)",
+      bufnr,
+      client.name,
+      M.lsp_formatting[bufnr]
+    )
   end
 
   if client.supports_method("textDocument/formatting") then
-
     vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
     vim.api.nvim_create_autocmd("BufWritePre", {
       group = M.au_format,

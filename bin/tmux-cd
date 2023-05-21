@@ -1,0 +1,4 @@
+#!/bin/sh
+# set the tmux session default for $PWD, while attached to a running session
+set -ex
+TMUX= tmux -C attach -c "$PWD" </dev/null "$@"

@@ -39,6 +39,8 @@ VimReset
 
       " implicit dep of null-ls
       Plug 'nvim-lua/plenary.nvim'
+
+      Plug 'nvim-treesitter/nvim-treesitter'
     else
       " :CheckHealth like in nvim
       Plug 'rhysd/vim-healthcheck'
@@ -62,7 +64,6 @@ VimReset
 
 " display options {
     set synmaxcol=3000      "extra-long lines lose highlighting, for speed
-    scriptencoding utf-8
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
@@ -287,6 +288,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.hcl         set filetype=terraform
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
+    autocmd BufNewFile,BufRead *.wgsl        set filetype=wgsl
 
     autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
 
@@ -318,7 +320,6 @@ augroup end
 " }
 
 if has('nvim')
-  lua require("bukzor.unload").unload()
   lua require("bukzor.plugins").setup()
 endif
 

@@ -6,4 +6,4 @@
 	url = https://github.com/jmattheis/gruvbox-dark-gtk
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
-	url = git@github.com:bukzor-sentryio/kitty-gruvbox-theme.git
+	url = https://github.com/wdomitrz/kitty-gruvbox-theme.git

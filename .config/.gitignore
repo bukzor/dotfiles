@@ -1,2 +1,7 @@
 # un-ignore non-hidden stuff
 ![!.]*
+
+# dont care:
+cros-garcon.conf
+nextjs-nodejs/
+weston.ini

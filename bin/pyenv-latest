@@ -1,0 +1,3 @@
+#!/bin/sh
+# What's the latest python available to pyenv?
+pyenv install --list | grep -E '^ *[0-9]+(\.[0-9]+)*$' | sort -rV | head -n1

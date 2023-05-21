@@ -35,7 +35,7 @@
         --unset=GIT_EXTERNAL_DIFF \
         --unset=GIT_DIR \
         --unset=GIT_WORK_TREE \
-        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
+        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$GIT_PREFIX/$MERGED\"
 [merge]
     renamelimit = 0
     tool = vimmerge

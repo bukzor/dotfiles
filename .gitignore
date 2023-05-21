@@ -13,3 +13,7 @@
 # these have to be explicitly ignored because they sometimes contain git repos
 .cache/
 .opam/
+.local/share/pnpm
+
+# dontcare:
+.fzf/
