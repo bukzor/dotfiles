@@ -10,6 +10,15 @@
 !**/
 !**/.gitignore
 
+# hacking
+tmp/
+munge*
+mangle*
+trash/
+*.bak/
+
 # these have to be explicitly ignored because they sometimes contain git repos
+.cargo/
 .cache/
 .opam/
+.git/

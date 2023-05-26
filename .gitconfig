@@ -1,11 +1,10 @@
 [user]
     name = Buck Evan
     email = buck.2019@gmail.com
-	signingkey = 53EB531B7135B49D
 [core]
     excludesfile = ~/.gitignore_global
 [init]
-	defaultBranch = main
+    defaultBranch = main
 [color]
     ui = auto
 [pack]
@@ -35,7 +34,8 @@
         --unset=GIT_EXTERNAL_DIFF \
         --unset=GIT_DIR \
         --unset=GIT_WORK_TREE \
-        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$REMOTE\"
+        --chdir=\"$GIT_PREFIX\" \
+        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$MERGED\"
 [merge]
     renamelimit = 0
     tool = vimmerge

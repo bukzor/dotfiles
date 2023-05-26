@@ -1,2 +1,3 @@
 #!/bin/sh
+set -x
 brew deps --tree --installed "$@"

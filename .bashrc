@@ -30,21 +30,17 @@ shopt -s globstar
 shopt -s extglob
 
 # shell settings and aliases, shared by zsh
-. ~/.sh_rc
+. "$HOME"/.sh_rc
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
-  if [ -f "$HOMEBREW_PREFIX"/etc/bash_completion ]; then
-    . "$HOMEBREW_PREFIX"/etc/bash_completion
-  elif [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
+  trysource  "$HOMEBREW_PREFIX"/etc/bash_completion
+  trysource /usr/share/bash-completion/bash_completion
+  trysource /etc/bash_completion
 
-  . ~/.sh_lib/functions.d/source_dir.sh
+  . "$HOME"/.sh_lib/functions.d/source_dir.sh
   source_dir ~/.bash_completion/
 fi
 # vim:et:sw=2:sts=2:

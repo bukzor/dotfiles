@@ -12,7 +12,8 @@ if has private-dotfiles-check && ! private-dotfiles-check; then
 fi
 
 # save/restore our $PATH, so that we can (re-)source this file idempotently
-# currently this is the only environment variable we modify (rather than overwrite), but we should do this for all such
+# currently this is the only environment variable we modify (rather than 
+# overwrite), but we should do this for all such
 if [ -z "$__orig_PATH" ]; then
   export __orig_PATH="$PATH"
 else
@@ -107,7 +108,6 @@ export PAGER=less
 if echo "$OSTYPE" | grep -q '^darwin'; then
   export BROWSER='open'
   export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-
 fi
 
 #unmap CTRL-S and CTRL-Q
@@ -213,11 +213,12 @@ fi
 
 . "$HOME"/.sh_plugins.d/xdg.sh
 
-export PYENV_ROOT="$XDG_CACHE_HOME/pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-if has pyenv; then
-  eval "$(pyenv init -)"
-fi
+# pyenv makes too many things derp
+## export PYENV_ROOT="$XDG_CACHE_HOME/pyenv"
+## export PATH="$PYENV_ROOT/bin:$PATH"
+## if has pyenv; then
+##   eval "$(pyenv init -)"
+## fi
 
 # added by travis gem
 trysource ~/.travis/travis.sh
@@ -226,5 +227,6 @@ if has aactivator; then
 fi
 
 trysource "$HOMEBREW_PREFIX/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
+trysource "$HOME/.cargo/env"
 
 # vim:et:sw=2:sts=2:

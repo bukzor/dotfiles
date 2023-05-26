@@ -4,18 +4,9 @@
 # hacking
 munge*
 mangle*
+trash/
 bak/
 *.log
 
 # automatic temporary files
-.netrwhist
-cache/
-plugged/
-shada/
-swap/
-mason/
-site/pack/packer
-sessions/
-
-telescope_history
-packer_compiled.lua
+data/

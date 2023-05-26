@@ -3,12 +3,6 @@
 # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 # supported: bash dash zsh busybox macos
 
-# idempotency:
-if [ "$__sh_plugin_xdg" ]; then
-  return 0
-else
-  export __sh_plugin_xdg=1
-fi
 umask 022
 
 # NB: macos mkdir doesn't support long option --mode, nor appended options

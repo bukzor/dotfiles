@@ -1,4 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'\x1b[31;1m$\x1b[m '
 
-gcloud  iam roles list --format json |
-  jq '.[] | .name' |
-  xargs -n1 gcloud iam roles describe --format json
+( # org custom roles:
+  gcloud organizations list --format='value(name)' |
+    xargs -tr --replace gcloud iam roles list --format json --organization={}
+
+  # project custom roles
+  gcloud projects list --format='value(projectId)' |
+    xargs -tr --replace gcloud iam roles list --format json --project={}
+
+  ### # built-in roles
+  ### gcloud iam roles list --format json
+) |
+  jq '.[] | .name' -r |
+  xargs -P50 -rn1 sh -ec '
+    role="$1"
+    role_file="$(sed "s@\.@/@" <<< "$1").json"
+    mkdir -p "$(dirname "$role_file")"
+    set -x
+    gcloud iam roles describe --format json "$role" > "$role_file"
+  ' -

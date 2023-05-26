@@ -1,3 +1,10 @@
+function! g:LogPluginPaths(label) abort
+  silent echo "RUNTIMEPATH(" .. a:label .. "):\n   "
+    \ substitute(&runtimepath, ",", "\n    ", "g")
+  silent echo "   PACKPATH(" .. a:label .. "):\n   "
+    \ substitute(&packpath, ",", "\n    ", "g")
+endfunction
+
 function! g:VimReset() abort
   " get vim back to a blank-slate state, as if we just started
   messages clear
@@ -5,9 +12,15 @@ function! g:VimReset() abort
   highlight clear       " Uses the current value of 'background' to decide which default colors to use.
   syntax clear          " The command also deletes the 'b:current_syntax' variable
   syntax on
-endfunction  # VimReset
+endfunction  " VimReset
+
 command! VimReset call g:VimReset()
 VimReset
+
+if !exists("$VIMHOME")
+  let $VIMHOME=split(&rtp, ',')[0]
+endif
+let g:plug_home = $VIMHOME .. '/pack/plugged/start'
 
 " plugins {
   call bukzor#plug#bootstrap()
@@ -18,37 +31,15 @@ VimReset
 
     " sensible behavior for zoom (AKA ctrl-w_o, AKA :only)
     Plug 'troydm/zoomwintab.vim'
+    """ " have location list follow the cursor
+    """ Plug 'elbeardmorez/vim-loclist-follow'
+    """ let g:loclist_follow = 1
 
     "syntaxen
     Plug 'vim-python/python-syntax'
     Plug 'HerringtonDarkholme/yats.vim'
     Plug 'hashivim/vim-terraform'
     Plug 'puppetlabs/puppet-syntax-vim'
-
-    if has('nvim')
-      " https://github.com/williamboman/mason-lspconfig.nvim#vim-plug
-      Plug 'williamboman/mason.nvim'
-      Plug 'williamboman/mason-lspconfig.nvim'
-      Plug 'neovim/nvim-lspconfig'
-
-      " https://github.com/jay-babu/mason-null-ls.nvim#vim-plug
-      " pending https://github.com/jose-elias-alvarez/null-ls.nvim/pull/1524
-      Plug 'bukzor-sentryio/null-ls.nvim', { 'branch': 'selene-cwd' }
-      "Plug 'jose-elias-alvarez/null-ls.nvim'
-      Plug 'jay-babu/mason-null-ls.nvim'
-
-      " implicit dep of null-ls
-      Plug 'nvim-lua/plenary.nvim'
-    else
-      " :CheckHealth like in nvim
-      Plug 'rhysd/vim-healthcheck'
-
-      """ Plug 'prabirshrestha/vim-lsp'
-      """ Plug 'mattn/vim-lsp-settings'
-      """ " TBD: do we need/want ale?
-      """ Plug 'dense-analysis/ale'
-      """ Plug 'rhysd/vim-lsp-ale'
-    end
 
     " migrated from pathogen
     Plug 'ConradIrwin/vim-bracketed-paste'
@@ -58,7 +49,6 @@ VimReset
   call plug#end()
   call bukzor#plug#lazy_sync()
 " } plugins
-
 
 " display options {
     set synmaxcol=3000      "extra-long lines lose highlighting, for speed
@@ -287,6 +277,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.hcl         set filetype=terraform
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
+    autocmd BufNewFile,BufRead *.scm         set filetype=lisp
 
     autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
 
@@ -308,26 +299,26 @@ augroup end
     nnoremap <Leader>ga :!git add %<CR>
 " }
 
+" { nvim provider opt-out
+  " we're not going to use this stuff:
+  let g:loaded_perl_provider = 0
+  let g:loaded_node_provider = 0
+  let g:loaded_ruby_provider = 0
+  let g:loaded_python3_provider = 0
+" }
+
 " Vim 8 Packages {
     " Load all plugins now.
     " Plugins need to be added to runtimepath before helptags can be generated.
     packloadall
     " Load all of the helptags now, after plugins have been loaded.
     " All messages and errors will be ignored.
-    silent! helptags ALL
+    if v:vim_did_enter
+      silent! helptags ALL
+    else
+      au VimEnter * silent! helptags ALL
+    endif
 " }
-
-if has('nvim')
-  lua require("bukzor.unload").unload()
-  lua require("bukzor.plugins").setup()
-endif
-
-function! g:OnLspBufferEnabled() abort
-    """ let g:lsp_format_sync_timeout = 1000
-    """ autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
-
-    " refer to doc to add more commands
-endfunction
 
 hi! link LspReference CursorColumn
 hi! link LspReferenceText Search

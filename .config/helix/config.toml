@@ -1,0 +1,15 @@
+# https://docs.helix-editor.com/configuration.html
+theme = "gruvbox"
+
+[editor]
+line-number = "absolute"
+mouse = true
+color-modes=true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
