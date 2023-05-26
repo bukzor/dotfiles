@@ -11,6 +11,9 @@ brew 'findutils'
 brew 'gnu-sed'
 brew 'diffutils'
 
+# common build deps
+
+
 # unix basics
 brew 'git'
 brew 'gnupg'
@@ -19,6 +22,8 @@ brew 'stdman'
 brew 'tmux'
 brew 'util-linux'
 brew 'wget'
+brew 'diffstat'
+brew 'rsync'
 
 # python basics
 brew 'virtualenv'
@@ -31,6 +36,7 @@ brew 'proctools'
 
 # unix super-handy
 brew 'direnv'
+brew 'dotenv-linter'
 brew 'jq'
 brew 'yq'
 brew 'graphviz'
@@ -45,6 +51,7 @@ brew 'zsh-completions'
 brew 'toilet'
 brew 'shellcheck'
 brew 'markdownlint-cli'
+brew 'fzf'
 
 # opensource prerequisites
 brew 'go'
@@ -52,10 +59,14 @@ brew 'gradle'
 brew 'opam'
 brew 'openjdk'
 brew 'pyenv'
+brew 'pyenv-virtualenv'
 brew 'rbenv'
 brew 'helm'
-brew 'rust'
 brew 'luarocks'
+brew 'virtualenv'
+brew 'typescript'
+brew 'rustup-init'
+brew 'pnpm'
 
 # terraform stuffs
 brew 'tfenv'   # provides `terraform`

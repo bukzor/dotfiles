@@ -226,7 +226,5 @@ if has aactivator; then
   eval "$(aactivator init)"
 fi
 
-trysource "$HOMEBREW_PREFIX/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
 trysource "$HOME/.cargo/env"
-
 # vim:et:sw=2:sts=2:

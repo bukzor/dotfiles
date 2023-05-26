@@ -52,7 +52,6 @@ let g:plug_home = $VIMHOME .. '/pack/plugged/start'
 
 " display options {
     set synmaxcol=3000      "extra-long lines lose highlighting, for speed
-    scriptencoding utf-8
     if has('termguicolors')
         set termguicolors   "use 24bit color schemes in the terminal
     endif
@@ -278,6 +277,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
     autocmd BufNewFile,BufRead *.scm         set filetype=lisp
+    autocmd BufNewFile,BufRead *.wgsl        set filetype=wgsl
 
     autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
 

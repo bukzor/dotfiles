@@ -1,6 +1,9 @@
 # un-ignore non-hidden files
 ![!.]*
 
+# automatic temporary files
+data/
+
 # hacking
 munge*
 mangle*
@@ -8,5 +11,3 @@ trash/
 bak/
 *.log
 
-# automatic temporary files
-data/

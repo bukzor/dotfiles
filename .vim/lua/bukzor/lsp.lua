@@ -238,7 +238,7 @@ function M.autoformat(client, bufnr)
   if M.lsp_formatting[bufnr] ~= nil then
     M.log(
       "formatting: %s: %s (dup: %s)",
-      bufnr,
+      bufnr, 
       client.name,
       M.lsp_formatting[bufnr]
     )

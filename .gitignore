@@ -22,3 +22,7 @@ trash/
 .cache/
 .opam/
 .git/
+.local/share/pnpm
+
+# dontcare:
+.fzf/

@@ -3,14 +3,21 @@ set -eu
 
 BREWDIR=/opt/homebrew
 BREW=$BREWDIR/bin/brew
-if ! [ -d "/opt/homebrew" ]; then
+if ! [ -d "$BREWDIR" ]; then
   if yesno "Homebrew is missing. Install homebrew?"; then
     eval "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
+    linuxbrew=/home/linuxbrew/.linuxbrew
+    if [ -d "$BREWDIR" ]; then
+      : all\'s swell
+    elif [ -d "$linuxbrew" ]; then
+      sudo ln -sf "$linuxbrew" -T "$BREWDIR"
+    else
+      echo 'Where'\''s homebrew?' >&2
+      exit 1
+    fi
   else
     echo 'Homebrew not installed.' >&2
     return 1
-
   fi
 fi
 
@@ -19,6 +26,11 @@ if ! [ -d "$BREWDIR" ]; then
   exit 1
 fi
 
-/opt/homebrew/bin/brew "$@"
+BEFORE="$BREWDIR/.before"
+touch "$BEFORE"
 
-homebrew-handle-gnubin
+$BREW "$@"
+
+if [ "$BREWDIR/opt" -nt "$BEFORE" ] || [ "$BREWDIR/Cellar" -nt "$BEFORE" ]; then
+  brew-handle-gnubin
+fi

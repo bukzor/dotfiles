@@ -4,13 +4,13 @@
 # shellcheck disable=SC2006  # allow backticks for hecka-ancient shells
 # test: exec env -i $SHELL -l
 export PATH LOGNAME USER HOME LANG TERM SHELL
-if ! [ "$PATH" ]; then
-  PATH="$(getconf PATH)"
+if ! command -v sh > /dev/null; then
+  PATH="$(/usr/bin/getconf PATH)"
 fi
 # these have only one correct value
 LOGNAME="$(whoami)"
 USER="$LOGNAME"
-HOME=`sh -c "unset HOME; echo ~"`
+HOME=`sh -c "unset HOME; echo ~$USER"`
 if [ -z "$LANG" ]; then
   LANG='en_US.UTF-8'
 fi

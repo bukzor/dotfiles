@@ -36,6 +36,8 @@
         --unset=GIT_WORK_TREE \
         --chdir=\"$GIT_PREFIX\" \
         vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$MERGED\"
+        # or maybe:
+        #   vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$GIT_PREFIX/$MERGED\"
 [merge]
     renamelimit = 0
     tool = vimmerge
