@@ -1,7 +1,7 @@
 set nocursorline
 set nocursorcolumn
 set nowrap  " wrapping makes cursorcolumn terribly ugly
-set diffopt+=followwrap
+silent! set diffopt+=followwrap
 set cursorlineopt=number,screenline
 
 
