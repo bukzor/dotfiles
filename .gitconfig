@@ -1,0 +1,8 @@
+[init]
+	defaultBranch = main
+[alias]
+	l = log --oneline --graph --decorate
+	xl = l --all
+[user]
+	email = workitharder@gmail.com
+	name = Buck Evan

@@ -1,0 +1,7 @@
+
+# don't care
+
+# files with transient data
+.netrwhist
+
+# files with host-local data

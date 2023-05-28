@@ -1,0 +1,9 @@
+# don't care
+.sommelierrc
+
+# files with transient data
+.local/state/
+.viminfo
+
+# files with host-local data
+.Xauthority
