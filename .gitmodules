@@ -1,0 +1,15 @@
+[submodule ".vim/bundle/vim-sensible"]
+	path = .vim/pack/github/start/vim-sensible
+	url = https://github.com/tpope/vim-sensible
+[submodule ".vim/bundle/asyncomplete-lsp.vim"]
+	path = .vim/pack/github/start/asyncomplete-lsp.vim
+	url = https://github.com/prabirshrestha/asyncomplete-lsp.vim.git
+[submodule ".vim/bundle/vim-lsp"]
+	path = .vim/pack/github/start/vim-lsp
+	url = https://github.com/prabirshrestha/vim-lsp.git
+[submodule ".vim/bundle/asyncomplete.vim"]
+	path = .vim/pack/github/start/asyncomplete
+	url = https://github.com/prabirshrestha/asyncomplete.vim.git
+[submodule ".vim/bundle/gruvbox"]
+	path = .vim/pack/github/start/gruvbox
+	url = https://github.com/morhetz/gruvbox.git
