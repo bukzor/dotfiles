@@ -1,9 +1,26 @@
 # don't care
 .sommelierrc
+.emscripten
 
 # files with transient data
 .local/state/
 .viminfo
+.cache
+.emscripten_cache/
+
+# transient history
+*.sw[a-p]
+.bash_history
+.python_history
+.lesshst
 
 # files with host-local data
 .Xauthority
+.aptitude/
+
+# local-machine binaries
+.rustup
+.cargo
+.volta
+.npm
+.local

@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eux
+
+options=(
+  -t --rm \
+  -v "$PWD":/usr/src/app \
+  -e JEKYLL_GITHUB_TOKEN=my-github-token \
+  -p "4000:4000" \
+)
+
+set -x
+docker run "${options[@]}" starefossen/github-pages

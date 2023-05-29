@@ -13,3 +13,9 @@
 [submodule ".vim/bundle/gruvbox"]
 	path = .vim/pack/github/start/gruvbox
 	url = https://github.com/morhetz/gruvbox.git
+[submodule ".vim/pack/github/start/vim-lsp-settings"]
+	path = .vim/pack/github/start/vim-lsp-settings
+	url = http://github.com/mattn/vim-lsp-settings
+[submodule "scratch"]
+	path = scratch
+	url = /home/bukzor/scratch/

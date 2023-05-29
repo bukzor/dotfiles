@@ -16,12 +16,28 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
+function path_add() { # NOTE: last wins
+  one_more="$1"
+  # affix colons on either side of $PATH to simplify matching
+  case ":$PATH:" in
+    *":$one_more:"*) : already done! ;;
+    # Prepending path in case a system-installed rustc needs to be overridden
+    *) export PATH="$one_more:$PATH" ;;
+  esac
+}
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
+# set some defaults
+export CLICOLOR=truecolor
+export COLORTERM=truecolor
+export EDITOR=vim
+export MAKEFLAGS="-j $(($(nproc) * 2))"
+
+# enable ~/bin/ unconditionally, so we can create it after login
+path_add "$HOME/bin"
+path_add "$HOME/.local/bin"  # similar, but XDG style
+
+# enabling meta-tools: rustup, volta, etc.
+path_add "/opt/homebrew/bin"
+export VOLTA_HOME="$HOME/.volta"
+path_add "$VOLTA_HOME/bin"
+path_add "$HOME/.cargo/bin"
