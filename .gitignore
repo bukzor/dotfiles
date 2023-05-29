@@ -1,3 +1,6 @@
+# hacking
+*.log
+
 # don't care
 .sommelierrc
 .emscripten

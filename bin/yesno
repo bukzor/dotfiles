@@ -1,0 +1,16 @@
+#!/bin/sh
+
+while true; do
+  printf "$1 [y/n]: "
+  if [ -t 0 ]; then
+    IFS= read -r answer
+    case $answer in
+      [yY]*) exit 0;;
+      [nN]*) exit 1;;
+      *) echo "Unrecognized response: '$answer'" >&2
+    esac
+  else  # noninteractive
+    echo no
+    exit 1
+  fi
+done

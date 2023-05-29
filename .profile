@@ -10,10 +10,10 @@
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
-    fi
+  # include .bashrc if it exists
+  if [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+  fi
 fi
 
 function path_add() { # NOTE: last wins
@@ -32,12 +32,15 @@ export COLORTERM=truecolor
 export EDITOR=vim
 export MAKEFLAGS="-j $(($(nproc) * 2))"
 
-# enable ~/bin/ unconditionally, so we can create it after login
-path_add "$HOME/bin"
-path_add "$HOME/.local/bin"  # similar, but XDG style
 
 # enabling meta-tools: rustup, volta, etc.
+path_add "$HOME/prefix/pnpm/bin"
 path_add "/opt/homebrew/bin"
 export VOLTA_HOME="$HOME/.volta"
 path_add "$VOLTA_HOME/bin"
 path_add "$HOME/.cargo/bin"
+
+# enable ~/bin/ unconditionally, so we can create it after login
+path_add "$HOME/.local/bin"  # similar, but XDG style
+path_add "$HOME/bin/alternatives"
+path_add "$HOME/bin"

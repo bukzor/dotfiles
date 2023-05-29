@@ -1,13 +1,9 @@
-" the bare basics {
-  set background=dark
-  colorscheme gruvbox
-" } the bare basics
+if exists("$VIMtDEBUG")
+  set verbose=2
+endif
 
-" cross-language defaults {
-  set et sw=2 sts=2
-" } cross-language defaults
+for s:vimfile in split(expand('$HOME/.vimrc.d/*.vim'), '\n')
+  exe "source" s:vimfile
+endfor
 
-
-" LSP key-bindings { 
-  nmap gd :LspDefinition<CR>
-" } LSP key-bindings
+set verbose=0

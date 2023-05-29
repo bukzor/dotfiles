@@ -1,0 +1,2 @@
+global-dir=${HOME}/prefix/pnpm
+global-bin-dir=${HOME}/prefix/pnpm/bin
