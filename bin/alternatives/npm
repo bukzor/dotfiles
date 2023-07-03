@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+case "$*" in
+  init) ;;
+  init" "-y) set -- init;;
+  init" "*)
+    shift 1
+    set -- create "$@";;
+  *) ;;
+esac
+set -x
+pnpm "$@"

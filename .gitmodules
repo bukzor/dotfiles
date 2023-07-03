@@ -7,6 +7,3 @@
 [submodule "scratch"]
 	path = scratch
 	url = /home/bukzor/scratch/
-[submodule ".vim/pack/github/start/ale"]
-	path = .vim/pack/github/start/ale
-	url = https://github.com/w0rp/ale

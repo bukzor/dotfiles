@@ -6,3 +6,6 @@
 [user]
 	email = workitharder@gmail.com
 	name = Buck Evan
+
+[include]
+  path = ~/.gitconfig.d/vimdiff.conf

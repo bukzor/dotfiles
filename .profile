@@ -31,9 +31,12 @@ export CLICOLOR=truecolor
 export COLORTERM=truecolor
 export EDITOR=vim
 export MAKEFLAGS="-j $(($(nproc) * 2))"
+export HOMEBREW_CC=clang
 
 
+# NOTE: in path_add, last wins
 # enabling meta-tools: rustup, volta, etc.
+path_add "$HOME/.local/share/nvim/mason/bin"
 path_add "$HOME/prefix/pnpm/bin"
 path_add "/opt/homebrew/bin"
 export VOLTA_HOME="$HOME/.volta"
@@ -42,5 +45,6 @@ path_add "$HOME/.cargo/bin"
 
 # enable ~/bin/ unconditionally, so we can create it after login
 path_add "$HOME/.local/bin"  # similar, but XDG style
+path_add "$HOME/bin/shim"
 path_add "$HOME/bin/alternatives"
 path_add "$HOME/bin"

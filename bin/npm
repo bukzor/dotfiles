@@ -1,8 +1,0 @@
-#!/bin/sh
-set -x
-case "$*" in
-  init\ -y)
-    set -- init;;
-  *) ;;
-esac
-pnpm "$@"

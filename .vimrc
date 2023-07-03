@@ -1,4 +1,4 @@
-if exists("$VIMtDEBUG")
+if exists("$VIMDEBUG")
   set verbose=2
 endif
 

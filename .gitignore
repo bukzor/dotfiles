@@ -10,12 +10,14 @@
 .viminfo
 .cache
 .emscripten_cache/
+tmp/
 
 # transient history
 *.sw[a-p]
 .bash_history
 .python_history
 .lesshst
+.node_repl_history
 
 # files with host-local data
 .Xauthority

@@ -7,6 +7,14 @@ set omnifunc=ale#completion#OmniFunc
 
 " dynamic help {
   let g:ale_set_balloons = has('gui_running') ? 'hover' : 0
-  set completeopt=menu,menuone,popup,noselect,noinsert
+  set completeopt+=menu
+  set completeopt-=preview
+  set completeopt+=menuone
+  try
+    set completeopt+=popup
+    set completeopt+=noselect
+    set completeopt+=noinsert
+  catch /.*/
+  endtry
   let g:ale_floating_preview = 1
 " }
