@@ -1,0 +1,8 @@
+#!/bin/sh
+for i in $(seq 30 37) $(seq 90 97); do 
+    for a in $(seq 40 47); do 
+	echo -ne "\e[$i;$a""m\\\e[$i;$a""m\e[0m "
+    done
+    echo
+done
+echo
