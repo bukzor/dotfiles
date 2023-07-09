@@ -24,6 +24,13 @@ setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history 
 setopt COMPLETE_IN_WORD          # tab in the middle of a word works correctly!
 setopt ALWAYS_TO_END
 setopt INTERACTIVE_COMMENTS      # sometimes I copy-paste comments
+setopt NOMATCH                   # refuse to use ambiguous globs
+setopt CHASE_DOTS                # resolve ".." paths textually, not physically
+setopt AUTO_CD                   # using a directory as a command implies "cd"
+
+unsetopt EXTENDED_GLOB           # weird zsh-specific globbing
+unsetopt BEEP                    # no, thanks
+unsetopt NOTIFY                  # background jobs' status waits for prompt
 
 HISTFILE="$HOME/.zsh_history"
 
@@ -79,8 +86,7 @@ unsetopt MENU_COMPLETE
 setopt AUTO_MENU
 bindkey "^[[Z" reverse-menu-complete
 
-
-# can't move cursor left to previous line
+# default vim bindings can't move cursor left to previous line
 bindkey "^[OC" forward-char
 bindkey "^[OD" backward-char
 bindkey "^[OF" end-of-line
@@ -103,7 +109,7 @@ bindkey -M vicmd v edit-command-line
 # jj for normal mode
 bindkey 'jj' vi-cmd-mode
 
-# ctrl-w removed word backwards
+# ctrl-w remove word backwards
 bindkey '^w' backward-kill-word
 
 # ctrl-r starts searching history backward
