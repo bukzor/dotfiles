@@ -1,8 +1,12 @@
 #!/bin/sh
 set -eu
+set -x
+: npm "$@"
+{ set +x; } 2>/dev/null
 case "$*" in
   init) ;;
   init" "-y) set -- init;;
+  init" "--yes*) set -- init;;
   init" "*)
     shift 1
     set -- create "$@";;

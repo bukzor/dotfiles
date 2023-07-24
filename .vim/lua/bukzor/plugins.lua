@@ -31,37 +31,22 @@ function M.config()
   lsp.init()
 
   require("lazy").setup({
-    root = M.LAZY_HOME,
-    dev = {
-      path = vim.fs.normalize(
-        vim.fn.stdpath("config") .. "/pack/invented-here/start"
-      ),
-    },
-    install = {
-      colorscheme = { "gruvbox", "habamax", "slate" },
-      missing = true, -- automatically install what's missing
-    },
-    checker = {
-      enabled = true,
-      frequency = 7 * 24 * hour, -- once a week
-    },
-    performance = {
-      reset_packpath = false, -- cooperate with vim-plug and local packs
-      rtp = {
-        reset = false,        -- cooperate with vim-plug and local packs
-      },
-    },
-
-    spec = {
       -- the plugin framework
       "folke/lazy.nvim",
 
       -- helpfully show keystrokes
-      { "folke/which-key.nvim", opts = {} },
+      {
+        "folke/which-key.nvim",
+        opts = {},
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+        },
+        config = function() require("bukzor.which-key") end,
+      },
 
       -- advanced LSP for nvim lua:
-      { "folke/neoconf.nvim",   opts = {} },
-      { "folke/neodev.nvim",    opts = {} },
+      { "folke/neoconf.nvim", opts = {} },
+      { "folke/neodev.nvim",  opts = {} },
       {
         "folke/trouble.nvim",
         opts = { height = 5 },
@@ -98,8 +83,6 @@ function M.config()
         dependencies = {
           -- https://github.com/folke/neoconf.nvim#-setup
           "folke/neoconf.nvim",
-          -- https://github.com/bukzor-sentryio/mason-lspconfig.nvim#setup
-          "williamboman/mason-lspconfig.nvim",
         },
         config = lsp.setup_lspconfig,
       },
@@ -124,7 +107,30 @@ function M.config()
       -- show LSPs' hints inline
       { "lvimuser/lsp-inlayhints.nvim", opts = {} },
     },
-  })
+    {
+      root = M.LAZY_HOME,
+      dev = {
+        path = vim.fs.normalize(
+          vim.fn.stdpath("config") .. "/pack/invented-here/start"
+        ),
+      },
+      install = {
+        colorscheme = { "gruvbox", "habamax", "slate" },
+        missing = true, -- automatically install what's missing
+      },
+      checker = {
+        enabled = true,
+        frequency = 7 * 24 * hour, -- once a week
+      },
+      performance = {
+        reset_packpath = false, -- cooperate with vim-plug and local packs
+        rtp = {
+          reset = false,        -- cooperate with vim-plug and local packs
+        },
+      },
+
+    }
+  )
 end
 
 return M

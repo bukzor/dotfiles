@@ -117,31 +117,6 @@ end
 
 function M.setup_lspconfig()
   vim.cmd(":runtime plugin/lspconfig.lua") -- surely there's a better way?
-  -- https://github.com/neovim/nvim-lspconfig/tree/master#suggested-configuration
-  local wk = require("which-key")
-  wk.register({
-    ["<leader>"] = {
-      l = {
-        name = "Language Server",
-        l = { vim.diagnostic.open_float, "Hover" },
-        w = { "<cmd>Trouble loclist<cr>", "Window" },
-      },
-    },
-    ["["] = {
-      name = "Previous",
-      l = { vim.diagnostic.goto_prev, "Prev Diagnostic" },
-    },
-    ["]"] = {
-      name = "Next",
-      l = { vim.diagnostic.goto_next, "Next Diagnostic" }
-    },
-    g = {
-      name = "Goto",
-      e = { vim.diagnostic.goto_next, "Next Error" },
-      E = { vim.diagnostic.goto_next, "Prev Error" },
-    }
-
-  })
 end
 
 function M.on_attach_lspconfig(client, bufnr)
@@ -155,55 +130,6 @@ function M.on_attach_lspconfig(client, bufnr)
   vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
   vim.bo[bufnr].tagfunc = "v:lua.vim.lsp.tagfunc"
   vim.bo[bufnr].formatexpr = ""
-
-  -- Buffer local mappings.
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  local opts = { buffer = bufnr }
-  vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-  vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
-
-  vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-  vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
-  vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-  vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-  vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-  vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, opts)
-  vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-  vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
-  vim.keymap.set("n", "<leader>wl", function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, opts)
-  vim.keymap.set("n", "<leader>lR", vim.lsp.buf.rename, opts)
-  vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, opts)
-  vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-  vim.keymap.set("n", "gs", vim.lsp.buf.document_symbol, opts)
-
-  ---TODO:
-  ---" Get current document diagnostics information.
-  ---nnoremap <Leader>li  :LspDocumentDiagnostics<CR>
-  ---nnoremap <Leader>lS  :LspStatus<CR>
-  ---nnoremap <Leader>lpd :LspPeekDefinition<CR>
-  ---nnoremap <Leader>lD  :LspDeclaration<CR>
-  ---nnoremap <Leader>lpD :LspPeekDeclaration<CR>
-  ---nnoremap <Leader>lpi :LspPeekImplementation<CR>
-  ---" Go to the type definition of the word under the cursor, and open in the current window.
-  ---nnoremap <Leader>lt  :LspTypeDefinition<CR>
-  ---nnoremap <Leader>lpt :LspPeekTypeDefinition<CR>
-  ---" View type hierarchy of the symbol under the cursor.
-  ---nnoremap <Leader>lT  :LspTypeHierarchy<CR>
-  ---" Gets a list of possible commands that can be applied to a file so it can be fixed.
-  ---nnoremap <Leader>la  :LspCodeAction<CR>
-  ---nnoremap <Leader>lr  :LspReferences<CR>
-  ---augroup lsp_stuff
-  ---  autocmd!
-  ---  autocmd BufEnter,CursorHold,InsertLeave lua vim.lsp.codelens.refresh()
-  ---  autocmd CursorHold  lua vim.lsp.buf.document_highlight()
-  ---  autocmd CursorHoldI lua vim.lsp.buf.document_highlight()
-  ---  autocmd CursorMoved lua vim.lsp.buf.clear_references()
-  ---  autocmd User lsp_buffer_enabled call g:OnLspBufferEnabled()
-  ---augroup END
 end
 
 function M.setup_mason_lspconfig()

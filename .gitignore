@@ -11,6 +11,7 @@
 .cache
 .emscripten_cache/
 tmp/
+**/trash/
 
 # transient history
 *.sw[a-p]
@@ -23,9 +24,15 @@ tmp/
 .Xauthority
 .aptitude/
 
+# externally managed
+Dropbox/
+
 # local-machine binaries
+package/
 .rustup
 .cargo
 .volta
 .npm
+.dropbox
+.dropbox-dist
 .local
