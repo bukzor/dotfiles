@@ -38,7 +38,8 @@ M.mason_install = {
     "fish", -- .fish
     "zsh", -- .zsh
     "dotenv_linter", -- .env
-    "editorconfig_checker", -- .editorconfig
+    -- too whiny:
+    -- "editorconfig_checker", -- .editorconfig
     "gitlint", -- git commit messages
     --"commitlint",  -- needs configuration
     "glslc", -- GLSL
@@ -110,7 +111,8 @@ end
 
 function M.show_loclist()
   vim.diagnostic.setloclist({ open = false })
-  vim.cmd("bo lw 5")
+  -- vim.cmd("bo lw 5")
+  vim.cmd("TroubleToggle document_diagnostics")
 end
 
 function M.setup_lspconfig()
@@ -123,7 +125,7 @@ function M.setup_lspconfig()
   vim.keymap.set("n", "gE", vim.diagnostic.goto_prev)
   vim.keymap.set("n", "<leader>lw", M.show_loclist)
 
-  M.setup_loclist_update()
+  --M.setup_loclist_update() -- too slow
 end
 
 function M.on_attach(client, bufnr)
@@ -238,7 +240,7 @@ function M.autoformat(client, bufnr)
   if M.lsp_formatting[bufnr] ~= nil then
     M.log(
       "formatting: %s: %s (dup: %s)",
-      bufnr, 
+      bufnr,
       client.name,
       M.lsp_formatting[bufnr]
     )

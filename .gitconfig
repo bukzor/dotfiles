@@ -55,14 +55,13 @@
 [advice]
     detachedHead = false
 [alias]
+    l = log --oneline --graph --decorate --color=always --pretty=format:\"%C(auto)%h %C(bold blue)%aL %Cgreen(%cr)%C(auto)%d%Creset %s\"
+    xl = l --all
     ff = !sh -exc 'git pull --ff "$@"' -
     branch-name = symbolic-ref -q --short HEAD
     tag-name = !sh -exc 'git tag -l --points-at ${1:-HEAD}' -
     base = !sh -exc 'git merge-base "$(git upstream)" ${1:-HEAD}' -
     diffbase = !git dt $(git base)
-    lol = log --oneline --graph --decorate --color=always --pretty=format:\"%C(auto)%h %C(bold blue)%aL %Cgreen(%cr)%C(auto)%d%Creset %s\"
-    l = lol
-    xl = lol --all
     feature = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git master && git checkout -b "$b" "$@"' -
     vimdiff = difftool
     dt = difftool

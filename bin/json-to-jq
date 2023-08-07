@@ -5,7 +5,7 @@
 s/^.{1,2}//
 
 # remove top-level trailing comma
-s/^([]}]),$/\1/
+s/^([^ ].*),$/\1/
 
 # skip (now) blank lines
 /^$/ d

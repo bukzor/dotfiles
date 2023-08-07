@@ -23,8 +23,10 @@ fi
 
 set -x
 gcloud logging read \
-    --flatten=textPayload \
-    --format='value(textPayload)' \
+    --format='json(textPayload)' \
     "$@" |
-  unescape \
+  json-to-jq |
+  jq 'values | .textPayload' -r |
+  unescape |
+  tac \
 ;

@@ -14,11 +14,19 @@ fi
 # save/restore our $PATH, so that we can (re-)source this file idempotently
 # currently this is the only environment variable we modify (rather than 
 # overwrite), but we should do this for all such
+if command -v deactivate >/dev/null; then
+  deactivate
+fi
 if [ -z "$__orig_PATH" ]; then
   export __orig_PATH="$PATH"
 else
   PATH="$__orig_PATH"
 fi
+# MacOS:
+if [ -x /usr/libexec/path_helper ]; then
+  eval "$(/usr/libexec/path_helper -s)"
+fi
+
 
 # note: "MACHTYPE" is the compile-time CPU architecture
 export CPUTYPE OSTYPE
@@ -92,7 +100,9 @@ export P4DIFFOPTS="-u --color"
 export P4DIFF=~/bin/p4-difftool
 export PYTHONSTARTUP=~/.pythonrc.py
 export EMAIL
-EMAIL="$(git config user.email)"
+if has git; then
+  EMAIL="$(git config user.email)"
+fi
 
 if [ -z "$LANG" ]; then
   export LANG='en_US.UTF-8'
@@ -168,17 +178,19 @@ export REPO=$HOME/repo
 
 # ask terminfo whether we have a color terminal
 # tput is more appropriate for this but harder to use
-if infocmp -1GLx | grep -Eq '^\s*(Tc|setrgbf)[=,]'; then
-  export CLICOLOR=truecolor
-  export COLORTERM=truecolor
-elif infocmp -1GLx | grep -Eq '^\s*(set_a_foreground)[=,]'; then
-  export CLICOLOR=1
-  export COLORTERM=1
-else
-  unset CLICOLOR
-  unset COLORTERM
+if has infocmp; then
+  if infocmp -1GLx | grep -Eq '^\s*(Tc|setrgbf)[=,]'; then
+    export CLICOLOR=truecolor
+    export COLORTERM=truecolor
+  elif infocmp -1GLx | grep -Eq '^\s*(set_a_foreground)[=,]'; then
+    export CLICOLOR=1
+    export COLORTERM=1
+  else
+    unset CLICOLOR
+    unset COLORTERM
+  fi
+  export TERM_ITALICS=1
 fi
-export TERM_ITALICS=1
 
 # My very own python!
 activate() { trysource ~/venv/"$USER"-venv/bin/activate; }

@@ -1,16 +1,14 @@
-#!/bin/bash
-# this is useful for printing "is_text_escaped" strings from GCP logging
-set -euo pipefail
+#!/usr/bin/env python3
+from sys import stdin
+from sys import stdout
 
-python3 -c 'if True:
-  from sys import stdin, stdout
-  for line in stdin:
+for line in stdin:
     line = line.rstrip("\n")
     if not line:
-      continue
+        continue
 
     from ast import literal_eval
-    line = literal_eval("\"\"\"" + line + "\"\"\"")
+
+    line = literal_eval('"""' + line + '"""')
     line = line.encode("latin1").decode("UTF-8")
     stdout.write(line)
-' | col -bx

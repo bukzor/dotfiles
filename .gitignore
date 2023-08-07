@@ -26,3 +26,6 @@ trash/
 
 # dontcare:
 .fzf/
+
+# binaries and local files
+.vscode

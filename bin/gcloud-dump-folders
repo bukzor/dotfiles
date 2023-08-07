@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ $# -eq  0 ]; then
+  # recurse on all visible orgs:
+  gcloud organizations list --format=json |
+    jq '.[].name' -r |
+    xargs -P20 -trn1 "$0" \
+  ;
+  exit 0
+fi
+
+parent="$1"
+parent_type="$(sed 's@/[^/]*$@@' <<< "$parent")"
+parent_name="$(sed 's@^[^/]*/@@' <<< "$parent")"
+
+case "$parent_type" in
+  organizations) type="organization";;
+  folders) type="folder";;
+  *) echo >&2 wat: "$parent"; exit 1;;
+esac
+
+mkdir -p folders
+folderfile="folders/$parent_name.$type.json"
+gcloud resource-manager folders list "--$type=$parent_name" --format=json |
+  json-to-jq |
+  tee "$folderfile" |
+  jq .name -r |
+  # recurse on sub-folders
+  xargs -P20 -trn1 "$0" \
+;

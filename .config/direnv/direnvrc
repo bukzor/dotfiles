@@ -1,7 +1,10 @@
+# start xtrace debug output whenever direnv sources a file:
 .() {
+  export PS4='+ \033[33m$\033[m '
   set -x
   builtin . "$@"
   { set +x; } 2>/dev/null
+  PS4="+ "
 }
 
 
@@ -10,20 +13,32 @@ keep_orig() {
   eval orig_"$(declare -f "$function_name")"
 }
 
-# wrap path_add to quiet its internals
-keep_orig path_add
-path_add() {
-  { set +x; } 2>/dev/null
-  orig_path_add "$@"
-  set -x
+# wrap $function_name to quiet its internals
+quieten() {
+  function_name="$1"
+
+  eval '
+    # keep the original
+    orig_'"$(declare -f "$function_name")"'
+
+    # call the original, quietly
+    '"$function_name"'() {
+      { set +x; } 2>/dev/null
+      orig_'"$function_name"' "$@"
+      status=$?
+      set -x
+      { return "$status" ; } 2>/dev/null
+    }
+  '
 }
 
-keep_orig source_up_if_exists
-source_up_if_exists() {
-  { set +x; } 2>/dev/null
-  orig_source_up_if_exists "$@"
-  set -x
-}
+quieten path_add
+quieten source_up
+#quieten source_up_if_exists
+quieten source_env
+quieten strict_env
+quieten unstrict_env
+trap '{ set +x; } 2>/dev/null; __dump_at_exit' EXIT
 
 ## automatically look at parent .envrc, too:
 #keep_orig source_env

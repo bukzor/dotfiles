@@ -1,0 +1,26 @@
+#!/bin/bash
+set -eu
+options=(
+  # provide identical uid/gid
+  -u "$(id -u):$(id -g)"
+  # provide unchanged username
+  -e USER
+  # provide unchanged home
+  -e HOME
+  # ensure home is mounted
+  -v "$HOME:$HOME"
+  # don't save the container when exited
+  --rm
+  # interactive terminal
+  -ti
+)
+podman run \
+  "${options[@]}" \
+  busybox \
+  sh -xc '
+    # provide an illusion of not changing directory
+    cd "'"$PWD"'"
+    # start interactive session
+    exec sh -il
+  ' \
+;

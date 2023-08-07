@@ -9,6 +9,7 @@ function M.setup()
       vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
       vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
     end,
+    disable_max_lines = 500000,
   })
   -- You probably also want to set a keymap to toggle aerial
   vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")

@@ -1,2 +1,2 @@
 [global]
-load_dotenv = true
+load_dotenv = false

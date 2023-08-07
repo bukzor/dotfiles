@@ -1,0 +1,40 @@
+#!/usr/bin/env jq -crf
+
+# extract the string message, or as a final fallback show the whole object
+null
+//  .text_payload
+//  .textPayload
+//  ( (.jsonPayload // .json_payload)
+    | (.message? // .MESSAGE? // .msg?)
+)
+//  ( .protoPayload
+    | [ "RPC: "
+      , (.serviceName | select(values) | sub(".googleapis.com"; ""))
+      , "."
+      , (.methodName | select(values) | split(".") | last)
+      , ": "
+      , ((.response // .status) | .message) // .status
+      , ( [ " ("
+          , .authenticationInfo.principalSubject
+          , "@"
+          , .resourceName
+          , ")"
+          ]
+        | join("")
+        )
+      ]
+   | select(all)
+   | join("")
+   )
+// ( (.httpRequest // .http_request)
+   | [ "HTTP:"
+     , (.status // "RST")
+     , (.requestMethod // .request_method)
+     , (.requestUrl // .request_url)
+     , (.remoteIp // .remote_ip)
+   ]
+   | select(all)
+   | join(" ")
+   )
+// .labels["authorization.k8s.io/reason"]?
+// .

@@ -20,5 +20,8 @@ _init_ps4() {
 }
 minimal_init() {
   _init_ps4
+  if [ "${DEBUG:-0}" -gt 0 ]; then
+    set -x
+  fi
 }
 minimal_init

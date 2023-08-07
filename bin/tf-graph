@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
-set -uo pipefail
+set -euo pipefail
 umask 022
 
 time="$(date +%R)"
 graph="${1:-$time}".svg
-shift 1
+shift 1 || true
 subpath="$(date +%F)"
 dir="${TMPDIR:-/tmp}/tf-graphs/$subpath"
 
@@ -14,7 +14,7 @@ nop2() {
 
 PS4='%1x:%i [1;34m$[0m '
 PS4='[1;34m$[0m '
-set -ex
+set -x
 mkdir --mode 755 -p "$dir"
 
 terraform graph -draw-cycles "$@" > "$dir/$time.0.dot"
@@ -23,8 +23,8 @@ if ! nop < "$dir/$time.0.dot" > /dev/null; then
   exit 1
 fi
 
-  # this sed "clean up" is optional, but makes the graph a lot more readable
-  sed -r '
+# this sed "clean up" is optional, but makes the graph a lot more readable
+sed -r '
     # clean up messy notation:
     s@\[root] @@g # meaningless
     s/\t//g       # tabs! ick.
@@ -44,7 +44,7 @@ fi
     s@\x1f@.@g
 
     s@ \(expand\)"@*"@g  # meaningless?
-  ' |
+  ' \
   < "$dir/$time.0.dot" \
   > "$dir/$time.1.dot" \
   ;

@@ -1,23 +1,24 @@
 #!/bin/bash
 set -euo pipefail
+HERE="$(cd "$(dirname "$0")"; pwd)"
 export PS4=$'\x1b[31;1m$\x1b[m '
 
+show() {(
+  set -x
+  "$@"
+)}
+
+
 ( # org custom roles:
-  gcloud organizations list --format='value(name)' |
+  show gcloud organizations list --format='value(name)' |
     xargs -tr --replace gcloud iam roles list --format json --organization={}
 
   # project custom roles
-  gcloud projects list --format='value(projectId)' |
-    xargs -tr --replace gcloud iam roles list --format json --project={}
+  show gcloud projects list --format='value(projectId)' |
+    xargs -tr -P50 --replace gcloud iam roles list --format json --project={}
 
-  ### # built-in roles
-  ### gcloud iam roles list --format json
+  # built-in roles
+  show gcloud iam roles list --format json
 ) |
-  jq '.[] | .name' -r |
-  xargs -P50 -rn1 sh -ec '
-    role="$1"
-    role_file="$(sed "s@\.@/@" <<< "$1").json"
-    mkdir -p "$(dirname "$role_file")"
-    set -x
-    gcloud iam roles describe --format json "$role" > "$role_file"
-  ' -
+  stdbuf -oL jq '.[] | .name' -r |
+  xargs -P50 -L1 -r "$HERE"/gcloud-dump-role

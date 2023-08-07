@@ -2,6 +2,7 @@
 
 # too easy to put secrets in there
 configurations/
+*_configs.db
 
 # these changes during the course of normal use -- they should be elsewhere
 cache/

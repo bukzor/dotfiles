@@ -1,7 +1,32 @@
-#!/bin/zsh
+#!/bin/bash
 set -euo pipefail
-. ~/.sh_lib/minimal.sh
+. "$HOME/.sh_lib/minimal.sh"
 minimal_init
+
+ACTIVE_CONFIG=~/.config/gcloud/active_config
+
+help() {
+  if [[ -e "$ACTIVE_CONFIG" ]]; then
+      gcpenv="$(cat "$ACTIVE_CONFIG" || echo '$env')"
+      sed "s/\$gcpenv/$gcpenv/g" >&2 <<'EOF'
+NOTE: You now have a new, empty gcloud configuration. To populate it:
+
+gcloud config set project $GCP_PROJECT
+gcloud config set account "$(git config user.email)"
+gcloud container clusters list
+gcloud config set compute/region $GCE_REGION
+gcloud config set container/cluster $GKE_CLUSTER
+gcpenv "$gcpenv"
+kubectl config set-context "$gcpenv" --namespace $K8S_NAMESPACE
+EOF
+    else
+      cat >&2 <<'EOF'
+usage: gcpenv $new-env-name
+
+Create and manage named groups of default options to gcloud commands.
+EOF
+  fi
+}
 
 case $# in
   0)
@@ -9,21 +34,11 @@ case $# in
     exit 0
     ;;
   1)
-    if ! gcloud config configurations activate "$@"; then
-      show gcloud config configurations create "$@"
-      show gcloud config set project "$@"
-      show gcloud config set account "$EMAIL"
-      cat >&2 <<'EOF'
-NOTE: You now have a new, empty gcloud configuration. To populate it:
-
-  gcloud config set project $GCP_PROJECT
-  gcloud config set account $EMAIL
-  gcloud container clusters list
-  gcloud config set compute/region $GCE_REGION
-  gcloud config set container/cluster $GKE_CLUSTER
-  kubectl config set-context --current --namespace $K8S_NAMESPACE
-EOF
-      exit 1
+    if [[ "$1" =~ ^(help|-h|--help)$ ]]; then
+      help
+      exit 0
+    else
+      gcpenv="$1"
     fi
   ;;
   *)
@@ -32,12 +47,24 @@ EOF
     ;;
 esac
 
+if ! gcloud config configurations activate "$gcpenv"; then
+  show gcloud config configurations create "$gcpenv"
+  show gcloud config set project "$gcpenv"
+  show gcloud config set account "$EMAIL"
+  cat >&2 <<EOF
+NOTE: You now have a new, empty gcloud configuration. To populate it:
+
+EOF
+  help
+  exit 1
+fi
+
 eval "$(gcloud config list --format 'get(container)')"
 
 if [[ "${cluster:-}" ]]; then
   # Authenticate with the configured cluster, use it to configure a kubectl
   # context of the same name (as the gcloud configuration), then activate it.
-  mkdir -p $HOME/.kube
+  mkdir -p "$HOME/.kube"
   export USE_GKE_GCLOUD_AUTH_PLUGIN=True
   gke_location=$(
     gcloud container clusters list \
@@ -46,12 +73,11 @@ if [[ "${cluster:-}" ]]; then
     ;
   )
 
-  show flock $HOME/.kube/config \
+  show flock "$HOME/.kube/config" \
     gcloud container clusters get-credentials --zone="$gke_location" \
       "$cluster"
 
 
-  gcloud_configuration="$(cat ~/.config/gcloud/active_config)"
   gke_context="$(kubectl config current-context)"
 
   kubectl config view -o json |
@@ -62,7 +88,8 @@ if [[ "${cluster:-}" ]]; then
       | map("--\(.key)=\(.value)")
       | join(" ")
     ' -r |
-    xargs -tr kubectl config set-context "$gcloud_configuration"
+    xargs -tr kubectl config set-context "$gcpenv" \
+  ;
 
-  show kubectl config use-context "$gcloud_configuration"
+  show kubectl config use-context "$gcpenv"
 fi

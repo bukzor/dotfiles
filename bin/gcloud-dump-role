@@ -1,0 +1,33 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'\x1b[34;1m$\x1b[m '
+
+show() {(
+  set -x
+  "$@"
+)}
+
+role="$1"
+shift 1
+role_file="$(sed "s@\.@/@" <<< "$role").json"
+mkdir -p "$(dirname "$role_file")"
+
+read -ra options <<< "$(
+  # typical gcloud: they wont accept the fully-qualified name and insist
+  # that I transform it to this --option syntax:
+  sed -r <<< "$role" '
+    /^organizations\// {
+      s@^organizations/@--organization=@
+      s@/roles/@ @
+    }
+    /^projects\// {
+      s@^projects/@--project=@
+      s@/roles/@ @
+    }
+')"
+
+show gcloud iam roles describe --format json "${options[@]}" |
+  # add includedPermissions:[] to roles that have none 
+  jq '{"includedPermissions": [] } + .' \
+  > "$role_file" \
+;
