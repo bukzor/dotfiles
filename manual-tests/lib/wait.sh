@@ -1,6 +1,6 @@
 #!/sourceme/bash
 
-wait-for() {
+wait::for() {
   assertion=( "$@" )
   time_limit=30
   while ! "${assertion[@]}" && ((time_limit > 0)); do

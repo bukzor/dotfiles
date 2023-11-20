@@ -1,9 +1,9 @@
 #!/bin/bash
 source "$REPO_TOP/lib/base.sh"
+base::strict-mode
+
 source "$REPO_TOP/manual-tests/lib/slice.sh"
 source "$REPO_TOP/manual-tests/lib/wait.sh"
-strict_mode
-
 
 
 open-pr() {
@@ -27,16 +27,6 @@ assert-gha-lock-ran() {
 acquire-lock() {
   timeout -s SIGSTOP 1 terraform plan --lock=true --var sleep=9999
 }
-assert-slice-locked() {(
-  slice_number="$1"
-  cd slice-"$slice_number"*/
-  if ! terraform plan --lock=true; then
-    : ok
-  else
-    echo >&2 "AssertionError: slice $slice_number should be locked!"
-    return 1
-  fi
-)}
 
 
 main() {
@@ -44,18 +34,18 @@ main() {
   cd sut/terraform/env/prod/
 
   # edit one or more slices
-  random-slices | read -ra slices
+  slice::random | read -ra slices
   for slice in "${slices[@]}"; do
-    edit-slice "$slice"
+    slice::edit "$slice"
   done
 
   branch="$USER/scenario/happy-path/$NOW"
   pr_number="$(open-pr "$branch")"
 
-  wait-for assert-gha-lock-ran "$pr_number"
+  wait::for assert-gha-lock-ran "$pr_number"
 
   for slice in "${slices[@]}"; do
-    assert-slice-locked "$slice"
+    slice::assert-locked "$slice"
   done
 
   # TODO: the rest

@@ -3,7 +3,7 @@ if [[ "${DEBUG:-}" ]]; then
   set -x
 fi
 
-strict_mode() {
+base::strict-mode() {
   set -eEuo pipefail
 }
 
