@@ -1,0 +1,16 @@
+# when in doubt, treat sourced files as file-relative
+
+# Allow opening any 'source'd file, even if not specified as input
+external-sources=true
+
+# https://www.shellcheck.net/wiki/SC2028
+# I'll use printf when I want format handling
+disable=SC2028
+
+# https://www.shellcheck.net/wiki/SC2016
+# I know that hard-quotes print $ literally...
+disable=SC2016
+
+# https://www.shellcheck.net/wiki/SC2001
+# I like sed and dislike ${//}
+disable=SC2001
