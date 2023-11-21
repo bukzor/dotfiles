@@ -31,7 +31,7 @@ acquire-lock() {
 
 main() {
   git clone git@github.com:getsentry/tacos-demo
-  cd sut/terraform/env/prod/
+  cd tacos-demo/terraform/env/prod/
 
   # edit one or more slices
   slice::random | read -ra slices
