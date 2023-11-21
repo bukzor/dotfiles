@@ -30,6 +30,14 @@ slice::random() {
   } | sort -u
 }
 
+slice::edit-random() {
+  echo slice::random:
+  read -r -a slices < <(slice::random)
+  for slice in "${slices[@]}"; do
+    slice::edit "$slice"
+  done
+}
+
 slice::assert-locked() {
   : FIXME: perform a real assertion here
   if true; then

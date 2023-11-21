@@ -42,11 +42,7 @@ main() {
   git checkout -b "$branch"
 
   # edit one or more slices
-  echo slice::random:
-  read -r -a slices < <(slice::random)
-  for slice in "${slices[@]}"; do
-    slice::edit "$slice"
-  done
+  slice::edit-random
 
   git commit -am "test: behaviors/lock-on-pr ($NOW)"
   git push origin "$branch:$branch"

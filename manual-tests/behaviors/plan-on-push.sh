@@ -54,34 +54,20 @@ main() {
   # NB: setting upstream tracking branch makes `gh pr` stop working well
   git checkout -b "$branch"
 
-  # edit one or more slices
-  echo slice::random:
-  read -r -a slices < <(slice::random)
-  for slice in "${slices[@]}"; do
-    slice::edit "$slice"
-  done
+  slice::edit-random
 
   git commit -am "test: behaviors/plan-on-push ($NOW)"
   git push origin "$branch:$branch"
 
   since="$(date +%s)"
   pr_url="$(open-pr "$branch")"
-  banner PR opened: "$pr_url", waiting for lock...
-
-  wait::for gha::assert-ran terraform_lock "$since"
-  banner lock ran
-  gha::assert-success terraform_lock
-  banner lock succeeded
+  banner PR opened: "$pr_url"
 
   assert_plan_ran "$since"
   assert_plan_succeeded
 
   # edit one or more slices (again)
-  echo slice::random:
-  read -r -a slices < <(slice::random)
-  for slice in "${slices[@]}"; do
-    slice::edit "$slice"
-  done
+  slice::edit-random
 
   git commit -am "test: behaviors/plan-on-push ($NOW) - more code"
   git push origin "$branch:$branch"
@@ -90,16 +76,6 @@ main() {
 
   assert_plan_ran "$since"
   assert_plan_succeeded
-
-  for slice in 1 2 3; do
-    if array::in "$slice" "${slices[@]}"; then
-      # relevant slice is locked
-      slice::assert-locked "$slice"
-    else
-      # irrelevant slice is not locked
-      slice::assert-not-locked "$slice"
-    fi
-  done
 }
 
 
