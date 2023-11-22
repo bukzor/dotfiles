@@ -1,20 +1,29 @@
-#!/sourceme/bash
-WAIT_LIMIT="${WAIT_LIMIT:-30}"
-WAIT_SLEEP="${WAIT_SLEEP:-3}"
+from os import getenv
 
-_wait_loop() {
-  assertion=( "$@" )
-  wait_limit="$WAIT_LIMIT"
-  while ! "${assertion[@]}" && ((wait_limit > WAIT_SLEEP)); do
-    sleep "$WAIT_SLEEP"
-    ((wait_limit -= WAIT_SLEEP))
-  done
-}
+from lib import sh
+from time import sleep as do_sleep
 
-wait::for() {
-  assertion=( "$@" )
-  : retrying for "$WAIT_LIMIT" seconds...
-  base::quiet _wait_loop "$@"
-  : show the final try:
-  "${assertion[@]}"
-}
+WAIT_LIMIT = int(getenv("WAIT_LIMIT", "30"))
+WAIT_SLEEP = int(getenv("WAIT_SLEEP", "3"))
+
+
+def _wait_loop(assertion, limit, sleep):
+    while limit > sleep:
+        try:
+            result = assertion()
+        except AssertionError:
+            result = False
+
+        if result in (True, None):
+            return
+
+        do_sleep(sleep)
+        limit -= sleep
+
+
+def for_(assertion, limit=WAIT_LIMIT, sleep=WAIT_SLEEP):
+    sh.banner(f"retrying for {limit} seconds...")
+    with sh.quiet():
+        _wait_loop(assertion, limit, sleep)
+    sh.run((":", "show the final try:"))
+    assertion()
