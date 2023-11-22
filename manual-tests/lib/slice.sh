@@ -31,11 +31,12 @@ slice::random() {
 }
 
 slice::edit-random() {
-  echo slice::random:
-  read -r -a slices < <(slice::random)
+  random_slice=$(slice::random)
+  read -r -a slices <<< "$random_slice"
   for slice in "${slices[@]}"; do
     slice::edit "$slice"
   done
+  echo "$random_slice"
 }
 
 slice::assert-locked() {

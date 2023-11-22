@@ -6,6 +6,7 @@ source "$REPO_TOP/lib/array.sh"
 source "$REPO_TOP/manual-tests/lib/slice.sh"
 source "$REPO_TOP/manual-tests/lib/wait.sh"
 source "$REPO_TOP/manual-tests/lib/gha.sh"
+source "$REPO_TOP/manual-tests/lib/gh.sh"
 
 # NB: aliases must be defined before their call-site is *parsed*
 shopt -s expand_aliases
@@ -65,6 +66,7 @@ main() {
 
   assert_plan_ran "$since"
   assert_plan_succeeded
+  gh::assert_matching_comment "Execution result of" "$since"
 
   # edit one or more slices (again)
   slice::edit-random
@@ -76,6 +78,7 @@ main() {
 
   assert_plan_ran "$since"
   assert_plan_succeeded
+  gh::assert_matching_comment "Execution result of" "$since"
 }
 
 
