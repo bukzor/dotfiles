@@ -37,3 +37,15 @@ gha::assert-success() {
   )"
   test "$conclusion" = "SUCCESS"
 }
+
+gha::assert-eventual-success() {
+  # success if a specified github-actions job ran
+  check_name="$1"
+  since="$2"
+
+  banner waiting for "$check_name"...
+  wait::for gha::assert-ran "$check_name" "$since"
+  banner "$check_name" ran
+  gha::assert-success "$check_name"
+  banner "$check_name" succeeded
+}

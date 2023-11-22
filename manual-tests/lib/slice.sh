@@ -31,7 +31,7 @@ slice::random() {
 }
 
 slice::edit-random() {
-  random_slice=$(slice::random)
+  random_slice=$(base::quiet slice::random)
   read -r -a slices <<< "$random_slice"
   for slice in "${slices[@]}"; do
     slice::edit "$slice"

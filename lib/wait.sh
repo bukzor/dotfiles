@@ -2,17 +2,19 @@
 WAIT_LIMIT="${WAIT_LIMIT:-30}"
 WAIT_SLEEP="${WAIT_SLEEP:-3}"
 
-wait::for() {
-  : retrying for "$WAIT_LIMIT" seconds...
-  set +x  # hide the retries, to cut out a bunch of noise
+_wait_loop() {
   assertion=( "$@" )
   wait_limit="$WAIT_LIMIT"
   while ! "${assertion[@]}" && ((wait_limit > WAIT_SLEEP)); do
     sleep "$WAIT_SLEEP"
     ((wait_limit -= WAIT_SLEEP))
   done
-  if [[ "${DEBUG:-}" ]]; then
-    set -x  # show the final try
-  fi
+}
+
+wait::for() {
+  assertion=( "$@" )
+  : retrying for "$WAIT_LIMIT" seconds...
+  base::quiet _wait_loop "$@"
+  : show the final try:
   "${assertion[@]}"
 }

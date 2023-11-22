@@ -21,3 +21,21 @@ gh::assert_matching_comment() {
 
   return 1
 }
+
+gh::open-pr() {
+  branch="$1"
+  gh pr create --fill-first --head "$branch"
+}
+
+gh::close-pr() {
+  pr_url="$1"
+  banner cleaning up:
+  since="$(date +%s)"
+  if gh pr edit --add-label ":taco::unlock"; then
+    banner waiting for unlock...
+    wait::for gha::assert-ran terraform_unlock "$since"
+    banner unlocked.
+  fi
+  banner deleting branch:
+  gh pr close --comment "test cleanup" --delete-branch "$pr_url"
+}
