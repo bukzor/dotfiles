@@ -29,6 +29,19 @@ cleanup() {
   gh pr close --comment "test cleanup" --delete-branch "$pr_url"
 }
 
+assert_plan_ran() {
+  since="$1"
+  banner waiting for plan...
+  wait::for gha::assert-ran terraform_plan "$since"
+  banner plan ran
+}
+
+assert_plan_succeeded() {
+  banner waiting for plan to succeed...
+  wait::for gha::assert-success terraform_plan
+  banner plan succeeded
+}
+
 main() {
   set -x
   rm -rf tacos-demo
@@ -41,30 +54,28 @@ main() {
   # NB: setting upstream tracking branch makes `gh pr` stop working well
   git checkout -b "$branch"
 
-  # edit one or more slices
   slice::edit-random
 
-  git commit -am "test: behaviors/lock-on-pr ($NOW)"
+  git commit -am "test: behaviors/plan-on-push ($NOW)"
   git push origin "$branch:$branch"
 
   since="$(date +%s)"
   pr_url="$(open-pr "$branch")"
-  banner PR opened: "$pr_url", waiting for lock...
+  banner PR opened: "$pr_url"
 
-  wait::for gha::assert-ran terraform_lock "$since"
-  banner lock ran
-  gha::assert-success terraform_lock
-  banner lock succeeded
+  assert_plan_ran "$since"
+  assert_plan_succeeded
 
-  for slice in 1 2 3; do
-    if array::in "$slice" "${slices[@]}"; then
-      # relevant slice is locked
-      slice::assert-locked "$slice"
-    else
-      # irrelevant slice is not locked
-      slice::assert-not-locked "$slice"
-    fi
-  done
+  # edit one or more slices (again)
+  slice::edit-random
+
+  git commit -am "test: behaviors/plan-on-push ($NOW) - more code"
+  git push origin "$branch:$branch"
+
+  since="$(date +%s)"
+
+  assert_plan_ran "$since"
+  assert_plan_succeeded
 }
 
 
