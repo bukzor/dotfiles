@@ -1,0 +1,31 @@
+#!/usr/bin/env expect
+# This script will either induce a state lock in terraform and succeed, or fail
+# with a state-already-locked error.
+#
+proc on_error {} {
+  upvar expect_out expect_out
+  puts stderr $expect_out(buffer)
+  exit 1
+}
+
+log_user 0
+spawn terraform console
+
+expect {
+  "\r> " {
+    # got prompt; exit gracefully
+    send "exit\r"
+    expect eof
+    wait
+    puts stderr "(terraform state not locked)"
+    exit 2  # no lock exists
+  }
+  -re " +ID: +(\[^\\r\\n]+).*$" {
+    puts "$expect_out(1,string)"
+    exit 0
+  }
+  timeout on_error
+  eof on_error
+}
+
+exit 123

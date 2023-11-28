@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
+not() {
+  if "$@"; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+set -x
+
+
+lock_id=$(tf-lock-id) && status=$? || status=$?
+
+if (( status == 2 )); then
+  "$HERE/"../lib/tf-lock-acquire.exp
+  not "$HERE/"../lib/tf-lock-acquire.exp
+elif (( status == 0 )); then
+  # already done!
+  cat <<< "$lock_id"
+  exit 0
+else
+  # surface any unexpected errors
+  cat >&2 <<< "$lock_id"
+  exit "$status"
+fi
