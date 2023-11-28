@@ -12,14 +12,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/logutils"
-	backendInit "github.com/hashicorp/terraform/backend/init"
-	"github.com/hashicorp/terraform/command"
-	"github.com/hashicorp/terraform/command/clistate"
+	backendInit "github.com/hashicorp/terraform/internal/backend/init"
+	"github.com/hashicorp/terraform/internal/command"
+	"github.com/hashicorp/terraform/internal/command/clistate"
 	"github.com/mitchellh/cli"
 )
 
 // Version is a version number.
-var version = "0.13.5"
+var version = "1.6.4"
 
 // LockCommand is a Command implementation that lock a Terraform state.
 type LockCommand struct {
