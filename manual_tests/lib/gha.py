@@ -1,5 +1,8 @@
 from lib import sh
+from lib import wait
 from datetime import datetime
+
+Check = str
 
 
 def get_checks() -> list[object]:
@@ -20,40 +23,36 @@ def get_checks() -> list[object]:
     return result
 
 
-def assert_ran(check_name: str, since: datetime):
+def assert_ran(check: Check, since: datetime):
     """success if a specified github-actions job ran"""
+    c = get_check(check)
+    completed_at = c["completedAt"]
+    assert isinstance(completed_at, str), completed_at
+
+    completed_at = datetime.fromisoformat(completed_at)
+    assert completed_at > since, (completed_at, since)
+
+
+def get_check(check: Check) -> dict[str, object]:
     checks = get_checks()
-
-    for check in checks:
-        assert isinstance(check, dict), (type(check), check)
-        if check["name"] == check_name:
-            completed_at = datetime.fromisoformat(check["completedAt"])
-            assert completed_at > since, (completed_at, since)
-            return
+    for c in checks:
+        assert isinstance(c, dict), (type(c), c)
+        if c["name"] == check:
+            assert isinstance(c, dict), (type(c), c)
+            return c
     else:
-        raise AssertionError(f"No such check found: {check_name}")
+        raise AssertionError(f"No such check found: {check}")
 
 
-### }
+def assert_success(check: Check):
+    # success if a specified github-actions job ran
+    _check = get_check(check)
+    assert _check["conclusion"] == "SUCCESS", _check
 
-### gha::assert-success() {
-###   # success if a specified github-actions job ran
-###   check_name="$1"
-###   check="$(gha::get-check "$check_name")"
-###   conclusion="$(
-###     jq <<< "$check" '.conclusion' --raw-output
-###   )"
-###   test "$conclusion" = "SUCCESS"
-### }
 
-### gha::assert-eventual-success() {
-###   # success if a specified github-actions job ran
-###   check_name="$1"
-###   since="$2"
-###
-###   banner waiting for "$check_name"...
-###   wait::for gha::assert-ran "$check_name" "$since"
-###   banner "$check_name" ran
-###   gha::assert-success "$check_name"
-###   banner "$check_name" succeeded
-### }
+def assert_eventual_success(check: Check, since: datetime):
+    sh.banner(f"waiting for {check}...")
+    wait.for_(lambda: assert_ran(check, since))
+    sh.banner(f"{check} ran")
+    assert_success(check)
+    sh.banner(f"{check} succeeded")

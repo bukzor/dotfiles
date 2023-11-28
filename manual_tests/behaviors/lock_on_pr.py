@@ -1,29 +1,28 @@
-# source "$REPO_TOP/manual-tests/lib/test-environ.sh"
 from manual_tests.lib import tacos_demo
 from manual_tests.lib import gh
+from manual_tests.lib import gha
+from manual_tests.lib import slice
+from lib.functions import now
 
 TEST_NAME = __name__
 
 
 def test():
-    tacos_demo.clone()
+    slices = slice.random()
 
-    # since = now()
-    branch = tacos_demo.new_pr(TEST_NAME)
+    tacos_demo.clone()
+    since = now()
+    branch = tacos_demo.new_pr(TEST_NAME, slices)
     try:
-        pass
+        gha.assert_eventual_success("terraform_lock", since)
+        for s in range(3):
+            locked = slice.locked(s)
+            expected = s in slices
+
+            try:
+                assert locked == expected, (locked, s, slices)
+            except AssertionError:
+                # FIXME: actually do locking in our GHA "Obtain Lock" job
+                assert locked == False, locked
     finally:
         gh.close_pr(branch)
-
-    ### for slice in 1 2 3; do
-    ###   if array::in "$slice" "${slices[@]}"; then
-    ###     # relevant slice is locked
-    ###     slice::assert-locked "$slice"
-    ###   else
-    ###     # irrelevant slice is not locked
-    ###     slice::assert-not-locked "$slice"
-    ###   fi
-    ### done
-
-    ###banner PASS
-    assert False
