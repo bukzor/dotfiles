@@ -1,0 +1,8 @@
+pip-tools
+coverage
+covdefaults
+pytest
+black
+pyright
+mypy
+isort

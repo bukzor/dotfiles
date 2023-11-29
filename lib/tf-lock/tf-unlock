@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eo pipefail
+HERE="$(cd "$(dirname "$0")"; pwd)"
 
-lock_id=$(tf-lock-id) && status=$? || status=$?
+lock_id=$("$HERE/"tf-lock-id) && status=$? || status=$?
 
 if (( status == 0 )); then
   terraform force-unlock -force "$lock_id"

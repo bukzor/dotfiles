@@ -1,55 +1,25 @@
-#!/bin/bash
-source "$REPO_TOP/lib/base.sh"
-base::strict-mode
+#!/usr/bin/env py.test
+from __future__ import annotations
 
-source "$REPO_TOP/manual-tests/lib/slice.sh"
-source "$REPO_TOP/manual-tests/lib/wait.sh"
+from pytest import fixture
 
-
-open-pr() {
-  branch="$1"
-
-  git add slice*/*.tf
-  git commit -m 'scenario: happy-path'
-  git checkout origin/main -b "$branch"
-  #git push origin HEAD
-  gh pr create
-}
-
-assert-gha-lock-ran() {
-  # true when GHA has run its lock action for this branch
-  branch="$1"
-  gh action -e pull_request -b "$branch"
-}
+from manual_tests.lib import gha
+from manual_tests.lib import slice
+from manual_tests.lib import tacos_demo
 
 
+@fixture
+def test_name():
+    return __name__
 
-acquire-lock() {
-  timeout -s SIGSTOP 1 terraform plan --lock=true --var sleep=9999
-}
+
+@fixture
+def slices():
+    return slice.random()
 
 
-main() {
-  git clone git@github.com:getsentry/tacos-demo
-  cd tacos-demo/terraform/env/prod/
+def test(tacos_demo_pr: tacos_demo.TacosDemoPR):
+    gha.assert_eventual_success("terraform_lock", tacos_demo_pr.since)
+    slice.assert_locked(tacos_demo_pr.slices)
 
-  # edit one or more slices
-  slice::random | read -ra slices
-  for slice in "${slices[@]}"; do
-    slice::edit "$slice"
-  done
-
-  branch="$USER/scenario/happy-path/$NOW"
-  pr_number="$(open-pr "$branch")"
-
-  wait::for assert-gha-lock-ran "$pr_number"
-
-  for slice in "${slices[@]}"; do
-    slice::assert-locked "$slice"
-  done
-
-  # TODO: the rest
-}
-
-set -x
-main
+    # TODO: the rest

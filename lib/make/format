@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euxo pipefail
+
+git ls-files '**/*.py' |
+  xargs black
+
+git ls-files '**/*.py' |
+  xargs isort
+
+git ls-files |
+  xargs prettier --write --ignore-unknown

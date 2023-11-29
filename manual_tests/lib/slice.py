@@ -1,9 +1,15 @@
-from random import Random
+from __future__ import annotations
+
 from pathlib import Path
+from random import Random
+from typing import TYPE_CHECKING
 
 from lib import sh
-from lib.functions import one
 from lib.constants import NOW
+from lib.functions import one
+
+if TYPE_CHECKING:
+    import contextlib
 
 Slice = int
 Slices = tuple[int, ...]
@@ -21,6 +27,7 @@ resource "null_resource" "edit-me" {{
 }}
 """
         )
+    assert isinstance(f.name, str), f.name
     sh.run(("git", "add", f.name))
 
 
@@ -35,12 +42,24 @@ def path(slice: Slice) -> Path:
     return one(Path().glob(f"slice-{slice}*/"))
 
 
-def chdir(slice: Slice):
+def chdir(slice: Slice) -> contextlib.chdir[Path]:
     import contextlib
 
     return contextlib.chdir(path(slice))
 
 
-def locked(slice: Slice) -> bool:
+def is_locked(slice: Slice) -> bool:
     with chdir(slice):
         return sh.success(("terraform", "plan", "--lock=true"))
+
+
+def assert_locked(slices: Slices) -> None:
+    for slice in range(3):
+        locked = is_locked(slice)
+        expected = slice in slices
+
+        try:
+            assert locked == expected, (locked, slice, slices)
+        except AssertionError:
+            # FIXME: actually do locking in our GHA "Obtain Lock" job
+            assert locked == False, locked

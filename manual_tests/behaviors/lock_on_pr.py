@@ -1,8 +1,11 @@
-from manual_tests.lib import tacos_demo
+#!/usr/bin/env py.test
+from __future__ import annotations
+
+from lib.functions import now
 from manual_tests.lib import gh
 from manual_tests.lib import gha
 from manual_tests.lib import slice
-from lib.functions import now
+from manual_tests.lib import tacos_demo
 
 TEST_NAME = __name__
 
@@ -12,11 +15,11 @@ def test():
 
     tacos_demo.clone()
     since = now()
-    branch = tacos_demo.new_pr(TEST_NAME, slices)
+    tacos_demo_pr = tacos_demo.new_pr(TEST_NAME, slices)
     try:
         gha.assert_eventual_success("terraform_lock", since)
         for s in range(3):
-            locked = slice.locked(s)
+            locked = slice.is_locked(s)
             expected = s in slices
 
             try:
@@ -25,4 +28,4 @@ def test():
                 # FIXME: actually do locking in our GHA "Obtain Lock" job
                 assert locked == False, locked
     finally:
-        gh.close_pr(branch)
+        gh.close_pr(tacos_demo_pr.branch)

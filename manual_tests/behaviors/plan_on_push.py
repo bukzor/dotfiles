@@ -1,28 +1,36 @@
-#!/bin/bash
-source "$REPO_TOP/manual-tests/lib/test-environ.sh"
+#!/usr/bin/env py.test
+from __future__ import annotations
 
-main() {
-  base::strict-mode
-  tacos-demo::clone "$TEST_NAME"
+from datetime import datetime
 
-  since="$(date +%s)"
-  tacos-demo::new-pr "$TEST_NAME"
+from lib.functions import now
+from manual_tests.lib import gh
+from manual_tests.lib import gha
+from manual_tests.lib import slice
+from manual_tests.lib import tacos_demo
 
-  gha::assert-eventual-success terraform_plan "$since"
-  gh::assert_matching_comment "Execution result of" "$since"
+TEST_NAME = __name__
 
-  # edit one or more slices (again)
-  slice::edit-random
-
-  since="$(date +%s)"
-  git commit -am "test: behaviors/plan-on-push ($NOW) - more code"
-  git push origin "$branch:$branch"
-
-  gha::assert-eventual-success terraform_plan "$since"
-  gh::assert_matching_comment "Execution result of" "$since"
-
-  banner PASS
-}
+Branch = int
 
 
-main
+def assert_gha_plan(since: datetime):
+    gha.assert_eventual_success("terraform_plan", since)
+    gh.assert_matching_comment("Execution result of", since)
+
+
+def test():
+    tacos_demo.clone()
+
+    since = now()
+    tacos_demo_pr = tacos_demo.new_pr(TEST_NAME, slice.random())
+    try:  # TODO: use fixtures to do this cleanup
+        assert_gha_plan(since)
+
+        since = now()
+        tacos_demo.commit_changes_to(
+            slice.random(), TEST_NAME, postfix="more code"
+        )
+        assert_gha_plan(since)
+    finally:
+        gh.close_pr(tacos_demo_pr.branch)

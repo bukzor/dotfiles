@@ -1,2 +1,11 @@
-
+# our standard system-under-test
 tacos-demo/
+
+# coverage raw data
+.coverage*
+
+# crutches for make
+*.done
+
+# there's no way to use this lockfile
+Brewfile.lock.json

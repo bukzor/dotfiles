@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euxo pipefail
+venv="./$1"
+
+onerror() {
+  rm -rf "$venv"
+}
+
+trap onerror ERR
+onerror  # let's start clean
+
+pyenv install --skip-existing
+pyenv exec python -m venv "$venv"
+"$venv"/bin/pip install -r requirements-dev.txt
+touch "$venv"

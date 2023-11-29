@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euxo pipefail
+
+fail=()
+if ! pyright .; then
+  fail+=(pyright)
+fi
+if ! mypy .; then
+  fail+=(mypy)
+fi
+if ! git ls-files './*/__init__.py' |
+    xargs dirname |
+    xargs -n1 -tr \
+      env PYTHONPATH="$PWD" \
+      pyright --verifytypes
+then
+  fail+=(pyright-verifytypes)
+fi
+
+if ! git ls-files |
+  file --mime-type --no-pad --files-from=- |
+  sed 's@: text/x-shellscript$@@; t; d' |
+  xargs shellcheck
+then
+  fail+=(shellcheck)
+fi
+
+
+set +x
+if [[ "${fail[*]}" ]]; then
+  echo "FAIL (${fail[*]})"
+  exit 1
+else
+  echo PASS
+fi

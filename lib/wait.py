@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 from os import getenv
+from time import sleep as do_sleep
+from typing import Callable
 
 from lib import sh
-from time import sleep as do_sleep
 
 WAIT_LIMIT = int(getenv("WAIT_LIMIT", "30"))
 WAIT_SLEEP = int(getenv("WAIT_SLEEP", "3"))
 
+Assertion = Callable[[], None | bool]
 
-def _wait_loop(assertion, limit, sleep):
+
+def _wait_loop(assertion: Assertion, limit: int, sleep: int) -> None:
     while limit > sleep:
         try:
             result = assertion()
@@ -21,7 +26,9 @@ def _wait_loop(assertion, limit, sleep):
         limit -= sleep
 
 
-def for_(assertion, limit=WAIT_LIMIT, sleep=WAIT_SLEEP):
+def for_(
+    assertion: Assertion, limit: int = WAIT_LIMIT, sleep: int = WAIT_SLEEP
+) -> None:
     sh.banner(f"retrying for {limit} seconds...")
     with sh.quiet():
         _wait_loop(assertion, limit, sleep)

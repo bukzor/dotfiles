@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import datetime
-from typing import TypeVar, Iterable
+from typing import Iterable
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
-def now():
+def now() -> datetime.datetime:
     return datetime.datetime.now(datetime.UTC)
 
 
