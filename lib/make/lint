@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
+exec >&2  # all output is logging
 
 fail=()
 if ! pyright .; then
@@ -27,7 +28,7 @@ fi
 
 
 set +x
-if [[ "${fail[*]}" ]]; then
+if [[ "${fail[*]:-}" ]]; then
   echo "FAIL (${fail[*]})"
   exit 1
 else

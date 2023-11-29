@@ -2,6 +2,6 @@
 from __future__ import annotations
 
 
-def test():
+def test() -> None:
     # TODO: anything
     pass

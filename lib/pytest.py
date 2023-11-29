@@ -6,14 +6,14 @@ import functools
 from contextlib import AbstractContextManager as ContextManager
 
 import pytest
+import typing_extensions
 from typing_extensions import Callable
-from typing_extensions import Generator
 from typing_extensions import ParamSpec
 from typing_extensions import TypeVar
 
 T = TypeVar("T")
 
-Generator = typing.Generator[T, None, None]  # shim python3.13
+Generator = typing_extensions.Generator[T, None, None]  # shim python3.13
 Params = ParamSpec("Params")
 Return = TypeVar("Return")
 

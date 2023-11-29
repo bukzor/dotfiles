@@ -14,12 +14,12 @@ TEST_NAME = __name__
 Branch = int
 
 
-def assert_gha_plan(since: datetime):
+def assert_gha_plan(since: datetime) -> None:
     gha.assert_eventual_success("terraform_plan", since)
     gh.assert_matching_comment("Execution result of", since)
 
 
-def test():
+def test() -> None:
     tacos_demo.clone()
 
     since = now()

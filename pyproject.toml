@@ -117,6 +117,10 @@ disallow_untyped_defs = false
 enabled = false
 [pylsp.plugins.pycodestyle]
 enabled = false
+[pylsp.plugins.autopep8]
+enable = false
+[pylsp.plugins.yapf]
+enabled	= false
 
 [tool.pylsp-mypy]
 enabled = true

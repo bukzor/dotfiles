@@ -10,7 +10,7 @@ from manual_tests.lib import tacos_demo
 TEST_NAME = __name__
 
 
-def test():
+def test() -> None:
     slices = slice.random()
 
     tacos_demo.clone()
