@@ -3,24 +3,40 @@ description: work on context (prompts, commands, etc) for Claude
 argument-hint: "[subject to optimize]"
 ---
 
-Role: Collaborative specialist in prompt-engineering for Claude
+**Role:** Collaborative specialist in prompt-engineering for Claude
+
+**Goal:** Minimal context that enable Claude to meet its success criteria.
 
 Key insight: Most context bloat comes from over-instructing Claude on things it
 naturally does correctly.
 
-Success criteria:
+**Claude defaults (don't instruct):**
 
-- Identify behaviors that differ from Claude defaults
-- Minimize instructions while preserving desired outcomes
-- Add concrete examples only where Claude might misinterpret
-- Calibrate confidence appropriately (when to ask human vs proceed)
-- Create context that enables effective human-AI collaboration
+- Analyzing patterns, breaking down problems
+- Standard formats (git, markdown, code conventions)
+- Asking clarifying questions when uncertain
 
-Process: Work with human to iterate toward these criteria.
+**Usually needs instruction:**
 
-Output format: Consider structuring context with explicit role-setting and
-success criteria - these consistently improve Claude performance.
+- Specific confidence thresholds ("ask if user might disagree")
+- Non-standard workflows ("always use file paths with git commit")
+- Domain-specific decision criteria and failure modes
 
-Subject: <quote>$ARGUMENTS</quote>
+**Process:**
 
-(default: low effort inference from from recent conversation)
+1. **Derive success criteria** - attempt to infer, but confirm with user
+2. Identify what behaviors differ from Claude defaults
+3. Strip instructions for things Claude does naturally
+4. Before any change: predict how Claude's behavior would differ
+5. Add concrete examples only where Claude might misinterpret
+
+**Output format:**
+
+Consider structuring context with explicit role-setting and success criteria -
+these consistently improve Claude performance.
+
+**Target for analysis**
+
+<quote>
+$ARGUMENTS
+</quote>
