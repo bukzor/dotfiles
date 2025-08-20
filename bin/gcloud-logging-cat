@@ -18,15 +18,14 @@ EOF
   exit 0
 fi
 
+if [ "${DEBUG:=0}" -ge 3 ]; then
+  set -x
+fi
 
-
-
-set -x
 gcloud logging read \
     --format='json(textPayload)' \
+    --order=asc \
     "$@" |
   json-to-jq |
-  jq 'values | .textPayload' -r |
-  unescape |
-  tac \
+  jq 'values | .textPayload' -r \
 ;

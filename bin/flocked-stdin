@@ -1,0 +1,77 @@
+#!/bin/bash
+# usage: flocked-stdin N CMD...
+# pipe stdin to a fleet of N subcommands, synchronized by line
+#
+# useful for parallel processing:
+#
+#   generate_work | flocked-stdin 6 process_work
+#
+###
+set -euo pipefail
+
+
+background_worker() {
+  line="$1"
+  shift 1
+
+  (
+    { set +x; } 2>/dev/null
+    {
+      while :; do
+        flock -u 4
+        printf '<%i.%i %s>\n' "$$" "$n" "$line" >&2
+        printf '%s\n' "$line"
+        flock -x 4
+      done
+      while read -r line; do
+        flock -u 4
+        printf '<%i.%i %s>\n' "$$" "$n" "$line" >&2
+        printf '%s\n' "$line"
+        flock -x 4
+      done
+    } |
+      "$@"
+
+  # NB: by default stdin becomes /dev/null for backgrounded jobs
+  ) <&0 &
+
+
+}
+
+n="${1?the number of processes}"
+shift 1
+
+LOCKFILE=$(mktemp "$TMPDIR/$$.XXXXXX.lock")
+exec 4<"$LOCKFILE"
+rm "$LOCKFILE"
+
+set -x
+
+for ((; n>0; n--)); do
+  flock -x 4
+  while read -r line; do
+    flock -u 4
+    printf '<%i.%i %s>\n' "$$" "$n" "$line" >&2
+    printf '%s\n' "$line"
+    flock -x 4
+  done |
+    "$@"
+
+
+
+  (
+    { set +x; } 2>/dev/null
+    flock -x 4
+    while read -r line; do
+      flock -u 4
+      printf '<%i.%i %s>\n' "$$" "$n" "$line" >&2
+      printf '%s\n' "$line"
+      flock -x 4
+    done |
+      "$@"
+
+  # NB: by default stdin becomes /dev/null for backgrounded jobs
+  ) <&0 &
+done
+
+wait

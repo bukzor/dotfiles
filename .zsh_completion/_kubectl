@@ -194,3 +194,4 @@ _kubectl()
 if [ "$funcstack[1]" = "_kubectl" ]; then
     _kubectl
 fi
+compdef _kubectl kubectl

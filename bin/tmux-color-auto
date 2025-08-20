@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+from bukzor.sh import sh
+
+TMUX_COLOR = [
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+    "default",
+    "inv",
+]
+
+
+def tmux_color_auto_select(session_name: str) -> tuple[int, int, bool]:
+    bg = int(sh.line(("roll", "0", "7", "bg", session_name)))
+    fg = int(sh.line(("roll", "0", "7", "fg", session_name)))
+    bright = bool(sh.line(("roll", "0", "1", "bright", session_name)))
+    return bg, fg, bright
+
+
+def tmux_color_auto_cmd(session_name: str) -> tuple[str, ...]:
+    bg, fg, bright = tmux_color_auto_select(session_name)
+    bg = TMUX_COLOR[bg]
+    fg = TMUX_COLOR[fg]
+    fg = f"bright{fg}" if bright else fg
+
+    return ("tmux", "-q", "set", "-s", "status-style", f"bold,fg={fg},bg={bg}")
+
+
+def tmux_color_auto(session_name: str):
+    return sh.run(tmux_color_auto_cmd(session_name))
+
+
+def main():
+    from sys import argv
+
+    try:
+        session_name = argv[1]
+    except IndexError:
+        session_name = sh.line(
+            ("tmux", "display-message", "-p", "#{session_name}")
+        )
+
+    return tmux_color_auto(session_name)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

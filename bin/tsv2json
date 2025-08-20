@@ -1,0 +1,2 @@
+#!/bin/sh
+mlr --icsv --ifs '\t' --ojson cat "$@"

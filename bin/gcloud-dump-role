@@ -1,16 +1,13 @@
 #!/bin/bash
 set -euo pipefail
-export PS4=$'\x1b[34;1m$\x1b[m '
+export PS4=$'+ \033[33;93m$\033[m '
 
-show() {(
-  set -x
-  "$@"
-)}
+role_filename() {
+  echo "$(sed "s@\.@/@g" <<< "$1")/role.json"
+}
 
 role="$1"
 shift 1
-role_file="$(sed "s@\.@/@" <<< "$role").json"
-mkdir -p "$(dirname "$role_file")"
 
 read -ra options <<< "$(
   # typical gcloud: they wont accept the fully-qualified name and insist
@@ -26,8 +23,19 @@ read -ra options <<< "$(
     }
 ')"
 
+role_file="$(role_filename "$role")"
+rm -f "$role_file"
+mkdir -p "$(dirname "$role_file")"
 show gcloud iam roles describe --format json "${options[@]}" |
   # add includedPermissions:[] to roles that have none 
   jq '{"includedPermissions": [] } + .' \
   > "$role_file" \
 ;
+
+# symlink from short "role/xyz" name to fully-qualified path
+# this only happens for custom roles
+role_shortname="$(sed "s@.*/roles/@roles/@" <<< "$role")"
+if [ "$role_shortname" != "$role" ]; then
+  role_file2="$(role_filename "$role_shortname")"
+  symlink "$role_file" "$role_file2"
+fi

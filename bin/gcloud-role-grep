@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euxo pipefail
+
+find . -type f -name '*.json' -print0|
+  xargs -0 jq '
+      [ "container.backendConfigs.list"
+      , "compute.regionUrlMaps.get"
+      , "compute.networks.get"
+      ] as $must_all
+    | [ "storage.objects.get"         # GCS bucket data access
+      , "iam.serviceAccounts.actAs"   # service account impersonation
+      , "logging.logEntries.list"     # view logs
+      ] as $must_none
+    | .includedPermissions as $perms
+
+    # exclude roles without any permissions
+    | select($perms != null)
+
+    # must contain all:
+    | select
+      ( $perms
+      | contains($must_all)
+      )
+
+    # must not contain any:
+    | select
+      ( $perms
+      | map(. != $must_none[])
+      | all
+      )
+  ' -cr |
+  jq -cs 'sort_by(.includedPermissions | length) | .[]' |
+  jq -c '.includedPermissions |= length' |
+  head |
+  jq |
+  ### sort |
+  ### uniq -c |
+  ### sort -n |
+  ### # exclude permissions rarely listed
+  ### grep -Ev '^ *([1-9]|[1][0-9]) ' |
+  ### sort -k2 |
+  ### $grep -Ev '\.(get|list|getIamPolicy)$' |
+  ### $grep -Ev '(serviceusage.services\.use|\.(create|getData|updateData|publish|delete|update|downloadArtifacts)$'
+  cat

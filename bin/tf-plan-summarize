@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eu
+HERE="$(cd "$(dirname "$0")"; pwd)"
+plan="${1:-tfplan}"
+
+set -x
+if ! [[ "$plan.json" -nt "$plan" ]]; then
+  terraform show -json "$plan" > "$plan.json.tmp"
+  mv "$plan.json.tmp" "$plan.json"
+fi
+
+< "$plan.json" \
+  jq -rcf "$HERE/"tf-plan-summarize.jq \
+;

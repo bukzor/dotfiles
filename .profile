@@ -21,7 +21,7 @@ esac
 # done
 
 # General shell environment, shared by zsh
-. "$HOME"/.sh_env
+. "$HOME/".sh_env
 
 # if running bash
 if [ -n "${BASH_VERSION:-}" ]; then

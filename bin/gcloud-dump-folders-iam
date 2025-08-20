@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'+ \033[33;1m$\033[m '
+
+# folder
+gcloud-dump-folders
+find . -name 'folder.json' -print0 |
+  xargs -0 cat |
+  jq .name -r |
+  xargs -P20 -rn1 sh -ec '
+    folder="$1"
+    folder_name="$(basename "$folder")"
+    set -x
+    gcloud resource-manager folders get-iam-policy "$folder_name" --format=json \
+      > "$folder/iam-policy.json"
+  ' -

@@ -1,0 +1,22 @@
+{
+  "name": "Task",
+  "description": "Launch specialized agents for complex tasks. *MUST* read ~/.claude/tools/Task.md before using.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "description": {
+        "type": "string",
+        "description": "A short (3-5 word) description of the task"
+      },
+      "prompt": {
+        "type": "string", 
+        "description": "The task for the agent to perform (follow preferences in Task.md)"
+      },
+      "subagent_type": {
+        "type": "string",
+        "description": "The type of specialized agent to use for this task"
+      }
+    },
+    "required": ["description", "prompt", "subagent_type"]
+  }
+}

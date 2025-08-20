@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'+ \033[36;1m$\033[m '
+
+gcloud projects list --format='get(projectId)' |
+  xargs -P20 -rn1 sh -ec '
+    project_name="$1"
+    project="projects/$project_name"
+    set -x
+    gcloud-dump-project "$project"
+    gcloud projects get-iam-policy "$project_name" --format=json \
+      > "$project/iam-policy.json"
+  ' - \
+;

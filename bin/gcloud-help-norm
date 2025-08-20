@@ -1,0 +1,3 @@
+#!/bin/bash
+# this makes alpha/beta help much more readable, and enables accurate diff
+sed -r 's/\*\([A-Z]+\)\*  //' | sed -zr 's/\n                               *(\S)/\1/g'

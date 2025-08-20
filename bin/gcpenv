@@ -47,7 +47,7 @@ case $# in
     ;;
 esac
 
-if ! gcloud config configurations activate "$gcpenv"; then
+if ! show gcloud config configurations activate "$gcpenv"; then
   show gcloud config configurations create "$gcpenv"
   show gcloud config set project "$gcpenv"
   show gcloud config set account "$EMAIL"

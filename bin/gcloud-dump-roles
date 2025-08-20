@@ -1,24 +1,20 @@
 #!/bin/bash
 set -euo pipefail
-HERE="$(cd "$(dirname "$0")"; pwd)"
-export PS4=$'\x1b[31;1m$\x1b[m '
-
-show() {(
-  set -x
-  "$@"
-)}
-
+export PS4=$'+ \033[32;92m$\033[m '
 
 ( # org custom roles:
   show gcloud organizations list --format='value(name)' |
-    xargs -tr --replace gcloud iam roles list --format json --organization={}
-
+    xargs -r -P50 --replace \
+      show gcloud iam roles list --format json --organization={} \
+  ;
   # project custom roles
   show gcloud projects list --format='value(projectId)' |
-    xargs -tr -P50 --replace gcloud iam roles list --format json --project={}
+    xargs -r -P50 --replace \
+      show gcloud iam roles list --format json --project={} \
+  ;
 
   # built-in roles
   show gcloud iam roles list --format json
 ) |
   stdbuf -oL jq '.[] | .name' -r |
-  xargs -P50 -L1 -r "$HERE"/gcloud-dump-role
+  xargs -P50 -L1 -r show gcloud-dump-role

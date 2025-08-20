@@ -38,7 +38,10 @@ function history() {
   if [[ "$#" -eq 0 ]] ; then
     # Modify default options.
     set -- -LDi -n
+  elif [[ "$#" -eq 1 ]] && [[ "$1" -ne 0 ]]; then
+    set -- -n -- -"$1"
   fi
+  # > same as `fc -l`
   builtin history "$@"
 }
 
@@ -50,13 +53,17 @@ fpath+=(
   "$HOMEBREW_PREFIX"/completions/zsh
   "$HOMEBREW_PREFIX"/share/zsh/site-functions
 )
-autoload -Uz compinit
-compinit
+zmodload -i zsh/parameter
+if ! (( $+functions[compdef] )) ; then
+    autoload -U +X compinit && compinit
+fi
 zstyle ':completion:*' insert-unambiguous yes
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*' select yes
 ## this causes ambiguous completions:
 #zstyle ':completion:*' menu yes
+
+autoload -U +X bashcompinit && bashcompinit
 
 zkbd_dir="${ZDOTDIR:-$HOME}/.zkbd"
 zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"

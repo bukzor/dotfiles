@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+SRC="$1"
+DST="$2"
+
+set -x
+git clean -fdxfn "$SRC"
+cp -r "$SRC" "$DST"
+git add "$DST"
+git status "$DST"

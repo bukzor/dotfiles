@@ -1,0 +1,55 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'+ \033[35;1m$\033[m '
+
+if [ $# -ne 1 ]; then
+  cat >&2 <<EOF
+usage: $0 {FOLDER|ORG}"
+EX:
+    $0 folders/573787052384
+    $0 organizations/225313812765
+EOF
+  exit 1
+fi
+
+resource="$1"
+resource_type="$(sed 's@/[^/]*$@@' <<< "$resource")"
+resource_name="$(sed 's@^[^/]*/@@' <<< "$resource")"
+
+case "$resource_type" in
+  organizations)
+    resource_singular=organization
+    subcommand=(organizations)
+  ;;
+  folders)
+    resource_singular=folder
+    subcommand=(resource-manager folders)
+  ;;
+  *) echo >&2 wat: "$resource"; exit 1;;
+esac
+
+resource="$(gcloud "${subcommand[@]}" describe "$resource_name" --format=json)"
+id=$(jq -r .name <<< "$resource")  # e.g. folders/12312415412
+name=$(jq -r .displayName <<< "$resource")
+
+mkdir -p "$id"
+symlink "$id" "$(dirname "$id")"/"$(basename "$name")"
+
+parent=$(jq -r .parent <<< "$resource")
+if [ "$parent" = null ]; then
+  # top-level object
+  exit 0
+elif ! [ -e "$parent" ]; then
+  # recurse, if needed
+  "$0" "$parent"
+fi
+
+parent_type="$(dirname "$parent")"
+if [ "$parent_type" =  "$resource_type" ]; then
+  # no need to repeat the type when the parent type is the same
+  symlink "$id" "$parent/$name"
+else
+  symlink "$id" "$parent/$resource_type/$name"
+fi
+
+tee "$id/$resource_singular.json" <<< "$resource"  # success

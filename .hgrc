@@ -4,19 +4,26 @@
 username=Buck Evan <buck.2019@gmail.com>
 merge = vimmerge
 ignore=~/.hgignore_global
+interface = curses
+relative-paths = True
+
+[graph]
+color=yes
 
 [extensions]
 progress =
 graphlog =
 patience = ~/.config/hg/extensions/patience.py
 
-#git=/usr/local/lib/python2.7/dist-packages/hggit/
+hggit = ~/.config/hg/extensions/hg-git/hggit
+evolve = ~/.config/hg/extensions/evolve/hgext3rd/evolve
 #mq=
 color=
 strip=
 rebase=
 pager=
 #hgshelve=/home/greg/src/hgshelve/hgshelve.py
+absorb=
 histedit=
 #extdiff=
 extdiff2 = ~/.config/hg/extensions/extdiff2.py
@@ -36,23 +43,47 @@ git = True
 related(s) = closure(s::)
 closure(s) = ancestor(s)::s
 revisions(s) = allprecursors(s) + allsuccessors(s) + s
-base = heads(::. - draft())
+history(s) = closure(revisions(s))
+
+branchof(s) = ::s - public()
+andparent(s) = s + parents(s)
+andchild(s) = s + children(s)
+survivors(s) = andchild(allsuccessors(s) - obsolete())
+andsurvivors(s) = s + survivors(s)
+stem(s) = roots(branchof(s))
+root(s) = parents(stem(s))
+xor(x, y) = (x or y) - (x and y)
+
 
 [commands]
 status.relative = True
+status.verbose = True
+
+# prevent accidentally pushing everyone's branches
+push.require-revs = True
+
+# Grep working directory by default.
+grep.all-files = False
+
 
 [histedit]
 dropmissing = True
 
 [alias]
-ll = log -G -T compact
-l = ll -r tree -r 'ancestor(p4head, . % p4head)::. + .::head()'
-history = ll --hidden -rev 'closure(revisions(.))'
-xl = l -r smart
-changed = status -n --rev base
+reword = metaedit
+rollback = backout
 
-stat = diff -r base --stat
-diff-base = vimdiff -r base
+ll = log -G
+l = ll -r 'root(.)::. + .::head()'
+
+ltrouble = ll --hidden -r 'closure(andparent(andsurvivors(troubled() + suspended())))'
+
+xl = ll -r 'root(head())::'
+history = ll --hidden --rev 'history(.)'
+changed = status -n --rev 'root(.)'
+
+stat = diff -r 'root(.)' --stat
+diff-root = vimdiff -r 'root(.)'
 difftool = vimdiff
 dt = difftool
 show = log -l1 -p -r
@@ -60,9 +91,52 @@ ls-files = status -manc .
 hg = !/usr/games/cowsay -f stegosaurus $HG_ARGS | /usr/games/lolcat; $HG $@
 - = ! $HG co "$($HG journal -l1 -T '{oldnodes}' -q)" $@
 s = status
+lg = log --template "{label('custom.rev', rev)}\t{label('custom.phase',phase)}\t{label('custom.tag',tags)}\t{desc|firstline} {label('custom.age', date|age)} {label('custom.user', author|user)}\n"
+
+
+bookmark-name = log -r '.' -T '{activebookmark}\n'
+branch-name = bookmark-name
+
+
+[alias]  # hg->gh: my fingers can't keep it straight...
+pr = ! gh pr "$@"
+workflow = ! gh workflow "$@"
+run = ! gh run "$@"
+act = ! gh act "$@"
+actions = ! gh actions "$@"
+
 
 [command-templates]
 log = '{changeset_levels}'
+
+[color]
+mode = terminfo
+
+color.bright-black = 8
+color.bright-red = 9
+color.bright-green = 10
+color.bright-yellow = 11
+color.bright-blue = 12
+color.bright-magenta = 13
+color.bright-cyan = 14
+color.bright-white = 15
+
+color.pink = 5
+color.bright-pink = 13
+color.teal = 6
+color.bright-teal = 14
+
+ui.note =
+
+log.date = bright-blue
+log.user = teal
+log.node = blue
+log.bookmark = yellow
+log.parent = green
+log.tag = bright-green bold
+
+changeset.draft = blue
+changeset.public = bright-black
 
 [templates]
 changeset_levels = '{
@@ -73,38 +147,44 @@ changeset_levels = '{
   )))}'
 
 # stolen from mercurial/templates/map-cmdline.compact
-changeset = '{lrev}{tags}{bookmarks}{parents}   {lnode}   {ldate}   {luser}\n  {ldescfirst}\n\n'
-changeset_quiet = '{lrev}:{lnode}\n'
-changeset_verbose = '{lrev}{tags}{parents}   {lnode}   {ldate}   {lauthor}\n  {ldesc}\n\n'
-changeset_debug = '{changeset_normal}'
+changeset = '{lrev}{lparents}{lage} {luser}: {lbookmarks}{ltags}\n{ldescfirst}\n'
+changeset_quiet = '{lrev}{lage} {luser}: {ldescfirst}\n'
+changeset_verbose = '{lrev}{lparents}:{lnode}{lbookmarks}{ltags} {ldate} {lauthor}\n  {ldesc}\n'
+changeset_debug = '{changeset_quiet}namespaces: {json(namespaces)}\nextras: {json(extras)}\n'
 
-ldate = '{label("log.date", "{date|isodate}")}'
-ldesc = '{label('ui.note log.description', '{desc|strip}')}'
-ldescfirst = '{label('ui.note log.description', '{desc|firstline|strip}')}'
-lrev = '{label("log.changeset changeset.{phase}", "{rev}")}'
-lnode = '{label("log.node", "{node|short}")}'
-lauthor = '{label("log.user", "{author}")}'
-luser = '{label("log.user", "{author|user}")}'
-start_tags = '['
-tag = '{label("log.tag", "{tag},")}'
-last_tag = '{tag}]'
-start_parents = ':'
-parent = '{lrev},'
-last_parent = '{lrev}'
-start_bookmarks = '['
-bookmark = '{label("log.bookmark", "{bookmark},")}'
-last_bookmark = '{bookmark}]'
+lage = '({label("log.date", date|age)})'
+ldate = '{label("log.date", date|rfc3339date)}{lage}'
+ldesc = '{label('ui.note log.description', desc|strip)}'
+ldescfirst = '{label('ui.note log.description', desc|firstline|strip)}'
+lrev = '{label("log.changeset changeset.{phase}", rev)}'
+lnode = '{label("log.node", node|short)}'
+lauthor = '{label("log.user", author)}'
+luser = '{label("log.user", author|user)}'
 
+# lists
+ltags = '{if(tags, ltags_if)}'
+ltags_if = '\{{join(tags % ltag, ',')}}'
+ltag = '{label("log.tag", tag)}'
+
+lparents = '{if(parents, lparents_if)}'
+lparents_if = '<{join(parents % lparent, ',')}>'
+lparent = '{label("log.parent", lrev)}'
+
+lbookmarks = '{if(bookmarks, lbookmarks_if)}'
+lbookmarks_if = '[{join(bookmarks % lbookmark, ',')}]'
+lbookmark = '{label("log.bookmark", bookmark)}'
+
+raw = '{tags|dict}\n'
 
 
 [merge-tools]
-vimmerge.args = $local $output $other $base
+vimmerge.args = $local $output $base $other
 vimmerge.premerge = keep-merge3
 
 [pager]
-pager = less -XLFR
+pager = less -FRXL
 # defaults, plus help
-attend = annotate, cat, diff, export, glog, log, ll, xl, l, qdiff, help, show
+attend = annotate, cat, diff, export, glog, log, ll, xl, l, qdiff, help, show, history, lt
 
 [phases]
 publish = False
@@ -142,5 +222,22 @@ update = True
 [rewrite]
 empty-successor = skip
 
+[hggit]
+usephases = 1
+
+[git]
+# commits reachable from remote HEAD are public
+public =
+  main
+  master
+  stable
+
+similarity = 10
+pull-prune-bookmarks = True
+pull-prune-remote-branches = True
+
+# git config set bare=false
+# alias git='sh -exc '\''sudo -u buck-ro git "$@"'\'' - '
+intree = True
 
 %include private-dotfiles/.hgrc

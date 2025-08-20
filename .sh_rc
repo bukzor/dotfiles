@@ -155,7 +155,9 @@ esc() {
   echo -n "$PSLESC$1$PSRESC"
 }
 
-PS1="$(esc "$YELLOW")$PS1PWD
+PS1=\
+'${PS1_PREFIX:-}'\
+"$(esc "$YELLOW")$PS1PWD
 "\
 "$(esc "$PURPLE")$PSDATE "\
 "$(esc "$BLUE")$PSUSER"\

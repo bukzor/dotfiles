@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'+ \033[32;1m$\033[m '
+
+gcloud organizations list --format='get(name)' |
+  xargs -P20 -rn1 sh -ec '
+    org="$1"
+    mkdir -p "$org"
+    set -x
+    gcloud organizations describe "$org" --format=json \
+      > "$org/organization.json"
+    gcloud organizations get-iam-policy "$org" --format=json \
+      > "$org/iam-policy.json"
+  ' -

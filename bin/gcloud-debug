@@ -1,0 +1,4 @@
+#!/bin/sh
+set -ex
+env CLOUDSDK_CORE_LOG_HTTP_REDACT_TOKEN=false  CLOUDSDK_CORE_LOG_HTTP=true \
+  gcloud "$@"

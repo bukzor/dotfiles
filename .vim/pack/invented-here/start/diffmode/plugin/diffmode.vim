@@ -54,7 +54,8 @@ augroup diff_mode_plugin
   silent! set diffopt+=hiddenoff
   silent! set diffopt+=algorithm:patience
 
-  au VimEnter,OptionSet * call DiffEvent()
+  au VimEnter * call DiffEvent()
+  au OptionSet diff call DiffEvent()
   au User DiffModeEnter call DiffModeEnter()
   au User DiffModeExit call DiffModeExit()
 

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+path="$1"
+base="${2:-$PWD}"
+
+path="$(realpath -Lms --relative-base="$base" "$path")"
+
+case "$path" in
+  /*) echo "$path";;
+  .) echo "$path";;
+  *) echo ./"$path";;
+esac

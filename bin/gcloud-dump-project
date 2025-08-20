@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+export PS4=$'+ \033[31;91m$\033[m '
+
+if [ $# -ne 1 ]; then
+  cat >&2 <<EOF
+usage: $0 project"
+EX:
+    $0 projects/528367808167
+EOF
+  exit 1
+fi
+
+project="$1"
+project_type="$(sed 's@/[^/]*$@@' <<< "$project")"
+project_name="$(sed 's@^[^/]*/@@' <<< "$project")"
+
+case "$project_type" in
+  projects) subcommand=(projects);;
+  *) echo >&2 wat: "$project"; exit 1;;
+esac
+
+project="$(gcloud "${subcommand[@]}" describe "$project_name" --format=json)"
+id="projects/$(jq -r .projectNumber <<< "$project")"  # e.g. projects/12312415412
+name=$(jq -r .projectId <<< "$project")
+
+mkdir -p "$id"
+symlink "$id" "$(dirname "$id")"/"$(basename "$name")"
+
+# e.g. folders/3959210132 or organizations/1234
+parent=$(jq -r '.parent | "\(.type)s/\(.id)"' <<< "$project")
+
+if ! [ -e "$parent" ]; then
+  # recurse, if needed
+  gcloud-dump-folder "$parent"
+fi
+
+symlink "$id" "$parent/projects/$name"
+
+tee "$id/project.json" <<< "$project"  # success

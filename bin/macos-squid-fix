@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+# There's a constellation of three bugs here:
+#   1. if squid crashes during startup, it leaves a shared memory object locked
+#   1. any non-root user attempting to start squid in this state will fail with:
+#      ```
+#      FATAL: Ipc::Mem::Segment::create failed to shm_open(/squid-cf__metadata.shm): (17) File exists
+#      ```
+#   1. when squid runs as root (without a `cache_effective_group` in place) it
+#       uses the 'nobody' group rather than (as document) root's default group
+#       (wheel), so it will fail to write any files that seem to allow write
+#       access via group-id
+#   1. when squid does start as root, it modifies the ownership of files to no
+#     longer belong to the real user, so squid will still fail with file
+#     permissions (causing `sudo squid` to fail on shm_open)
+#
+#   The overall result is that if squid is started as a normal user
+#   (successfully!), then is run with sudo, it will fail, and in such a way that
+#   the normal user stops working, too, until root successfully starts squid,
+#   which requires settings/permissions that will cause the normal user to fail
+#   to start squid...
+
+expect_sigint() {
+  if "$@"; status=$?; [[ $status == 124 ]]; then
+    : expected failure 'timeout: sending signal INT'
+  elif [[ $status == 0 ]]; then
+    : unexpected success!?
+    exit 1
+  else
+    : unexpected failure
+    exit $status
+  fi
+}
+
+USER=$(id -un)
+root_GID=$(id -g root)
+nobody_GID=$(id -g nobody)
+
+PREFIX=/opt/homebrew
+writables=(
+  "$PREFIX/var/cache/squid"  # cache_dir
+  "$PREFIX/var/log/squid.access.log"  # access_log
+  "$PREFIX/var/log/squid.cache.log"  # cache_log
+)
+#
+
+set -x
+: adjust permissions to allow squid-as-root to not crash
+sudo chown -R "${USER}:${nobody_GID}" "${writables[@]}"
+chmod -R g+w "${writables[@]}"
+
+: run as root to unlock shared memory...
+expect_sigint sudo timeout --verbose --signal=SIGINT 3 squid -N -d 1
+
+: put ownership back where it belongs
+sudo chown -R "${USER}:${root_GID}" "${writables[@]}"
+
+: running in foreground to verify fix...
+expect_sigint timeout --verbose --signal=SIGINT 3 squid -N -d 1
+
+brew services start squid
+
+: FIXED

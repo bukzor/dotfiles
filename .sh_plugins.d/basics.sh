@@ -18,12 +18,12 @@ if ! [ "$TERM" ]; then
   TERM=xterm-256color
 fi
 if ! [ "$SHELL" ]; then
-  set -x  # this should be exceptional
   if [ -d /proc ]; then
     SHELL="$(readlink /proc/$$/exe)"
-  elif ! SHELL="$(ps -o exe= -p $$ 2>&1)"; then
-    : 'macos: I am not a fan: SHELL='"'$SHELL'"
+  elif ! SHELL="$(ps -o ucomm= -p $$ 2>&1)"; then
+    warn 'macos: I am not a fan: SHELL='"'$SHELL'"
+    set -x  # this should be exceptional
     unset SHELL
+    set +x
   fi
-  set +x
 fi

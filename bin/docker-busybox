@@ -14,7 +14,7 @@ options=(
   # interactive terminal
   -ti
 )
-podman run \
+docker run \
   "${options[@]}" \
   busybox \
   sh -xc '

@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+git branch |
+  grep bukzor/ |
+  sed 's/..//' |
+  xargs -tr \
+    git push "$(git remote-upstream)" --force-with-lease --force-if-includes \
+;

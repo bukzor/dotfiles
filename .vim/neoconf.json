@@ -1,4 +1,17 @@
 {
+  "jsonls": {
+    "filetypes": [
+      "json",
+      "jsonc"
+    ],
+    "settings": {
+      "json": {
+        "format": {
+          "enable": false
+        }
+      }
+    }
+  },
   "neodev": {
     "library": {
       "enabled": true,

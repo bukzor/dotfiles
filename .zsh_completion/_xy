@@ -1,0 +1,11 @@
+#compdef xy
+
+_xy() {
+  set -x
+  : A PID:$$ SUBSHELL:$ZSH_SUBSHELL bq_COMMANDS: "$bq_COMMANDS"
+  x=$((x + 1))
+  echo x:$x
+  set +x
+}
+
+complete -o default -F _xy xy

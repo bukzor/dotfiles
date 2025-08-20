@@ -1,0 +1,11 @@
+black
+covdefaults
+coverage
+coverage-enable-subprocess
+mercurial
+pre-commit
+pudb
+pylint
+pyright
+pytest
+PyYAML

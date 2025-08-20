@@ -1,0 +1,12 @@
+#!/bin/sh
+set -ex
+
+ps -ef |
+  grep -E 'lang[^ ]*serv|pylsp|pyright' |
+  grep -Ev '\<(grep|vim|'"$(basename "$0")"')\>' |
+  tee /dev/stderr |
+  awkf 2 |
+  xargs -tr kill \
+;
+
+watchman shutdown-server

@@ -1,0 +1,37 @@
+{
+  "neodev": {
+    "library": {
+      "enabled": true,
+      "plugins": [
+        "neoconf.nvim",
+        "nvim-lspconfig"
+      ]
+    }
+  },
+  "neoconf": {
+    "plugins": {
+      "lua_ls": {
+        "enabled": true
+      }
+    }
+  },
+  "lspconfig": {
+    "lua_ls": {
+      "Lua.workspace.userThirdParty": [],
+      "Lua.runtime.path": [
+        "?.lua",
+        "?/init.lua"
+      ],
+      "Lua.runtime.builtin": {},
+      "Lua.workspace.library": [
+        "/Users/buck/.local/share/lunarvim/site/pack/lazy/opt/neodev.nvim/types/stable",
+        "/opt/homebrew/Cellar/neovim/0.9.1/share/nvim/runtime/lua",
+        "/Users/buck/.local/share/lunarvim/site/pack/lazy/opt/nvim-lspconfig/lua",
+        "/Users/buck/.local/share/lunarvim/site/pack/lazy/opt/neoconf.nvim/lua",
+        "/Users/buck/.local/share/lunarvim/site/pack/lazy/opt/neoconf.nvim/types",
+        "/Users/buck/.local/share/lunarvim/site/pack/lazy/opt/neoconf.nvim/types/lua",
+        "${3rd}/luv/library"
+      ]
+    }
+  }
+}

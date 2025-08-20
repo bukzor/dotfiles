@@ -1,6 +1,10 @@
 [user]
     name = Buck Evan
-    email = buck.2019@gmail.com
+    handle = bukzor
+
+    # last wins
+    email = buck.evan@sentry.io
+
 [core]
     excludesfile = ~/.gitignore_global
 [init]
@@ -20,24 +24,23 @@
     # relative = false  # break git-vimdiff otherwise
     relative = true  # less useful otherwise
     # SADFACE: these don't work (yet?)
-    find-renames = 0.1
-    find-copies =  0.1
+    find-renames = 10%
+    find-copies = 10%
     find-copies-harder = true
 [difftool]
     prompt = false
+
+[difftool "debug"]
+    cmd = "echo ---; echo \"BASE:$BASE\"; echo \"LOCAL:$LOCAL\"; echo \"MERGED:$MERGED\"; echo \"REMOTE:$REMOTE\""
 [difftool "vimdiff"]
     # unset GIT_EXTERNAL_DIFF, to allow :!git diff to work
     # unset GIT_DIR and GIT_WORK_TREE, because it confuses GitSigns badly
     # The `vim` command is the same that git would use by default, except
     # missing a -R (readonly) option.
-    cmd = env \
-        --unset=GIT_EXTERNAL_DIFF \
-        --unset=GIT_DIR \
-        --unset=GIT_WORK_TREE \
-        --chdir=\"$GIT_PREFIX\" \
-        vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$MERGED\"
-        # or maybe:
-        #   vim -f -d -c \"wincmd l\" \"$LOCAL\" \"$GIT_PREFIX/$MERGED\"
+    cmd = " \
+        unset GIT_DIR GIT_WORK_TREE; \
+        ${GIT_DIFFTOOL_VIM:-vim} -f -d -c \"wincmd l | cd $GIT_PREFIX\" \"$LOCAL\" \"$REMOTE\" \
+    "
 [merge]
     renamelimit = 0
     tool = vimmerge
@@ -47,22 +50,40 @@
     keepBackup = false
     trustExitCode = true
 [mergetool "vimmerge"]
-    cmd = vimmerge $REMOTE $MERGED $LOCAL $BASE
+    cmd = "set -x; vimmerge $REMOTE $MERGED $LOCAL $BASE"
 [push]
     default = current
+    useForceIfIncludes = true
 [pull]
     ff = only
+[rebase]
+    rebaseMerges = rebase-cousins
+    # mark any 'fixup! ...' commits as fixup
+    autoSquash = true
+    # use reflog to pick a better base SHA
+    forkPoint = true
+
+    # Automatically force-update any branches that point to commits that are
+    # being rebased. Any branches that are checked out in a worktree are not
+    # updated in this way.
+    updateRefs = true
+
 [advice]
     detachedHead = false
 [alias]
-    l = log --oneline --graph --decorate --color=always --pretty=format:\"%C(auto)%h %C(bold blue)%aL %Cgreen(%cr)%C(auto)%d%Creset %s\"
-    xl = l --all
-    ff = !sh -exc 'git pull --ff "$@"' -
+    ll = log --oneline --graph --decorate --color=always --pretty=format:%C(auto)%h\\ %C(bold\\ blue)%aE\\ %Cgreen(%cr)%C(auto)%d%Creset\\ %s
+    l = !sh -ec 'git ll HEAD ^"$(git upstream)" "$@"' -
+    xl = ll --all
+
+    ff = merge --ff-only
+
+    push-mine = !git-push-mine
     branch-name = symbolic-ref -q --short HEAD
     tag-name = !sh -exc 'git tag -l --points-at ${1:-HEAD}' -
     base = !sh -exc 'git merge-base "$(git upstream)" ${1:-HEAD}' -
     diffbase = !git dt $(git base)
     feature = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git master && git checkout -b "$b" "$@"' -
+    is-clean = diff-index --quiet HEAD
     vimdiff = difftool
     dt = difftool
     d = diff
@@ -74,11 +95,23 @@
     ci = commit
     top = rev-parse --show-toplevel
     s = status -s
-    topic = !set -x && git fetch origin master && git checkout FETCH_HEAD -b
-    top = rev-parse --show-toplevel
+    sha = !sh -exc 'git rev-parse ${1:-HEAD}' -
 [http]
     cookiefile = ~/.gitcookies
 [include]
     path = ./private-dotfiles/.gitconfig
+
+[log]
+    diffMerges = dense-combined
+[safe]
+    directory = /Users/buck/repo/getsentry/tacos-gha.hg
+    directory = /Users/buck/repo/getsentry/tacos-gha.hg
+    directory = /Users/buck/repo/getsentry/tacos-gha.hg2
+    directory = /Users/buck/repo/getsentry/tacos-gha
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 
 # vim:sts=4:sw=4:et:

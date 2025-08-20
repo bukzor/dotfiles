@@ -7,6 +7,9 @@ fi
 # completions for travis, added by travis gem
 . ~/.sh_lib/functions.d/trysource.sh
 trysource ~/.travis/travis.sh
+if has tenv; then
+  eval "$(tenv completion "$(basename "$SHELL")")"
+fi
 
 
 if [ "${BASH:-}" ]; then

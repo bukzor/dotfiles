@@ -3,7 +3,21 @@ local M = {}
 M.treesitter_dir = vim.fn.stdpath("data") .. "/tree-sitters"
 
 function M.setup()
-  vim.opt.runtimepath:append(M.treesitter_dir)
+  -- prepend, to avoid https://github.com/nvim-treesitter/nvim-treesitter/issues/3092
+  vim.opt.runtimepath:prepend(M.treesitter_dir)
+
+  local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+  parser_config["sql_bigquery"] = {
+    install_info = {
+      url = "~/repo/tree-sitter-sql-bigquery",
+      files = { "src/parser.c", "src/scanner.c" },
+      branch = "main",                        -- default branch in case of git repo if different from master
+      generate_requires_npm = false,          -- if stand-alone parser without npm dependencies
+      requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
+    },
+    filetype = "sql_bigquery",                -- if filetype does not match the parser name
+  }
+
   require("nvim-treesitter.configs").setup({
     -- A list of parser names, or "all"
     ensure_installed = {},

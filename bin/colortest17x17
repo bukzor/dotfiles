@@ -6,25 +6,77 @@
 #   out of 17 (default + 16 escapes), followed by a
 #   test use of that color on all nine background
 #   colors (default + 8 escapes).
-#
+
+
+colorgrid() {
+  BGs="$1"
+  FGs="$2"
+
+  # BG header
+  printf '           0m'
+  #printf '      '
+  for BG in $BGs; do
+    printf ' %7s' "$BG"
+  done  # BG
+  echo
+
+  # FG body
+  for FG in $FGs; do
+    for bold in '' '1;'; do
+      fg="$bold$FG"
+      printf ' %6s \033[%s  %s  ' "$fg"  "$fg" "$T"
+      #printf ' %6s ' "$fg"
+      for BG in $BGs; do
+        printf ' \033[%s\033[%s  %s  \033[0m' "$fg" "$BG" "$T"
+      done  # BG
+      echo
+    done  # bold
+  done  # FG
+  echo
+}
+
 
 T='1il'   # The test text
-BGs='7m 40m 100m 41m 101m 42m 102m 43m 103m 44m 104m 45m 105m 46m 106m 47m 107m'
-FGs='0m 7m 30m 90m 31m 91m 32m 92m 33m 93m 34m 94m 35m 95m 36m 96m 37m 97m'
+#BGs_dark='7m 40m 41m 42m 43m 44m 45m 46m 47m'
+#BGs_bright='7m 100m 101m 102m 103m 104m 105m 106m 107m'
 
-printf '            '
-for BG in $BGs; do
-  printf ' %7s' "$BG"
-done
-echo
+#FGs_dark='0m 7m 30m 31m 32m 33m 34m 35m 36m 37m'
+#FGs_bright='0m 7m 90m 91m 92m 93m 94m 95m 96m 97m'
 
-for FG in $FGs; do
-  for bold in '' '1;'; do
-    fg="$bold$FG"
-    printf ' %5s \033[%s  %s  ' "$fg"  "$fg" "$T"
-    for BG in $BGs; do
-      printf ' \033[%s\033[%s  %s  \033[0m' "$fg" "$BG" "$T"
-    done
-    echo
-  done
-done
+BGs_dark='7m 40m 41m 42m 43m 44m 45m 46m 47m'
+FGs_bright='0m 7m 90m 91m 92m 93m 94m 95m 96m 97m'
+colorgrid "$BGs_dark" "$FGs_bright"
+
+BGs_bright='7m 100m 101m 102m 103m 104m 105m 106m 107m'
+FGs_dark='0m 7m 30m 31m 32m 33m 34m 35m 36m 37m'
+colorgrid "$BGs_bright" "$FGs_dark"
+
+
+# contrast priority:
+#   1. always bright vs dark
+#   1. bg
+#   1. fg
+#   1. bright yellow
+#   1. dark black
+#   1. dark red
+#   1. dark blue
+#   1. bright green
+#   1. dark purple
+#   1. light teal
+#   1. never white/white
+
+
+###
+# ansi colors
+###
+#
+# 0 black
+# 1 red
+# 2 green
+# 3 yellow
+# 4 blue
+# 5 purple
+# 6 teal
+# 7 white
+#
+###

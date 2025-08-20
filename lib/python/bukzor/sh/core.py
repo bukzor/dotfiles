@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bukzor.types import Environ, OSPath
+from bukzor.functions import one
+from bukzor.types import Environ
+from bukzor.types import OSPath
 
 from .constant import US_ASCII
 from .io import xtrace
-from .types import Command, Generator
+from .types import Command
+from .types import Generator
 
 # empty lines and lines beginning with '#' not returned
 Line = str
@@ -16,7 +19,8 @@ Line = str
 
 if TYPE_CHECKING:
     # strict encapsulation: limit run-time access to just one function each
-    from subprocess import CompletedProcess, Popen
+    from subprocess import CompletedProcess
+    from subprocess import Popen
 
 
 def get_HERE(__file__: str) -> OSPath:
@@ -64,6 +68,10 @@ def lines(cmd: Command, *, encoding: str = US_ASCII) -> Generator[Line]:
             continue
 
         yield line
+
+
+def line(cmd: Command) -> str:
+    return one(lines(cmd))
 
 
 def returncode(cmd: Command) -> int:

@@ -1,4 +1,5 @@
 #!/usr/bin/sed -rf
+# convert gcloud's gargantuan-list json to streaming-friendly newline-delimited json:
 # currently this is "good enough" for use with `gcloud --format=json`
 
 # delete first two columns of characters

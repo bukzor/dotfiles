@@ -1,0 +1,14 @@
+{
+  "name": "TodoWrite",
+  "description": "Minimal override test - manages todo lists",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "todos": {
+        "type": "array",
+        "description": "Todo items"
+      }
+    },
+    "required": ["todos"]
+  }
+}

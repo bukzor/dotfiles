@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "additionalDirectories": ["~/.claude/context"],
+    "allow": [
+      "Read(~/.claude/context/**/CLAUDE.*.md)",
+      "Bash(cp -i:*)",
+      "Bash(mv -i:*)",
+      "Bash(mkdir:*)",
+      "Bash(rmdir:*)",
+      "Bash(chmod:*)",
+      "Bash(ps:*)"
+    ],
+    "deny": ["TodoWrite", "MultiEdit"]
+  },
+  "//hooks": {
+    "SessionStart": [
+      {
+        "PROBLEMA": "this thing is showing up in *every* turn, when using --verbose. see: https://github.com/anthropics/claude-code/issues/5557 ",
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/SessionStart.extra-context.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "feedbackSurveyState": {
+    "lastShownTime": 1754083893860
+  }
+}

@@ -1,11 +1,24 @@
 #!/bin/bash
 set -euo pipefail
+export PS4=$'+ \033[34;1m$\033[m '
 
-if [ $# -eq  0 ]; then
+if grep -q -- -h <<< "$*"; then
+  cat >&2 <<EOF
+  usage: "$0" [FOLDER|ORG]
+
+  with no arguments, dump all visible orgs
+
+EX:
+    $0
+    $0 folders/573787052384
+    $0 organizations/225313812765
+EOF
+elif [ $# -eq  0 ]; then
   # recurse on all visible orgs:
   gcloud organizations list --format=json |
     jq '.[].name' -r |
-    xargs -P20 -trn1 "$0" \
+      xargs -P20 -rn1 \
+        show gcloud-dump-folders \
   ;
   exit 0
 fi
@@ -13,19 +26,18 @@ fi
 parent="$1"
 parent_type="$(sed 's@/[^/]*$@@' <<< "$parent")"
 parent_name="$(sed 's@^[^/]*/@@' <<< "$parent")"
-
 case "$parent_type" in
   organizations) type="organization";;
   folders) type="folder";;
   *) echo >&2 wat: "$parent"; exit 1;;
 esac
 
-mkdir -p folders
-folderfile="folders/$parent_name.$type.json"
+gcloud-dump-folder "$parent"
+
 gcloud resource-manager folders list "--$type=$parent_name" --format=json |
   json-to-jq |
-  tee "$folderfile" |
   jq .name -r |
   # recurse on sub-folders
-  xargs -P20 -trn1 "$0" \
+  xargs -P20 -rn1 \
+    show gcloud-dump-folders \
 ;

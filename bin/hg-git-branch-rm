@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euxo pipefail
+branch="$1"
+revset='only('"$branch"')::'
+
+set -x
+hg glog --stat -r "$revset"
+
+( { set +x; } 2>/dev/null
+  yesno "Please confirm DELETION of git branch '$branch'"
+)
+
+hg obso -r "$revset"
+hg bookmark -d "$branch"
+hg push --bookmark "$branch"
+hg pull

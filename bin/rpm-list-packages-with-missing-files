@@ -1,0 +1,16 @@
+#!/bin/sh
+rmquery --all --docfiles |
+  grep -vFx '(contains no files)
+' |
+  tr '\n' '\0' |
+  xargs -0 sh -c '
+    for file in "$@"; do
+      if ! [[ -e "$file" ]]; then
+        echo "$file"
+      fi
+    done
+  ' - |
+  tr '\n' '\0' |
+  xargs -0 rpmquery -f 
+  uniq \
+;

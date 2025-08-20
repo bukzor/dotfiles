@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+
+# ASCII "Unit Separator" "Record Separator" "Group Separator"
+if [[ $# -eq 1 ]]; then
+  LO="1"
+  HI="$1"
+  SEED="$RANDOM"
+elif [[ $# -eq 2 ]]; then
+  LO="$1"
+  HI="$2"
+  SEED="$RANDOM"
+else
+  LO="$1"
+  HI="$2"
+  SEED="$*"
+fi
+
+if [[ $# -eq 0 ]]; then  # TODO: check arguments
+  cat >&2 <<EOF
+usage: roll [LO=1] HI [SEED]
+
+example:
+
+  # chosen by fair dice roll
+  roll 6
+
+  # choose a hashed background color
+  "$(tmux display-message -p '#{session_name}')" | roll 30 38
+EOF
+  if [[ $# -eq 0 ]]; then
+    exit 0
+  else
+    exit 1
+  fi
+fi
+
+
+shuf \
+  -n1 \
+  --input-range="$LO-$HI" \
+  --random-source=<(sha256sum <<< "$SEED") \
+;

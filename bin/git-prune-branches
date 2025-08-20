@@ -1,36 +1,44 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD)
 if [[ $BRANCH == HEAD ]]; then
     echo "Can't prune from detached state" >&2
     exit 1
 fi
-export GIT_COMMITER_EMAIL=${GIT_COMMITER_EMAIL:-$(git config user.email)}
-if [[ ! "$GIT_COMMITER_EMAIL" ]]; then
+export GIT_COMMITTER_EMAIL=${GIT_COMMITTER_EMAIL:-$(git config --get-all user.email)}
+if [[ ! "$GIT_COMMITTER_EMAIL" ]]; then
     echo 'Please set your email: git config --global user.email me@example.com'  >&2
     exit 1
 fi
-UPSTREAM=$(git rev-parse --symbolic-full-name --abbrev-ref @{u})
+UPSTREAM=$(git rev-parse --symbolic-full-name --abbrev-ref '@{u}')
 
 colorize() {
-    echo -e "\033[01;36m>\033[m \033[01;33m$@\033[m" >&2
+    echo -e "\033[01;36m>\033[m \033[01;33m$*\033[m" >&2
     "$@"
 }
 export -f colorize
 
+export github_handle
+github_handle=$(git config user.handle)
+
 colorize git fetch --all --prune --tags
 colorize git branch -q -a --merged "$UPSTREAM" |
-    sed 's/^[[:space:]]*//; s/[[:space:]].*//' |
-    grep -Ev "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" |
-    xargs -r --replace bash --norc -ec '
-        # only mess with branches where I am the last committer
-        git log -1 --format=%ae "{}" | grep -Fxq "$GIT_COMMITER_EMAIL"
-        if [[ "{}" =~ ^remotes/ ]]; then
-            colorize git push --quiet --delete $(
-                sed '\''s|^remotes/||; s|/| |;'\'' <<< "{}"
-            )
-        else
-            colorize git branch -d "{}"
-        fi
-    '
+  sed 's/^[[:space:]]*//; s/[[:space:]].*//' |
+  grep -Ev "^(\*.*|remotes/$UPSTREAM|${UPSTREAM##*/})$" |
+  xargs -r --replace bash -euo pipefail -c '
+    if [[ "${DEBUG:-}" ]]; then
+      set -x
+    fi
+    if ! git log -1 --format=%ae "{}" | grep -qFx "$GIT_COMMITTER_EMAIL"; then
+      : not my commit: {}
+    elif [[ "{}" =~ ^remotes/[^/]*/$github_handle/ ]]; then
+      colorize git push --quiet --delete $(
+        sed '\''s|^remotes/||; s|/| |;'\'' <<< "{}"
+      )
+    elif [[ "{}" =~ ^remotes/ ]]; then
+      : not my branch: {}
+    else
+      colorize git branch -d "{}"
+    fi
+  '

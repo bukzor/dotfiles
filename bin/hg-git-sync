@@ -1,0 +1,44 @@
+#!/bin/bash
+# a helper for use with hg-git and git.intree=True:
+# bring the in-tree git state in line with hg
+set -euo pipefail
+
+(set -x; hg gitimport )
+sha_hg="$(hg log -l1 -r . --template "{gitnode}")"
+if ! [[ "$sha_hg" ]]; then
+  cat >&2 <<EOF
+current hg working copy has no corresponding gitnode!
+EOF
+  exit 1
+fi
+
+branch_hg="$(hg log -r '.' -T '{activebookmark}')"
+if ! [[ "$branch_hg" ]]; then
+  cat >&2 <<EOF
+current hg working copy has no active bookmark!
+tip:
+    hg co my-feature
+EOF
+  exit 1
+fi
+
+branch_git="$(git symbolic-ref -q --short HEAD || : no branch)"
+#sha_git="$(git rev-parse HEAD)"
+
+set -x
+
+: ensure that the below commands can modify .git but not any other files:
+chmod -R a-w .
+chmod -R u+w .git
+
+if [[ "$branch_hg" == "$branch_git" ]]; then
+  : already checked out: "$branch_hg"
+  git reset -q --mixed "$sha_hg"
+else
+  git checkout -q --detach
+  git reset -q --mixed "$sha_hg"
+  git checkout -q "$sha_hg" -B "$branch_hg"
+fi
+
+chmod -R u+w .
+git status

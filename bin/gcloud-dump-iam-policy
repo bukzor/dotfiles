@@ -1,39 +1,25 @@
 #!/bin/bash
 set -euo pipefail
-HERE="$(cd "$(dirname "$0")"; pwd)"
+export PS4=$'+ \033[31;1m$\033[m '
 
 set -x
-mkdir -p iam-policy
 
-my_org="$(gcloud organizations list --format=json | jq '.[].name' -r)"
+if [ -d organizations ]; then
+  rm -r organizations
+fi
+gcloud-dump-org-iam
 
-rm iam-policy/org-policy.json -f
-gcloud organizations get-iam-policy "$my_org" --format=json \
-  > iam-policy/org-policy.json
+if [ -d folders ]; then
+  rm -r folders
+fi
+gcloud-dump-folders-iam
 
-gcloud projects list --format=json |
-  json-to-jq  \
-  > projects.list.json \
-;
+if [ -d projects ]; then
+  rm -r projects
+fi
+gcloud-dump-projects-iam
 
-rm iam-policy/*.project-policy.json -f
-< projects.list.json jq .projectId -r |
-  xargs -P20 -rn1 sh -ec '
-    project="$1"
-    set -x
-    gcloud projects get-iam-policy "$project" --format=json \
-      > iam-policy/"$project".project-policy.json
-  ' - \
-;
-
-"$HERE/"gcloud-dump-folders
-rm iam-policy/*.folder-policy.json -f
-cat folders/*.json |
-  jq .name -r |
-  sed 's@^folders/@@' |
-  xargs -P20 -rn1 sh -ec '
-    folder="$1"
-    set -x
-    gcloud resource-manager folders get-iam-policy "$folder" --format=json \
-      > iam-policy/"$folder".folder-policy.json
-  ' -
+if [ -d roles ]; then
+  rm -r roles
+fi
+gcloud-dump-roles

@@ -15,6 +15,7 @@ options=(
   -r  # show time deltas for each line
   -T  # show time spent in syscalls
   -e 'trace=!signal,memory'  # suppress syscalls that are never useful
+  -s 999  # truncate strings less
 )
 
 exec strace "${options[@]}" "$@"

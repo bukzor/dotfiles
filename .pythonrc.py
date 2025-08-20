@@ -1,10 +1,14 @@
-# pylint:disable=missing-docstring
-# pylint:disable=g-bad-import-order,g-importing-member,g-import-not-at-top
+from __future__ import annotations
 
 # make common use cases quicker:
 from pathlib import Path
+
+# pylint:disable=missing-docstring
+# pylint:disable=g-bad-import-order,g-importing-member,g-import-not-at-top
+
+
 P = Path
-p = Path('/a/b/c/d.txt')
+p = Path("/a/b/c/d.txt")
 
 
 # Enable default readline configuration on interactive prompts.
@@ -15,13 +19,13 @@ def register_readline():
 
     # Reading the initialization (config) file may not be enough to set a
     # completion key, so we set one first and then read the file.
-    readline_doc = getattr(readline, '__doc__', '')
-    if readline_doc is not None and 'libedit' in readline_doc:
-        init_file = '~/.editrc'
+    readline_doc = getattr(readline, "__doc__", "")
+    if readline_doc is not None and "libedit" in readline_doc:
+        init_file = "~/.editrc"
     else:
-        init_file = '~/.inputrc'
+        init_file = "~/.inputrc"
 
-    print('Line-editor configured:', init_file)
+    print("Line-editor configured:", init_file)
     readline.read_init_file(Path(init_file).expanduser())
 
     if readline.get_current_history_length() == 0:
@@ -30,7 +34,7 @@ def register_readline():
         # each interpreter exit when readline was already configured
         # through a PYTHONSTARTUP hook, see:
         # http://bugs.python.org/issue5845#msg198636
-        history = Path('~/.python_history').expanduser()
+        history = Path("~/.python_history").expanduser()
         if history.exists():
             readline.read_history_file(history)
 
@@ -39,16 +43,23 @@ def register_readline():
 
         atexit.register(write_history)
 
+
 import sys
-del sys.__interactivehook__
+
+try:
+    del sys.__interactivehook__
+except AttributeError:  # python -S
+    pass
 register_readline()
 del register_readline
 
 
 from pprint import pprint
+
 pp = pprint
 
 from datetime import datetime
+
 now = datetime.now
 NOW = now()
 

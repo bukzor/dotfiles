@@ -73,20 +73,29 @@ if [[ -z $@ || $# -lt 3 || $# -gt 4 ]] ; then
     exit 1
 fi
 
+set -x
+: VIMMERGE: "$@"
 MINE="$1"
 MERGED="$2"
 THEIRS="$3"
 BASE="${4:-}"
 
+cmd=(
+  vim -R -d
+  -c ":tabfir |wincmd l |wincmd q |bo sp |b2 |set noro nodiff cursorbind" \
+  "$MINE"
+  "$MERGED"
+)
+
 if [[ "$BASE" ]]; then
-  middle=("$BASE")
+  cmd+=("$BASE")
 else
-  middle=()
+  cmd+=()
 fi
+cmd+=("$THEIRS")
 
 # Fire up vimdiff
-vim -R \
-  -d "${MINE}" "$MERGED" "${middle[@]}" "${THEIRS}" \
-  -c ":tabfir |wincmd l |wincmd q |bo sp |b2 |set noro nodiff cursorbind"
+set -x
+"${cmd[@]}"
 
 # :vim:textwidth=79:

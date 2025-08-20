@@ -1,5 +1,8 @@
 local M = {}
 
+-- see ~/.local/state/nvim/mason.log
+local mason_log_level = vim.log.levels.DEBUG
+
 -- mason is in charge of installing various tools
 M.mason_install = {
   -- lspconfig configures many language servers
@@ -8,6 +11,7 @@ M.mason_install = {
     "rust_analyzer", -- rust
     "lua_ls", -- lua
     "pyright", -- python
+    "pylsp", -- python
     -- FIXME: none of these are valid
     --- "jq", -- jq
     --- "jqls", -- jq
@@ -20,7 +24,7 @@ M.mason_install = {
     "jsonnet_ls", -- jsonnet
     "tflint", -- terraform
     "terraformls", -- terraform-ls: terraform
-    "tsserver", -- typescript
+    -- "tsserver",    -- typescript
     "vimls", --vim
     "clangd", -- c/c++
     "gopls", -- golang
@@ -55,7 +59,7 @@ M.lsp_formatting = nil
 M.ensure_installed_by = nil
 
 function M.log(...)
-  require("mason-core.log").fmt_trace(...)
+  require("mason-core.log").fmt_debug(...)
 end
 
 function M.init()
@@ -98,7 +102,7 @@ end
 
 function M.setup_mason()
   require("mason").setup({
-    log_level = vim.log.levels.INFO,
+    log_level = mason_log_level,
     ui = {
       icons = {
         package_installed = "✓",
@@ -111,8 +115,7 @@ end
 
 function M.show_loclist()
   vim.diagnostic.setloclist({ open = false })
-  -- vim.cmd("bo lw 5")
-  vim.cmd("TroubleToggle document_diagnostics")
+  vim.cmd("Trouble diagnostics toggle")
 end
 
 function M.setup_lspconfig()
@@ -124,13 +127,11 @@ function M.setup_lspconfig()
   vim.keymap.set("n", "ge", vim.diagnostic.goto_next)
   vim.keymap.set("n", "gE", vim.diagnostic.goto_prev)
   vim.keymap.set("n", "<leader>lw", M.show_loclist)
-
-  --M.setup_loclist_update() -- too slow
 end
 
-function M.on_attach(client, bufnr)
+function M.on_attach_lspconfig(client, bufnr)
   require("lsp-inlayhints").on_attach(client, bufnr)
-  M.autoformat(client, bufnr)
+  M.on_attach_autoformat(client, bufnr)
 
   -- prevent jittery rendering by just always showing the sign column
   vim.opt_local.signcolumn = "yes:1"
@@ -196,16 +197,116 @@ end
 function M.mason_lspconfig_handler(server_name) -- default handler (optional)
   M.lsp_attached[server_name] = "lspconfig"
   M.log("lspconfig handler: %s", server_name)
-  require("lspconfig")[server_name].setup({
-    on_attach = M.on_attach,
-  })
+  local setup = {
+    on_attach = M.on_attach_lspconfig,
+    flags = {
+      debounce_text_changes = 200,
+    },
+  }
+  if server_name == "rust_analyzer" then
+    setup["settings"] = {
+      ["rust-analyzer"] = {
+        cargo = {
+          allFeatures = true,
+          allTargets = true,
+          loadOutDirsFromCheck = true,
+          -- loadOutDirsFromCheck = false,
+          runBuildScripts = true,
+        },
+        diagnostics = {
+          enable = true,
+          disabled = { "inactive-code" },
+        },
+        -- See: https://github.com/simrat39/rust-tools.nvim/issues/300
+        -- inlayHints = { locationLinks = false },
+        lruCapacity = 1024,
+        -- checkOnSave = {
+        --   enable = true,
+        --   allFeatures = true,
+        --   allTargets = true,
+        --   command = "clippy",
+        --   -- extraArgs = {
+        --   --   "--no-deps",
+        --   --   "--",
+        --   --   "-W",
+        --   --   "clippy::all",
+        --   -- },
+        -- },
+        completion = {
+          autoimport = {
+            enable = true,
+          },
+        },
+        lens = {
+          enable = true,
+        },
+        rustfmt = {
+          enableRangeFormatting = true,
+        },
+        procMacro = {
+          enable = true,
+          ignored = {
+            ["async-trait"] = { "async_trait" },
+            ["napi-derive"] = { "napi" },
+            ["async-recursion"] = { "async_recursion" },
+          },
+        },
+        assist = {
+          importGranularity = "module",
+          importPrefix = "by_self",
+        },
+      },
+    }
+  elseif server_name == "pylsp" then
+    -- FIXME: ensure-installed pylsp plugins:
+    --   :PylspInstall python-lsp-black
+    --   :PylspInstall -e /Users/buck/repo/mypy
+    -- https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
+    setup["settings"] = {
+      pylsp = {
+        plugins = {
+          black = {
+            -- https://github.com/python-lsp/python-lsp-black#configuration
+            enabled = true,
+          },
+          mypy = {
+            enabled = false, -- too damn buggy
+          },
+          autopep8 = {
+            enabled = false,
+          },
+          flake8 = {
+            enabled = false,
+          },
+          mccabe = {
+            enabled = true,
+            threshold = 12,
+          },
+          -- preload ?
+          pycodestyle = { -- covered by black+pyright
+            enabled = false,
+          },
+          pyflakes = {
+            enabled = false,
+          },
+          pylint = {
+            enabled = false,
+          },
+          yapf = {
+            enabled = false,
+          },
+        },
+      },
+    }
+  end
+
+  require("lspconfig")[server_name].setup(setup)
 end
 
 function M.setup_mason_null_ls()
   -- https://github.com/jay-babu/mason-null-ls.nvim#example-config
   -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Formatting-on-save#code
-  --require("null-ls").setup()
-  require("null-ls").setup({ on_attach = M.autoformat })
+  require("null-ls").setup({ on_attach = M.on_attach_autoformat })
   require("mason-null-ls").setup({
     ensure_installed = M.mason_install["null-ls"],
     automatic_installation = true,
@@ -219,24 +320,28 @@ function M.null_ls_handler(source, types)
   local configured_by = M.lsp_attached[source]
   if configured_by ~= nil then
     M.log("null-ls handler: %s already configured: %s", source, configured_by)
+  else
+    -- initially copied from mason-null-ls.automatic_setup
+    local null_ls = require("null-ls")
+    vim.tbl_map(function(type)
+      local builtin = null_ls.builtins[type][source]
+      if builtin == nil then
+        M.log("null-ls handler: unknown: %s %s", source, type)
+      else
+        null_ls.register(builtin)
+        M.lsp_attached[source] = "null-ls"
+        M.log("null-ls handler: configured: %s %s", source, type)
+      end
+    end, types)
+  end
+end
+
+function M.on_attach_autoformat(client, bufnr)
+  if not client.supports_method("textDocument/formatting") then
+    M.log("formatting: no support: %s", client.name)
     return
   end
 
-  -- initially copied from mason-null-ls.automatic_setup
-  local null_ls = require("null-ls")
-  vim.tbl_map(function(type)
-    local builtin = null_ls.builtins[type][source]
-    if builtin == nil then
-      M.log("null-ls handler: unknown: %s %s", source, type)
-    else
-      null_ls.register(builtin)
-      M.lsp_attached[source] = "null-ls"
-      M.log("null-ls handler: configured: %s %s", source, type)
-    end
-  end, types)
-end
-
-function M.autoformat(client, bufnr)
   if M.lsp_formatting[bufnr] ~= nil then
     M.log(
       "formatting: %s: %s (dup: %s)",
@@ -246,21 +351,17 @@ function M.autoformat(client, bufnr)
     )
   end
 
-  if client.supports_method("textDocument/formatting") then
-    vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      group = M.au_format,
-      buffer = bufnr,
-      callback = function()
-        vim.lsp.buf.format({ bufnr = bufnr })
-      end,
-      desc = "format on save: " .. client.name,
-    })
-    M.lsp_formatting[bufnr] = client.name
-    M.log("formatting: %s: %s ", bufnr, M.lsp_formatting[bufnr])
-  else
-    M.log("formatting: no support: %s", client.name)
-  end
+  vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = M.au_format,
+    buffer = bufnr,
+    callback = function()
+      vim.lsp.buf.format({ bufnr = bufnr })
+    end,
+    desc = "format on save: " .. client.name,
+  })
+  M.lsp_formatting[bufnr] = client.name
+  M.log("formatting: buffer %s: %s ", bufnr, M.lsp_formatting[bufnr])
 end
 
 function M.update_loclist_if_visible()
@@ -270,11 +371,5 @@ function M.update_loclist_if_visible()
   end
 end
 
-function M.setup_loclist_update()
-  vim.api.nvim_create_autocmd("DiagnosticChanged", {
-    group = M.au_loclist,
-    callback = M.update_loclist_if_visible,
-  })
-end
-
+M.init()
 return M

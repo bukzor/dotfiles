@@ -35,7 +35,7 @@ OSTYPE="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
 # extra shell environment for work
 . "$HOME"/.sh_lib/functions.d/trysource.sh
-trysource ~/private-dotfiles/.sh_env
+trysource "$HOME/"private-dotfiles/.sh_env
 
 export HOMEBREW
 HOMEBREW="$(command -v brew)"
@@ -69,8 +69,8 @@ else
 fi
 
 # set PATH so it includes user's personal bin if it exists (or is created)
-export PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
-export GOPATH=~/prefix/gopath
+export PATH="$HOME/.local/bin:$HOME/private-dotfiles/bin:$HOME/bin:$PATH"
+export GOPATH="$HOME/"libexec/gopath
 export GDK_SCALE=2
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
@@ -79,13 +79,14 @@ export CLOUDSDK_PYTHON_PREFIX="$CLOUDSDK_ROOT_DIR/latest/google-cloud-sdk/platfo
 export CLOUDSDK_PYTHON="$CLOUDSDK_PYTHON_PREFIX/bin/python3"
 export CLOUDSDK_PYTHON_SITEPACKAGES=1
 export USE_GKE_GCLOUD_AUTH_PLUGIN=1
+export PYTHONPATH="$HOME/lib/python${PYTHONPATH+:$PYTHONPATH}"
 
 # https://docs.sentry.io/product/sentry-basics/dsn-explainer/
 export SENTRY_INSTRUMENTATION=1
 export SENTRY_POST_MERGE_AUTO_UPDATE=1
 export SENTRY_SPA_DSN=https://863de587a34a48c4a4ef1a9238fdb0b1@o19635.ingest.sentry.io/5270453
 
-. "$HOME"/.sh_lib/functions.d/bootstamp.sh
+. "$HOME/".sh_lib/functions.d/bootstamp.sh
 export BOOT
 BOOT=$(bootstamp)
 
@@ -97,8 +98,9 @@ export EDITOR=vim
 export VISUAL=$EDITOR
 export GIT_EDITOR=$EDITOR
 export P4DIFFOPTS="-u --color"
-export P4DIFF=~/bin/p4-difftool
-export PYTHONSTARTUP=~/.pythonrc.py
+export P4DIFF="$HOME/"bin/p4-difftool
+export PYTHONSTARTUP="$HOME/".pythonrc.py
+export PYTHONBREAKPOINT='pudb.set_trace'
 export EMAIL
 if has git; then
   EMAIL="$(git config user.email)"
@@ -128,21 +130,32 @@ fi
 psget() {
   column="$1"
   pid="$2"
-  ps -o "$column"= -p "$pid" |
-    tr -d " "
+  if ! [ "$pid" ]; then
+    return 1
+  fi
+  ps -o "$column"= "$pid" |
+    tr -d ' '
 }
 
 # fix up TERM values
 # get the session-leader's parent
-
-if ! terminal="$(psget ppid "$(psget sess $$)")" || [ -z "$terminal" ]; then
-  : refuse the tempation to guess what went wrong
+if ! {
+    pgid="$(psget pgid "$$")" &&
+    #sid="$(psget ppid "$pgid")" &&
+    terminal="$(psget ppid "$pgid")" &&
+    [ "$terminal" ] &&
+    true
+}; then
+  # refuse the temptation to guess what went wrong
+  warn "could not find terminal: $$ -> $pgid -> $terminal"
 elif [ "$terminal" -gt 0 ]; then
   #use the basename of its arg[0]
-  terminal="$(basename "$(head -zn1 "/proc/$terminal/cmdline" | tr -d '\0')")"
-else
+  terminal="$(basename "$(psget ucomm "$terminal")")"
+elif [ "$terminal" -eq 0 ]; then
   # if our session-leader doesn't have a real parent (pid:0) then we're running as init
   terminal=init
+else
+  warn "terminal < 0 ?!: $$ -> $pgid -> $terminal"
 fi
 case "$terminal" in
 lxterminal | gnome-terminal | xfce4-terminal)
@@ -173,7 +186,7 @@ esac
 # Further environment
 export PREFIX
 PREFIX="$(abspath "$HOME/../..")"
-export GEM_HOME=~/prefix/rubygems
+export GEM_HOME="$HOME/"libexec/rubygems
 export REPO=$HOME/repo
 
 # ask terminfo whether we have a color terminal
@@ -193,7 +206,7 @@ if has infocmp; then
 fi
 
 # My very own python!
-activate() { trysource ~/venv/"$USER"-venv/bin/activate; }
+activate() { trysource "$HOME/"venv/"$USER"-venv/bin/activate; }
 activate
 
 export TMPDIR
@@ -231,12 +244,19 @@ fi
 ## if has pyenv; then
 ##   eval "$(pyenv init -)"
 ## fi
+export GOENV_ROOT="$XDG_CACHE_HOME/goenv"
+
 
 # added by travis gem
-trysource ~/.travis/travis.sh
+trysource "$HOME/".travis/travis.sh
 if has aactivator; then
   eval "$(aactivator init)"
 fi
 
 trysource "$HOME/.cargo/env"
+
+# pnpm
+export PNPM_HOME="$HOME/libexec/pnpm"
+PATH="$PATH:$PNPM_HOME:$HOME/libexec/macos-bin"
+
 # vim:et:sw=2:sts=2:

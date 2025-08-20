@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+sha="$(git sha)"
+
+while :; do
+  echo ---
+  gh run list -c "$sha" --json databaseId --jq 'first|values[]' |
+    xargs -r gh run view --json jobs |
+    jq '
+      .jobs
+    | arrays
+    | .[]
+    | "\(.url)\n    \(.status) \(.conclusion) \(.name)"
+    ' -r \
+  ;
+  sleep 3
+done

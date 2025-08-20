@@ -1,4 +1,6 @@
 # start xtrace debug output whenever direnv sources a file:
+return 0
+
 .() {
   export PS4='+ \033[33m$\033[m '
   set -x

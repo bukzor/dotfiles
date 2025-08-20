@@ -1,0 +1,5 @@
+#!/bin/bash
+# bigquery, suitable as a script interpreter
+set -euo pipefail
+sed '/^#/d' "$@" |  # delete shebang line
+  bq query --format=json
