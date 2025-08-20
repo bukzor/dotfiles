@@ -7,3 +7,6 @@
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
 	url = https://github.com/wdomitrz/kitty-gruvbox-theme.git
+[submodule "data/gcloud"]
+	path = data/gcloud
+	url = git@github.com:bukzor/gcloud-data.git
