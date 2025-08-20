@@ -1,3 +1,8 @@
+set foldmethod=indent
+set foldminlines=8
+set foldlevel=3
+set foldlevelstart=2
+
 function! g:LogPluginPaths(label) abort
   silent echo "RUNTIMEPATH(" .. a:label .. "):\n   "
     \ substitute(&runtimepath, ",", "\n    ", "g")
@@ -15,11 +20,74 @@ function! g:VimReset() abort
 endfunction  " VimReset
 
 command! VimReset call g:VimReset()
-VimReset
+"VimReset
 
 if !exists("$VIMHOME")
   let $VIMHOME=split(&rtp, ',')[0]
 endif
+
+if executable('opam')
+  let g:opamshare=substitute(system('opam var share'),'\n$','','''')
+  if isdirectory(g:opamshare."/merlin/vim")
+    execute "set rtp+=" . g:opamshare."/merlin/vim"
+  endif
+endif
+
+" kitty terminfo {
+"   These settings must be placed _before_ setting the colorscheme. It is also
+"   important that the value of the vim term variable is not changed after these
+"   settings.
+
+" Mouse support
+"""set ttymouse=sgr
+"""set balloonevalterm
+" Styled and colored underline support
+let &t_AU = "\e[58:5:%dm"
+let &t_8u = "\e[58:2:%lu:%lu:%lum"
+let &t_Us = "\e[4:2m"
+let &t_Cs = "\e[4:3m"
+let &t_ds = "\e[4:4m"
+let &t_Ds = "\e[4:5m"
+let &t_Ce = "\e[4:0m"
+" Strikethrough
+let &t_Ts = "\e[9m"
+let &t_Te = "\e[29m"
+" Truecolor support
+let &t_8f = "\e[38:2:%lu:%lu:%lum"
+let &t_8b = "\e[48:2:%lu:%lu:%lum"
+let &t_RF = "\e]10;?\e\\"
+let &t_RB = "\e]11;?\e\\"
+" Bracketed paste
+let &t_BE = "\e[?2004h"
+let &t_BD = "\e[?2004l"
+let &t_PS = "\e[200~"
+let &t_PE = "\e[201~"
+" Cursor control
+let &t_RC = "\e[?12$p"
+let &t_SH = "\e[%d q"
+let &t_RS = "\eP$q q\e\\"
+let &t_SI = "\e[5 q"
+let &t_SR = "\e[3 q"
+let &t_EI = "\e[1 q"
+let &t_VS = "\e[?12l"
+" Focus tracking
+let &t_fe = "\e[?1004h"
+let &t_fd = "\e[?1004l"
+"execute "set <FocusGained>=\<Esc>[I"
+"execute "set <FocusLost>=\<Esc>[O"
+" Window title
+let &t_ST = "\e[22;2t"
+let &t_RT = "\e[23;2t"
+
+" vim hardcodes background color erase even if the terminfo file does
+" not contain bce. This causes incorrect background rendering when
+" using a color theme with a background color in terminals such as
+" kitty that do not support background color erase.
+let &t_ut=''
+" }
+
+
+
 let g:plug_home = $VIMHOME .. '/pack/plugged/start'
 
 " plugins {
@@ -35,11 +103,21 @@ let g:plug_home = $VIMHOME .. '/pack/plugged/start'
     """ Plug 'elbeardmorez/vim-loclist-follow'
     """ let g:loclist_follow = 1
 
+    " I like Claude maybe too much...
+    Plug 'pasky/claude.vim'
+
+    Plug 'mbbill/undotree'
+    nnoremap <Leader>u :UndotreeToggle<CR>
+
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-unimpaired'
+
     "syntaxen
     Plug 'vim-python/python-syntax'
     Plug 'HerringtonDarkholme/yats.vim'
     Plug 'hashivim/vim-terraform'
     Plug 'puppetlabs/puppet-syntax-vim'
+    Plug 'reasonml-editor/vim-reason-plus'
 
     " migrated from pathogen
     Plug 'ConradIrwin/vim-bracketed-paste'
@@ -69,21 +147,32 @@ let g:plug_home = $VIMHOME .. '/pack/plugged/start'
     set scrolloff=3         "keep three lines visible above and below
     set sidescrolloff=8     "keep cursor away from left and right edge, too
     "set ruler showcmd       "give line, column, and command in the status line
-    set colorcolumn=80      "often I want to know when/if I've exceeded 80 columns
-    set colorcolumn+=+1,+2  "visual inidicator of maximum column
-    set laststatus=2        "always show the status line
-    "set laststatus=3        "global status line
-                            "make filename-completion more terminal-like
+    set colorcolumn+=+0,+1,+2  "visual inidicator of maximum column
+
+    set laststatus=2        "always show the status line, per window
+    "set laststatus=3        "a singular, global status line
+
+    "make filename-completion more terminal-like
     set wildmode=longest:full
     set wildmenu            "a menu for resolving ambiguous tab-completion
                             "files we never want to edit
     set wildignore=*.pyc,*.sw[pno],.*.bak,.*.tmp
-    set updatetime=1000     "CursorHold (show type) after 1s (down from 4s)
+    set updatetime=300     "CursorHold (show type) -- default 4s
+    let g:netrw_sort_sequence = '*' " remove special-case sorting
+    augroup checktime
+      autocmd!
+      " check file changes periodically
+      autocmd BufEnter,VimResume * checktime
+      " BufEnter -- switching windows (in or out), switching buffers
+      " VimResume -- fg
+    augroup END
 
     " Make whitespace characters look nice when shown.
     set listchars=tab:→·,extends:»,precedes:«,nbsp:␠,trail:␠
     set list
 
+    " persist undo information between sessions, per-file
+    set undofile
 " }
 
 " searching {
@@ -213,6 +302,12 @@ let g:plug_home = $VIMHOME .. '/pack/plugged/start'
     set shortmess+=IA       "no intro message, no swap-file message
     set shortmess-=F        "allow for debugging echo
 
+    " better automatic behavior for max-size window commands: c-w+| c-w+_
+    set winheight=5
+    set winminheight=3
+    set winwidth=86
+    set winminwidth=30
+
     "replacement for CTRL-I, also known as <tab>
     noremap <C-P> <C-I>
 
@@ -273,17 +368,31 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.pxi       set filetype=pyrex
     autocmd BufNewFile,BufRead *.md        set filetype=markdown
     autocmd BufNewFile,BufRead *.proto     set filetype=proto
-    autocmd BufNewFile,BufRead *.hcl       set filetype=terraform
+    "autocmd BufNewFile,BufRead *.hcl       set filetype=terraform
     autocmd BufNewFile,BufRead .envrc      set filetype=bash
     autocmd BufNewFile,BufRead *.tfvars    set filetype=terraform
     autocmd BufNewFile,BufRead *.scm       set filetype=lisp
     autocmd BufNewFile,BufRead *.wgsl      set filetype=wgsl
     autocmd BufNewFile,BufRead *.sls       set filetype=yaml
     autocmd BufNewFile,BufRead *.sshconfig set filetype=sshconfig
+    autocmd BufNewFile,BufRead *.bq.sql    set filetype=sql_bigquery
     autocmd BufNewFile,BufRead *           call g:RegexFiletype('\<jq\>', 'jq')
 
     autocmd FileType go set ts=2
 augroup end
+if has('nvim')
+lua << EOF
+  vim.filetype.add({
+    extension = {
+      ['do'] = function(path, bufnr)
+
+        local firstline = vim.fn.getbufline(bufnr, 1)
+        return vim.filetype.match({ contents = {firstline} })
+      end
+    },
+  })
+EOF
+endif
 " }
 
 " { Finger-savers:
@@ -320,6 +429,21 @@ augroup end
       au VimEnter * silent! helptags ALL
     endif
 " }
+
+
+if has('nvim')
+lua << EOF
+  function LspDetach(bufnr)
+    local clients = vim.lsp.buf_get_clients(bufnr)
+    for client_id, _ in pairs(clients) do
+      vim.lsp.buf_detach_client(bufnr, client_id)
+    end
+    vim.diagnostic.reset(nil, bufnr)
+  end
+EOF
+command! LspDetach lua LspDetach(tonumber(vim.fn.expand("<abuf>")))
+endif
+
 
 hi! link LspReference CursorColumn
 hi! link LspReferenceText Search
@@ -365,5 +489,38 @@ if filereadable($HOME . "/private-dotfiles/.vimrc")
     source $HOME/private-dotfiles/.vimrc
 endif
 " }
+
+command! LogAllEvents call s:LogAllEvents()
+function! s:LogAllEvents() abort
+  call writefile(["START"], 'vim-event.log', "")
+  function! LogEvent(event) abort
+    try
+      let l:match = expand('<amatch>')
+    catch
+      let l:match = '(expand failed)'
+    endtry
+    call writefile([a:event . ": " . l:match], 'vim-event.log', "a")
+  endfunction
+
+  augroup ShowAllEvents
+    autocmd!
+    let skip_events = ['SourcePre', 'SourcePost']  " too noisy
+    for event in getcompletion('', 'event')
+      if index(skip_events, event) == -1 && event !~# 'Cmd$'
+        execute 'autocmd' event '* call LogEvent("' . event . '")'
+      endif
+    endfor
+  augroup END
+
+  echom "event logging activated; see vim-event.log"
+endfunction
+
+" quickfix window height of five
+autocmd FileType qf,Trouble 5wincmd_
+
+
+set formatoptions-=t
+set isfname+=:
+
 
 " vim:et:sts=2:sw=2
