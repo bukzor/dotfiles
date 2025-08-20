@@ -5,7 +5,8 @@ git remote update --prune
 git \
     for-each-ref \
     --format="%(refname:short)" \
-    "refs/heads/$(git config user.handle)/" |
+    "refs/heads/$(git config user.handle)/" \
+    "refs/heads/buckevan/" |
   xargs -tr git push --force-with-lease "$(git remote-upstream)" \
 ;
 

@@ -16,6 +16,20 @@ TMUX_COLOR = [
     "inv",
 ]
 
+Color = tuple[str, str | tuple[str, ...]]
+ColorPair = tuple[Color, Color]
+
+TMUX_COLORS: tuple[ColorPair, ...] = (
+    # bg, fg
+    (("*", "*"), ("*", "fg")),
+    (("*", "bg"), ("*", "*")),
+    (("*", "fg"), ("*", "*")),
+    (("*", "*"), ("*", "bg")),
+    (("*", "*"), ("bright", ("red", "green", "yellow"))),
+    (("dark", "black"), ("light", ("*", "-black"))),
+    (("dark", "red"), ("light", ("*", "-black", "-red"))),
+)
+
 
 def tmux_color_auto_select(session_name: str) -> tuple[int, int, bool]:
     bg = int(sh.line(("roll", "0", "7", "bg", session_name)))

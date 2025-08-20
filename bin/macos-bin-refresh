@@ -1,2 +1,18 @@
-ln -sf /System/Library/CoreServices/*.app/Contents/MacOS/* .
-ln -sf /Applications/*.app/Contents/MacOS/* .
+#!/bin/sh
+dst=~/libexec/macos-bin
+rm -r "$dst"
+mkdir -p "$dst"
+
+
+for basedir in / /System/ ~/; do
+  for subdir in Library Applications; do
+    src="$basedir$subdir"
+    if [ -d "$src" ]; then
+      find "$src" -mindepth 1 -maxdepth 3 -type d -name "*.app" -print0 |
+        xargs -r0 -I{} find {} -maxdepth 2 -mindepth 2 -type d -name MacOS -path "{}/Contents/MacOS" -print0 |
+        xargs -r0 -I{} find {} -maxdepth 1 -mindepth 1 -type f -executable -print0 \
+      ;
+    fi
+  done
+done |
+  xargs -r0 ln -sf -t "$dst"

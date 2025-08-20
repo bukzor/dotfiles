@@ -2,11 +2,47 @@
 set -euo pipefail
 remote=$(git-remote-upstream)
 
+quiet() {
+  if (( ${DEBUG:-0} > 1 )); then
+    "$@" >&2
+  else
+    "$@" >/dev/null 2>&1
+  fi
+}
+
+remote_branch_exists() {
+  local branch="${1#"$remote/"}"
+  quiet git ls-remote --exit-code "$remote" "refs/heads/$branch"
+}
 show_remote_head() {
   git symbolic-ref -q --short refs/remotes/"$remote"/HEAD
 }
+set_remote_head() {
+  quiet git remote update "$remote" --prune
+  quiet git remote set-head "$remote" --auto
+}
+unset_remote_head() {
+  git remote set-head "$remote" --delete # >/dev/null
+}
 
-if ! show_remote_head; then
-  git remote set-head "$remote" --auto >/dev/null
-  show_remote_head
+test() {
+  git update-ref refs/remotes/"$remote"/master HEAD
+  git remote set-head "$remote" master
+}
+
+if (( ${DEBUG:-0} > 1 )); then
+  set -x
 fi
+
+#test
+if ! head=$(show_remote_head); then
+  : continue
+elif remote_branch_exists "$head"; then
+  echo "$head"
+  exit 0
+else
+  unset_remote_head
+fi
+
+set_remote_head
+show_remote_head

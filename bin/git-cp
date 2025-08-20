@@ -3,8 +3,18 @@ set -euo pipefail
 SRC="$1"
 DST="$2"
 
+if [ -d "$DST" ]; then
+  DST="$DST/$(basename "$SRC")"
+fi
+if [ -e "$DST" ]; then
+  echo >&2 "destination exists: $DST"
+  exit 1
+fi
+
+
+
 set -x
-git clean -fdxfn "$SRC"
-cp -r "$SRC" "$DST"
+cp -rn "$SRC" "$DST"
 git add "$DST"
+git clean -fdxf "$DST"
 git status "$DST"

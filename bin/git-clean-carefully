@@ -1,14 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-
-src="$PWD"
+src=$PWD
 dirname=$(basename "$src")
-dst="../$dirname.files/$(today)"
+dst=$(mktemp -d "../$dirname.files/$(today).XXXX")
 
-mkdir "$dst"
-git clean -fdxfn | sed 's@Would remove @mkdir -p $dst/@; s@/[^/]*$@@' | uniq | sh -ex
-git clean -fdxfn | sed -r 's@Would remove (.*)@mv \1 $dst/\1@; s@/[^/]+$@/@'
-
-
-
+git clean -fdxfn | sed 's@Would remove @mkdir -p '"$dst"'/@; s@/[^/]*$@@' | uniq | sh -ex
+git clean -fdxfn | sed -r 's@Would remove (.*)@mv \1 '"$dst"'/\1@; s@/[^/]+$@/@' | sh -ex

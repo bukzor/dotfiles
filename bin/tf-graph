@@ -68,8 +68,8 @@ chmod 644 "$dir/$graph"
 ls -ld "$dir/$time"*
 
 : some metadata
-ccomps -sv < "$dir/$time.2.dot"
-acyclic -nv < "$dir/$time.2.dot"
+ccomps -sv < "$dir/$time.2.dot" || true
+acyclic -nv < "$dir/$time.2.dot" || true
 : Now have a look at "file://$dir/$graph"
 
 exit 0
