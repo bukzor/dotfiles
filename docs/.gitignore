@@ -1,2 +1,5 @@
 # un-ignore non-hidden files
 ![!.]*
+
+# work-related
+sentry/

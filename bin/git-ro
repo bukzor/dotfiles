@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+set -x
+sudo \
+  -u buck-ro \
+  env \
+    TERM="$TERM" \
+    TERMINFO="$TERMINFO" \
+  git "$@" \
+;
+

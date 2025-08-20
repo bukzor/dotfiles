@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eEuo pipefail
+
+echo -n $'\e]52;c;'
+base64
+echo -n $'\x07'

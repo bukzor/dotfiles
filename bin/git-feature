@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+feature="$1"
+
+upstream="$(git upstream)"
+prefix="$(git config user.handle)/"
+branch="$(sed -r <<<"$feature" "s@^($prefix)?@$prefix@" )"
+
+set -x
+git fetch1 "$upstream"
+
+git checkout -b "$branch"
+git branch --set-upstream-to "$upstream"
+
+if ! git is-clean; then
+  git commit -am "WIP: $feature"
+fi
+
+git rebase -i "$upstream"

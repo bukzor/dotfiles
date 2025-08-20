@@ -1,0 +1,14 @@
+#!/bin/sh
+CLOUDSDK_CONFIG="$(gcloud info --format="value(config.paths.global_config_dir)")"
+EMAIL="$(gcloud info --format='value(config.account)')"
+
+
+sqlite3 -json "$CLOUDSDK_CONFIG/access_tokens.db" <<EOF
+.parameter init
+.parameter set @email "'$EMAIL'"
+UPDATE access_tokens
+SET
+  token_expiry = '2000-01-01 00:00:00.000000'
+, rapt_token = 'x'
+WHERE account_id = @email;
+EOF

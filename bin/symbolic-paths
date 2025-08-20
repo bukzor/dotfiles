@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+
+VIRTUAL_ENV_BASE_PREFIX=$(readlink -f "$(python -c 'import sys; print(sys.base_prefix)')")
+sed -r "
+  s@$VIRTUAL_ENV@\$VIRTUAL_ENV@g
+  s@$PWD@\$PWD@g
+  s#$VIRTUAL_ENV_BASE_PREFIX#\$VIRTUAL_ENV_BASE_PREFIX#g
+  s@$XDG_CACHE_HOME@\$XDG_CACHE_HOME@g
+"
