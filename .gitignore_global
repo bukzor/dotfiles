@@ -12,6 +12,8 @@ bak/
 mangle/
 foo
 foo.*
+.aider*
 
 # built stuff
 venv/
+

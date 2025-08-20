@@ -29,3 +29,5 @@ trash/
 
 # binaries and local files
 .vscode
+.aider*
+.env
