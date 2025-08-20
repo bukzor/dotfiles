@@ -169,10 +169,15 @@ unset esc
 
 export PS1
 
+
 # extra shell settings for work
 . "$HOME/.sh_lib/functions.d/trysource.sh"
 trysource ~/private-dotfiles/.sh_rc
 . "$HOME/.sh_advanced_rc"
+
+# My very own python!
+activate() { trysource "$HOME/""venv/$USER-venv/bin/activate"; }
+activate
 
 echo "==> $HOME/TODO.md <=="
 cat "$HOME/TODO.md"

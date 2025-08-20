@@ -69,7 +69,7 @@ else
 fi
 
 # set PATH so it includes user's personal bin if it exists (or is created)
-export PATH="$HOME/.local/bin:$HOME/private-dotfiles/bin:$HOME/bin:$PATH"
+export PATH="$HOME/private-dotfiles/bin:$HOME/bin:$HOME/.local/bin:$PATH"
 export GOPATH="$HOME/"libexec/gopath
 export GDK_SCALE=2
 export VOLTA_HOME="$HOME/.volta"
@@ -204,10 +204,6 @@ if has infocmp; then
   fi
   export TERM_ITALICS=1
 fi
-
-# My very own python!
-activate() { trysource "$HOME/"venv/"$USER"-venv/bin/activate; }
-activate
 
 export TMPDIR
 # NB: macos date(1) doesn't support -I nor -Id
