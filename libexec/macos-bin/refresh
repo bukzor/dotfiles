@@ -1,2 +1,0 @@
-ln -sf /System/Library/CoreServices/*.app/Contents/MacOS/* .
-ln -sf /Applications/*.app/Contents/MacOS/* .
