@@ -1,6 +1,6 @@
 {
   "name": "Bash",
-  "description": "Executes bash commands in a persistent shell session. IMPORTANT: Before using this tool, you *MUST* read ~/.claude/context/CLAUDE.bash-preferences.md.",
+  "description": "Executes bash commands in a persistent shell session. IMPORTANT: Before using this tool, you *MUST* read ~/.claude/tools/Bash.md.",
   "parameters": {
     "type": "object",
     "properties": {

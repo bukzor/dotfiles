@@ -26,3 +26,8 @@
 - Always quote file paths with spaces: `cd "/path with spaces/file.txt"`
 - In regex patterns, ensure good left/right delimiters
 - For sed, **always** use -r option for extended regex
+
+**sed on this system:**
+This system uses GNU sed from Homebrew (`/opt/homebrew/libexec/gnubin/sed`), not BSD sed:
+- `sed -i` - GNU sed for in-place editing (no empty string needed)
+- `sed -r` - extended regex
