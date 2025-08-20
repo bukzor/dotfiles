@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 # prevent #4316 from taking over my machine
-set -x
-ulimit -a 1000
-ulimit -Ha 2000
+set -eux
+ulimit -Su 1200
+ulimit -Hu 2400
 exec "$HOME/.local/bin/claude" "$@"
