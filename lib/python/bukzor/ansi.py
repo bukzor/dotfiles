@@ -5,7 +5,6 @@ from __future__ import annotations
 import typing
 from abc import abstractmethod
 from enum import Enum
-from typing import Callable
 from typing import NamedTuple
 from typing import Self
 
@@ -19,11 +18,11 @@ T = typing.TypeVar("T")
 P = typing.ParamSpec("P")
 
 
-def attribute(f: Callable[P, T]) -> T:
-    from builtins import property
-
-    result = property(f)
-    return typing.cast(T, result)
+### def attribute(f: Callable[P, T]) -> T:
+###     from builtins import property
+###
+###     result = property(f)
+###     return typing.cast(T, result)
 
 
 ### from enum.pyi >>>
@@ -47,6 +46,8 @@ EnumType = enum.EnumMeta
 
 
 class SGRColor(int, Enum):
+    __slots__ = ()
+
     black = 0
     red = 1
     green = 2
@@ -107,7 +108,7 @@ BRIGHT = SGRBrightness.bright
 class Enumerated(Named):
     __slots__ = ()
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args: object, **kwargs: object):
         self = super().__new__(cls, *args, **kwargs)
         del self.__dict__
         return self
@@ -198,11 +199,11 @@ class ANSIColor(Enumerated, _ANSIColor):
 ###
 
 
-class Color(ANSIColor, Enum):
+class Color(Enum):
     __slots__ = ()
 
     # class Color(enum.Enum):
-    black = SGRColor.black
+    black = 0
     red = SGRColor.red
     green = SGRColor.green
     yellow = SGRColor.yellow
