@@ -9,25 +9,26 @@ M.mason_install = {
   -- full list: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
   lspconfig = {
     "rust_analyzer", -- rust
-    "lua_ls", -- lua
-    "pyright", -- python
-    "pylsp", -- python
+    "lua_ls",        -- lua
+    -- I want to install this one myself
+    "pyright",       -- python
+    "pylsp",         -- python
     -- FIXME: none of these are valid
-    --- "jq", -- jq
-    --- "jqls", -- jq
-    --- "jqlsp", -- jq
-    --- "jq-ls", -- jq
-    --- "jq-lsp", -- jq
-    --- "jq_ls", -- jq
-    --- "jq_lsp", -- jq
-    "jsonls", -- json
-    "jsonnet_ls", -- jsonnet
-    "tflint", -- terraform
+    --- "jq",            -- jq
+    --- "jqls",          -- jq
+    --- "jqlsp",         -- jq
+    --- "jq-ls",         -- jq
+    --- "jq-lsp",        -- jq
+    --- "jq_ls",         -- jq
+    --- "jq_lsp",        -- jq
+    "jsonls",      -- json    -- FIXME: format json with prettier, not jsonls
+    "jsonnet_ls",  -- jsonnet
+    "tflint",      -- terraform
     "terraformls", -- terraform-ls: terraform
-    -- "tsserver",    -- typescript
-    "vimls", --vim
-    "clangd", -- c/c++
-    "gopls", -- golang
+    --- "tsserver",       -- typescript
+    "vimls",       --vim
+    "clangd",      -- c/c++
+    "gopls",       -- golang
   },
   -- null-ls adapts CLI tools to the LSP protocol
   -- full list: https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
@@ -39,16 +40,16 @@ M.mason_install = {
     "prettierd",
     -- shell
     "shellcheck", -- .sh
-    "fish", -- .fish
-    "zsh", -- .zsh
-    "dotenv_linter", -- .env
+    "fish",       -- .fish
+    "zsh",        -- .zsh
+    -- "dotenv_linter", -- .env
     -- too whiny:
     -- "editorconfig_checker", -- .editorconfig
     "gitlint", -- git commit messages
     --"commitlint",  -- needs configuration
-    "glslc", -- GLSL
-    "tfsec", -- terraform
-    "gofmt", -- golang
+    "glslc",   -- GLSL
+    "tfsec",   -- terraform
+    "gofmt",   -- golang
   },
 }
 
@@ -102,6 +103,7 @@ end
 
 function M.setup_mason()
   require("mason").setup({
+    PATH = "append", -- let dev-environment tools take precedence
     log_level = mason_log_level,
     ui = {
       icons = {
@@ -190,8 +192,18 @@ function M.setup_mason_lspconfig()
   local mason_lspconfig = require("mason-lspconfig")
   mason_lspconfig.setup({
     ensure_installed = M.mason_install["lspconfig"],
+    automatic_enable = {
+      exclude = { "pylsp" },
+    },
   })
-  mason_lspconfig.setup_handlers({ M.mason_lspconfig_handler })
+
+  -- Since automatic_enable uses vim.lsp.enable(), we need to ensure our
+  -- configurations are applied. Let's do that by setting up each server:
+  for _, server_name in ipairs(mason_lspconfig.get_installed_servers()) do
+    if vim.tbl_contains(M.mason_install.lspconfig, server_name) then
+      M.mason_lspconfig_handler(server_name)
+    end
+  end
 end
 
 function M.mason_lspconfig_handler(server_name) -- default handler (optional)
@@ -298,6 +310,32 @@ function M.mason_lspconfig_handler(server_name) -- default handler (optional)
         },
       },
     }
+  elseif server_name == "jsonls" then
+    setup.init_options = {
+      provideFormatter = false,
+    }
+  elseif server_name == "yamlls" then
+    setup["settings"] = {
+      yaml = {
+        hover = true,
+        validate = true,
+        completion = true,
+        schemaStore = {
+          enable = true,
+          url = "https://www.schemastore.org/api/json/catalog.json",
+        },
+        ---- schemas = {
+        ----   ["http://json-schema.org/draft-07/schema#"] = "*.schema.yaml",
+        ----   -- Add other schemas you want to recognize
+        ---- },
+        -- This is key - it allows the server to use the $schema field in the document
+        customTags = {
+          "!include",
+          "!reference",
+          "tag:yaml.org,2002:str",
+        },
+      },
+    }
   end
 
   require("lspconfig")[server_name].setup(setup)
@@ -316,6 +354,11 @@ function M.setup_mason_null_ls()
 end
 
 function M.null_ls_handler(source, types)
+  --- if source == "prettierd" then
+  ---   M.log("DEBUG: null-ls disabled: %s", source)
+  ---   return
+  --- end
+
   -- `types` is a list with "diagnostics" "formatting" etc.
   local configured_by = M.lsp_attached[source]
   if configured_by ~= nil then
@@ -342,6 +385,13 @@ function M.on_attach_autoformat(client, bufnr)
     return
   end
 
+  --- -- FIXME: surely there's a better way to disable jsonls formatting D:
+  --- -- TODO: fix neoconf
+  --- if client.name == "jsonls" then
+  ---   M.log("jsonls formatting disabled")
+  ---   return
+  --- end
+
   if M.lsp_formatting[bufnr] ~= nil then
     M.log(
       "formatting: %s: %s (dup: %s)",
@@ -356,6 +406,10 @@ function M.on_attach_autoformat(client, bufnr)
     group = M.au_format,
     buffer = bufnr,
     callback = function()
+      M.log(
+        "formatting buffer with: %s",
+        vim.inspect(vim.lsp.get_clients({ bufnr = bufnr }))
+      )
       vim.lsp.buf.format({ bufnr = bufnr })
     end,
     desc = "format on save: " .. client.name,
