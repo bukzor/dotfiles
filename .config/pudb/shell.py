@@ -64,6 +64,7 @@ def set_readline_history(readline: object, history_file: str):
 
     atexit.register(write_history)
 
+
 def set_readline_completion(readline, locals, globals):
     ns = SetPropagatingDict([locals, globals], locals)
 

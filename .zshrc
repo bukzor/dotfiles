@@ -159,3 +159,6 @@ fi
 if [ -e "$HOME/private-dotfiles/.zshrc" ]; then
     source "$HOME/private-dotfiles/.zshrc"
 fi
+
+
+eval "$(direnv hook zsh)"
