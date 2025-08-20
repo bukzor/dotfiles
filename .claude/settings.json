@@ -9,7 +9,9 @@
       "Bash(mkdir:*)",
       "Bash(rmdir:*)",
       "Bash(chmod:*)",
-      "Bash(ps:*)"
+      "Bash(ps:*)",
+      "Bash(alert:*)",
+      "Bash(namei:*)"
     ],
     "deny": ["TodoWrite", "MultiEdit"]
   },
