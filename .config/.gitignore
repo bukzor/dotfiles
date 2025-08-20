@@ -5,3 +5,15 @@
 cros-garcon.conf
 nextjs-nodejs/
 weston.ini
+colima/
+containers/
+gcloud-logs/
+lvim/
+ngrok/
+packer/
+prometheus/
+sentry-devenv/
+timestamps/
+
+# dirty hacks:
+gcloud.*

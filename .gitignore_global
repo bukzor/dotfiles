@@ -1,5 +1,6 @@
 # automatic temporary files
 *.py[cod]
+__pycache__/
 .*.sw[a-z]
 
 # ad-hoc backups

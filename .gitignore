@@ -23,9 +23,12 @@ trash/
 .opam/
 .git/
 .local/share/pnpm
+.goenv/
+.zkbd/
 
 # dontcare:
 .fzf/
+Downloads/
 
 # binaries and local files
 .vscode
