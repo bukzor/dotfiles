@@ -23,16 +23,14 @@ procedure:
 - Each commit should represent a working system state
 - Always end messages with: `🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>`
 
-4. **Handle Non-Commit Files** (only with explicit human approval):
-   - create trash/ directory if it doesn't exist
-   - move stale/generated files to trash/ using `cp -i` then `mv -i` 
-   - amend .gitignore for files we'll never commit but will usually exist
+4. **Handle Non-Commit Files**:
+   - Create co-located trash directories: `mkdir -p bin/trash .config/trash docs/trash`  
+   - Move stale/generated files to appropriate trash/ using `mv -it path/trash/ files`
+   - Never flatten to root trash/ - keep trash co-located with source
 
 5. **Verify Success**:
    - git status should show clean working tree
-   - all valuable work preserved either in commits or trash/
-
-NEVER PROCEED TO STEP 4 WITHOUT HUMAN APPROVAL OF WHAT TO MOVE TO TRASH
+   - all valuable work preserved either in commits or co-located trash/
 
 ---
 
