@@ -29,8 +29,8 @@ procedure:
    - Never flatten to root trash/ - keep trash co-located with source
 
 5. **Verify Success**:
-   - git status should show clean working tree
-   - all valuable work preserved either in commits or co-located trash/
+   - Clean working tree: `git status -s . | grep -Ev '^. '` shows nothing
+   - All valuable work preserved either in commits or co-located trash/
 
 ---
 
