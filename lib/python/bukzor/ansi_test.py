@@ -46,5 +46,7 @@ class DescribeAnsiColor:
         for cls in type(BLACK).mro():
             print(cls.__name__, getattr(cls, "__slots__", "unset"))
 
+        import pudb
+        pudb.set_trace()
         with pytest.raises(AttributeError):
             BLACK.x = "X"  # type: ignore
