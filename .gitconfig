@@ -82,6 +82,7 @@
     tag-name = !sh -exc 'git tag -l --points-at ${1:-HEAD}' -
     base = !sh -exc 'git merge-base "$(git upstream)" ${1:-HEAD}' -
     diffbase = !git dt $(git base)
+    diff3 = !git range-diff "$(git upstream)"
     feature = !sh -ec 'b="bukzor/$1" && shift 1 && set -x && git master && git checkout -b "$b" "$@"' -
     is-clean = diff-index --quiet HEAD
     vimdiff = difftool

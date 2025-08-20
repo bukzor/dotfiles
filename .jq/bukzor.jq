@@ -90,3 +90,18 @@ def rjust(width; pad):
 
 def rjust(width):
   rjust(width; " ");
+
+
+def diff:
+  . as $pair
+| ($pair[0] | keys) + ($pair[1] | keys) | unique as $keys
+| reduce $keys[] as $k (
+    [{}, {}];
+    if ($pair[0][$k] != $pair[1][$k]) then
+      .[0][$k] = $pair[0][$k]
+    | .[1][$k] = $pair[1][$k]
+    else
+      .
+    end
+  )
+;
