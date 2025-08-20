@@ -232,6 +232,12 @@ interpret as TODO.md file operations instead:
 User maintains auxiliary context files in ~/.claude/context/. Proactively list
 the directory and offer to read files when/if they seem relevant.
 
+# Communication Patterns
+
+## Async Work Notifications
+- Use `alert` to notify when long-running tasks complete
+- Allows user to focus on other work during systematic operations
+
 # Appendix: Commands
 
 ## `/compact` Command Behavior
