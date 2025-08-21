@@ -13,7 +13,7 @@
       "Bash(alert:*)",
       "Bash(namei:*)"
     ],
-    "deny": ["TodoWrite", "MultiEdit"]
+    "deny": ["TodoWrite", "MultiEdit", "NotebookEdit"]
   },
   "//hooks": {
     "SessionStart": [
