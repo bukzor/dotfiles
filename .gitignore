@@ -9,6 +9,8 @@
 #     ./Library/CloudStorage/.gitignore
 !**/
 !**/.gitignore
+tmp/**/
+trash/**/
 
 # these have to be explicitly ignored because they sometimes contain git repos
 .cargo/
