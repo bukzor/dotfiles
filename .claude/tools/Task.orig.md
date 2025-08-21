@@ -1,1 +1,1 @@
-/Users/buck/.claude/claude-startup-context.d/system-prompt/tools/Task.d/description.md
+/Users/buck/.claude/default-context.d/system-prompt/tools/Task.d/description.md

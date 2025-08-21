@@ -1,0 +1,14 @@
+{
+  "name": "ExitPlanMode",
+  "description": "Exit plan mode when ready to execute planned changes. ONLY use for implementation tasks requiring code changes, NOT for research/analysis tasks.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "plan": {
+        "type": "string",
+        "description": "The plan to present for user approval"
+      }
+    },
+    "required": ["plan"]
+  }
+}

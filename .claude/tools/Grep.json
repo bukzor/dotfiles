@@ -1,0 +1,59 @@
+{
+  "name": "Grep",
+  "description": "Fast search tool using ripgrep. ALWAYS use Grep for searches - NEVER use grep/rg as Bash commands. Supports regex patterns, file filtering by glob/type, and output modes. Use Task tool for open-ended multi-round searches. Literal braces need escaping: use interface\\\\{\\\\} to find interface{}.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "pattern": {
+        "type": "string",
+        "description": "The regex pattern to search for"
+      },
+      "path": {
+        "type": "string", 
+        "description": "File or directory to search (defaults to current directory)"
+      },
+      "glob": {
+        "type": "string",
+        "description": "Glob pattern to filter files (e.g. \"*.js\", \"*.{ts,tsx}\")"
+      },
+      "type": {
+        "type": "string",
+        "description": "File type filter (js, py, rust, go, java, etc.)"
+      },
+      "output_mode": {
+        "type": "string",
+        "enum": ["content", "files_with_matches", "count"],
+        "description": "Output mode: content (lines), files_with_matches (paths), count (counts). Default: files_with_matches"
+      },
+      "-i": {
+        "type": "boolean",
+        "description": "Case insensitive search"
+      },
+      "-n": {
+        "type": "boolean", 
+        "description": "Show line numbers (content mode only)"
+      },
+      "-A": {
+        "type": "number",
+        "description": "Lines after match (content mode only)"
+      },
+      "-B": {
+        "type": "number",
+        "description": "Lines before match (content mode only)"
+      },
+      "-C": {
+        "type": "number",
+        "description": "Lines before and after match (content mode only)"
+      },
+      "head_limit": {
+        "type": "number",
+        "description": "Limit output to first N results"
+      },
+      "multiline": {
+        "type": "boolean",
+        "description": "Enable multiline mode for cross-line patterns"
+      }
+    },
+    "required": ["pattern"]
+  }
+}
