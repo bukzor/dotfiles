@@ -1,15 +1,17 @@
 # Claude Code Startup Context Analysis
 
-**Total tokens consumed: 21,730**
+**CORRECTED**: Token counting bug discovered - true vanilla cost is ~7,300 tokens
 
-## Token Breakdown by Category
+## Corrected Token Breakdown (True Values)
 
-| Category                  | Estimated Tokens | Percentage | Location         |
-| ------------------------- | ---------------- | ---------- | ---------------- |
-| Context Files (CLAUDE.md) | 8,000+           | 40%        | `context-files/` |
-| System Prompt & Tools     | 8,000+           | 37%        | `system-prompt/` |
-| Environment & Git Status  | 3,000+           | 14%        | `environment/`   |
-| Conversation Overhead     | 2,000+           | 9%         | `conversation/`  |
+| Category               | True Tokens | Percentage | Notes                           |
+| ---------------------- | ----------- | ---------- | ------------------------------- |
+| Tool Definitions       | 4,000       | 55%        | Removable via --disallowedTools |
+| System Prompt          | 1,600       | 22%        | Core Claude Code behavior       |
+| Context Files          | 2,700       | 25%*       | When CLAUDE.md files present    |
+| System Infrastructure  | 1,240       | 17%        | Session initialization          |
+
+*Context percentage applies to setups with CLAUDE.md files (~10,600 total tokens)
 
 ## Directory Structure
 
