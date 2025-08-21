@@ -10,13 +10,6 @@
 !**/
 !**/.gitignore
 
-# hacking
-tmp/
-munge*
-mangle*
-trash/
-*.bak/
-
 # these have to be explicitly ignored because they sometimes contain git repos
 .cargo/
 .cache/
@@ -28,7 +21,6 @@ trash/
 
 # dontcare:
 .fzf/
-Downloads/
 
 # binaries and local files
 .vscode

@@ -3,4 +3,4 @@
 set -eux
 ulimit -Su 1200
 ulimit -Hu 2400
-exec "$HOME/.local/bin/claude" "$@"
+exec "$XDG_DATA_HOME/../bin/claude" "$@"
