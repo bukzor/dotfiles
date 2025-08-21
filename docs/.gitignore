@@ -1,5 +1,6 @@
 # un-ignore non-hidden files
 ![!.]*
+trash/
 
 # work-related
 sentry/

@@ -1,5 +1,6 @@
 # un-ignore non-hidden files
 ![!.]*
+trash/
 
 # this is a symlink to one of my alert- scripts, depending on working environment
 alert
