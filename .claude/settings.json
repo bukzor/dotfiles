@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "additionalDirectories": ["~/.claude/context"],
     "allow": [
       "Read(~/.claude/context/**/CLAUDE.*.md)",
       "Bash(cp -i:*)",
@@ -13,7 +12,14 @@
       "Bash(alert:*)",
       "Bash(namei:*)"
     ],
-    "deny": ["TodoWrite", "MultiEdit", "NotebookEdit"]
+    "deny": [
+      "TodoWrite",
+      "MultiEdit",
+      "NotebookEdit"
+    ],
+    "additionalDirectories": [
+      "~/.claude/context"
+    ]
   },
   "//hooks": {
     "SessionStart": [
@@ -31,5 +37,6 @@
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754083893860
-  }
+  },
+  "model": "opusplan"
 }
