@@ -1,0 +1,33 @@
+query($q: String!) {
+  search(query: $q, type: ISSUE, first: 30) {
+    nodes {
+      ... on PullRequest {
+        number
+        title
+        url
+        createdAt
+        statusCheckRollup: commits(last: 1) {
+          nodes {
+            commit {
+              statusCheckRollup {
+                contexts(first: 100) {
+                  nodes {
+                    ... on CheckRun {
+                      __typename
+                      name
+                      status
+                      conclusion
+                      startedAt
+                      completedAt
+                      detailsUrl
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

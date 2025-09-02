@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Auto un-draft PRs with passing CI or notify of failures."""
+
+import json
+import subprocess
+import sys
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+from pathlib import Path
+
+RECENT = timedelta(weeks=2)
+HERE = Path(__file__).parent
+
+
+def run_gh_command(cmd):
+    """Run a gh command and return the JSON result."""
+    try:
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True, check=True
+        )
+        return json.loads(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command: {cmd}")
+        print(f"Error: {e.stderr}")
+        sys.exit(1)
+
+
+def send_alert(message):
+    """Send a desktop alert."""
+    subprocess.run(["alert", message], check=False)
+
+
+def check_pr_status(pr):
+    """Check the CI status of a PR and take appropriate action."""
+    pr_number = pr["number"]
+    pr_title = pr["title"]
+    pr_url = pr["url"]
+
+    print(f"Checking PR #{pr_number}: {pr_title}")
+
+    # We only get CheckRuns from our GraphQL query
+    checks = pr["statusCheckRollup"]
+    if not checks:
+        print("  No CI checks found, skipping")
+        return
+
+    # Categorize checks
+    in_progress = [c for c in checks if c["status"] == "IN_PROGRESS"]
+    failed = [c for c in checks if c["conclusion"] == "FAILURE"]
+    pending = [
+        c for c in checks if c["status"] == "PENDING" or c["conclusion"] == ""
+    ]
+    successful = [c for c in checks if c["conclusion"] == "SUCCESS"]
+    skipped = [c for c in checks if c["conclusion"] == "SKIPPED"]
+
+    if failed:
+        print(f"  ❌ CI FAILED - {len(failed)} failed check(s)")
+        print(f"  URL: {pr_url}")
+
+        # Show failed checks
+        for check in failed[:5]:  # Limit to first 5 to avoid spam
+            print(f"    - {check['name']}: {check['detailsUrl']}")
+
+        if len(failed) > 5:
+            print(f"    ... and {len(failed) - 5} more")
+
+        # Send notification
+        send_alert(f"PR #{pr_number} CI failed: {pr_title} - {pr_url}")
+
+    elif in_progress or pending:
+        print(
+            f"  ⏳ CI still running - {len(in_progress)} in progress,"
+            f" {len(pending)} pending"
+        )
+
+    else:
+        # All checks passed or were skipped
+        print(
+            f"  ✅ CI passed - {len(successful)} successful,"
+            f" {len(skipped)} skipped"
+        )
+        print(f"  Un-drafting PR #{pr_number}")
+
+        try:
+            subprocess.run(["gh", "pr", "ready", str(pr_number)], check=True)
+            print(f"  ✓ Successfully un-drafted PR #{pr_number}")
+            send_alert(
+                f"PR #{pr_number} ready for review: {pr_title} - {pr_url}"
+            )
+        except subprocess.CalledProcessError:
+            print(f"  ❌ Failed to un-draft PR #{pr_number}")
+            send_alert(
+                f"Failed to un-draft PR #{pr_number}: {pr_title} - {pr_url}"
+            )
+
+
+def get_draft_prs():
+    """Get draft PRs using custom GraphQL query that only fetches CheckRuns."""
+    cutoff_date = (datetime.now(timezone.utc) - RECENT).strftime("%Y-%m-%d")
+
+    # Load GraphQL query from file
+    query_file = HERE / "gh-pr-undraft.d" / "pr-checks.graphql"
+    query = query_file.read_text()
+
+    search_query = f"is:pr is:draft author:@me created:>{cutoff_date}"
+    variables = {"q": search_query}
+
+    result = run_gh_command(
+        f"gh api graphql -f query='{query}' --raw-field q='{search_query}'"
+    )
+
+    # Transform the nested structure to match the original format
+    prs = []
+    for node in result["data"]["search"]["nodes"]:
+        if node and "statusCheckRollup" in node:
+            # Flatten the nested statusCheckRollup structure
+            checks = []
+            for commit_node in node["statusCheckRollup"]["nodes"]:
+                for context_node in commit_node["commit"]["statusCheckRollup"][
+                    "contexts"
+                ]["nodes"]:
+                    if context_node:  # Filter out null nodes
+                        checks.append(context_node)
+
+            prs.append({
+                "number": node["number"],
+                "title": node["title"],
+                "url": node["url"],
+                "createdAt": node["createdAt"],
+                "statusCheckRollup": checks,
+            })
+
+    return prs
+
+
+def main():
+    """Main function."""
+    # Get recent draft PRs with only CheckRuns
+    draft_prs = get_draft_prs()
+
+    if not draft_prs:
+        print("No draft PRs found")
+        return
+
+    for pr in draft_prs:
+        check_pr_status(pr)
+        print()  # Blank line between PRs
+
+
+if __name__ == "__main__":
+    main()
