@@ -21,11 +21,12 @@
       "~/.claude/context"
     ]
   },
+  "model": "opus",
   "//hooks": {
     "SessionStart": [
       {
-        "PROBLEMA": "this thing is showing up in *every* turn, when using --verbose. see: https://github.com/anthropics/claude-code/issues/5557 ",
         "matcher": "startup",
+        "// HAY PROBLEMA": "this thing is showing up in *every* turn, when using --verbose. see: https://github.com/anthropics/claude-code/issues/5557",
         "hooks": [
           {
             "type": "command",
@@ -37,6 +38,5 @@
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754083893860
-  },
-  "model": "opusplan"
+  }
 }
