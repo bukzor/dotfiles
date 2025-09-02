@@ -3,6 +3,7 @@ set -euo pipefail
 
 src=$PWD
 dirname=$(basename "$src")
+mkdir -p "../$dirname.files/"
 dst=$(mktemp -d "../$dirname.files/$(today).XXXX")
 
 git clean -fdxfn | sed 's@Would remove @mkdir -p '"$dst"'/@; s@/[^/]*$@@' | uniq | sh -ex
