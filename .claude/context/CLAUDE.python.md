@@ -1,5 +1,7 @@
 ## Style guide
 
+- We're (usually) working in python3.13. Please use modern idioms:
+  - typing: `list[]` `|`
 - all code should be fully-typed for `pyright`
   - return types may be left implicit when trivial
 - let `black` handle the fine details of formatting
@@ -132,3 +134,28 @@ if __name__ == "__main__":
 - prefer removing or generalizing over adding code
 - remember that the units of technical debt are LOC -- each bit of code should
   be able to justify its existence
+
+### Type Safety
+
+- **Never** use `Any` types: use `object` + `TypeGuard` for dynamic data
+  - Example: `def is_json_object(obj: object) -> TypeGuard[dict[str, object]]:`
+- Minimize `# type: ignore`: only for complex dynamic libraries (more acceptable
+  inside TypeGuards)
+- Run `pyright` before commits: typing **must** pass, entirely
+- Return types may be implicit (when they are both simple and obvious)
+- Empty containers must always be annotated, e.g. `x: dict[str, Thing] = {}`
+
+### Error Handling
+
+- Replace defensive programming with assertions:
+  `assert condition, (context, actual_value)`
+- No silent fallbacks: convert `continue`, `return 0`, `.get()` patterns to
+  direct access
+
+### Tools & Search
+
+- Use `git grep -C3 -w` for systematic refactoring
+- Use `uv add` over `pip install`
+- Search comprehensively when fixing patterns
+- Standard tooling setup:
+  - uv, pyright, prettier, pytest, black, isort, pyupgrade, pre-commit
