@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # prevent #4316 from taking over my machine
-set -eux
+set -eu
 ulimit -Su 1200
 ulimit -Hu 2400
+
+
+export PATH="$XDG_DATA_HOME/claude-bin:$PATH"
 exec "$XDG_DATA_HOME/../bin/claude" "$@"
