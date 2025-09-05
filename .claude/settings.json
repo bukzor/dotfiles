@@ -21,7 +21,7 @@
       "~/.claude/context"
     ]
   },
-  "model": "opus",
+  "model": "sonnet[1m]",
   "//hooks": {
     "SessionStart": [
       {

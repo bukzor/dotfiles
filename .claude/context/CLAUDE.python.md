@@ -21,7 +21,6 @@ usage: do-useful-thing [ARG]
 
 {{Examples (if warranted)}}
 """
-from __future__ import annotations
 
 ExitCode: TypeAlias = None | int | str
 USAGE = __doc__

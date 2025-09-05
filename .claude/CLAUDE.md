@@ -65,16 +65,24 @@ When asked to make something "clean":
 
 # Domain Context Files
 
-**MANDATORY - Read the specified context file BEFORE:**
+**MANDATORY, HIGH PRIORITY**
 
-- Using the Bash tool → ~/.claude/context/CLAUDE.shell-commands.md (includes git commands)
-- Writing Python code → ~/.claude/context/CLAUDE.python.md (esp. for typing, testing)
-- Writing shell scripts → ~/.claude/context/CLAUDE.shell-scripts.md
-- Using redo build system → ~/.claude/context/CLAUDE.redo.md
-- Using Sentry MCP tools → ~/.claude/context/CLAUDE.sentry-mcp.md
-- Writing PromQL queries → ~/.claude/context/CLAUDE.promql.md
-- Analyzing large log files → ~/.claude/context/CLAUDE.howto-huge-log.md
-- Optimizing Claude Code startup → ~/.claude/context/CLAUDE.claude-code-startup-cost.md
+You _MUST_ find and read the relevant extra context when encountering these
+trigger sitations:
+
+- Using the Bash tool (esp. cd, git)
+- Writing Python code (esp. typing, testing)
+- Writing shell scripts
+- Using redo build system
+- Using Sentry MCP tools
+- Writing PromQL queries
+- Analyzing large log files
+- Optimizing Claude Code startup
+
+Action items:
+
+- [ ] List(~/.claude/context/)
+- [ ] Read(~/.claude/context/CLAUDE.xxxx.md)
 
 # Bulk Operations & Systematic Changes
 
@@ -116,11 +124,19 @@ When using tools, check here for relevant guidelines.
 
 ## File Output (Write, Edit, Update)
 
-- **REQUIRED**: _Always_ append a `\n\n` to the content parameter
-- Reason: this is required for many unix tools to work correctly (e.g. cat)
-- To add a trailing newline to existing files, instead use
-  `Bash(echo >> filename)`
-  - or, for idempotency, use: `sed -i '' '$a\' filename`
+- All text files _MUST_ end with a trailing newline. This is essential for many
+  unix tools and systems.
+- The tool system **removes one newline** from any multiline `antml:parameter`
+- To produce a trailing newline in the output file, you must provide a **blank
+  line** before the closing `{/antml:parameter}`
+- Example:
+
+  ```
+  {antml:parameter name="content"}line 1
+  line 2
+
+  {/antml:parameter}
+  ```
 
 ## Update
 
