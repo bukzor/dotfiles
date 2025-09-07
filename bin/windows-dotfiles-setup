@@ -1,0 +1,47 @@
+#!/bin/bash
+# windows-dotfiles-setup
+
+set -euo pipefail
+
+if ! has rsync; then
+    echo "Error: rsync is required but not installed"
+    echo "Install with: sudo apk add rsync"
+    exit 1
+fi
+
+WINDOWS_CONFIG="$HOME/.config/windows"
+
+# Get Windows username
+WINDOWS_USER=$(wsl-id-un)
+WINDOWS_APPDATA="/mnt/c/Users/$WINDOWS_USER/AppData"
+
+if [[ ! -d "$WINDOWS_APPDATA" ]]; then
+    echo "Error: Windows AppData not found at $WINDOWS_APPDATA"
+    exit 1
+fi
+
+TEAL='\033[0;36m'
+RESET='\033[0m'
+PS4="${TEAL}\$${RESET} "
+set -x
+
+: "Setting up Windows dotfiles integration..."
+
+# Move the entire dotfiles directory out of the way
+temp_name=$(mktemp -u "$WINDOWS_CONFIG.XXXXXX")
+: "Moving dotfiles to: $temp_name"
+mv "$WINDOWS_CONFIG" "$temp_name"
+
+# Create mount point and bind mount AppData
+mkdir "$WINDOWS_CONFIG"
+sudo mount --bind "$WINDOWS_APPDATA" "$WINDOWS_CONFIG"
+: "Mounted $WINDOWS_APPDATA -> $WINDOWS_CONFIG"
+
+# Use rsync to merge dotfiles back, backing up conflicts
+: "Merging dotfiles with Windows configs..."
+rsync -av --backup --suffix=.windows-original "$temp_name"/ "$WINDOWS_CONFIG"/
+
+# Clean up temp directory
+rm -rf "$temp_name"
+: "Setup complete!"
+: "Any conflicting Windows files were backed up with .windows-original suffix"
