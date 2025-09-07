@@ -1,0 +1,25 @@
+#!/bin/sh
+cmd="$1"
+
+if [ -e /etc/alpine-release ]; then
+  if ! has /usr/libexec/command-not-found; then
+    sudo apk add command-not-found
+  fi
+  exec /usr/libexec/command-not-found "$1"
+fi
+
+# The code below is based off this Linux Journal article:
+#   http://www.linuxjournal.com/content/bash-command-not-found
+
+# do not run when inside Midnight Commander or within a Pipe, except if CI
+if test ! -t 2 && test "$CI" != "true"; then
+  TEXTDOMAIN=command-not-found echo $"$cmd: command not found"
+  exit 127
+fi
+
+if [ "$cmd" != "-h" ] && [ "$cmd" != "--help" ] && [ "$cmd" != "--usage" ] && [ "$cmd" != "-?" ]; then
+    if ! which brew > /dev/null; then exit; fi
+    brew which-formula --explain "$cmd"
+fi
+
+exit 127
