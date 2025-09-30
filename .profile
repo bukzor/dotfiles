@@ -9,36 +9,21 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+if [ -z "$HOME" ]; then
+  export HOME USER
+  USER=$(whoami)
+  HOME=$(eval "echo ~$USER")
+  ##@#exit 0   # ???
+fi
+
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
   # include .bashrc if it exists
-  if [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-  fi
+  . "$HOME/.bashrc"
 fi
 
-function path_prepend() { # NOTE: last wins
-  local one_more newpath
-  one_more="$(sed 's@/@\\/@g' <<< "$1")"
-  if newpath=$(
-    # shellcheck disable=2016  # I know about hard quotes
-    sed -r '
-      # affix colons on either side of $PATH to simplify matching
-      s/^:*/:/
-      s/:*$/:/
-      # clean up repeated colons
-      s/::+/:/g
-      # remove preexisting entry
-      s/:'"$one_more"':/:/g
-      # prepend
-      s/^:/'"$one_more"':/
-      # clean up trailing colon
-      s/:$//
-    ' <<< "$PATH"
-  ); then
-	PATH="$newpath"
-  fi
-}
+# `nproc` and `path`
+. ~/.config/sh/functions.sh
 
 # set some defaults
 export CLICOLOR=truecolor
@@ -47,22 +32,31 @@ export EDITOR=vim
 export MAKEFLAGS="-j $(($(nproc) * 3))"
 export HOMEBREW_CC=clang
 
-export GOROOT="$PREFIX/goroot"
+export PREFIX=$HOME/prefix
+export GOPATH="$PREFIX/golang"
 export CARGO_INSTALL_ROOT="$PREFIX/cargo"
 
+export VOLTA_HOME="$HOME/.volta"
 
 # NOTE: in path_prepend, last wins
 # enabling meta-tools: rustup, volta, etc.
-path_prepend "$HOME/.local/share/nvim/mason/bin"
-path_prepend "$HOME/bin/shim"
-path_prepend "$PREFIX/pnpm/bin"
-path_prepend "$GOROOT/bin"
-path_prepend "/opt/homebrew/bin"
-export VOLTA_HOME="$HOME/.volta"
-path_prepend "$VOLTA_HOME/bin"
-path_prepend "$CARGO_INSTALL_ROOT/bin"
+path prepend PATH <<EOF
+  $HOME/.local/share/nvim/mason/bin
+  $HOME/bin/shim
+  $PREFIX/pnpm/bin
+  $GOROOT/bin
+  /opt/homebrew/bin
+  $VOLTA_HOME/bin
+  $CARGO_INSTALL_ROOT/bin
+  $HOME/.cargo/bin
 
-# enable ~/bin/ unconditionally, so we can create it after login
-path_prepend "$HOME/.local/bin"  # similar, but XDG style
-path_prepend "$HOME/bin/alternatives"
-path_prepend "$HOME/bin"
+  # enable ~/bin/ unconditionally, so we can create it after login
+  $HOME/.local/bin  # similar, but XDG style
+  $HOME/bin
+EOF
+
+## for preferred_shell in "$(which zsh)"; do
+##   if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
+##     SHELL="$preferred_shell" exec "$preferred_shell" -il
+##   fi
+## done
