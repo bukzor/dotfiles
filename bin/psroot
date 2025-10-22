@@ -1,0 +1,12 @@
+#!/bin/sh
+# find the root of a process tree
+set -eu
+pid="$1"
+while true; do
+    ppid="`ps -p $pid -o ppid:1=`"
+    if [ "$ppid" -eq 1 ]; then
+        exec echo "$pid"
+    else
+        pid="$ppid"
+    fi
+done

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+
+docker history --no-trunc --format '{{json .}}' "$@" |
+  tac |
+  jq '.CreatedBy' -r |
+  sed -r '
+    s/[a-f0-9]{16,}/$SHA/g
+    s/ && / \&\&\n        /g
+    s/^$ (echo|apt-get|dpkg|rm) /# : \&\&\n        \1 /g
+  '

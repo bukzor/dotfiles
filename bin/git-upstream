@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+remote=$(git-remote-upstream)
+
+show_remote_head() {
+  git symbolic-ref -q --short refs/remotes/"$remote"/HEAD
+}
+
+if ! show_remote_head; then
+  git remote set-head "$remote" --auto >/dev/null
+  show_remote_head
+fi

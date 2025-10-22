@@ -1,0 +1,2 @@
+#!/bin/sh
+ps -wwo stat,user,pid,ppid,pgid,sid,c,pri,ni,rss:8,wchan:22,stime,tname,time,cmd --forest "$@"

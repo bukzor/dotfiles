@@ -1,0 +1,43 @@
+#!/bin/bash
+usage() {
+  cat >&2 <<'EOF'
+Usage: ls-parents [PATH=$PWD]
+  or:  ls-parents [pattern=''] PATH ...
+
+With no arguments, list all parents of $PWD.
+Optionally, pass a path (or multiple) to analyze.
+Optionally, pass a pattern to list for each parent.
+EOF
+}
+trap usage ERR
+set -euo pipefail
+
+if [[ $# -gt 1 ]]; then
+    relpath="${1-}"
+    shift 1
+else
+    relpath=''
+fi
+if [[ $# -eq 0 ]]; then
+    set -- "$PWD"
+fi
+
+
+# normalize double-slashes; remove any leading slash
+relpath="$(sed -r 's@//+@/@g; s@^/@@;' <<< "$relpath")"
+if [[ "$relpath" ]]; then
+    join=/
+else
+    join=""
+fi
+
+for path in "$@"; do
+  while true; do
+    case $path in
+        /* ) echo "$path$join$relpath"; path=${path%/*};;
+        '' ) echo "/$relpath"; break;;
+        -h|--help ) usage; exit 0;;
+        * ) path="$PWD/$path";;  # abspath, no output
+    esac
+  done
+done

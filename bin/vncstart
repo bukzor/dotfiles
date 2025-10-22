@@ -1,0 +1,1 @@
+vncserver -depth 24 -geometry 2300x920

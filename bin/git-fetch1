@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+ref="${1:-}"
+
+if [[ "$ref" =~ ^[^/]*/[^/]*$ ]]; then
+    remote=$(dirname "$ref")
+    branch=$(basename "$ref")
+else
+    echo >&2 'usage: git-fetch1 $REMOTE/$BRANCH'
+    exit 1
+fi
+
+set -x
+git fetch "$remote" "$branch:refs/remotes/$ref"

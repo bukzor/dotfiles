@@ -1,0 +1,10 @@
+{
+    "workspace.library": [
+        "/home/bukzor/.vim/pack/lazy/opt/neodev.nvim/types/stable",
+        "/home/linuxbrew/.linuxbrew/Cellar/neovim/0.9.1/share/nvim/runtime/lua",
+        "/home/bukzor/.config/lvim/lua",
+        "${3rd}/luv/library",
+        "${3rd}/luassert/library"
+    ],
+    "workspace.maxPreload": 1000
+}

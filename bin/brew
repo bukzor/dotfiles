@@ -6,7 +6,7 @@ BREW=$BREWDIR/bin/brew
 if ! [ -d "$BREWDIR" ]; then
   if yesno "Homebrew is missing. Install homebrew?"; then
     set +eu
-    NONINTERACTIVE=1 eval "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     set -eu
     linuxbrew=/home/linuxbrew/.linuxbrew
     if [ -d "$BREWDIR" ]; then
@@ -19,7 +19,7 @@ if ! [ -d "$BREWDIR" ]; then
     fi
   else
     echo 'Homebrew not installed.' >&2
-    exit 1
+    return 1
   fi
 fi
 

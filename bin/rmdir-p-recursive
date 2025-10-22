@@ -1,0 +1,1 @@
+find -type d | tac | xargs -n1 rmdir -p

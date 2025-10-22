@@ -1,0 +1,54 @@
+/* ===== REFERENCE FONTS (for comparison/testing) ===== */
+
+/* These fonts are kept for reference but not recommended for primary use.
+   They either have limited coverage, aren't monospaced, or have other issues. */
+
+/* Nerd Font Symbols Only - BROKEN: renders double-width */
+@font-face {
+  font-family: 'Nerd Symbols Mono';
+  src: url(https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFontMono-Regular.ttf) format('truetype');
+}
+
+/* Source Code Pro - base font without Nerd Font patches */
+@font-face {
+  font-family: 'Source Code Pro';
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/source-code-pro@latest/latin-400-normal.woff2) format('woff2');
+}
+
+/* Noto Sans Mono - comprehensive Unicode coverage */
+@font-face {
+  font-family: 'Noto Sans Mono';
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-mono@latest/latin-400-normal.woff2) format('woff2');
+}
+
+/* Noto Sans Symbols - symbol coverage (NOT monospaced) */
+@font-face {
+  font-family: 'Noto Sans Symbols';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/notosanssymbols/v47/rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gag.ttf) format('truetype');
+}
+
+/* Noto Sans Symbols 2 - extended symbol coverage (NOT monospaced) */
+@font-face {
+  font-family: 'Noto Sans Symbols 2';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/notosanssymbols2/v25/I_uyMoGduATTei9eI8daxVHDyfisHr71ypM.ttf) format('truetype');
+}
+
+/* Noto Emoji - black & white emoji (NOT monospaced) */
+@font-face {
+  font-family: 'Noto Emoji';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/notoemoji/v61/bMrnmSyK7YY-MEu6aWjPDs-ar6uWaGWuob-r0jwv.ttf) format('truetype');
+}
+
+/* Noto Color Emoji - color emoji (NOT monospaced) */
+@font-face {
+  font-family: 'Noto Color Emoji';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/notocoloremoji/v36/Yq6P-KqIXTD0t4D9z1ESnKM3-HpFab4.ttf) format('truetype');
+}

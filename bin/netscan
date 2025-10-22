@@ -1,0 +1,104 @@
+#!/usr/bin/python
+import commands
+import os
+import sys
+from math import log
+
+wifi = "wlan0"
+for line in open('/proc/net/wireless'):
+    if ':' in line:
+        wifi = line.split(':')[0].strip()
+        break
+
+class net:
+    def __init__(self, essid, dB, quality, crypt):
+	self.essid = essid
+        self.dB = int(dB)
+        self.quality = quality
+        try:
+            self.signal1 = log(93.+self.dB) / .03
+        except ValueError:
+            self.signal1 = 0
+        self.signal2 = 300 * eval(quality) - 55
+        self.signal = (self.signal1 + self.signal2) / 2
+	self.crypt = crypt
+	if(crypt == "on"):
+	    self.locked = "locked"
+	else:
+	    self.locked = "unlocked"
+
+    def __str__(self):
+	return "%-20s %3i%% (%idB %s) %20s" \
+	    % (self.essid, self.signal, self.dB, self.quality, self.locked)
+
+    def __cmp__(self, other):
+	if not isinstance(other, net):
+	    raise TypeError("Cannot compare 'net' to %r" % type(other).__name__)
+
+	if self.crypt == other.crypt:
+	    if self.signal > other.signal:
+		return 1
+	    elif self.signal < other.signal:
+		return -1
+	    else:
+		return 0
+	elif self.crypt == "off":
+	    return 1
+	else:
+	    return -1
+
+
+from subprocess import Popen, PIPE
+iwl = Popen(["sudo", "iwlist", wifi, "scan"], stdout=PIPE)
+	
+netlist = []
+
+essid = quality = signal = crypt = None
+divider = '='
+for line in iwl.stdout:
+    if "ESSID:" in line:
+        essid = line.split('ESSID:')[-1].strip()
+    if "Signal" in line:
+        data = line.split(divider)[1:]
+        try:
+            quality = data[0].split()[0]
+        except IndexError:
+            divider = ':'
+            data = line.split(divider)[1:]
+            quality = data[0].split()[0]
+        signal  = data[1].split()[0]
+    if "Encryption" in line:
+        crypt = line.split(":")[-1].strip()
+    if essid and quality and signal and crypt:
+	netlist.append( net(essid, signal, quality, crypt) )
+        essid = quality = signal = crypt = None
+
+        
+if False:
+	print iwl[x]
+	print iwl[x+1]
+	print iwl[x+2]
+	essid =  iwl[x+2].split(":")[1]
+	signal =  iwl[x+1].split()[0]
+	crypt =  iwl[x+2].split(":")[1]
+
+"""
+essid = "test"
+crypt = "off"
+netlist.append( net(essid, -70, crypt) )
+netlist.append( net(essid, -60, crypt) )
+crypt = "on"
+netlist.append( net(essid, -50, crypt) )
+netlist.append( net(essid, -80, crypt) )
+netlist.append( net(essid, -85, crypt) )
+crypt = "off"
+netlist.append( net(essid, -90, crypt) )
+netlist.append( net(essid, -95, crypt) )
+netlist.append( net(essid, -99, crypt) )
+"""
+
+netlist.sort()
+for x in netlist:
+    print x
+	
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+# An inverse for uniq(1): Print only non-unique lines.
+
+set -- "${@:--w 5}"
+
+set -x
+uniq --all-repeated=prepend "$@" |
+  sed '/^$/ {N; d}'

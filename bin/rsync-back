@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euxo pipefail
+src="${1:-$src}"
+dst="${2:-$dst}"
+
+if [[ -d "$src" ]]; then
+    src="$src/"
+    srcdir="$src"
+else
+    srcdir="$(dirname "$src")/"
+fi
+if [[ -d "$dst" ]]; then
+    dst="$dst/"
+fi
+
+# link-dest needs to be absolute, for unknown reasons
+srcdir="$(cd "$srcdir"; pwd)/"
+
+# -@ controls timestamp diffing; -1 indicates full precision
+rsync -a -@-1 \
+    --link-dest="$srcdir" \
+    "$src" \
+    "$dst" \
+;

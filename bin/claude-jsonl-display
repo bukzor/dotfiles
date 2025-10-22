@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""Make Claude Code transcripts more readable"""
+
+import json
+import sys
+from typing import Any, TypeGuard
+
+
+# ANSI color codes
+class Color:
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+    BRIGHT_RED = "\033[91m"
+    BRIGHT_GREEN = "\033[92m"
+    BRIGHT_YELLOW = "\033[93m"
+    BRIGHT_BLUE = "\033[94m"
+    BRIGHT_MAGENTA = "\033[95m"
+    BRIGHT_CYAN = "\033[96m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+
+def is_dict_list(val: Any) -> TypeGuard[list[dict[str, Any]]]:
+    """TypeGuard to check if value is a list of dicts with string keys"""
+    if not isinstance(val, list):
+        return False
+    for item in val:  # type: ignore[reportUnknownVariableType]
+        if not isinstance(item, dict):
+            return False
+        for k in item.keys():  # type: ignore[reportUnknownVariableType]
+            if not isinstance(k, str):
+                return False
+    return True
+
+
+def prefix(text: str, p: str) -> str:
+    """Prefix each line of text with p"""
+    return "\n".join(p + line for line in text.split("\n"))
+
+
+def update_state(item: dict[str, Any], msg_num: int, sub_num: int) -> tuple[int, int]:
+    """Update message and sub-message counters based on item type"""
+    item_type = item.get("type")
+    content = item.get("message", {}).get("content") if item_type in ("user", "assistant") else None
+
+    if item_type == "user":
+        if isinstance(content, str):
+            return msg_num + 1, 0
+        elif is_dict_list(content) and content and content[0].get("type") == "tool_result":
+            return msg_num, sub_num + 1
+        elif is_dict_list(content) and content and content[0].get("type") != "tool_result":
+            return msg_num + 1, 0
+    elif item_type == "assistant":
+        return msg_num + 1, 0
+
+    return msg_num, sub_num
+
+
+def format_stream_event(event_type: str) -> str:
+    """Format stream event messages"""
+    if event_type == "message_start":
+        return f"{Color.YELLOW}⏵ Message starting...{Color.RESET}"
+    elif event_type == "message_stop":
+        return f"{Color.YELLOW}⏹ Message complete{Color.RESET}"
+    return ""
+
+
+def format_system(item: dict[str, Any]) -> str:
+    """Format system/session start message"""
+    tools = ", ".join(item.get("tools", []))
+    return (
+        f"{Color.BOLD}## SESSION START{Color.RESET}\n"
+        f"## Session: {item.get('session_id')}\n"
+        f"## Model: {item.get('model')}\n"
+        f"## CWD: {item.get('cwd')}\n"
+        f"## Tools: {tools}"
+    )
+
+
+def format_tool_result(tool_result: dict[str, Any], msg_num: int, sub_num: int) -> str:
+    """Format a tool result message"""
+    is_error = tool_result.get("is_error", False)
+    result_content = tool_result.get("content", "")
+
+    if is_error:
+        return (
+            f"{Color.BRIGHT_RED}┌─ [{msg_num}.{sub_num}] Tool Result ❌ ERROR{Color.RESET}\n"
+            + prefix(result_content, f"{Color.RED}│ {Color.RESET}")
+        )
+    else:
+        return (
+            f"{Color.BRIGHT_GREEN}┌─ [{msg_num}.{sub_num}] Tool Result ✓{Color.RESET}\n"
+            + prefix(result_content, f"{Color.GREEN}│ {Color.RESET}")
+        )
+
+
+def format_user_message(content: Any, msg_num: int, sub_num: int) -> str:
+    """Format a user message"""
+    if isinstance(content, str):
+        return (
+            f"{Color.BRIGHT_BLUE}┌─ [{msg_num}] USER{Color.RESET}\n"
+            + prefix(content, f"{Color.BLUE}│ {Color.RESET}")
+        )
+    elif is_dict_list(content) and content and content[0].get("type") == "tool_result":
+        return format_tool_result(content[0], msg_num, sub_num)
+    else:
+        return (
+            f"{Color.BRIGHT_BLUE}┌─ [{msg_num}] USER{Color.RESET}\n"
+            + prefix(str(content), f"{Color.BLUE}│ {Color.RESET}")
+        )
+
+
+def format_tool_use(block: dict[str, Any]) -> str:
+    """Format a tool use block"""
+    tool_name = block.get("name", "")
+    tool_input = block.get("input", {})
+
+    tool_lines = [f"{Color.BRIGHT_MAGENTA}╔═ Tool Call: {tool_name}{Color.RESET}"]
+    for key, value in tool_input.items():
+        tool_lines.append(f"{Color.MAGENTA}║ {key}: |{Color.RESET}")
+        tool_lines.append(prefix(str(value), f"{Color.MAGENTA}║   {Color.RESET}"))
+
+    return "\n".join(tool_lines)
+
+
+def format_assistant_content_block(block: dict[str, Any], msg_num: int) -> str:
+    """Format a single content block from assistant message"""
+    block_type = block.get("type")
+
+    if block_type == "text":
+        return (
+            f"{Color.BRIGHT_CYAN}┌─ [{msg_num}] ASSISTANT{Color.RESET}\n"
+            + prefix(block.get("text", ""), f"{Color.CYAN}│ {Color.RESET}")
+        )
+    elif block_type == "tool_use":
+        return format_tool_use(block)
+    else:
+        return f"## {block}"
+
+
+def format_assistant_message(content: Any, msg_num: int) -> str:
+    """Format an assistant message"""
+    if is_dict_list(content):
+        parts = [format_assistant_content_block(block, msg_num) for block in content]
+        return "\n".join(parts)
+    else:
+        return (
+            f"{Color.BRIGHT_CYAN}┌─ [{msg_num}] ASSISTANT{Color.RESET}\n"
+            + prefix(str(content), f"{Color.CYAN}│ {Color.RESET}")
+        )
+
+
+def format_result(item: dict[str, Any]) -> str:
+    """Format session result/end message"""
+    duration = item.get("duration_ms")
+    num_turns = item.get("num_turns")
+    cost = item.get("total_cost_usd")
+    is_error = item.get("is_error", False)
+    permission_denials = item.get("permission_denials", [])
+    result_content = item.get("result", "")
+
+    status = (
+        f"{Color.BRIGHT_RED}❌ ERROR{Color.RESET}" if is_error
+        else f"{Color.BRIGHT_GREEN}✓ SUCCESS{Color.RESET}"
+    )
+
+    lines = [
+        f"{Color.BOLD}## SESSION END{Color.RESET}",
+        f"## Duration: {duration}ms ({num_turns} turns)",
+        f"## Cost: ${cost}",
+        f"## Status: {status}",
+    ]
+
+    if len(permission_denials) > 0:
+        lines.append(f"## Permission denials: {len(permission_denials)}")
+
+    lines.append(f"{Color.BRIGHT_CYAN}┌─ Result:{Color.RESET}")
+    lines.append(prefix(result_content, f"{Color.CYAN}│ {Color.RESET}"))
+
+    return "\n".join(lines)
+
+
+def format_item(item: dict[str, Any], msg_num: int, sub_num: int) -> str:
+    """Format a single transcript item"""
+    item_type = item.get("type")
+
+    if item_type == "stream_event":
+        event_type: str = item.get("event", {}).get("type", "")
+        return format_stream_event(event_type)
+
+    elif item_type == "system":
+        return format_system(item)
+
+    elif item_type == "user":
+        content = item.get("message", {}).get("content")
+        return format_user_message(content, msg_num, sub_num)
+
+    elif item_type == "assistant":
+        content = item.get("message", {}).get("content")
+        return format_assistant_message(content, msg_num)
+
+    elif item_type == "result":
+        return format_result(item)
+
+    return ""
+
+
+def main():
+    msg_num = 0
+    sub_num = 0
+
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        msg_num, sub_num = update_state(item, msg_num, sub_num)
+
+        output = format_item(item, msg_num, sub_num)
+        if output:
+            print(output)
+
+
+if __name__ == "__main__":
+    main()

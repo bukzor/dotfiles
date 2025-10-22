@@ -1,0 +1,4 @@
+[core]
+disable_usage_reporting = False
+account = buck.evan@sentry.io
+

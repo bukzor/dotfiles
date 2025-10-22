@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+#read -s -dc -p $'\E[>c' da;da=${da##$'\E'[>};echo "${da//;/ }"
+
+# https://www.xfree86.org/current/ctlseqs.html
+ESC = b'\x1B'
+CSI = ESC + b'['
+XTERM_DA = CSI + b'c'
+XTERM_DA2 = CSI + b'>c'
+
+from contextlib import contextmanager
+
+@contextmanager
+def tty_fixture(tty):
+  import termios
+  old = termios.tcgetattr(tty)
+  try:
+    yield
+  finally:
+    termios.tcsetattr(tty, termios.TCSADRAIN, old)
+
+
+
+def getpass(tty, prompt="Password: "):
+  r, w = tty
+
+  with tty_fixture(r):
+    from tty import setcbreak
+    # See: https://github.com/python/cpython/blob/3.9/Lib/tty.py#L30
+    setcbreak(r)  #, termios.TCSADRAIN)
+
+    print('QUERY:', repr(prompt))
+    w.write(prompt)
+    w.flush()
+    response = []
+    buf = b''
+    while not any(chr(c).isalpha() for c in buf):
+      buf = r.read(16)  # expected size is 11 bytes
+      response.append(buf)
+  response = b''.join(response)
+  print('RESPONSE:', response)
+  return response
+
+def get_tty():
+  from os import fdopen
+  for fd in range(3):
+    r = fdopen(fd, mode='rb', buffering=0)
+    w = fdopen(fd, mode='wb', buffering=0)
+    if w.isatty():
+      print('TTY:', fd)
+      return (r, w)
+
+def main():
+  tty = get_tty()
+
+  da = getpass(tty, XTERM_DA)
+  assert da.startswith(ESC + b'[?'), da
+  assert da.endswith(b'c')
+  da = da[3:-1].split(b';')
+  da = [int(arg) for arg in da]
+
+  da2 = getpass(tty, XTERM_DA2)
+  assert da2.startswith(ESC + b'[>'), da2
+  assert da2.endswith(b'c')
+  da2 = da2[3:-1].split(b';')
+  da2 = [int(arg) for arg in da2]
+  print(' '.join(str(n) for n in (da + da2)))
+
+
+if __name__ == '__main__':
+  exit(main())

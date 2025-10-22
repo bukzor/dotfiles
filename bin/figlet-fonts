@@ -1,0 +1,44 @@
+#!/bin/bash
+#echo 'filters: (-F)'
+
+export PHRASE="${1:-wtf, indeed!}"
+FONTDIR=${FONTDIR:-/usr/share/figlet}
+
+
+echo '-------------------------------------------------------------------------------'
+echo 'figlet fonts: (-f)'
+ls $FONTDIR/*.flf |
+    sed 's|.*/||; s|\..*||' |
+    xargs --replace sh -xc '
+        : figlet font: {}
+        figlet -w 999 -f {} "$PHRASE"
+    '
+
+if false; then
+    # boring!
+    echo '-------------------------------------------------------------------------------'
+    echo 'figlet controls: (-C)'
+    ls $FONTDIR/*.flc |
+        sed 's|.*/||; s|\..*||' |
+        xargs --verbose -n1 --replace figlet  -w 999 -C {} {}
+    exit
+fi
+
+if which toilet >&/dev/null; then
+    echo '-------------------------------------------------------------------------------'
+    echo 'toilet fonts: (-f)'
+    ls $FONTDIR/*.tlf |
+        sed 's|.*/||; s|\..*||' |
+        xargs --replace sh -xc '
+            : toilet font: {}
+            toilet -w 999 -f {} "$PHRASE"
+        '
+
+    echo '-------------------------------------------------------------------------------'
+    echo "toilet filters: (-F)"
+    toilet --filter list | sed '1d; s/^"//; s/".*$//' |
+        xargs --replace sh -xc '
+            : toilet -t -f big -F {} "$PHRASE"
+            toilet -t -f big -F {} "$PHRASE"
+        '
+fi

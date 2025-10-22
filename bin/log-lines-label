@@ -1,0 +1,3 @@
+name="$1"
+
+exec sed -u 's/^/'"$name"' says "/; s/$/"/' | tee /dev/pts/*

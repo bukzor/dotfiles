@@ -1,6 +1,10 @@
 " the bare basics
 set background=dark
-colorscheme gruvbox
+try
+  colorscheme gruvbox
+catch /^Vim\%((\a\+)\)\=:E185:/ " catch error E123
+  colorscheme desert
+endtry
 
 set number
 set norelativenumber
@@ -14,4 +18,4 @@ set list
 set listchars=tab:→·,extends:»,precedes:«,nbsp:␠,trail:␠
 
 " cross-language defaults
-set et sw=2 sts=2  " two-space indents
+set et sw=2 sts=2 sr  " two-space indents

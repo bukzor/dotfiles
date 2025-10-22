@@ -1,0 +1,36 @@
+#!/bin/bash
+## usage:  echo buildbot28 bb{90..96}-useast1atestopia | time ssh-each hostname -f
+# the wrapped command is quoted so that it survives the shell inside ssh
+set -euo pipefail
+
+# we create a shared lock to prevent interleaving output
+tmpdir="${TMPDIR:-/tmp}/$USER/ssh-each"
+mkdir -p "$tmpdir"
+SSH=${SSH:-ssh-noninteractive}
+SSH_PARALLEL=${SSH_PARALLEL:-20}
+
+lock=$tmpdir/$$.lock
+exec 200>"$lock"
+rm "$lock"
+
+xargs -n1 | xargs --replace -P"$SSH_PARALLEL" bash -c '
+    set -euo pipefail
+    (
+        # fd 5 points at the original stdout
+        exec 5>&1
+
+        # fd 4 points at our line-counting pipeline
+        exec 4> >(
+            if [ "$(tee /dev/fd/5 | wc -l)" = 0 ]; then
+                echo "(no output)"
+            fi
+        )
+
+        # stdout and stderr point at fd 4
+        exec 1>&4
+        exec 2>&4
+
+        echo -n "{}: "
+        '"$SSH"' "{}" '"$(sh-quote "$(sh-quote "$@")")"' || true
+    ) | flock -x 200 cat
+'

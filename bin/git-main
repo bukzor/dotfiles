@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+upstream="$(git upstream)"
+branch=$(basename "$upstream")
+
+set -x
+git fetch1 "$upstream"
+git checkout "$upstream" -B "$branch"

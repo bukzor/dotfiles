@@ -1,0 +1,4 @@
+#!/bin/bash
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-"${HOME:-"$(unset HOME; echo ~)"}"/.config}"
+
+sqlite3 "$XDG_CONFIG_HOME/gcloud/access_tokens.db" '.mode json' 'select * from access_tokens' | jq '.[]'

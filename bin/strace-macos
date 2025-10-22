@@ -1,0 +1,17 @@
+#!/bin/zsh
+# the closest I know how to get to strace under macos
+set -eu
+
+set -x
+: keep a copy of original stdin, for use in subshell
+exec stdin<&1
+: stdin="$stdin"
+
+(
+  sudo -k /Applications/FileMonitor.app/Contents/MacOS/FileMonitor <&- |
+    ( : wait until Filemonitor prints at least one line
+      grep -qm1 '}'
+      : then execute the wrapped command, with stdin attached
+      exec "$@" <"$stdin"
+    )
+) | head -n20

@@ -1,0 +1,41 @@
+#!/usr/bin/python3
+from urllib.error import HTTPError
+from urllib.request import urlopen
+import json
+import sys
+
+files = sys.argv[1:] or ['-']
+
+data = {
+    "public": True,
+    "files": {},
+}
+
+for fname in files:
+    if fname == '-':
+        f = sys.stdin
+    else:
+        f = open(fname)
+
+    fname = fname.replace('/', '⧸')
+    data['files'][fname] = {
+        'type': 'text/plain',
+        'content': f.read(),
+    }
+
+try:
+  r = urlopen('https://api.github.com/gists', json.dumps(data).encode('UTF-8'))
+except HTTPError as e:
+  message = e.read()
+  try:
+    message = json.dumps(json.loads(message.decode('UTF-8')), indent=2)
+  except:
+    pass
+  exit('Error %i\n\n%s' % (e.code, message))
+
+response = json.loads(r.read().decode('UTF-8'))
+
+try:
+  print(response['html_url'])
+except:
+  print(json.dumps(response, indent=2))

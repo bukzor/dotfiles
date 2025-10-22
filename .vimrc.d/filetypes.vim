@@ -16,10 +16,14 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.md          set filetype=markdown
     autocmd BufNewFile,BufRead *.proto       set filetype=proto
     autocmd BufNewFile,BufRead *.hcl         set filetype=terraform
-    autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
     autocmd BufNewFile,BufRead *.scm         set filetype=lisp
     autocmd BufNewFile,BufRead *.wgsl        set filetype=wgsl
+    autocmd BufNewFile,BufRead *.go.erb      set filetype=go.eruby
+    autocmd BufNewFile,BufRead *.sls         set filetype=sls.yaml.jinja
+
+    autocmd BufNewFile,BufRead .envrc        set filetype=bash
+    autocmd BufNewFile,BufRead Brewfile      set filetype=ruby
 
     autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
 

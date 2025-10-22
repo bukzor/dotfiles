@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+tmp="$(mktemp -ud "$PWD/XXXXXX.trace")"
+exe="$1"
+shift 1
+exe="$(which "$exe")"
+
+set -x
+xctrace record \
+	--template 'System Trace' \
+	--instrument 'Filesystem Activity' \
+	--instrument 'Filesystem Suggestions' \
+	--instrument 'Disk I/O Latency' \
+	--instrument 'Disk Usage' \
+	--output "$tmp" \
+	--launch \
+	-- \
+	"$exe" "$@" \
+	;
+open "$tmp"

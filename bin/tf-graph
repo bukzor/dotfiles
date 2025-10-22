@@ -1,0 +1,80 @@
+#!/usr/bin/env zsh
+set -uo pipefail
+umask 022
+
+time="$(date +%R)"
+graph="${1:-$time}".svg
+shift 1
+subpath="$(date +%F)"
+dir="${TMPDIR:-/tmp}/tf-graphs/$subpath"
+
+nop2() {
+  neato -n2 "$@"
+}
+
+PS4='%1x:%i [1;34m$[0m '
+PS4='[1;34m$[0m '
+set -ex
+mkdir --mode 755 -p "$dir"
+
+terraform graph -draw-cycles "$@" > "$dir/$time.0.dot"
+if ! nop < "$dir/$time.0.dot" > /dev/null; then
+  cat "$dir/$time.0.dot" >&2
+  exit 1
+fi
+
+  # this sed "clean up" is optional, but makes the graph a lot more readable
+  sed -r '
+    # clean up messy notation:
+    s@\[root] @@g # meaningless
+    s/\t//g       # tabs! ick.
+
+    # separate module names by a temporary character, replaced by . later
+    s@\.module\.@\x1f@g
+    s@"module\.@"\x1f@g
+
+    # thats the default...
+    s@\\"registry.terraform.io/hashicorp/@\\"@g
+
+    # the first remaining . divides the module from its object
+    s@\x1f([^[".]*)\.@\x1f\1 @g
+
+    # separate submodules by dots, again
+    s@"\x1f@"@g
+    s@\x1f@.@g
+
+    s@ \(expand\)"@*"@g  # meaningless?
+  ' |
+  < "$dir/$time.0.dot" \
+  > "$dir/$time.1.dot" \
+  ;
+
+tred < "$dir/$time.1.dot" |
+  dot \
+    -G'dpi=40' \
+    -G'rankdir=RL' \
+    -G'ranksep=0.3' \
+    -G'nodesep=0.3' \
+    -E'dir=back' \
+  |
+  edgepaint \
+  > "$dir/$time.2.dot" \
+;
+
+
+neato -n2 -Tsvg < "$dir/$time.2.dot" > "$dir/$graph"
+
+chmod 644 "$dir/$graph"
+ls -ld "$dir/$time"*
+
+: some metadata
+ccomps -sv < "$dir/$time.2.dot"
+acyclic -nv < "$dir/$time.2.dot"
+: Now have a look at "file://$dir/$graph"
+
+exit 0
+: Now have a look at "http://$(hostname -f):9991/$subpath/$graph"
+cd "$dir/.."
+exec flock -nF http-server.lock \
+  python3 -m http.server 9991 \
+;

@@ -1,0 +1,31 @@
+/* Usage:
+
+  font-family: 'Nerd Source Code Pro', 'Julia Mono', 'Unifont', monospace;
+
+Explanation:
+  - Nerd Source Code Pro: Source Code Pro + Nerd Font icons (properly monospaced)
+  - Julia Mono: Nice-looking, designed for Unicode (11,000+ glyphs)
+  - Unifont: Ugly bitmap font but comprehensive fallback for rare symbols
+  - monospace: System fallback
+
+Note: The "Symbols Only" Nerd Font is broken (renders double-width).
+      Only the fully patched mono fonts work correctly.
+*/
+
+/* Nerd Source Code Pro - RECOMMENDED */
+@font-face {
+  font-family: 'Nerd Source Code Pro';
+  src: url(https://raw.githubusercontent.com/ryanoasis/nerd-fonts/refs/heads/master/patched-fonts/SourceCodePro/SauceCodeProNerdFontMono-Regular.ttf) format('truetype');
+}
+
+/* Julia Mono - specifically designed for monospaced Unicode including dingbats */
+@font-face {
+  font-family: 'Julia Mono';
+  src: url(https://cdn.jsdelivr.net/gh/cormullion/juliamono/webfonts/JuliaMono-Regular.woff2) format('woff2');
+}
+
+/* GNU Unifont - bitmap font, everything is exactly same width (ugly but comprehensive) */
+@font-face {
+  font-family: 'Unifont';
+  src: url(https://cdn.jsdelivr.net/npm/@fontsource/unifont@latest/files/unifont-latin-400-normal.woff2) format('woff2');
+}

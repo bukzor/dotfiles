@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+
+PID="$1"
+
+ticks_per_second="$(getconf CLK_TCK)"
+ps_start_ticks="$(awk '{print $22}' "/proc/$PID/stat")"
+# Note: This multiplication gets rid of pesky fractional seconds.
+now_ticks="$(awk '{print $1 * '"$ticks_per_second"'}' /proc/uptime)"
+
+echo "$(( (now_ticks - ps_start_ticks) / ticks_per_second ))"

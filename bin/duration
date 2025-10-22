@@ -1,0 +1,83 @@
+#!/bin/bash
+set -euo pipefail
+duration="${1:-}"
+if ! [[ "$duration" ]]; then
+  exec >&2
+  cat <<EOF
+usage: duration NANOSECONDS
+Print a human-readable duration.
+EOF
+  exit 0
+fi
+
+# It's hard to believe there doesn't exist a standard progrm for this.
+nanos="$((   duration % 1000))"
+duration="$((duration / 1000))"
+micros="$((  duration % 1000))"
+duration="$((duration / 1000))"
+millis="$((  duration % 1000))"
+duration="$((duration / 1000))"
+seconds="$(( duration % 60))"
+duration="$((duration / 60))"
+minutes="$(( duration % 60))"
+duration="$((duration / 60))"
+hours="$((   duration % 24))"
+duration="$((duration / 24))"
+days="$((    duration % 7))"
+duration="$((duration / 7))"
+weeks="$((   duration % 52))"
+years="$((   duration / 52))"
+units=
+if [[ "$years" -gt "0" ]]; then
+  if [[ "$years" -gt 1 ]]; then
+    printf "%i years " "$years"
+  else
+    printf "1 year "
+  fi
+  units=hours
+fi
+if [[ "$units" || "$weeks" -gt "0" ]]; then
+  if [[ "$weeks" -gt 1 ]]; then
+    printf "%i weeks " "$weeks"
+  else
+    printf "1 week "
+  fi
+  units=hours
+fi
+if [[ "$units" || "$days" -gt "0" ]]; then
+  if [[ "$days" -gt 1 ]]; then
+    printf "%i days " "$days"
+  else
+    printf "1 day "
+  fi
+  units=hours
+fi
+if [[ "$units" ]]; then
+  printf "%02i:" "$hours"
+elif [[ "$hours" -gt "0" ]]; then
+  printf "%i:" "$hours"
+  units=hours
+fi
+if [[ "$units" ]]; then
+  printf "%02i:" "$minutes"
+elif [[ "$minutes" -gt "0" ]]; then
+  printf "%i:" "$minutes"
+  units=minutes
+fi
+if [[ "$units" ]]; then
+  printf "%02i." "$seconds"
+elif [[ "$seconds" -gt 0 ]]; then
+  printf "%i." "$seconds"
+  units=seconds
+fi
+if [[ "$units" ]]; then
+  printf "%03i %s\n" "$millis" "$units"
+elif [[ "$units" || "$millis" -gt 0 ]]; then
+  printf "%i.%03i %s\n" "$millis" "$micros" "milliseconds"
+elif [[ "$micros" -gt 0 ]]; then
+  printf "%i.%03i %s\n" "$micros" "$nanos" "microseconds"
+elif [[ "$nanos" -gt 0 ]]; then
+  printf "%i %s\n" "$nanos" "nanoseconds"
+else
+  printf "0\n"
+fi

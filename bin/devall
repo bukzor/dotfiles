@@ -1,0 +1,4 @@
+#!/bin/bash
+mco find -F role=devbox |
+    sort -u |
+    ssh-each "$@"

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+PID="${1:$PID}"
+exec tr '\n\0' ';\n' < /proc/$PID/environ | sed 's/^/'"$PID"' /'

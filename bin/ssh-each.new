@@ -1,0 +1,21 @@
+#!/bin/bash
+## usage:  echo buildbot28 bb{90..96}-useast1atestopia | time ssh-each hostname -f
+# the wrapped command is quoted so that it survives the shell inside ssh
+set -euo pipefail
+
+# we create a shared lock to prevent interleaving output
+tmpdir="${TMPDIR:-/tmp}/$USER/ssh-each"
+mkdir -p "$tmpdir"
+
+lock=$tmpdir/$$.lock
+exec 200>$lock
+rm "$lock"
+
+exec xargs -n1 | xargs --replace -P10 bash -euo pipefail -c '
+    exec 2>&1
+    (
+        echo -n "{}: "
+        ssh-noninteractive "{}" '"$(sh-quote "$@")"' ||
+            echo "(exited with code $?)"
+    ) | flock -x 200 cat
+'

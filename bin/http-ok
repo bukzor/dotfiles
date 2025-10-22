@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euxo pipefail
+docker run alpine sh -exc 'hostname -i
+nc -lk -p 8080 -e echo '\''HTTP/1.1 200 OK
+Content-Type: text/plain
+Connection: close
+Content-Length: 14
+
+Hello, world!'\'

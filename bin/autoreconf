@@ -1,0 +1,3 @@
+#!/bin/sh
+touch NEWS AUTHOR README
+autoreconf -vfim

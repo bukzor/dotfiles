@@ -1,2 +1,5 @@
 # host-local overrides
 *
+
+# the array of possible choices
+!alternatives

@@ -1,0 +1,22 @@
+#!/bin/bash
+set -eu
+
+xdocker() {
+  exec xargs -P10 -r --replace sh -c "
+    echo docker $* {}
+    docker $* {}
+    exit 0
+  "
+}
+
+set -x
+
+# remove unused containers
+docker ps -aq | xdocker rm
+
+# remove unused images
+docker images -q | xdocker rmi
+docker images -aq | xdocker rmi
+
+# remove unused volumes
+docker volume ls -q | xdocker volume rm

@@ -1,0 +1,13 @@
+# creds =.=
+access_tokens.db
+credentials.db
+legacy_credentials/
+
+# transient data
+active_config
+config_sentinel
+default_configs.db
+gce
+.last_opt_in_prompt.yaml
+.last_survey_prompt.yaml
+.metricsUUID

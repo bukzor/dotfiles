@@ -1,0 +1,2 @@
+#!/bin/sh
+exec date +%FT%T.%N%z

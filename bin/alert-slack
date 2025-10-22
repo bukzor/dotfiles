@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ "$#" -eq 0 ]]; then
+  set "It's done!"
+fi
+
+# Black magic detected!
+# If I inline the secret here (I know) it gets disabled the *instant* that I
+# push to github. How can it possibly be that fast?
+if ! [[ "${ALERT_SLACK_AUTH:-}" ]]; then
+  cat >&2 <<'EOF'
+Necessary slack auth not found. To make your own:
+
+  1. https://api.slack.com/tutorials/tracks/posting-messages-with-curl
+  2. https://api.slack.com/apps/$APP_ID/oauth
+  3. export ALERT_SLACK_AUTH=xoxb-1111111111111-2222222222222-xxxxxxxxxxxxxxxxxxxxxxxx"
+
+EOF
+  exit 1
+fi
+
+# my private channel in my private workspace:
+SLACK_CHANNEL="${SLACK_CHANNEL:-C04515GTLNM}"
+curl \
+  -H "Authorization: Bearer $ALERT_SLACK_AUTH" \
+  -d "text=$*" \
+  -d "channel=$SLACK_CHANNEL" \
+  https://slack.com/api/chat.postMessage \
+;

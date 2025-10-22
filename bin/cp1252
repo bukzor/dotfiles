@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+QUOTES = '''\'"'''
+
+def main():
+  print('byte char')
+  print('--------------')
+  for i in range(0x80, 0xA0):
+    b = bytes([i])
+    try:
+      c = b.decode('cp1252')
+    except UnicodeDecodeError:
+      codepoint = '    '
+      c = 'N/A'
+    else:
+      codepoint = format(ord(c), '04x')
+    print(hex(i), codepoint, repr(c).strip(QUOTES))
+
+if __name__ == '__main__':
+  exit(main())

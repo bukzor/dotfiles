@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+QUOTES = '''\'"'''
+from unicodedata import name as charname
+
+def main():
+  print('byte char')
+  print('--------------')
+  for i in range(0x80, 0xA0):
+    b = bytes([i])
+    c = b.decode('latin1')
+    try:
+      name = charname(c)
+    except ValueError:
+      name = ''
+    print(hex(i), name)
+
+if __name__ == '__main__':
+  exit(main())

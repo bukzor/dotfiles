@@ -1,0 +1,5 @@
+#!/bin/sh
+# send data to the terminal's clipboard, via an ansi escape
+echo -n '\033]52;c;'
+base64 | tr -d '\n'
+echo -n '\007'

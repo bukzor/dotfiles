@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+# TEST:
+# yes | xargs -P10  --replace deinterlace sh -c 'r=$((RANDOM % 100)); sleep "$((r / 10))"; yes "$r" | head -n "$r" | SLOWLY_RATE="$((r))" slowly'
+
+PID=$$
+
+# Run the wrapped command
+#"$@" | (
+exec "$@" | (
+  # Only grab the flock *after* there's something to write.
+  read -d '' -n 1 c
+
+#  flock "1" sh -c "
+  exec flock --no-fork "1" -c "
+    # Use echo *commmand* to avoid buffering in the shell builtin.
+    command echo -n '$c'
+#    cat
+    exec cat
+  "
+)

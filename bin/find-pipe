@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eu
+find /proc -maxdepth 2 -mindepth 2 -name fd -type d |
+    xargs --replace \
+        find {} -maxdepth 1 -not -readable -prune -or -lname 'pipe:\['"$1"'\]' -print \
+    2> >(grep -v ': No such file ' >&2)

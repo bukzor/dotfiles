@@ -1,0 +1,20 @@
+#!/usr/bin/env sed -rf
+# un-wrap a graphviz document
+: while
+
+# Those lines that don't have a proper ending:
+/(^|[;{}])$/ ! {
+  # grab the next line
+  N
+  # delete the continuation
+  s/ *\n\t*/ /g
+  # look again
+  b while
+}
+
+# NB: BSD sed has no \s
+s/;[[:space:]]*([^[:space:]])/;\n\t\t\1/g
+
+# untablify
+s/\t\[/ [/g
+s/\t/  /g
