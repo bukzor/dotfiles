@@ -2,6 +2,7 @@
 """Make Claude Code transcripts more readable"""
 
 import json
+import signal
 import sys
 from typing import Any, TypeGuard
 
@@ -127,6 +128,14 @@ def format_tool_use(block: dict[str, Any]) -> str:
     return "\n".join(tool_lines)
 
 
+def format_thinking(content: str, msg_num: int, sub_num: int) -> str:
+    """Format a thinking message"""
+    return (
+        f"{Color.BRIGHT_YELLOW}┌─ [{msg_num}.{sub_num}] THINKING 💭{Color.RESET}\n"
+        + prefix(content, f"{Color.YELLOW}│ {Color.RESET}")
+    )
+
+
 def format_assistant_content_block(block: dict[str, Any], msg_num: int) -> str:
     """Format a single content block from assistant message"""
     block_type = block.get("type")
@@ -138,6 +147,8 @@ def format_assistant_content_block(block: dict[str, Any], msg_num: int) -> str:
         )
     elif block_type == "tool_use":
         return format_tool_use(block)
+    elif block_type == "thinking":
+        return format_thinking(block.get("thinking", ""), msg_num, 0)
     else:
         return f"## {block}"
 
@@ -210,6 +221,9 @@ def format_item(item: dict[str, Any], msg_num: int, sub_num: int) -> str:
 
 
 def main():
+    # Restore default SIGPIPE handler (terminate on broken pipe, e.g., piping to head)
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
     msg_num = 0
     sub_num = 0
 
@@ -220,7 +234,9 @@ def main():
 
         try:
             item = json.loads(line)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as error:
+            print("WARN: unable to decode json:", error, file=sys.stderr)
+            print(" ", repr(line), file=sys.stderr)
             continue
 
         msg_num, sub_num = update_state(item, msg_num, sub_num)
