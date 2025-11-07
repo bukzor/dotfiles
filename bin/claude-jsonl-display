@@ -4,7 +4,24 @@
 import json
 import signal
 import sys
-from typing import Any, TypeGuard
+from dataclasses import dataclass
+from typing import Any, Generator, TypeGuard
+
+
+@dataclass(frozen=True)
+class State:
+    """Track conversation state for numbering messages"""
+
+    role: str
+    msg_num: int
+    sub_num: int
+
+    def __str__(self) -> str:
+        if self.sub_num > 0:
+            sub_num = f".{self.sub_num}"
+        else:
+            sub_num = ""
+        return f"[{self.msg_num}{sub_num}]"
 
 
 # ANSI color codes
@@ -43,22 +60,52 @@ def prefix(text: str, p: str) -> str:
     return "\n".join(p + line for line in text.split("\n"))
 
 
-def update_state(item: dict[str, Any], msg_num: int, sub_num: int) -> tuple[int, int]:
-    """Update message and sub-message counters based on item type"""
+def normalize_to_list(content: Any) -> list[Any]:
+    """Normalize content to a list (wrap non-lists)"""
+    if is_dict_list(content):
+        return content
+    else:
+        return [content]
+
+
+def format_unknown(label: str, data: Any, state: State) -> str:
+    """Format unknown/unexpected data with a clear error indicator"""
+    json_str = json.dumps(data, indent=2)
+    return f"{Color.BRIGHT_RED}┌─ {state} UNKNOWN ({label}){Color.RESET}\n" + prefix(
+        json_str, f"{Color.BRIGHT_RED}│ {Color.RESET}"
+    )
+
+
+def update_state(item: dict[str, Any], state: State) -> State:
+    """Update role and message counters. Turn number increments when role changes between user and assistant."""
     item_type = item.get("type")
-    content = item.get("message", {}).get("content") if item_type in ("user", "assistant") else None
 
+    # Determine the role of this message
     if item_type == "user":
-        if isinstance(content, str):
-            return msg_num + 1, 0
-        elif is_dict_list(content) and content and content[0].get("type") == "tool_result":
-            return msg_num, sub_num + 1
-        elif is_dict_list(content) and content and content[0].get("type") != "tool_result":
-            return msg_num + 1, 0
+        content = item.get("message", {}).get("content")
+        # User text messages are user role; tool results are part of assistant turn
+        if isinstance(content, str) or (
+            is_dict_list(content)
+            and content
+            and content[0].get("type") != "tool_result"
+        ):
+            new_role = "user"
+        else:
+            new_role = "assistant"
     elif item_type == "assistant":
-        return msg_num + 1, 0
+        new_role = "assistant"
+    else:
+        # system, stream_event, result don't change role
+        return state
 
-    return msg_num, sub_num
+    # Increment turn number when role changes, otherwise increment sub-number
+    if new_role != state.role and state.role != "":
+        return State(new_role, state.msg_num + 1, 0)
+    elif state.role == "":
+        # First message with a role
+        return State(new_role, 1, 0)
+    else:
+        return State(new_role, state.msg_num, state.sub_num + 1)
 
 
 def format_stream_event(event_type: str) -> str:
@@ -68,6 +115,31 @@ def format_stream_event(event_type: str) -> str:
     elif event_type == "message_stop":
         return f"{Color.YELLOW}⏹ Message complete{Color.RESET}"
     return ""
+
+
+def format_snapshot(item: dict[str, Any]) -> str:
+    """Format file history snapshot message"""
+    snapshot = item.get("snapshot", {})
+    tracked = snapshot.get("trackedFileBackups", {})
+    num_files = len(tracked)
+
+    if num_files == 0:
+        return f"{Color.CYAN}▸ Snapshot (no files){Color.RESET}"
+    elif num_files <= 3:
+        files = ", ".join(tracked.keys())
+        return f"{Color.CYAN}▸ Snapshot: {files}{Color.RESET}"
+    else:
+        files = list(tracked.keys())[:3]
+        files_str = ", ".join(files)
+        return (
+            f"{Color.CYAN}▸ Snapshot: {files_str}... ({num_files} files){Color.RESET}"
+        )
+
+
+def format_summary(item: dict[str, Any]) -> str:
+    """Format summary message"""
+    summary_text = item.get("summary", "")
+    return f"{Color.CYAN}▸ Summary: {summary_text}{Color.RESET}"
 
 
 def format_system(item: dict[str, Any]) -> str:
@@ -82,86 +154,92 @@ def format_system(item: dict[str, Any]) -> str:
     )
 
 
-def format_tool_result(tool_result: dict[str, Any], msg_num: int, sub_num: int) -> str:
+def format_tool_result(tool_result: dict[str, Any], state: State) -> str:
     """Format a tool result message"""
     is_error = tool_result.get("is_error", False)
     result_content = tool_result.get("content", "")
 
     if is_error:
         return (
-            f"{Color.BRIGHT_RED}┌─ [{msg_num}.{sub_num}] Tool Result ❌ ERROR{Color.RESET}\n"
+            f"{Color.BRIGHT_RED}┌─ {state} Tool Result ❌ ERROR{Color.RESET}\n"
             + prefix(result_content, f"{Color.RED}│ {Color.RESET}")
         )
     else:
-        return (
-            f"{Color.BRIGHT_GREEN}┌─ [{msg_num}.{sub_num}] Tool Result ✓{Color.RESET}\n"
-            + prefix(result_content, f"{Color.GREEN}│ {Color.RESET}")
+        return f"{Color.BRIGHT_GREEN}┌─ {state} Tool Result ✓{Color.RESET}\n" + prefix(
+            result_content, f"{Color.GREEN}│ {Color.RESET}"
         )
 
 
-def format_user_message(content: Any, msg_num: int, sub_num: int) -> str:
-    """Format a user message"""
+def format_user_message(content: Any, state: State) -> str:
+    """Format a single user message content block"""
     if isinstance(content, str):
-        return (
-            f"{Color.BRIGHT_BLUE}┌─ [{msg_num}] USER{Color.RESET}\n"
-            + prefix(content, f"{Color.BLUE}│ {Color.RESET}")
+        return f"{Color.BRIGHT_BLUE}┌─ {state} USER{Color.RESET}\n" + prefix(
+            content, f"{Color.BLUE}│ {Color.RESET}"
         )
-    elif is_dict_list(content) and content and content[0].get("type") == "tool_result":
-        return format_tool_result(content[0], msg_num, sub_num)
+    elif not isinstance(content, dict):
+        return format_unknown("user_message", content, state)
+    elif content["type"] == "tool_result":
+        return format_tool_result(content, state)
+    elif content["type"] == "text":
+        text = content["text"]
+        # Special case for user interruption
+        if text.startswith("[Request interrupted by user"):
+            return f"{Color.RED}✗ {state} {text}{Color.RESET}"
+        else:
+            return f"{Color.BRIGHT_BLUE}┌─ {state} USER{Color.RESET}\n" + prefix(
+                text, f"{Color.BLUE}│ {Color.RESET}"
+            )
     else:
-        return (
-            f"{Color.BRIGHT_BLUE}┌─ [{msg_num}] USER{Color.RESET}\n"
-            + prefix(str(content), f"{Color.BLUE}│ {Color.RESET}")
-        )
+        return format_unknown("user_content_dict", content, state)
 
 
-def format_tool_use(block: dict[str, Any]) -> str:
+def format_tool_use(block: dict[str, Any], state: State) -> str:
     """Format a tool use block"""
     tool_name = block.get("name", "")
     tool_input = block.get("input", {})
 
-    tool_lines = [f"{Color.BRIGHT_MAGENTA}╔═ Tool Call: {tool_name}{Color.RESET}"]
+    tool_lines = [f"{Color.BRIGHT_MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"]
     for key, value in tool_input.items():
         tool_lines.append(f"{Color.MAGENTA}║ {key}: |{Color.RESET}")
-        tool_lines.append(prefix(str(value), f"{Color.MAGENTA}║   {Color.RESET}"))
+        if isinstance(value, (dict, list)):
+            value_str = json.dumps(value, indent=2)
+        else:
+            value_str = str(value)
+        tool_lines.append(prefix(value_str, f"{Color.MAGENTA}║   {Color.RESET}"))
 
     return "\n".join(tool_lines)
 
 
-def format_thinking(content: str, msg_num: int, sub_num: int) -> str:
+def format_thinking(content: str, state: State) -> str:
     """Format a thinking message"""
-    return (
-        f"{Color.BRIGHT_YELLOW}┌─ [{msg_num}.{sub_num}] THINKING 💭{Color.RESET}\n"
-        + prefix(content, f"{Color.YELLOW}│ {Color.RESET}")
+    return f"{Color.BRIGHT_YELLOW}┌─ {state} THINKING 💭{Color.RESET}\n" + prefix(
+        content, f"{Color.YELLOW}│ {Color.RESET}"
     )
 
 
-def format_assistant_content_block(block: dict[str, Any], msg_num: int) -> str:
+def format_assistant_content_block(block: dict[str, Any], state: State) -> str:
     """Format a single content block from assistant message"""
     block_type = block.get("type")
 
     if block_type == "text":
-        return (
-            f"{Color.BRIGHT_CYAN}┌─ [{msg_num}] ASSISTANT{Color.RESET}\n"
-            + prefix(block.get("text", ""), f"{Color.CYAN}│ {Color.RESET}")
+        return f"{Color.BRIGHT_CYAN}┌─ {state} ASSISTANT{Color.RESET}\n" + prefix(
+            block.get("text", ""), f"{Color.CYAN}│ {Color.RESET}"
         )
     elif block_type == "tool_use":
-        return format_tool_use(block)
+        return format_tool_use(block, state)
     elif block_type == "thinking":
-        return format_thinking(block.get("thinking", ""), msg_num, 0)
+        return format_thinking(block.get("thinking", ""), state)
     else:
-        return f"## {block}"
+        return format_unknown("assistant_content_block", block, state)
 
 
-def format_assistant_message(content: Any, msg_num: int) -> str:
-    """Format an assistant message"""
-    if is_dict_list(content):
-        parts = [format_assistant_content_block(block, msg_num) for block in content]
-        return "\n".join(parts)
+def format_assistant_message(content: Any, state: State) -> str:
+    """Format a single assistant message content block"""
+    if isinstance(content, dict):
+        return format_assistant_content_block(content, state)
     else:
-        return (
-            f"{Color.BRIGHT_CYAN}┌─ [{msg_num}] ASSISTANT{Color.RESET}\n"
-            + prefix(str(content), f"{Color.CYAN}│ {Color.RESET}")
+        return f"{Color.BRIGHT_CYAN}┌─ {state} ASSISTANT{Color.RESET}\n" + prefix(
+            json.dumps(content, indent=2), f"{Color.CYAN}│ {Color.RESET}"
         )
 
 
@@ -175,7 +253,8 @@ def format_result(item: dict[str, Any]) -> str:
     result_content = item.get("result", "")
 
     status = (
-        f"{Color.BRIGHT_RED}❌ ERROR{Color.RESET}" if is_error
+        f"{Color.BRIGHT_RED}❌ ERROR{Color.RESET}"
+        if is_error
         else f"{Color.BRIGHT_GREEN}✓ SUCCESS{Color.RESET}"
     )
 
@@ -195,37 +274,45 @@ def format_result(item: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def format_item(item: dict[str, Any], msg_num: int, sub_num: int) -> str:
-    """Format a single transcript item"""
+def format_item(item: dict[str, Any], state: State) -> Generator[tuple[str, State], None, None]:
+    """Format a single transcript item, yielding (output, state) tuples"""
     item_type = item.get("type")
 
     if item_type == "stream_event":
         event_type: str = item.get("event", {}).get("type", "")
-        return format_stream_event(event_type)
+        output = format_stream_event(event_type)
+        if output:
+            yield output, state
 
     elif item_type == "system":
-        return format_system(item)
+        yield format_system(item), state
 
-    elif item_type == "user":
+    elif item_type in ("user", "assistant"):
         content = item.get("message", {}).get("content")
-        return format_user_message(content, msg_num, sub_num)
-
-    elif item_type == "assistant":
-        content = item.get("message", {}).get("content")
-        return format_assistant_message(content, msg_num)
+        contents = normalize_to_list(content)
+        formatter = format_user_message if item_type == "user" else format_assistant_message
+        for content_block in contents:
+            yield formatter(content_block, state), state
+            state = State(state.role, state.msg_num, state.sub_num + 1)
 
     elif item_type == "result":
-        return format_result(item)
+        yield format_result(item), state
 
-    return ""
+    elif item_type == "file-history-snapshot":
+        yield format_snapshot(item), state
+
+    elif item_type == "summary":
+        yield format_summary(item), state
+
+    elif item_type:
+        yield format_unknown("item_type", item, state), state
 
 
 def main():
     # Restore default SIGPIPE handler (terminate on broken pipe, e.g., piping to head)
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-    msg_num = 0
-    sub_num = 0
+    state = State("", 0, 0)
 
     for line in sys.stdin:
         line = line.strip()
@@ -239,10 +326,9 @@ def main():
             print(" ", repr(line), file=sys.stderr)
             continue
 
-        msg_num, sub_num = update_state(item, msg_num, sub_num)
+        state = update_state(item, state)
 
-        output = format_item(item, msg_num, sub_num)
-        if output:
+        for output, state in format_item(item, state):
             print(output)
 
 
