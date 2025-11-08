@@ -5,7 +5,7 @@ import json
 import signal
 import sys
 from dataclasses import dataclass
-from typing import Any, Generator, TypeGuard
+from typing import Any, Callable, Generator, TypeGuard
 
 
 Content = dict[str, Any]
@@ -25,6 +25,9 @@ class State:
         else:
             sub_num = ""
         return f"[{self.msg_num}{sub_num}]"
+
+
+Formatter = Callable[[Content, State], str]
 
 
 # ANSI color codes
@@ -76,13 +79,17 @@ def prefix(text: str, p: str) -> str:
 
 
 def format_boxed_message(
-    label: str, content: str, state: State | str, color: str,
+    label: str,
+    content: str,
+    state: State | str,
+    color: str,
 ) -> str:
     """Format a message with a boxed header and colored border"""
     bright_color = Color.to_bright[color]
     return f"{bright_color}┌─ {state} {label}{Color.RESET}\n" + prefix(
         content, f"{color}│ {Color.RESET}"
     )
+
 
 def normalize_contents(content: Any) -> list[Content]:
     """Normalize content to a list (wrap non-lists)"""
@@ -103,9 +110,7 @@ def format_unknown(
 ) -> str:
     """Format unknown/unexpected data with a clear error indicator"""
     json_str = json.dumps(data, indent=2)
-    return format_boxed_message(
-        f"UNKNOWN ({label})", json_str, state, color
-    )
+    return format_boxed_message(f"UNKNOWN ({label})", json_str, state, color)
 
 
 def update_state(content: Content, state: State) -> State:
@@ -117,9 +122,7 @@ def update_state(content: Content, state: State) -> State:
         content = content["message"]["content"]
         # User text messages are user role; tool results are part of assistant turn
         if isinstance(content, str) or (
-            is_content_list(content)
-            and content
-            and content[0]["type"] != "tool_result"
+            is_content_list(content) and content and content[0]["type"] != "tool_result"
         ):
             new_role = "user"
         else:
@@ -212,7 +215,9 @@ def format_tool_use(content: Content, state: State) -> str:
     tool_name = content["name"]
     tool_input = content["input"]
 
-    tool_lines = [f"{Color.Bright.MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"]
+    tool_lines = [
+        f"{Color.Bright.MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"
+    ]
     for key, value in tool_input.items():
         tool_lines.append(f"{Color.MAGENTA}║ {key}: |{Color.RESET}")
         if isinstance(value, str):
@@ -229,9 +234,7 @@ def format_assistant_message(content: Content, state: State) -> str:
     content_type = content["type"]
 
     if content_type == "text":
-        return format_boxed_message(
-            "ASSISTANT", content["text"], state, Color.CYAN
-        )
+        return format_boxed_message("ASSISTANT", content["text"], state, Color.CYAN)
     elif content_type == "tool_use":
         return format_tool_use(content, state)
     elif content_type == "thinking":
@@ -269,14 +272,29 @@ def format_result(content: Content) -> str:
     else:
         pass  # No permission denials to report
 
-    lines.append(
-        format_boxed_message("", result_content, "FIN", Color.CYAN)
-    )
+    lines.append(format_boxed_message("", result_content, "FIN", Color.CYAN))
 
     return "\n".join(lines)
 
 
-def format_item(content: Content, state: State) -> Generator[tuple[str, State], None, None]:
+def format_summary(content: Content) -> str:
+    """Format summary message"""
+    return f"{Color.CYAN}▸ Summary: {content['summary']}{Color.RESET}"
+
+
+def format_turn(
+    formatter: Formatter, content: Content, state: State
+) -> Generator[tuple[str, State], None, None]:
+    """Format a user or assistant turn (may contain multiple content blocks)"""
+    contents = normalize_contents(content["message"]["content"])
+    for content in contents:
+        yield formatter(content, state), state
+        state = State(state.role, state.msg_num, state.sub_num + 1)
+
+
+def format_item(
+    content: Content, state: State
+) -> Generator[tuple[str, State], None, None]:
     """Format a single transcript content, yielding (output, state) tuples"""
     item_type = content.get("type")
 
@@ -287,12 +305,11 @@ def format_item(content: Content, state: State) -> Generator[tuple[str, State], 
     elif item_type == "system":
         yield format_system(content), state
 
-    elif item_type in ("user", "assistant"):
-        contents = normalize_contents(content["message"]["content"])
-        formatter = format_user_message if item_type == "user" else format_assistant_message
-        for content in contents:
-            yield formatter(content, state), state
-            state = State(state.role, state.msg_num, state.sub_num + 1)
+    elif item_type == "user":
+        yield from format_turn(format_user_message, content, state)
+
+    elif item_type == "assistant":
+        yield from format_turn(format_assistant_message, content, state)
 
     elif item_type == "result":
         yield format_result(content), state
@@ -301,8 +318,7 @@ def format_item(content: Content, state: State) -> Generator[tuple[str, State], 
         yield format_snapshot(content), state
 
     elif item_type == "summary":
-        summary_text = content["summary"]
-        yield f"{Color.CYAN}▸ Summary: {summary_text}{Color.RESET}", state
+        yield format_summary(content), state
 
     else:
         yield format_unknown("item_type", content, state), state
