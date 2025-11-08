@@ -77,11 +77,17 @@ def normalize_to_list(content: Any) -> list[Any]:
         return [content]
 
 
-def format_unknown(label: str, data: Any, state: State) -> str:
+def format_unknown(
+    label: str,
+    data: Any,
+    state: State,
+    bright_color: str = Color.BRIGHT_RED,
+    regular_color: str = Color.BRIGHT_RED,
+) -> str:
     """Format unknown/unexpected data with a clear error indicator"""
     json_str = json.dumps(data, indent=2)
     return format_boxed_message(
-        f"UNKNOWN ({label})", json_str, state, Color.BRIGHT_RED, Color.BRIGHT_RED
+        f"UNKNOWN ({label})", json_str, state, bright_color, regular_color
     )
 
 
@@ -123,7 +129,8 @@ def format_stream_event(event_type: str) -> str:
         return f"{Color.YELLOW}⏵ Message starting...{Color.RESET}"
     elif event_type == "message_stop":
         return f"{Color.YELLOW}⏹ Message complete{Color.RESET}"
-    return ""
+    else:
+        return ""
 
 
 def format_snapshot(item: dict[str, Any]) -> str:
@@ -242,13 +249,7 @@ def format_assistant_message(content: Any, state: State) -> str:
     if isinstance(content, dict):
         return format_assistant_content_block(content, state)
     else:
-        return format_boxed_message(
-            "ASSISTANT",
-            json.dumps(content, indent=2),
-            state,
-            Color.BRIGHT_CYAN,
-            Color.CYAN,
-        )
+        return format_unknown("ASSISTANT", content, state, Color.BRIGHT_CYAN, Color.CYAN)
 
 
 def format_result(item: dict[str, Any]) -> str:
@@ -275,6 +276,8 @@ def format_result(item: dict[str, Any]) -> str:
 
     if len(permission_denials) > 0:
         lines.append(f"## Permission denials: {len(permission_denials)}")
+    else:
+        pass  # No permission denials to report
 
     lines.append(
         format_boxed_message("", result_content, "FIN", Color.BRIGHT_CYAN, Color.CYAN)
@@ -292,6 +295,8 @@ def format_item(item: dict[str, Any], state: State) -> Generator[tuple[str, Stat
         output = format_stream_event(event_type)
         if output:
             yield output, state
+        else:
+            pass  # Skip empty output
 
     elif item_type == "system":
         yield format_system(item), state
@@ -313,7 +318,7 @@ def format_item(item: dict[str, Any], state: State) -> Generator[tuple[str, Stat
     elif item_type == "summary":
         yield format_summary(item), state
 
-    elif item_type:
+    else:
         yield format_unknown("item_type", item, state), state
 
 
