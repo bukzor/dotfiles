@@ -80,14 +80,14 @@ def prefix(text: str, p: str) -> str:
 
 def format_boxed_message(
     label: str,
-    content: str,
+    text: str,
     state: State | str,
     color: str,
 ) -> str:
     """Format a message with a boxed header and colored border"""
     bright_color = Color.to_bright[color]
     return f"{bright_color}┌─ {state} {label}{Color.RESET}\n" + prefix(
-        content, f"{color}│ {Color.RESET}"
+        text, f"{color}│ {Color.RESET}"
     )
 
 
@@ -143,8 +143,9 @@ def update_state(content: Content, state: State) -> State:
         return State(new_role, state.msg_num, state.sub_num + 1)
 
 
-def format_stream_event(event_type: str) -> str:
+def format_stream_event(content: Content) -> str:
     """Format stream event messages"""
+    event_type = content["event"]["type"]
     if event_type == "message_start":
         return f"{Color.YELLOW}⏵ Message starting...{Color.RESET}"
     elif event_type == "message_stop":
@@ -299,8 +300,7 @@ def format_item(
     item_type = content.get("type")
 
     if item_type == "stream_event":
-        event_type: str = content["event"]["type"]
-        yield format_stream_event(event_type), state
+        yield format_stream_event(content), state
 
     elif item_type == "system":
         yield format_system(content), state
