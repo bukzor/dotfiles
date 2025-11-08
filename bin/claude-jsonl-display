@@ -32,14 +32,26 @@ class Color:
     BLUE = "\033[34m"
     MAGENTA = "\033[35m"
     CYAN = "\033[36m"
-    BRIGHT_RED = "\033[91m"
-    BRIGHT_GREEN = "\033[92m"
-    BRIGHT_YELLOW = "\033[93m"
-    BRIGHT_BLUE = "\033[94m"
-    BRIGHT_MAGENTA = "\033[95m"
-    BRIGHT_CYAN = "\033[96m"
+
+    class Bright:
+        RED = "\033[91m"
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        MAGENTA = "\033[95m"
+        CYAN = "\033[96m"
+
     RESET = "\033[0m"
     BOLD = "\033[1m"
+
+Color.to_bright = {
+    Color.RED: Color.Bright.RED,
+    Color.GREEN: Color.Bright.GREEN,
+    Color.YELLOW: Color.Bright.YELLOW,
+    Color.BLUE: Color.Bright.BLUE,
+    Color.MAGENTA: Color.Bright.MAGENTA,
+    Color.CYAN: Color.Bright.CYAN,
+}
 
 
 def is_dict_list(val: Any) -> TypeGuard[list[dict[str, Any]]]:
@@ -61,11 +73,12 @@ def prefix(text: str, p: str) -> str:
 
 
 def format_boxed_message(
-    label: str, content: str, state: State | str, bright_color: str, regular_color: str
+    label: str, content: str, state: State | str, color: str,
 ) -> str:
     """Format a message with a boxed header and colored border"""
+    bright_color = Color.to_bright[color]
     return f"{bright_color}┌─ {state} {label}{Color.RESET}\n" + prefix(
-        content, f"{regular_color}│ {Color.RESET}"
+        content, f"{color}│ {Color.RESET}"
     )
 
 
@@ -81,13 +94,12 @@ def format_unknown(
     label: str,
     data: Any,
     state: State,
-    bright_color: str = Color.BRIGHT_RED,
-    regular_color: str = Color.BRIGHT_RED,
+    color: str = Color.RED,
 ) -> str:
     """Format unknown/unexpected data with a clear error indicator"""
     json_str = json.dumps(data, indent=2)
     return format_boxed_message(
-        f"UNKNOWN ({label})", json_str, state, bright_color, regular_color
+        f"UNKNOWN ({label})", json_str, state, color
     )
 
 
@@ -177,18 +189,18 @@ def format_tool_result(tool_result: dict[str, Any], state: State) -> str:
 
     if is_error:
         return format_boxed_message(
-            "Tool Result ❌ ERROR", result_content, state, Color.BRIGHT_RED, Color.RED
+            "Tool Result ❌ ERROR", result_content, state, Color.RED
         )
     else:
         return format_boxed_message(
-            "Tool Result ✓", result_content, state, Color.BRIGHT_GREEN, Color.GREEN
+            "Tool Result ✓", result_content, state, Color.GREEN
         )
 
 
 def format_user_message(content: Any, state: State) -> str:
     """Format a single user message content block"""
     if isinstance(content, str):
-        return format_boxed_message("USER", content, state, Color.BRIGHT_BLUE, Color.BLUE)
+        return format_boxed_message("USER", content, state, Color.BLUE)
     elif not isinstance(content, dict):
         return format_unknown("user_message", content, state)
     elif content["type"] == "tool_result":
@@ -199,7 +211,7 @@ def format_user_message(content: Any, state: State) -> str:
         if text.startswith("[Request interrupted by user"):
             return f"{Color.RED}✗ {state} {text}{Color.RESET}"
         else:
-            return format_boxed_message("USER", text, state, Color.BRIGHT_BLUE, Color.BLUE)
+            return format_boxed_message("USER", text, state, Color.BLUE)
     else:
         return format_unknown("user_content_dict", content, state)
 
@@ -209,7 +221,7 @@ def format_tool_use(block: dict[str, Any], state: State) -> str:
     tool_name = block.get("name", "")
     tool_input = block.get("input", {})
 
-    tool_lines = [f"{Color.BRIGHT_MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"]
+    tool_lines = [f"{Color.Bright.MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"]
     for key, value in tool_input.items():
         tool_lines.append(f"{Color.MAGENTA}║ {key}: |{Color.RESET}")
         if isinstance(value, str):
@@ -224,7 +236,7 @@ def format_tool_use(block: dict[str, Any], state: State) -> str:
 def format_thinking(content: str, state: State) -> str:
     """Format a thinking message"""
     return format_boxed_message(
-        "THINKING 💭", content, state, Color.BRIGHT_YELLOW, Color.YELLOW
+        "THINKING 💭", content, state, Color.YELLOW
     )
 
 
@@ -234,7 +246,7 @@ def format_assistant_content_block(block: dict[str, Any], state: State) -> str:
 
     if block_type == "text":
         return format_boxed_message(
-            "ASSISTANT", block.get("text", ""), state, Color.BRIGHT_CYAN, Color.CYAN
+            "ASSISTANT", block.get("text", ""), state, Color.CYAN
         )
     elif block_type == "tool_use":
         return format_tool_use(block, state)
@@ -249,7 +261,7 @@ def format_assistant_message(content: Any, state: State) -> str:
     if isinstance(content, dict):
         return format_assistant_content_block(content, state)
     else:
-        return format_unknown("ASSISTANT", content, state, Color.BRIGHT_CYAN, Color.CYAN)
+        return format_unknown("ASSISTANT", content, state, Color.CYAN)
 
 
 def format_result(item: dict[str, Any]) -> str:
@@ -262,9 +274,9 @@ def format_result(item: dict[str, Any]) -> str:
     result_content = item.get("result", "")
 
     status = (
-        f"{Color.BRIGHT_RED}❌ ERROR{Color.RESET}"
+        f"{Color.Bright.RED}❌ ERROR{Color.RESET}"
         if is_error
-        else f"{Color.BRIGHT_GREEN}✓ SUCCESS{Color.RESET}"
+        else f"{Color.Bright.GREEN}✓ SUCCESS{Color.RESET}"
     )
 
     lines = [
@@ -280,7 +292,7 @@ def format_result(item: dict[str, Any]) -> str:
         pass  # No permission denials to report
 
     lines.append(
-        format_boxed_message("", result_content, "FIN", Color.BRIGHT_CYAN, Color.CYAN)
+        format_boxed_message("", result_content, "FIN", Color.CYAN)
     )
 
     return "\n".join(lines)
