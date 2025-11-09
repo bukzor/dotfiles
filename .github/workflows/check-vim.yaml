@@ -32,8 +32,10 @@ jobs:
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: false
-          version: ${{ matrix.rev }}`
+          version: ${{ matrix.rev }}
 
+      - name: Install dependencies
+        run: ${{ matrix.install-rg }}
 
-# TODO: 	nvim --headless --noplugin -u scripts/minimal_init.vim -c "PlenaryBustedDirectory lua/tests/automated/ { minimal_init = './scripts/minimal_init.vim' }"
-
+      - name: Run acceptance tests
+        run: ~/lib/ci/check-vim.sh
