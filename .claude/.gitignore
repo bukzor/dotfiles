@@ -1,0 +1,9 @@
+# working files for claude-code internals
+.credentials.json
+history.jsonl
+projects/
+debug/
+shell-snapshots/
+todos/
+file-history/
+statsig/
