@@ -128,9 +128,7 @@ grep -l "keyword" docs/adr/*.md
 
 ## Creating ADRs
 
-```bash
-.claude/new-adr.sh "Your decision title"
-```
+Use the llm-collab-docs skill scripts (see ~/.claude/skills/llm-collab-docs/scripts/).
 
 ## Recent Decisions
 
@@ -177,21 +175,15 @@ EOF
   echo "✅ Created docs/architecture/overview.md"
 fi
 
-# Copy helper scripts to .claude/
-SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Note: Helper scripts remain in skill directory
+HERE="$(cd "$(dirname "$0")"; pwd)"
+SKILL_DIR="$(cd "$HERE/.." && pwd)"
 
-for script in new-adr.sh new-devlog.sh update-status.sh update-adr-index.sh session-start.sh session-end.sh; do
-  if [ -f "$SKILL_DIR/scripts/$script" ] && [ ! -f ".claude/$script" ]; then
-    cp "$SKILL_DIR/scripts/$script" ".claude/"
-    chmod +x ".claude/$script"
-  fi
-done
-
-echo "✅ Copied helper scripts to .claude/"
+echo "✅ Helper scripts available at: $SKILL_DIR/scripts/"
 
 # Create first devlog entry
 if [ ! -f "docs/devlog/$(date +%Y-%m-%d).md" ]; then
-  .claude/new-devlog.sh
+  "$HERE/new-devlog.sh"
   echo "✅ Created first devlog entry"
 fi
 
@@ -201,5 +193,5 @@ echo ""
 echo "Next steps:"
 echo "  1. Edit .claude/README.md with project-specific guidance"
 echo "  2. Update STATUS.md with current milestone and actions"
-echo "  3. Create first ADR: .claude/new-adr.sh \"Your decision\""
-echo "  4. At session end: .claude/session-end.sh"
+echo "  3. Create first ADR: $SKILL_DIR/scripts/new-adr.sh \"Your decision\""
+echo "  4. At session end: $SKILL_DIR/scripts/session-end.sh"

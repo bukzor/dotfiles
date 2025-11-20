@@ -3,21 +3,16 @@
 
 set -e
 
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
 echo "📝 Wrapping up session..."
 echo ""
 
-# Update STATUS.md from latest devlog
-if [ -f .claude/update-status.sh ]; then
-  .claude/update-status.sh
-fi
-
-# Update ADR index
-if [ -f .claude/update-adr-index.sh ]; then
-  .claude/update-adr-index.sh
-fi
+# Reminder to update todo.md
+echo "⚠️  Remember to update .claude/todo.md with current TodoWrite state"
+echo ""
 
 # Show git status
-echo ""
 echo "=== Git Status ==="
 git status
 
@@ -25,6 +20,7 @@ echo ""
 echo "✅ Session wrapped up"
 echo ""
 echo "Next steps:"
-echo "  1. Review changes: git diff"
-echo "  2. Commit if appropriate: git add -A && git commit -m \"...\""
-echo "  3. Next session: .claude/session-start.sh"
+echo "  1. Update .claude/todo.md (if not already done)"
+echo "  2. Review changes: git diff"
+echo "  3. Commit if appropriate: git add -A && git commit -m \"...\""
+echo "  4. Next session: $HERE/session-start.sh"

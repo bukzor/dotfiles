@@ -3,6 +3,8 @@
 
 set -e
 
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
 if [ ! -d "docs/adr" ]; then
   echo "Error: docs/adr/ not found. Run from project root."
   exit 1
@@ -23,7 +25,7 @@ fi
     echo "None yet. Create your first ADR:"
     echo ""
     echo "\`\`\`bash"
-    echo ".claude/new-adr.sh \"Your decision title\""
+    echo "$HERE/new-adr.sh \"Your decision title\""
     echo "\`\`\`"
   else
     echo "## Recent Decisions"
@@ -33,7 +35,7 @@ fi
       TITLE=$(head -1 "$file" | sed 's/^# //')
       BASE=$(basename "$file")
       DATE=$(echo "$BASE" | cut -d- -f1-3)
-      STATUS=$(grep "^**Status:**" "$file" | sed 's/^**Status:** //' || echo "Unknown")
+      STATUS=$(grep "^\*\*Status:\*\*" "$file" | sed 's/^\*\*Status:\*\* //' || echo "Unknown")
       echo "- [$TITLE]($BASE) - $DATE - *$STATUS*"
     done
 
@@ -75,7 +77,7 @@ fi
   echo "## Creating ADRs"
   echo ""
   echo "\`\`\`bash"
-  echo ".claude/new-adr.sh \"Your decision title\""
+  echo "$HERE/new-adr.sh \"Your decision title\""
   echo "\`\`\`"
   echo ""
   echo "Auto-increments within each day. Supports up to 1000 decisions per day."

@@ -37,8 +37,8 @@ Skip for:
 **Pattern:** Different files for different audiences/purposes:
 - README.md → users (what it does, how to use)
 - CONTRIBUTING.md → contributors (how to develop)
-- .claude/README.md or docs/CLAUDE.md → agents (architecture, conventions)
-- STATUS.md → current state (where we are, what's next)
+- CLAUDE.md → agents (architecture, conventions) - auto-loaded at root
+- .claude/todo.md → current tasks (manually maintained, read at session start)
 - docs/adr/ → why (decision rationale)
 - docs/architecture/ → what/how (technical design)
 - docs/devlog/ → when (session history, handoffs)
@@ -134,38 +134,36 @@ docs/adr/
 **Choose based on:** How often do you need temporal conflict resolution?
 
 **Helper available:** `scripts/new-adr.sh` - Auto-increments date-based ADRs
+- Usage: `new-adr.sh "Decision title"`
+- Backdate: `DATE=YYYY-MM-DD new-adr.sh "Decision title"`
 
-### Status Tracking
+### Task Tracking
 
-**Problem:** Starting a session, agent doesn't know current focus.
+**Problem:** Starting a session, agent doesn't know what tasks are pending.
 
-**Solution:** STATUS.md as entry point.
+**Solution:** `.claude/todo.md` for persistent cross-session tasks.
 
-**Variation 1: Auto-generated pointer**
+**Pattern:**
 ```markdown
-# Status
-Last Session: [2025-11-19](docs/devlog/2025-11-19.md)
-Milestone: See ROADMAP.md
-Next Actions: [extracted from devlog]
+# Current Tasks
+
+- [ ] Convert design-rationale to ADRs
+- [ ] Apply .edge/ convention to repository
+- [x] Move CLAUDE.md to root for auto-loading
 ```
-- Always fresh (generated from devlog)
-- Minimal duplication
-- Requires automation
 
-**Variation 2: Manual maintenance**
-- Full details in STATUS.md
-- Edit after each session
-- Simple, no automation needed
-- Can get stale
+**Workflow:**
+1. **Session start:** Read `.claude/todo.md` (if exists) to see persistent tasks
+2. **During session:** Use TodoWrite tool for working memory
+3. **Before commit:** Manually update `.claude/todo.md` to reflect progress
 
-**Variation 3: No STATUS.md**
-- Just read latest devlog directly
-- One less file to maintain
-- Less obvious entry point
+**Benefits:**
+- Actionable (concrete tasks vs abstract status)
+- Persistent (survives across sessions in git)
+- Simple (no auto-generation needed)
+- Coordinating (tells next agent what to do)
 
-**Choose based on:** How much automation do you want?
-
-**Helper available:** `scripts/update-status.sh` - Generate STATUS.md from latest devlog
+**Alternative:** Skip `.claude/todo.md` and just rely on latest devlog + TodoWrite
 
 ### Session Coordination
 
@@ -219,25 +217,9 @@ Creates devlog entry from template with sections: Focus, What Happened, Decision
 
 **Skip if:** Freeform devlog or git commits work better for you.
 
-### scripts/update-status.sh
-
-Generates STATUS.md from latest devlog entry (extracts "Next Session" section).
-
-**Use if:** You want STATUS.md as auto-generated pointer.
-
-**Skip if:** Manual STATUS.md or no STATUS.md works better.
-
-### scripts/update-adr-index.sh
-
-Generates docs/adr/README.md index (recent ADRs, by status, quick search examples).
-
-**Use if:** You want auto-maintained ADR index.
-
-**Skip if:** Manual index or no index is fine.
-
 ### scripts/session-start.sh
 
-Reads and displays: CLAUDE.md, STATUS.md, latest devlog, recent ADRs.
+Reads and displays: CLAUDE.md, .claude/todo.md, latest devlog, recent ADRs.
 
 **Use if:** You want scripted orientation at session start.
 
@@ -277,31 +259,26 @@ Complete 780-line guide covering:
 
 ### With Git
 
-**Option:** Git hooks for auto-updates
+**Workflow:**
 ```bash
-# .git/hooks/post-commit
-#!/bin/bash
-.claude/update-status.sh
-.claude/update-adr-index.sh
-```
+# Work happens (LLM uses TodoWrite during session)
 
-**Option:** Manual commit workflow
-```bash
-# Work happens
-.claude/session-end.sh  # Updates docs
+# Before commit: manually update .claude/todo.md
+# (LLM edits file to reflect current TodoWrite state)
+
 git diff               # Review
 git commit -m "..."    # Commit
 ```
 
-**Choose based on:** How much automation do you want?
+**Optional:** Use `scripts/session-end.sh` to display git status and remind about todo.md update.
 
 ### With Existing Projects
 
 **Adopt gradually:**
-1. Add STATUS.md (manual or generated)
+1. Create CLAUDE.md at root for agent orientation
 2. Start using ADRs for new decisions
-3. Add devlog when valuable
-4. Create .claude/README.md as agent quick-ref
+3. Add `.claude/todo.md` for persistent task tracking
+4. Add devlog when valuable
 5. Restructure existing docs as needed
 
 **Don't:** Feel obligated to follow every pattern.
@@ -327,28 +304,24 @@ git commit -m "..."    # Commit
 **Starting a session:**
 ```bash
 # With scripts
-.claude/session-start.sh
+~/.claude/skills/llm-collab-docs/scripts/session-start.sh
 
 # Manual
-# Read STATUS.md, latest devlog, .claude/README.md
+# Read CLAUDE.md, .claude/todo.md, latest devlog
 ```
 
 **Creating ADR:**
 ```bash
-# Date-based with script
-.claude/new-adr.sh "Decision title"
+~/.claude/skills/llm-collab-docs/scripts/new-adr.sh "Decision title"
 
-# Manual
-# Create docs/adr/YYYY-MM-DD-NNN-title.md or docs/adr/0001-title.md
+# Or backdate:
+DATE=2025-11-19 ~/.claude/skills/llm-collab-docs/scripts/new-adr.sh "Decision title"
 ```
 
 **Ending session:**
 ```bash
-# With scripts
-.claude/session-end.sh
-
-# Manual
-# Update STATUS.md, commit changes
+# Update .claude/todo.md to reflect TodoWrite state
+# Review and commit changes
 ```
 
 ## Success Indicators

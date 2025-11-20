@@ -3,20 +3,22 @@
 
 set -e
 
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
 echo "📖 Reading session context..."
 echo ""
 
 # Read CLAUDE.md
-if [ -f .claude/README.md ]; then
-  echo "=== .claude/README.md ==="
-  cat .claude/README.md
+if [ -f CLAUDE.md ]; then
+  echo "=== CLAUDE.md ==="
+  cat CLAUDE.md
   echo ""
 fi
 
-# Read STATUS.md
-if [ -f STATUS.md ]; then
-  echo "=== STATUS.md ==="
-  cat STATUS.md
+# Read .claude/todo.md
+if [ -f .claude/todo.md ]; then
+  echo "=== .claude/todo.md ==="
+  cat .claude/todo.md
   echo ""
 fi
 
@@ -42,7 +44,6 @@ fi
 echo "✅ Session context loaded"
 echo ""
 echo "Quick commands:"
-echo "  - Create ADR: .claude/new-adr.sh \"Decision title\""
-echo "  - Create devlog: .claude/new-devlog.sh"
-echo "  - Update STATUS: .claude/update-status.sh"
-echo "  - End session: .claude/session-end.sh"
+echo "  - Create ADR: $HERE/new-adr.sh \"Decision title\""
+echo "  - Create devlog: $HERE/new-devlog.sh"
+echo "  - Update .claude/todo.md before commit"

@@ -3,10 +3,15 @@
 
 set -e
 
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
 if [ -z "$1" ]; then
   echo "Usage: new-adr.sh \"Decision title\""
+  echo "       DATE=YYYY-MM-DD new-adr.sh \"Decision title\"  (for backdating)"
   exit 1
 fi
+
+TITLE="$*"
 
 # Ensure we're in project root
 if [ ! -d "docs/adr" ]; then
@@ -14,23 +19,23 @@ if [ ! -d "docs/adr" ]; then
   exit 1
 fi
 
-DATE=$(date +%Y-%m-%d)
+DATE=${DATE:-$(date +%Y-%m-%d)}
 LAST=$(ls docs/adr/$DATE-* 2>/dev/null | tail -1)
 
 if [ -z "$LAST" ]; then
   NUM="000"
 else
-  # Extract number, handle leading zeros properly
-  NUM=$(basename "$LAST" | grep -oP '\d{3}' | head -1)
+  # Extract number after date prefix, handle leading zeros properly
+  NUM=$(basename "$LAST" | sed -E "s/^$DATE-([0-9]{3})-.*/\1/")
   NUM=$(printf "%03d" $((10#$NUM + 1)))
 fi
 
 # Create slug from title
-SLUG=$(echo "$*" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
+SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
 FILE="docs/adr/$DATE-$NUM-$SLUG.md"
 
 cat > "$FILE" <<EOF
-# $*
+# $TITLE
 
 **Date:** $DATE
 **Status:** Proposed
@@ -71,15 +76,3 @@ cat > "$FILE" <<EOF
 EOF
 
 echo "✅ Created $FILE"
-
-# Update ADR index
-if [ -f .claude/update-adr-index.sh ]; then
-  .claude/update-adr-index.sh
-fi
-
-# Open in editor if available
-if [ -n "$EDITOR" ]; then
-  $EDITOR "$FILE"
-elif command -v code >/dev/null; then
-  code "$FILE"
-fi
