@@ -1,0 +1,46 @@
+#!/bin/bash
+# Link to path-encoded object store in XDG_STATE_HOME
+
+set -euo pipefail
+
+REPOS_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
+WORK_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+ENCODED=$(claude-path "$WORK_DIR")
+OBJECT_STORE="$REPOS_ROOT/$ENCODED"
+
+mkdir -p "$OBJECT_STORE"
+chmod 700 "$OBJECT_STORE"
+
+# Link via alternates FIRST so git can find objects
+mkdir -p .git/objects/info
+echo "$OBJECT_STORE/objects" > .git/objects/info/alternates
+
+if [ ! -d "$OBJECT_STORE/objects" ]; then
+    # New object store
+    git init --bare "$OBJECT_STORE" >/dev/null
+    echo "✓ Created object store: $OBJECT_STORE" >&2
+else
+    # Existing object store - restore refs
+    if git --git-dir="$OBJECT_STORE" show-ref --heads >/dev/null 2>&1; then
+        echo "✓ Found existing objects - recovering..." >&2
+
+        # Copy all refs from object store
+        cp -r "$OBJECT_STORE/refs/"* .git/refs/ 2>/dev/null || true
+
+        # Copy HEAD
+        if [ -f "$OBJECT_STORE/HEAD" ]; then
+            cp "$OBJECT_STORE/HEAD" .git/HEAD
+        fi
+
+        BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
+
+        # Checkout to restore working tree
+        if ! git checkout "$BRANCH"; then
+            echo "❌ Failed to checkout $BRANCH" >&2
+            exit 1
+        fi
+        echo "  Restored working tree" >&2
+    else
+        echo "✓ Linked to object store: $OBJECT_STORE" >&2
+    fi
+fi

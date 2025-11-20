@@ -1,0 +1,20 @@
+#!/bin/bash
+# Ensure setup, then sync refs after checkout
+
+set -euo pipefail
+
+# Check if alternates is already configured
+if [ ! -f .git/objects/info/alternates ]; then
+    # Run the setup
+    .git/hooks/post-init
+fi
+
+REPOS_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
+WORK_DIR="$(git rev-parse --show-toplevel)"
+ENCODED=$(claude-path "$WORK_DIR")
+OBJECT_STORE="$REPOS_ROOT/$ENCODED"
+
+[ -d "$OBJECT_STORE" ] || exit 0
+
+git push "$OBJECT_STORE" --all >/dev/null 2>&1 || true
+git push "$OBJECT_STORE" --tags >/dev/null 2>&1 || true

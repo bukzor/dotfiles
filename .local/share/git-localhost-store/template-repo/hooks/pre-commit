@@ -1,0 +1,10 @@
+#!/bin/bash
+# Ensure object store is set up before first commit
+
+set -euo pipefail
+
+# Check if alternates is already configured
+if [ ! -f .git/objects/info/alternates ]; then
+    # Run the setup
+    .git/hooks/post-init
+fi

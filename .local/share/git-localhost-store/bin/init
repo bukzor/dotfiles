@@ -1,0 +1,27 @@
+#!/bin/bash
+# Setup git-localhost-store system
+
+set -euo pipefail
+
+TEMPLATE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/template-repo"
+REPOS_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
+
+echo "Setting up git-localhost-store..."
+echo "  Template: $TEMPLATE_DIR"
+echo "  Objects:  $REPOS_DIR"
+echo ""
+
+# Verify template directory exists
+if [ ! -d "$TEMPLATE_DIR/hooks" ]; then
+    echo "❌ Template directory not found: $TEMPLATE_DIR" >&2
+    echo "   Expected hooks directory at: $TEMPLATE_DIR/hooks" >&2
+    exit 1
+fi
+
+# Create repos directory
+mkdir -p "$REPOS_DIR"
+chmod 700 "$REPOS_DIR"
+
+echo "✓ Directories created"
+echo ""
+echo "See README.md for git config instructions"

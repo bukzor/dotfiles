@@ -1,0 +1,11 @@
+#!/bin/bash
+# Encode a path using Claude Code's encoding scheme
+# Usage: claude-path [PATH]
+#   Encodes PATH (or PWD if not provided)
+
+set -euo pipefail
+
+path="${1:-$PWD}"
+path=$(cd "$path" && pwd)
+
+sed <<<"$path" 's/-/\n/g; s/\//-/g; s/\n/--/g'

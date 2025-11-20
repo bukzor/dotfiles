@@ -1,5 +1,8 @@
 # hacking
 *.log
+demo*
+*.strace
+*.bak
 
 # don't care
 .sommelierrc
@@ -12,6 +15,7 @@
 .emscripten_cache/
 tmp/
 **/trash/
+bak/
 
 # transient history
 *.sw[a-p]
@@ -19,6 +23,9 @@ tmp/
 .python_history
 .lesshst
 .node_repl_history
+.wget-hsts
+Brewfile.lock.json
+.sudo_as_admin_successful
 
 # files with host-local data
 .Xauthority
@@ -26,6 +33,9 @@ tmp/
 
 # externally managed
 Dropbox/
+.cpan/
+.docker/
+.conda/
 
 # local-machine binaries
 package/
@@ -35,4 +45,13 @@ package/
 .npm
 .dropbox
 .dropbox-dist
-.local
+.local/*
+
+# Opt-in .local/share (controlled by .local/share/.gitignore)
+!.local/share/
+
+
+# Pants workspace files
+/.pants.d
+/dist/
+.aider*
