@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error): Failed to get tmux directory"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+tmux display-message -p '#{session_path}'

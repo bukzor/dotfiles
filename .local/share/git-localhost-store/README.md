@@ -14,11 +14,11 @@ This system automatically stores all git objects in a protected central location
 
 ### Automatic Setup
 
-When you run `git init` or `git add` for the first time in a repo, hooks automatically:
+When you run `git init` or `git add` for the first time in a repo, hooks automatically run `git restore-repo` which:
 
-1. Create a bare repository in `~/.local/state/git-localhost-store/repos/<encoded-path>/`
-2. Link it via git alternates so objects are stored there
-3. Sync refs on every commit, checkout, and merge
+1. Creates a worktree-based repository structure in `~/.local/state/git-localhost-store/repos/<encoded-path>/`
+2. Converts your `.git` directory to a worktree link
+3. Preserves all existing commits and index state
 
 ### Path Encoding
 
@@ -32,31 +32,65 @@ Working directory paths are encoded using Claude Code's scheme to create unique,
 
 After `rm -rf` of a working directory:
 
+**Automatic (via hooks):**
 ```bash
 mkdir ~/projects/myrepo && cd ~/projects/myrepo
-git init  # Automatically detects existing store and recovers everything
+git init  # Hook detects existing store and recovers everything
 ```
+
+**Explicit (direct command):**
+```bash
+mkdir ~/projects/myrepo && cd ~/projects/myrepo
+git init
+git restore-repo  # Directly restore from store
+```
+
+## Commands
+
+### `git restore-repo`
+
+Converts an existing git repository to use the localhost store, or recovers a deleted repository if the store already exists.
+
+**Usage:**
+```bash
+cd /path/to/your/repo
+git restore-repo
+```
+
+**What it does:**
+- Detects if a store exists for this path
+- If no store: moves `.git` to the store location and sets up worktree
+- If store exists: recovers all commits and tracked files from the store
+- Preserves staged changes (index) and existing commits
+- Safe to run multiple times (idempotent)
+
+**When to use:**
+- Convert an existing repo to use localhost store
+- Recover after accidental `rm -rf`
+- Fix a broken worktree configuration
+
+**Note:** `git restore-repo` is automatically called by hooks on `git add` and `git commit`, so manual invocation is rarely needed.
 
 ## Structure
 
 ```
 ~/.local/share/git-localhost-store/
 ├── bin/
-│   ├── init           # Setup script (run once)
-│   └── claude-path    # Symlink to ~/bin/claude-path
-├── template-repo/     # Git template directory
+│   ├── git-restore-repo # Core restore logic (user-facing)
+│   └── claude-path      # Symlink to ~/bin/claude-path
+├── lib/
+│   └── init             # Internal setup script
+├── template-repo/       # Git template directory
 │   └── hooks/
-│       ├── post-init        # Core setup logic
-│       ├── post-index-change # Trigger on git add
-│       ├── pre-commit       # Trigger on git commit
-│       ├── post-checkout    # Trigger on git checkout/clone
-│       ├── post-commit      # Sync refs after commit
-│       └── post-merge       # Sync refs after merge
-└── README.md          # This file
+│       ├── post-index-change # Calls git-restore-repo on git add
+│       └── pre-commit        # Calls git-restore-repo on git commit
+└── README.md            # This file
 
 ~/.local/state/git-localhost-store/
-└── repos/             # Per-repo object stores (not version-controlled)
-    └── <encoded-path>/ # Bare git repos
+└── repos/               # Per-repo object stores (not version-controlled)
+    └── <encoded-path>/  # Worktree-structured repos
+        └── worktrees/
+            └── <name>/  # Per-worktree data
 ```
 
 ## Installation
@@ -82,11 +116,11 @@ The state directory (`~/.local/state/git-localhost-store/repos/`) will be create
 
 ## Maintenance
 
-### Check if a repo has backup
+### Check if a repo is using localhost store
 
 ```bash
-cat .git/objects/info/alternates
-# Should show: ~/.local/state/git-localhost-store/repos/<encoded-path>/objects
+cat .git
+# Should show: gitdir: ~/.local/state/git-localhost-store/repos/<encoded-path>/worktrees/<name>
 ```
 
 ### List all backed-up repos
@@ -105,9 +139,9 @@ git --git-dir="$HOME/.local/state/git-localhost-store/repos/$ENCODED" log
 
 ## Limitations
 
-- Only protects commits, not uncommitted changes
-- Recovery requires `git init` in the exact original path
-- Bare repos in state directory can still be manually deleted
+- Only protects commits and staged changes, not unstaged modifications
+- Recovery requires recreating directory at the exact original path
+- Object stores in state directory can still be manually deleted
 - Does not replace proper remote backups (GitHub, etc.)
 
 ## Design Principles

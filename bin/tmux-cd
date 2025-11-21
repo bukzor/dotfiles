@@ -1,4 +1,29 @@
-#!/bin/sh
-# set the tmux session default for $PWD, while attached to a running session
-set -ex
-TMUX= tmux -C attach -c "$PWD" </dev/null "$@"
+#!/bin/bash
+set -euo pipefail
+
+# Get the target directory (default to $PWD if not provided)
+target_dir="${1:-$PWD}"
+
+# Resolve to absolute path
+target_dir=$(cd "$target_dir" && pwd)
+
+
+tmux=(
+  tmux 
+  # enable control mode for programmatic control
+  -C
+  # change the session working directory
+  attach-session -c "$target_dir"
+  # prevent environment updates
+  -E
+  # minimize side effects
+  -f active-pane,ignore-size,read-only,no-output
+)
+
+window_number=$(tmux display-message -p '#I')
+
+set -x
+tmux set-option base-index $((window_number - 2))
+
+# </dev/null prevents "sessions should be nested with care" error
+"${tmux[@]}" </dev/null >/dev/null
