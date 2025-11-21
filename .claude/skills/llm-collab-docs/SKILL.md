@@ -5,6 +5,8 @@ description: Principles and helpers for human-LLM agent swarm collaboration on l
 
 # LLM-Collaborative Documentation
 
+> **Note:** This skill is new and locally maintained. Expect rough edges and iterative improvements as patterns are validated through use. Feedback and touchups welcome.
+
 ## Purpose
 
 Support effective human-LLM agent swarm collaboration through documentation patterns that enable:
@@ -38,7 +40,7 @@ Skip for:
 - README.md → users (what it does, how to use)
 - CONTRIBUTING.md → contributors (how to develop)
 - CLAUDE.md → agents (architecture, conventions) - auto-loaded at root
-- .claude/todo.md → current tasks (manually maintained, read at session start)
+- .claude/todo.d/ → current tasks (date-based files, read at session start)
 - docs/adr/ → why (decision rationale)
 - docs/architecture/ → what/how (technical design)
 - docs/devlog/ → when (session history, handoffs)
@@ -104,6 +106,28 @@ references/creating-documentation.md: [Full 780-line guide]
 
 ## Common Patterns
 
+### When to Document What
+
+**Use ADR for:** Significant architectural/design decisions with rationale
+- Extract a new user-facing command from internal logic
+- Choose between competing implementation approaches
+- Adopt a new technology or pattern
+- Deprecate or remove functionality
+- Captures: Decision, context, alternatives considered, consequences
+
+**Use Devlog for:** Session work with tactical implementation details
+- What was explored/implemented in this session
+- Specific commands run, tests performed
+- Issues encountered and how resolved
+- Handoff context for next session
+- Captures: Focus, what happened, next steps
+
+**Use Both ADR + Devlog for:** Significant changes that need both perspectives
+- ADR documents the decision and "why" (durable reference)
+- Devlog documents the session and "how it went" (temporal record)
+- Devlog references the ADR for decision rationale
+- Example: Today's git-restore-repo extraction
+
 ### Architecture Decision Records (ADRs)
 
 **Problem:** Decisions lost in code comments or chat history. When conflicts found, unclear which decision is current.
@@ -141,29 +165,26 @@ docs/adr/
 
 **Problem:** Starting a session, agent doesn't know what tasks are pending.
 
-**Solution:** `.claude/todo.md` for persistent cross-session tasks.
+**Solution:** `.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed TODO files with full context.
 
 **Pattern:**
-```markdown
-# Current Tasks
-
-- [ ] Convert design-rationale to ADRs
-- [ ] Apply .edge/ convention to repository
-- [x] Move CLAUDE.md to root for auto-loading
-```
+- Each TODO in separate file with complete planning details
+- Use for complex tasks needing planning/multiple sessions
+- Helper: `scripts/new-todo.sh "Task title"` (date-based auto-increment)
+- View available: `ls .claude/todo.d/`
 
 **Workflow:**
-1. **Session start:** Read `.claude/todo.md` (if exists) to see persistent tasks
+1. **Session start:** `ls .claude/todo.d/` to see pending tasks
 2. **During session:** Use TodoWrite tool for working memory
-3. **Before commit:** Manually update `.claude/todo.md` to reflect progress
+3. **Session end:** Use `new-todo.sh` to create detailed TODOs for remaining work
 
 **Benefits:**
-- Actionable (concrete tasks vs abstract status)
+- Actionable (concrete tasks with full context)
 - Persistent (survives across sessions in git)
-- Simple (no auto-generation needed)
-- Coordinating (tells next agent what to do)
+- Coordinating (tells next agent exactly what to do)
+- Date-ordered (temporal tracking built in)
 
-**Alternative:** Skip `.claude/todo.md` and just rely on latest devlog + TodoWrite
+**Alternative:** Skip explicit TODOs and just rely on latest devlog "Next Session" + TodoWrite
 
 ### Session Coordination
 
@@ -219,7 +240,7 @@ Creates devlog entry from template with sections: Focus, What Happened, Decision
 
 ### scripts/session-start.sh
 
-Reads and displays: CLAUDE.md, .claude/todo.md, latest devlog, recent ADRs.
+Reads and displays: CLAUDE.md, .claude/todo.d/, latest devlog, recent ADRs.
 
 **Use if:** You want scripted orientation at session start.
 
@@ -263,23 +284,38 @@ Complete 780-line guide covering:
 ```bash
 # Work happens (LLM uses TodoWrite during session)
 
-# Before commit: manually update .claude/todo.md
-# (LLM edits file to reflect current TodoWrite state)
+# Session end: Create detailed TODOs for remaining work
+new-todo.sh "Remaining task title"
 
 git diff               # Review
 git commit -m "..."    # Commit
 ```
 
-**Optional:** Use `scripts/session-end.sh` to display git status and remind about todo.md update.
+**Optional:** Use `scripts/session-end.sh` to display git status and context.
 
 ### With Existing Projects
 
 **Adopt gradually:**
 1. Create CLAUDE.md at root for agent orientation
 2. Start using ADRs for new decisions
-3. Add `.claude/todo.md` for persistent task tracking
+3. Add `.claude/todo.d/` for persistent task tracking
 4. Add devlog when valuable
 5. Restructure existing docs as needed
+
+**Make the skill discoverable:**
+
+Once you've adopted these patterns (ADRs, devlogs, etc.), add a note to your project's CLAUDE.md so future agents know to load this skill:
+
+```markdown
+## Documentation System
+
+This project uses llm-collab-docs patterns for coordination:
+- ADRs in docs/adr/ (date-based)
+- Devlogs in docs/devlog/
+- Persistent TODOs in .claude/todo.d/
+
+When working on this project, load the llm-collab-docs skill for helper scripts and pattern details.
+```
 
 **Don't:** Feel obligated to follow every pattern.
 
@@ -307,7 +343,7 @@ git commit -m "..."    # Commit
 ~/.claude/skills/llm-collab-docs/scripts/session-start.sh
 
 # Manual
-# Read CLAUDE.md, .claude/todo.md, latest devlog
+# Read CLAUDE.md, ls .claude/todo.d/, latest devlog
 ```
 
 **Creating ADR:**
@@ -318,9 +354,17 @@ git commit -m "..."    # Commit
 DATE=2025-11-19 ~/.claude/skills/llm-collab-docs/scripts/new-adr.sh "Decision title"
 ```
 
+**Creating TODO:**
+```bash
+~/.claude/skills/llm-collab-docs/scripts/new-todo.sh "Task title"
+
+# Set priority:
+PRIORITY=high ~/.claude/skills/llm-collab-docs/scripts/new-todo.sh "Task title"
+```
+
 **Ending session:**
 ```bash
-# Update .claude/todo.md to reflect TodoWrite state
+# Create TODOs for remaining work
 # Review and commit changes
 ```
 

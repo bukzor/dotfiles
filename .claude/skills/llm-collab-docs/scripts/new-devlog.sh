@@ -93,10 +93,3 @@ DEVLOG_DIR="docs/devlog"
 } > "$DEVLOG_DIR/README.md"
 
 echo "✅ Updated docs/devlog/README.md"
-
-# Open in editor if available
-if [ -n "$EDITOR" ]; then
-  $EDITOR "$FILE"
-elif command -v code >/dev/null; then
-  code "$FILE"
-fi
