@@ -59,7 +59,7 @@ Skip for:
 **Example:**
 ```
 CLAUDE.md: "Uses ADR format for decisions. See docs/adr/"
-docs/adr/README.md: "Date-based ADRs with auto-increment. See references/creating-documentation.md for rationale"
+docs/adr/ directory: [Date-based ADRs, list with ls or grep]
 references/creating-documentation.md: [Full 780-line guide]
 ```
 
@@ -97,8 +97,9 @@ references/creating-documentation.md: [Full 780-line guide]
 
 **Pattern:** Auto-generate coordination files from source of truth:
 - STATUS.md generated from latest devlog
-- ADR index generated from adr/*.md files
 - Devlog index generated from entries
+
+**Note:** ADR directory itself is the index—use `ls -t docs/adr/` or `grep` to find decisions.
 
 **Alternative:** Manual maintenance, accept some staleness.
 
@@ -224,7 +225,6 @@ Creates ADR with date-based auto-incrementing (YYYY-MM-DD-NNN-title.md). Handles
 - Finding last ADR from today
 - Incrementing number
 - Creating from template
-- Updating index
 
 **Use if:** You want date-based ADRs and don't want to manage numbers manually.
 
@@ -248,7 +248,7 @@ Reads and displays: CLAUDE.md, .claude/todo.d/, latest devlog, recent ADRs.
 
 ### scripts/session-end.sh
 
-Updates STATUS.md, ADR index, shows git status.
+Updates STATUS.md, shows git status.
 
 **Use if:** You want scripted coordination updates.
 
