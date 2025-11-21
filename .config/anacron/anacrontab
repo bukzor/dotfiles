@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+
+# period(days)  delay(min)  job-id       command
+1               5           pnpm-update  source /home/bukzor/.profile; ( echo .; date -Ins; logrotate-cron pnpm -g update ) >> /tmp/bukzor-cron.log

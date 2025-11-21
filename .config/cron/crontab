@@ -1,0 +1,10 @@
+SHELL=/bin/bash
+
+@reboot insync-headless start >/dev/null 2>&1
+
+# Auto-reload crontab from VCS
+@hourly crontab ~/.config/cron/crontab
+
+# Run anacron to check for missed jobs
+@reboot /usr/sbin/anacron -t ~/.config/anacron/anacrontab -S ~/.local/state/anacron
+@hourly /usr/sbin/anacron -t ~/.config/anacron/anacrontab -S ~/.local/state/anacron
