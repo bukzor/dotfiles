@@ -3,44 +3,68 @@
 
 set -euo pipefail
 
+# Pretty trace output
+export PS4=$'\e[36m$\e[0m '
+
 REPOS_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
 WORK_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 ENCODED=$(claude-path "$WORK_DIR")
 OBJECT_STORE="$REPOS_ROOT/$ENCODED"
 
-mkdir -p "$OBJECT_STORE"
-chmod 700 "$OBJECT_STORE"
+mkdir -p "$REPOS_ROOT"
+chmod 700 "$REPOS_ROOT"
 
-# Link via alternates FIRST so git can find objects
-mkdir -p .git/objects/info
-echo "$OBJECT_STORE/objects" > .git/objects/info/alternates
+# Check if .git is effectively empty (no commits, no branches)
+git_is_empty() {
+    [ ! -d .git/refs/heads ] || [ -z "$(ls -A .git/refs/heads 2>/dev/null)" ]
+}
 
-if [ ! -d "$OBJECT_STORE/objects" ]; then
-    # New object store
-    git init --bare "$OBJECT_STORE" >/dev/null
-    echo "✓ Created object store: $OBJECT_STORE" >&2
+WORKTREE_NAME=$(basename "$WORK_DIR")
+WORKTREE_DIR="$OBJECT_STORE/worktrees/$WORKTREE_NAME"
+
+# Initialize object store if needed
+if [ ! -d "$OBJECT_STORE" ]; then
+    echo "✓ Creating object store: $OBJECT_STORE" >&2
+    (set -x
+        mv .git "$OBJECT_STORE"
+        git config -f "$OBJECT_STORE/config" core.bare true
+    )
 else
-    # Existing object store - restore refs
-    if git --git-dir="$OBJECT_STORE" show-ref --heads >/dev/null 2>&1; then
-        echo "✓ Found existing objects - recovering..." >&2
+    echo "✓ Found existing object store - recovering..." >&2
 
-        # Copy all refs from object store
-        cp -r "$OBJECT_STORE/refs/"* .git/refs/ 2>/dev/null || true
-
-        # Copy HEAD
-        if [ -f "$OBJECT_STORE/HEAD" ]; then
-            cp "$OBJECT_STORE/HEAD" .git/HEAD
-        fi
-
-        BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
-
-        # Checkout to restore working tree
-        if ! git checkout "$BRANCH"; then
-            echo "❌ Failed to checkout $BRANCH" >&2
-            exit 1
-        fi
-        echo "  Restored working tree" >&2
-    else
-        echo "✓ Linked to object store: $OBJECT_STORE" >&2
+    if ! git_is_empty; then
+        echo "❌ .git has existing commits but object store exists" >&2
+        echo "   Cannot safely merge - manual intervention required" >&2
+        exit 1
     fi
+
+    (set -x; rm -rf .git)
+fi
+
+# Set up worktree structure
+(set -x
+    mkdir -p "$WORKTREE_DIR"
+    echo "$WORK_DIR/.git" > "$WORKTREE_DIR/gitdir"
+    echo "../.." > "$WORKTREE_DIR/commondir"
+)
+
+if [ -f "$OBJECT_STORE/HEAD" ]; then
+    cp "$OBJECT_STORE/HEAD" "$WORKTREE_DIR/HEAD"
+fi
+
+mkdir -p "$WORKTREE_DIR/refs"
+
+# Preserve index if it exists (may have been written before this hook ran)
+if [ -f "$OBJECT_STORE/index" ]; then
+    mv "$OBJECT_STORE/index" "$WORKTREE_DIR/index"
+fi
+
+echo "gitdir: $WORKTREE_DIR" > .git
+
+# If branches exist, restore deleted files
+if git show-ref --heads >/dev/null 2>&1; then
+    # Only restore files that were tracked but are now missing
+    git ls-files --deleted |
+      tr '\n' '\0' |
+      xargs -0r sh -xc 'git restore "$@"' -
 fi

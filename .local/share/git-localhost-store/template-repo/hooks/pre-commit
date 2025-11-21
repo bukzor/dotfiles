@@ -3,8 +3,10 @@
 
 set -euo pipefail
 
-# Check if alternates is already configured
-if [ ! -f .git/objects/info/alternates ]; then
+HERE=$(cd "$(dirname "$0")"; pwd)
+
+# Check if .git is still a directory (not yet converted to worktree)
+if [ -d .git ]; then
     # Run the setup
-    .git/hooks/post-init
+    "$HERE/post-init"
 fi
