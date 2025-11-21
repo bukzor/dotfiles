@@ -219,6 +219,15 @@ Enable more tracing by adding `set -x` to more commands in hooks.
 - **bin/init** - One-time setup script
 - **template-repo/hooks/*** - Git hooks (the actual implementation)
 
+## Documentation System
+
+This project uses llm-collab-docs patterns for coordination:
+- ADRs in docs/adr/ (date-based)
+- Devlogs in docs/devlog/
+- Persistent TODOs in .claude/todo.d/
+
+When working on this project, load the llm-collab-docs skill for helper scripts and pattern details.
+
 ## Questions?
 
 When in doubt:
