@@ -36,6 +36,9 @@
       "Bash(node --version:*)"
     ],
     "deny": [
+      "TodoWrite",
+      "ExitPlanMode",
+      "EnterPlanMode",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Bash(dd:*)",

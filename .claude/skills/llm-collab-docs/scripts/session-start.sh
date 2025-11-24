@@ -15,10 +15,13 @@ if [ -f CLAUDE.md ]; then
   echo ""
 fi
 
-# Read .claude/todo.md
-if [ -f .claude/todo.md ]; then
-  echo "=== .claude/todo.md ==="
-  cat .claude/todo.md
+# List pending TODOs
+if [ -d .claude/todo.d ] && [ -n "$(ls -A .claude/todo.d 2>/dev/null)" ]; then
+  echo "=== Pending TODOs (.claude/todo.d/) ==="
+  ls -1t .claude/todo.d/*.md 2>/dev/null | while read todo; do
+    TITLE=$(head -1 "$todo" | sed 's/^# //')
+    echo "  - $TITLE ($(basename "$todo"))"
+  done
   echo ""
 fi
 
@@ -44,6 +47,6 @@ fi
 echo "✅ Session context loaded"
 echo ""
 echo "Quick commands:"
+echo "  - Create TODO: $HERE/new-todo.sh \"Task title\""
 echo "  - Create ADR: $HERE/new-adr.sh \"Decision title\""
 echo "  - Create devlog: $HERE/new-devlog.sh"
-echo "  - Update .claude/todo.md before commit"

@@ -9,7 +9,7 @@ cd "$PROJECT_ROOT"
 echo "🚀 Initializing LLM-collaborative documentation structure..."
 
 # Create directory structure
-mkdir -p .claude
+mkdir -p .claude/todo.d
 mkdir -p docs/{adr,architecture,milestones,devlog,examples}
 
 echo "✅ Created directory structure"
@@ -21,7 +21,7 @@ if [ ! -f .claude/README.md ]; then
 
 ## Quick Reference
 
-**Current state:** See [../STATUS.md](../STATUS.md) for milestone, blockers, and next actions.
+**Current state:** Check `.claude/todo.d/` for pending tasks, or latest [devlog entry](../docs/devlog/).
 
 ## Common Tasks
 
@@ -37,33 +37,17 @@ See [docs/architecture/overview.md](../docs/architecture/overview.md) for detail
 
 TODO: List important files and what they do.
 
-## Latest Session
+## Decision History
 
-See most recent entry in [docs/devlog/](../docs/devlog/) for last session's work.
+See [docs/adr/](../docs/adr/) for architecture decisions.
 EOF
   echo "✅ Created .claude/README.md"
 fi
 
-# Create STATUS.md
-if [ ! -f STATUS.md ]; then
-  TODAY=$(date +%Y-%m-%d)
-  cat > STATUS.md <<EOF
-# Project Status
-
-**Last Updated:** $TODAY
-
-## Current Focus
-
-- **Last Session:** [devlog/$TODAY](docs/devlog/$TODAY.md)
-- **Milestone:** See [ROADMAP.md](ROADMAP.md)
-
-## Next Actions
-
-1. TODO: First concrete action
-2. TODO: Second concrete action
-3. TODO: Third concrete action
-EOF
-  echo "✅ Created STATUS.md"
+# Create .gitkeep for todo.d
+if [ ! -f .claude/todo.d/.gitkeep ]; then
+  touch .claude/todo.d/.gitkeep
+  echo "✅ Created .claude/todo.d/ directory"
 fi
 
 # Create ROADMAP.md
@@ -192,6 +176,6 @@ echo "🎉 Documentation structure initialized!"
 echo ""
 echo "Next steps:"
 echo "  1. Edit .claude/README.md with project-specific guidance"
-echo "  2. Update STATUS.md with current milestone and actions"
+echo "  2. Create TODOs as needed: $SKILL_DIR/scripts/new-todo.sh \"Task title\""
 echo "  3. Create first ADR: $SKILL_DIR/scripts/new-adr.sh \"Your decision\""
 echo "  4. At session end: $SKILL_DIR/scripts/session-end.sh"

@@ -27,6 +27,17 @@ Before responding, STOP and check: Am I hedging, softening, or seeking validatio
 - Open with statements that accurately reflect your actual position
 - End with conclusions. Remove validation-seeking questions
 
+# Subtask Management
+
+Use `.claude/todo.md` with standard markdown checkboxes. TodoWrite is disabled.
+
+- `todo push: DESC` → append `- [ ] DESC`
+- `todo pop:` → mark first `[ ]` as `[x]`
+- `todo list:` → display file contents
+- `todo clear:` → remove all `[x]` lines
+
+Details: `~/.claude/must-read-before.d/subtask-management.md`
+
 # Required Reading
 
 Files in must-read-before.d/ contain custom, user-specific instructions
@@ -39,3 +50,5 @@ tools, and managing documentation.
 >
 
 This enables you to know exactly which of your upcoming actions have custom instructions.
+
+**NOTE:** The using-claude-code-tool/Bash.md file contains workarounds for common Claude Code failure modes.

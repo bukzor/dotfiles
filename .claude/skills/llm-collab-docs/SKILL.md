@@ -82,24 +82,23 @@ references/creating-documentation.md: [Full 780-line guide]
 
 **Problem:** Agent swarm loses alignment between sessions.
 
-**Pattern:** Explicit handoffs via devlog "Next Session" sections:
-- Each session documents: Focus, What Happened, Decisions, Next Session
-- Next agent reads STATUS.md → points to latest devlog
-- "Next Session" section explicitly says what to do
+**Pattern:** Explicit handoffs via `.claude/todo.d/` directory:
+- Session end: Create TODO files for remaining work with full context
+- Next agent reads: `ls .claude/todo.d/` to see pending tasks
+- Each TODO file contains complete planning details
 
-**Alternative:** STATUS.md manually maintained, or just use git commit messages.
+**Alternative:** Just use git commit messages or latest devlog "Next Session" section.
 
-**Tradeoff:** Devlog maintenance overhead vs explicit coordination.
+**Tradeoff:** TODO maintenance overhead vs explicit coordination.
 
 ### 5. Living Documentation
 
 **Problem:** Docs become stale and lie.
 
-**Pattern:** Auto-generate coordination files from source of truth:
-- STATUS.md generated from latest devlog
-- Devlog index generated from entries
-
-**Note:** ADR directory itself is the index—use `ls -t docs/adr/` or `grep` to find decisions.
+**Pattern:** Use directory listings as the source of truth:
+- `.claude/todo.d/` directory contains pending tasks—`ls` to see what's left
+- `docs/adr/` directory contains decisions—`ls -t` to see chronologically
+- Devlog index generated from entries (optional)
 
 **Alternative:** Manual maintenance, accept some staleness.
 
@@ -200,8 +199,9 @@ docs/adr/
 - **Helpers available:** `scripts/session-start.sh`, `scripts/session-end.sh`
 
 **Option B: Manual reading**
-- Agent reads STATUS.md
-- Follows links to devlog, ADRs, etc.
+- Agent reads CLAUDE.md for orientation
+- `ls .claude/todo.d/` to see pending tasks
+- Follows links to devlog, ADRs, etc. as needed
 - No script dependencies
 
 **Option C: Prompt the agent**
@@ -248,7 +248,7 @@ Reads and displays: CLAUDE.md, .claude/todo.d/, latest devlog, recent ADRs.
 
 ### scripts/session-end.sh
 
-Updates STATUS.md, shows git status.
+Reminds to create TODOs for remaining work, shows git status.
 
 **Use if:** You want scripted coordination updates.
 
