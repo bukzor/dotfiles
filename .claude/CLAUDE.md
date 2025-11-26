@@ -29,14 +29,13 @@ Before responding, STOP and check: Am I hedging, softening, or seeking validatio
 
 # Subtask Management
 
-Use `.claude/todo.md` with standard markdown checkboxes. TodoWrite is disabled.
+Quick reference for ephemeral (in-session) subtasks:
+- `subtask list:` → enumerate pending work from conversation context
+- `subtask push: DESC` → add ephemeral subtask to working memory
+- `subtask pop:` → mark current ephemeral subtask complete
+- `subtask prepend:` → signal priority shift, refocus on new work stream
 
-- `todo push: DESC` → append `- [ ] DESC`
-- `todo pop:` → mark first `[ ]` as `[x]`
-- `todo list:` → display file contents
-- `todo clear:` → remove all `[x]` lines
-
-Details: `~/.claude/must-read-before.d/subtask-management.md`
+For persistent tasks across sessions, see the "subtask" skill (four-tier system with `.claude/todo.md` and `.claude/todo.d/`).
 
 # Required Reading
 

@@ -30,13 +30,26 @@ Support task decomposition at four granularities, from finest to coarsest:
 - `subtask load:` - Session start: read `.claude/todo.md` and enumerate tactical todos
 - `subtask save:` - Session end: review incomplete ephemeral subtasks, categorize as tactical/strategic/abandon
 - `todo push: DESC` - Append `- [ ] DESC` to `.claude/todo.md` (tactical)
-- `todo pop:` - Mark first `[ ]` as `[x]` in `.claude/todo.md`
+- `todo pop:` - Mark the current task (should be first) as complete
 - `todo list:` - Read and display `.claude/todo.md`
-- `todo clear:` - Remove all `[x]` lines from `.claude/todo.md`
+- `todo clear:` - Remove all completed items from the list
 
 ### Strategic (Tier 3)
 
 Create planning files via: `~/.claude/skills/subtask/bin/new-todo "Task title"`
+
+## Integration: todo.md + todo.d/
+
+Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains both inline tasks and references to planning files in <https:todo.d/>.
+
+**Example pattern:**
+```markdown
+- [ ] <https:todo.d/2025-11-26-001-research-local-climbing-gyms.md>
+- [ ] Buy climbing shoes
+  - [ ] Measure foot size
+  - [ ] Check REI sale section
+- [ ] Schedule first climbing session
+```
 
 ## Example: subtask list
 
