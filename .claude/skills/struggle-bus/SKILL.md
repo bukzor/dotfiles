@@ -1,17 +1,11 @@
 ---
 name: struggle-bus
-description: |
-  Use when communication breaks down between Claude and user. Triggered by
-  phrases like "struggle bus", "manual breathing", or "why did you [unexpected
-  behavior]". Performs systematic turn-by-turn analysis to identify where
-  misunderstanding occurred and why.
+description: "Load when:\n\n1. User says \"struggle bus\" or \"manual breathing\" OR\n2. User asks \"why did you [unexpected behavior]\" OR\n3. Multiple clarification attempts fail"
 ---
 
 # Struggle Bus
 
-## Overview
-
-Diagnose communication breakdowns through systematic causal analysis. When Claude and user get stuck in unproductive loops, this skill traces the conversation turn-by-turn to identify where things went wrong and why.
+Diagnose communication breakdowns through systematic causal analysis. When Claude and user get stuck in unproductive loops, this skill traces the conversation turn-by-turn to identify where misunderstanding occurred and why. Triggered by explicit phrases ("struggle bus", "manual breathing") or patterns of repeated misunderstanding.
 
 ## When to Use
 
