@@ -1,0 +1,9 @@
+- [ ] todo.d/2025-11-26-003-clarify-the-relationship-between-todomd-and-todod-in-subtask-skill.md
+- [ ] Revert local references/ changes (will use must-read-before.d source instead)
+- [ ] Clean up conflicting staged/unstaged changes in init-docs.sh, session-start.sh
+- [ ] Commit deletions (todo.d-pattern.md, new-todo.sh, session-end.sh)
+- [ ] todo.d/2025-11-26-000-destructure-must-read-beforedcreating-documentationmd-into-referencesd-llmd-structure.md
+  - [ ] Finalize references.d/ categorization structure
+  - [ ] Split content into small focused files
+- [ ] todo.d/2025-11-26-001-add-ideasd-pattern-to-llm-collab-docs-skill-with-helper-script.md
+- [ ] todo.d/2025-11-26-002-update-devlog-template-to-remove-task-management-pure-history--idea-capture-to-ideasd.md
