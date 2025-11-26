@@ -1,21 +1,15 @@
 ---
 name: llm-collab-docs
-description: Principles and helpers for human-LLM agent swarm collaboration on long-running projects. Use when working on projects with multiple daily sessions (10-20+) that need coordination across agents, temporal conflict resolution, and just-in-time context loading. Provides progressive-detail documentation guide and optional scripts for common patterns.
+description: "Load when:\n\n1. Working on projects with 10-20+ agent sessions per day OR\n2. Parallel explorations create conflicting implementations OR\n3. Agents need structured handoffs between sessions"
 ---
 
 # LLM-Collaborative Documentation
 
-> **Note:** This skill is new and locally maintained. Expect rough edges and iterative improvements as patterns are validated through use. Feedback and touchups welcome.
+Principles and helpers for human-LLM agent swarm collaboration on long-running projects. Provides documentation patterns for coordination across agents, temporal conflict resolution, and just-in-time context loading through structured files (ADRs, devlogs, ideas), progressive-detail guides, and optional scripts.
 
-## Purpose
+**Note:** This skill focuses on documentation patterns. For task management across sessions, use the `subtask` skill which handles ephemeral, tactical, and strategic task tracking.
 
-Support effective human-LLM agent swarm collaboration through documentation patterns that enable:
-
-- **Just-in-time expertise** - Agents discover and load exactly what they need
-- **Multi-agent coordination** - Many daily sessions stay aligned through explicit handoffs
-- **Temporal conflict resolution** - When parallel explorations create conflicts, recency helps resolve
-- **Bidirectional alignment** - Both human and agents can recover shared state
-- **Variable-fidelity access** - Load appropriate detail level on demand
+> **Status:** Locally maintained, iteratively improving. Expect rough edges.
 
 ## When to Use
 
@@ -40,7 +34,6 @@ Skip for:
 - README.md → users (what it does, how to use)
 - CONTRIBUTING.md → contributors (how to develop)
 - CLAUDE.md → agents (architecture, conventions) - auto-loaded at root
-- .claude/todo.d/ → current tasks (date-based files, read at session start)
 - docs/adr/ → why (decision rationale)
 - docs/architecture/ → what/how (technical design)
 - docs/devlog/ → when (session history, handoffs)
@@ -82,23 +75,25 @@ references/creating-documentation.md: [Full 780-line guide]
 
 **Problem:** Agent swarm loses alignment between sessions.
 
-**Pattern:** Explicit handoffs via `.claude/todo.d/` directory:
-- Session end: Create TODO files for remaining work with full context
-- Next agent reads: `ls .claude/todo.d/` to see pending tasks
-- Each TODO file contains complete planning details
+**Pattern:** Explicit handoffs via devlog "Next Session" sections:
+- Each session documents: Focus, What Happened, Decisions, Next Session
+- "Next Session" section explicitly says what to do next
+- Latest devlog provides immediate context for incoming agent
 
-**Alternative:** Just use git commit messages or latest devlog "Next Session" section.
+**For task tracking:** Use the `subtask` skill for managing ephemeral, tactical, and strategic tasks.
 
-**Tradeoff:** TODO maintenance overhead vs explicit coordination.
+**Alternative:** Just use git commit messages for handoffs.
+
+**Tradeoff:** Devlog maintenance overhead vs explicit coordination.
 
 ### 5. Living Documentation
 
 **Problem:** Docs become stale and lie.
 
 **Pattern:** Use directory listings as the source of truth:
-- `.claude/todo.d/` directory contains pending tasks—`ls` to see what's left
 - `docs/adr/` directory contains decisions—`ls -t` to see chronologically
-- Devlog index generated from entries (optional)
+- `docs/devlog/` directory contains session history—directory itself is the index
+- Avoid maintaining separate index files that can drift
 
 **Alternative:** Manual maintenance, accept some staleness.
 
@@ -161,47 +156,22 @@ docs/adr/
 - Usage: `new-adr.sh "Decision title"`
 - Backdate: `DATE=YYYY-MM-DD new-adr.sh "Decision title"`
 
-### Task Tracking
-
-**Problem:** Starting a session, agent doesn't know what tasks are pending.
-
-**Solution:** `.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed TODO files with full context.
-
-**Pattern:**
-- Each TODO in separate file with complete planning details
-- Use for complex tasks needing planning/multiple sessions
-- Helper: `scripts/new-todo.sh "Task title"` (date-based auto-increment)
-- View available: `ls .claude/todo.d/`
-
-**Workflow:**
-1. **Session start:** `ls .claude/todo.d/` to see pending tasks
-2. **During session:** Use TodoWrite tool for working memory
-3. **Session end:** Use `new-todo.sh` to create detailed TODOs for remaining work
-
-**Benefits:**
-- Actionable (concrete tasks with full context)
-- Persistent (survives across sessions in git)
-- Coordinating (tells next agent exactly what to do)
-- Date-ordered (temporal tracking built in)
-
-**Alternative:** Skip explicit TODOs and just rely on latest devlog "Next Session" + TodoWrite
-
 ### Session Coordination
 
 **Problem:** Agent picks up mid-project, doesn't know context.
 
 **Solutions:**
 
-**Option A: Session start/end scripts**
+**Option A: Session start script**
 - Run script that reads key files
 - Display context at session start
-- Update coordination at end
-- **Helpers available:** `scripts/session-start.sh`, `scripts/session-end.sh`
+- **Helper available:** `scripts/session-start.sh`
 
 **Option B: Manual reading**
 - Agent reads CLAUDE.md for orientation
-- `ls .claude/todo.d/` to see pending tasks
-- Follows links to devlog, ADRs, etc. as needed
+- Check latest devlog for "Next Session" handoff
+- Load `subtask` skill for task management if needed
+- Follows links to ADRs, architecture docs as needed
 - No script dependencies
 
 **Option C: Prompt the agent**
@@ -240,19 +210,11 @@ Creates devlog entry from template with sections: Focus, What Happened, Decision
 
 ### scripts/session-start.sh
 
-Reads and displays: CLAUDE.md, .claude/todo.d/, latest devlog, recent ADRs.
+Reads and displays: CLAUDE.md, latest devlog, recent ADRs.
 
 **Use if:** You want scripted orientation at session start.
 
 **Skip if:** Manual reading or agent decides what to read works better.
-
-### scripts/session-end.sh
-
-Reminds to create TODOs for remaining work, shows git status.
-
-**Use if:** You want scripted coordination updates.
-
-**Skip if:** Manual updates or git hooks work better.
 
 ## Reference Material
 
@@ -278,29 +240,13 @@ Complete 780-line guide covering:
 
 ## Integration Patterns
 
-### With Git
-
-**Workflow:**
-```bash
-# Work happens (LLM uses TodoWrite during session)
-
-# Session end: Create detailed TODOs for remaining work
-new-todo.sh "Remaining task title"
-
-git diff               # Review
-git commit -m "..."    # Commit
-```
-
-**Optional:** Use `scripts/session-end.sh` to display git status and context.
-
 ### With Existing Projects
 
 **Adopt gradually:**
 1. Create CLAUDE.md at root for agent orientation
 2. Start using ADRs for new decisions
-3. Add `.claude/todo.d/` for persistent task tracking
-4. Add devlog when valuable
-5. Restructure existing docs as needed
+3. Add devlog for session history and handoffs
+4. Restructure existing docs as needed
 
 **Make the skill discoverable:**
 
@@ -309,12 +255,11 @@ Once you've adopted these patterns (ADRs, devlogs, etc.), add a note to your pro
 ```markdown
 ## Documentation System
 
-This project uses llm-collab-docs patterns for coordination:
+This project uses llm-collab-docs patterns:
 - ADRs in docs/adr/ (date-based)
 - Devlogs in docs/devlog/
-- Persistent TODOs in .claude/todo.d/
 
-When working on this project, load the llm-collab-docs skill for helper scripts and pattern details.
+Load the llm-collab-docs skill for helper scripts and pattern details.
 ```
 
 **Don't:** Feel obligated to follow every pattern.
@@ -339,11 +284,11 @@ When working on this project, load the llm-collab-docs skill for helper scripts 
 
 **Starting a session:**
 ```bash
-# With scripts
+# With script
 ~/.claude/skills/llm-collab-docs/scripts/session-start.sh
 
 # Manual
-# Read CLAUDE.md, ls .claude/todo.d/, latest devlog
+# Read CLAUDE.md, check latest devlog
 ```
 
 **Creating ADR:**
@@ -354,18 +299,9 @@ When working on this project, load the llm-collab-docs skill for helper scripts 
 DATE=2025-11-19 ~/.claude/skills/llm-collab-docs/scripts/new-adr.sh "Decision title"
 ```
 
-**Creating TODO:**
+**Creating devlog:**
 ```bash
-~/.claude/skills/llm-collab-docs/scripts/new-todo.sh "Task title"
-
-# Set priority:
-PRIORITY=high ~/.claude/skills/llm-collab-docs/scripts/new-todo.sh "Task title"
-```
-
-**Ending session:**
-```bash
-# Create TODOs for remaining work
-# Review and commit changes
+~/.claude/skills/llm-collab-docs/scripts/new-devlog.sh
 ```
 
 ## Success Indicators
