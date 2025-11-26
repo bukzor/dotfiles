@@ -83,6 +83,18 @@ Each `.d/` directory contains **same type of thing**:
 See `references/pattern-guide.md` for detailed explanation.
 See `references/complete-example.md` for real-world application.
 
+## Reading Collections
+
+**Use category directories as query filters.** Load entire categories in one operation to save tokens and time:
+
+```bash
+head -n999 patterns.d/*.md          # All patterns
+head -n999 topic.d/**/*.md          # Everything
+grep -l "keyword" category.d/*.md   # Search within category
+```
+
+This exploits small focused files - loading 5 related files is faster than searching one 500-line file.
+
 ## Tools Provided
 
 ### scripts/validate-frontmatter.py
