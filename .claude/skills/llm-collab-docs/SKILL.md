@@ -66,7 +66,7 @@ project/
 ```
 CLAUDE.md: "Uses ADR format for decisions. See docs/adr/"
 docs/adr/ directory: [Date-based ADRs, list with ls or grep]
-references/creating-documentation.md: [Full 780-line guide]
+references.d/: [Categorized guides: file-types.d/, guidelines.d/, workflows.d/]
 ```
 
 **Tradeoff:** More navigation vs loading only what's needed.

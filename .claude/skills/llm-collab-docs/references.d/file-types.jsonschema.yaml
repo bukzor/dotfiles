@@ -1,0 +1,37 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: File Type Reference Metadata
+description: |
+  Frontmatter for file-types.d/ documentation reference files.
+
+  Provides context about which file type is documented, its audience, and purpose,
+  helping LLMs and humans quickly assess relevance.
+
+type: object
+properties:
+  filename:
+    type: string
+    description: |
+      The filename pattern this document describes (e.g., "README.md", "CLAUDE.md", "devlog.md").
+
+      Should match the base filename of this reference document.
+
+  audience:
+    type: string
+    description: |
+      Primary intended readers of the file type being described (e.g., "Users",
+      "Contributors", "Claude (or other LLM development assistant)").
+
+  purpose:
+    type: string
+    description: |
+      Brief statement of what this file type accomplishes or why it exists.
+
+      Should be concise (typically one phrase or sentence) and answer:
+      "What does this file do for its audience?"
+
+required:
+  - filename
+  - audience
+  - purpose
+
+additionalProperties: false

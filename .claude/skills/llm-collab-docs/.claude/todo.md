@@ -1,7 +1,7 @@
-- [~] todo.d/2025-11-26-000 (destructure docs into references.d/)
+- [x] todo.d/2025-11-26-000 (destructure docs into references.d/)
   - [x] Fix errors in must-read-before.d/creating-documentation.md
   - [x] Extract all content to references.d/ (file-types, guidelines, workflows)
-  - [ ] Remaining: schemas, update references
+  - [x] Remaining: schemas, update references
 - [ ] todo.d/2025-12-02-001 (create category overview files) — Low
 - [ ] todo.d/2025-12-02-000 (factor SKILL.md above the fold) — Medium
 - [ ] Decide fate of creating-documentation.md (delete vs replace with index)
