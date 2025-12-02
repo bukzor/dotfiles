@@ -71,3 +71,14 @@ The heredoc prevents shell escaping failures in commit messages. This commits th
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+## Recovery: Accidental Index Inclusion
+
+If a commit accidentally includes staged files from the dirty index (e.g., via `--amend`):
+
+```bash
+git reset --soft HEAD^
+git commit -C ORIG_HEAD -- <intended-paths...>
+```
+
+This preserves the original commit message while scoping to the correct paths. The unrelated files remain staged in the index.
