@@ -1,0 +1,86 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Todo/Idea Task Metadata
+description: |
+  Cost-benefit analysis frontmatter for todo.d/ and ideas.d/ task files.
+
+  Helps answer: "Should I keep working on this?" and "Is this worth doing?"
+
+  All time values use SWE-hours (SWEh) as units, roughly equivalent to story points.
+  One SWEh ≈ 60 minutes of focused software engineering work.
+
+definitions:
+  sweh-value:
+    description: |
+      Time investment measured in SWE-hours. Can be specified as:
+      - Simple number: 1.5
+      - Object with rationale: {@value: 1.5, rationale: "explanation"}
+
+      The rationale form is recommended for non-obvious estimates, especially
+      for timebox values where explaining "why stop here?" helps future readers
+      understand the break-even point.
+    oneOf:
+      - type: number
+        minimum: 0
+        description: "SWE-hours (shorthand when rationale is obvious)"
+      - type: object
+        description: "SWE-hours with explanatory rationale"
+        properties:
+          "@value":
+            type: number
+            minimum: 0
+            description: "Time investment in SWE-hours"
+          rationale:
+            type: string
+            description: "Why this estimate? What assumptions or constraints apply?"
+        required: ["@value"]
+        additionalProperties: false
+
+type: object
+properties:
+  cost-benefit-sweh:
+    type: object
+    description: |
+      Cost-benefit analysis for task prioritization and timebox decisions.
+
+      Answers two critical questions:
+      1. When should I stop working on this? (timebox)
+      2. How much time does completing this save/generate? (benefit-2w)
+    properties:
+      timebox:
+        $ref: "#/definitions/sweh-value"
+        description: |
+          Break-even point: maximum time worth investing before diminishing returns.
+
+          This is NOT an estimate of how long the task takes. It's the point where
+          you should stop and reassess, even if incomplete. Answers: "At what point
+          does continuing to work on this stop being worth it?"
+
+          Rationale should explain: What constraints limit the value? What makes
+          this the break-even threshold?
+
+          Example: timebox 0.5 SWEh (30 min) because "confusion happened 3x this
+          session; while context is fresh should take ~30 min to document clearly.
+          Beyond that, diminishing returns on clarity vs time spent."
+
+      benefit-2w:
+        $ref: "#/definitions/sweh-value"
+        description: |
+          Expected time savings over next 2 weeks if task is completed successfully.
+
+          Measures return on investment. Can be specified as simple number when
+          obvious (e.g., "saves 1 hour" → 1) or with rationale for non-obvious
+          benefits or assumptions.
+
+          Consider:
+          - Direct time savings (automation, preventing repeated work)
+          - Reduced cognitive load (clearer docs, better tools)
+          - Avoided future debugging/confusion
+          - Multiplier effects (helps multiple people/sessions)
+
+          Example: 1.5 SWEh because "prevents confusion for me and Claude agents,
+          estimate 15 min saved per occurrence × 6 occurrences = 90 min"
+
+    required: ["timebox", "benefit-2w"]
+    additionalProperties: false
+
+additionalProperties: true

@@ -1,3 +1,20 @@
+---
+cost-benefit-sweh:
+  timebox:
+    @value: 0.5
+    rationale: |
+      Template already exists (just created). Need helper script (new-idea.sh)
+      and SKILL.md documentation. ~30 min work.
+  benefit-2w:
+    @value: 2.0
+    rationale: |
+      Prevents "jump into great idea before I forget" context-switching during
+      focused work. Just demonstrated: had cost-benefit-sweh idea mid-task,
+      spent ~20 min on it immediately. With ideas.d/, that's <2 min to capture.
+      Expect dozens more ideas during hearts project. Each disruption costs
+      ~15-20 min. Preventing 6-8 disruptions = 2 SWEh saved.
+---
+
 # Add ideas.d/ pattern to llm-collab-docs skill with helper script
 
 **Priority:** Medium

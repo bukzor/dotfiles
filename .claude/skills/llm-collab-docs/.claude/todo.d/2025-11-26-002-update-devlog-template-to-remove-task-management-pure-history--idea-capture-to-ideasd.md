@@ -1,3 +1,17 @@
+---
+cost-benefit-sweh:
+  timebox:
+    @value: 0.08
+    rationale: |
+      Delete "Next Session" section from template (4 lines). Trivial change.
+  benefit-2w:
+    @value: 0.5
+    rationale: |
+      Removes duplication with .claude/todo.md from subtask skill. Each new
+      devlog session saves ~5 min of "wait, do I update both?" confusion.
+      ~6 sessions over 2 weeks = 30 min saved.
+---
+
 # Update devlog template to remove task management redundancy
 
 **Priority:** Medium
