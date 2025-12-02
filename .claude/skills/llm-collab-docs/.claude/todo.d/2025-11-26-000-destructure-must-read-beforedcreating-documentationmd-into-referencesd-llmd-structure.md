@@ -23,14 +23,26 @@ Split into references.d/ with llm.d-style categorization:
 
 ## Implementation Steps
 
-1. [ ] Finalize references.d/ categorization structure
-   - [ ] Review existing content in creating-documentation.md
-   - [ ] Review SKILL.md for missing pieces (ADRs, ROADMAP, etc.)
-   - [ ] Define categories (e.g., file-purposes/, guidelines/, patterns/)
-2. [ ] Split content into small focused files
-   - [ ] Extract sections from creating-documentation.md
-   - [ ] Add missing documentation for ADRs, ROADMAP, docs/milestones, docs/architecture
-   - [ ] Create category README.md files with reading guidance
+1. [x] Finalize references.d/ categorization structure
+   - [x] Review existing content in creating-documentation.md
+   - [x] Review SKILL.md for missing pieces (ADRs, ROADMAP, etc.)
+   - [x] Define categories using successive subtraction (file-types.d/ first)
+2. [~] Split content into small focused files (using successive subtraction)
+   - [x] Extract file-types.d/ content
+     - [x] README.md, HACKING.md, CLAUDE.md
+     - [x] design-rationale.md, technical-design.md, development-plan.md
+     - [x] devlog.md
+     - [x] Move templates to skeleton/
+     - [x] design-incubators.md
+     - [x] Add ADRs.md documentation
+     - [x] Add ROADMAP.md documentation
+     - [x] Add milestones documentation
+     - [x] Add architecture documentation
+   - [~] Identify and extract next category from remainder
+   - [ ] Repeat until doc fully factored
+   - [ ] Create category CLAUDE.md files with maintenance guidance
+   - [ ] Create category overview files (file-types.md, etc.)
+   - [ ] Create schemas (if needed for frontmatter)
 3. [ ] Update references to point to new structure
 
 ## Open Questions
