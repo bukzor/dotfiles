@@ -1,37 +1,50 @@
 # Destructure must-read-before.d/creating-documentation.md into references.d/ llm.d structure
 
 **Priority:** Medium
-**Complexity:** [Low/Medium/High]
-**Context:** [Link to related docs/issues]
+**Complexity:** Medium
+**Context:** Part of moving from monolithic docs to llm.d categorized structure
 
 ## Problem Statement
 
-[What needs to be done and why?]
+creating-documentation.md is a single 780-line file. Need to split into focused, categorized files following llm.d pattern for better LLM consumption.
 
 ## Current Situation
 
-[What's the current state?]
+- Single large file in must-read-before.d/creating-documentation.md
+- Some content missing (ADRs, ROADMAP, docs/milestones, docs/architecture)
+- Some content incorrect (will be fixed in prior task)
 
 ## Proposed Solution
 
-[How should this be addressed?]
+Split into references.d/ with llm.d-style categorization:
+- Each category gets its own subdirectory
+- Small focused files within each category
+- Category-level README.md with reading guidance
 
 ## Implementation Steps
 
-1. [ ] First step
-2. [ ] Second step
-3. [ ] Third step
+1. [ ] Finalize references.d/ categorization structure
+   - [ ] Review existing content in creating-documentation.md
+   - [ ] Review SKILL.md for missing pieces (ADRs, ROADMAP, etc.)
+   - [ ] Define categories (e.g., file-purposes/, guidelines/, patterns/)
+2. [ ] Split content into small focused files
+   - [ ] Extract sections from creating-documentation.md
+   - [ ] Add missing documentation for ADRs, ROADMAP, docs/milestones, docs/architecture
+   - [ ] Create category README.md files with reading guidance
+3. [ ] Update references to point to new structure
 
 ## Open Questions
 
-- [Question 1]
-- [Question 2]
+- What categories make most sense for the content?
+- Should we keep creating-documentation.md as a high-level overview that links to references.d/?
 
 ## Success Criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+- [ ] All content from creating-documentation.md is in references.d/
+- [ ] Missing pieces (ADRs, ROADMAP, etc.) are documented
+- [ ] Each file is focused and < 200 lines
+- [ ] Category READMEs provide clear reading guidance
 
 ## Notes
 
-[Additional context, references, etc.]
+Depends on: "Fix errors in must-read-before.d/creating-documentation.md" task completing first
