@@ -1,5 +1,30 @@
 # LLM Document Consumption Patterns
 
+## Session Coordination
+
+**Problem:** Agent picks up mid-project, doesn't know context.
+
+**Solutions:**
+
+**Option A: Session start script**
+- Run script that reads key files
+- Display context at session start
+- **Helper available:** `scripts/session-start.sh`
+
+**Option B: Manual reading** (recommended)
+- Agent reads CLAUDE.md for orientation
+- Check latest devlog for "Next Session" handoff
+- Load `subtask` skill for task management if needed
+- Follows links to ADRs, architecture docs as needed
+- No script dependencies
+
+**Option C: Prompt the agent**
+- User says "Read the docs to orient yourself"
+- Agent finds what it needs
+- Most flexible
+
+**Choose based on:** Preference for scripts vs manual flow.
+
 ## First Session on Project
 
 Read in order:

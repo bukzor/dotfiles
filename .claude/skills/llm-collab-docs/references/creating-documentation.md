@@ -35,12 +35,10 @@ project/
 
 ## Documentation Resources
 
-**Templates:** See skeleton/ directory for file templates
+**Templates:** See [../skeleton/](../skeleton/) directory for file templates
 
-**Guidance:**
-- [writing-design-docs.md](writing-design-docs.md) - How to write design-rationale.md and technical-design.md
-- [writing-planning-docs.md](writing-planning-docs.md) - How to write development-plan.md and milestones
-- [design-incubators.md](design-incubators.md) - Pattern for exploring unsolved problems
-- [documentation-antipatterns.md](documentation-antipatterns.md) - Common mistakes and how to avoid them
-- [new-project-checklist.md](new-project-checklist.md) - Setup checklist for new projects
+**Detailed Guidance:** Browse [../references.d/](../references.d/) for:
+- **File types:** How to write each type of doc (README, CLAUDE.md, ADRs, devlogs, etc.) - [file-types.d/](../references.d/file-types.d/)
+- **Guidelines:** Documentation principles (linking, DRY, subdirectories, anti-patterns) - [guidelines.d/](../references.d/guidelines.d/)
+- **Workflows:** Practical procedures (setup, maintenance, when to deviate) - [workflows.d/](../references.d/workflows.d/)
 

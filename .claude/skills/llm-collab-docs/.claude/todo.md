@@ -3,13 +3,13 @@
   - [x] Extract all content to references.d/ (file-types, guidelines, workflows)
   - [x] Remaining: schemas, update references
 - [ ] todo.d/2025-12-02-001 (create category overview files) — Low
-- [ ] todo.d/2025-12-02-000 (factor SKILL.md above the fold) — Medium
+- [x] todo.d/2025-12-02-000 (factor SKILL.md above the fold) — Medium
 - [ ] Decide fate of creating-documentation.md (delete vs replace with index)
 - [ ] Consider must-read-before trigger for llm-collab-docs skill
 - [ ] todo.d/2025-11-29-001 (document blocking pattern in subtask skill) — High/Low
 - [ ] todo.d/2025-11-26-002 (devlog template redundancy fix) — Medium/Low
 - [ ] todo.d/2025-11-26-001 (ideas.d/ pattern) — Medium/Low
-- [ ] Update init-docs.sh to create docs/dev/ structure — Low
+- [ ] Update init-docs to create docs/dev/ structure — Low
 
 ## Later
 

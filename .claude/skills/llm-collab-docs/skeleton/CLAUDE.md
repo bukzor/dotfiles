@@ -38,3 +38,11 @@ See [docs/dev/technical-design.md#data-flow](docs/dev/technical-design.md#data-f
 [How to run tests, what to check]
 
 See [HACKING.md#testing](HACKING.md#testing) for details.
+
+## Documentation System
+
+This project uses llm-collab-docs patterns:
+- ADRs in docs/adr/ (date-based)
+- Devlogs in docs/devlog/
+
+Load the llm-collab-docs skill for helper scripts and pattern details.
