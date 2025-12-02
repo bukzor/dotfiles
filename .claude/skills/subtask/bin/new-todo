@@ -5,13 +5,11 @@ set -euo pipefail
 
 if [ -z "${1:-}" ]; then
   echo "Usage: new-todo \"TODO title\""
-  echo "       PRIORITY=high new-todo \"TODO title\"  (set priority)"
   echo "       DATE=YYYY-MM-DD new-todo \"TODO title\"  (for backdating)"
   exit 1
 fi
 
 TITLE="$*"
-PRIORITY="${PRIORITY:-medium}"
 
 # Ensure .claude/todo.d/ exists
 mkdir -p .claude/todo.d
@@ -31,44 +29,11 @@ fi
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
 FILE=".claude/todo.d/$DATE-$NUM-$SLUG.md"
 
-cat > "$FILE" <<EOF
-# $TITLE
+# Get skeleton template path
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SKELETON="$SCRIPT_DIR/../skeleton/.claude/todo.d/YYYY-MM-DD-000-example-task.md"
 
-**Priority:** ${PRIORITY^}
-**Complexity:** [Low/Medium/High]
-**Context:** [Link to related docs/issues]
-
-## Problem Statement
-
-[What needs to be done and why?]
-
-## Current Situation
-
-[What's the current state?]
-
-## Proposed Solution
-
-[How should this be addressed?]
-
-## Implementation Steps
-
-1. [ ] First step
-2. [ ] Second step
-3. [ ] Third step
-
-## Open Questions
-
-- [Question 1]
-- [Question 2]
-
-## Success Criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-## Notes
-
-[Additional context, references, etc.]
-EOF
+# Copy skeleton template
+cp "$SKELETON" "$FILE"
 
 echo "✅ Created $FILE"

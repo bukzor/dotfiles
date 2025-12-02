@@ -1,0 +1,14 @@
+#!/bin/bash
+# Ensure .claude/todo.md exists (idempotent)
+# Prints path to stdout
+
+set -euo pipefail
+
+if [ ! -f .claude/todo.md ]; then
+  HERE="$(cd "$(dirname "$0")"; pwd)"
+  SKELETON="$HERE/../skeleton/.claude/todo.md"
+  mkdir -p .claude
+  cp "$SKELETON" .claude/todo.md
+fi
+
+echo ".claude/todo.md"

@@ -7,6 +7,19 @@ description: "Load when:\n\n1. user gives a terse command starting with \"subtas
 
 Four-tier task decomposition system for managing work at different granularities: conversational, ephemeral, tactical, and strategic. Use when breaking down complex work into manageable pieces, coordinating across sessions, or transitioning between persistence tiers.
 
+## Overview
+
+**Audience:** Both humans and LLMs during work sessions
+
+**Purpose:** Track current tasks, priorities, and blockers across sessions
+
+**Artifacts:**
+- `.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
+- `.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
+- Conversation context - Ephemeral subtasks (Tier 1)
+
+**Integration:** Works alongside devlog documentation - tasks track "what's next" (forward-looking), devlogs document "what happened" (historical). See "Integration with Devlog" section below.
+
 ## Four Tiers
 
 Support task decomposition at four granularities, from finest to coarsest:
@@ -33,6 +46,8 @@ Support task decomposition at four granularities, from finest to coarsest:
 - `todo pop:` - Mark the current task (should be first) as complete
 - `todo list:` - Read and display `.claude/todo.md`
 - `todo clear:` - Remove all completed items from the list
+
+**File initialization:** `bin/ensure-todo-md` creates `.claude/todo.md` from skeleton if missing (idempotent).
 
 ### Strategic (Tier 3)
 
@@ -82,6 +97,19 @@ Proactively suggest `subtask save:` when detecting:
 - Abrupt topic shift leaving work dangling
 
 Phrase as: "Before we move on, should I `subtask save:` to review what's incomplete?"
+
+## Integration with Devlog
+
+Task tracking and devlog documentation are complementary systems:
+
+**Tasks (forward-looking):** Track "what's next" - active work, priorities, blockers
+**Devlogs (historical):** Document "what happened" - decisions, discoveries, outcomes
+
+**At session end:**
+1. `subtask save:` reviews incomplete work → updates `.claude/todo.md`
+2. Create/update devlog entry documenting session narrative
+
+**For devlog structure and conventions**, load the llm-collab-docs skill.
 
 ## References
 

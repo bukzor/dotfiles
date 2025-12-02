@@ -14,7 +14,9 @@ project/
 ├── README.md              # Users: what this does, how to install/use
 ├── HACKING.md             # Contributors: how to develop, test, contribute
 ├── CLAUDE.md              # LLMs: quick-ref, current focus, architecture
-├── STATUS.md              # Current milestone, blockers, next actions
+├── .claude/
+│   ├── todo.md            # Current tasks (managed by subtask skill)
+│   └── todo.d/            # Detailed task breakdowns
 ├── docs/
 │   ├── dev/
 │   │   ├── design-rationale.md        # Why decisions were made
@@ -148,17 +150,17 @@ See [docs/dev/design-rationale.md] for why things are the way they are.
 - **Front-loads most important info** (common tasks, quick ref)
 - **Terse summaries with links** for deep dives
 - **Never just links** (always include 1-2 sentence summary before link)
-- **References STATUS.md** for current state (don't duplicate)
+- **References .claude/todo.md** for current tasks (don't duplicate)
 
 **Must contain:**
 1. **Quick Reference** - Most common development tasks
-2. **Current State Reference** - Link to STATUS.md (don't duplicate milestone/blockers)
+2. **Current State Reference** - Link to .claude/todo.md (don't duplicate tasks)
 3. **Architecture** - Terse overview with links
 4. **Data Flow** - How information moves through the system
 5. **Key Files** - Where to find critical code/config
 
 **Should contain:**
-- Links to STATUS.md, latest devlog entry
+- Links to .claude/todo.md, latest devlog entry
 - Common gotchas or constraints
 - Testing shortcuts
 - Conventions (naming, style)
@@ -180,7 +182,7 @@ See [docs/dev/design-rationale.md] for why things are the way they are.
 **Understanding [key concept]:**
 [Brief explanation] → See [docs/dev/technical-design.md#concept](docs/dev/technical-design.md#concept)
 
-**Current state:** See [STATUS.md] for milestone, blockers, and next actions.
+**Current tasks:** See [.claude/todo.md] for active work and priorities.
 
 ## Architecture Overview
 
@@ -210,50 +212,6 @@ See [docs/dev/technical-design.md#data-flow](docs/dev/technical-design.md#data-f
 [How to run tests, what to check]
 
 See [HACKING.md#testing](HACKING.md#testing) for details.
-```
-
-### STATUS.md (Current State)
-
-**Audience:** Both humans and LLMs starting a new session
-
-**Purpose:** "Where we are now" (high-level snapshot, not detailed tracking)
-
-**Must contain:**
-- Current Focus: milestone, last session, blockers
-- Next Actions: 3 concrete tasks
-- Progress Summary: brief status + link to devlog for details
-
-**Should NOT contain:**
-- Blow-by-blow session details (that's devlog)
-- How to work on the project (that's CLAUDE.md)
-- Why decisions were made (that's design-rationale.md)
-- Per-task checkboxes (that's development-plan.md - link to it instead)
-
-**Template:**
-```markdown
-# Project Status
-
-**Last Updated:** YYYY-MM-DD
-
-## Current Focus
-
-- **Milestone:** [Milestone N: Name](docs/dev/development-plan.md#milestone-N) - **Status**
-- **Last Session:** [devlog/YYYY-MM-DD](docs/dev/devlog/YYYY-MM-DD.md)
-- **Blockers:** [None / List specific blockers]
-
-## Progress Summary
-
-See [docs/dev/devlog/] for session details.
-
-**Milestone Status:** [Brief 1-2 sentence summary of progress]
-
-## Next Actions
-
-[Brief context line]
-
-1. [Specific next task]
-2. [Specific next task]
-3. [Specific next task]
 ```
 
 ### docs/dev/design-rationale.md (The "Why")
@@ -392,7 +350,7 @@ See [development-plan/milestone-1-details.md] for task breakdown.
 **Living document practice:**
 - Check boxes as tasks complete during session
 - Update milestone Status field when status changes
-- Link from STATUS.md to active milestone for detailed progress
+- Link from .claude/todo.md to active milestone for detailed progress
 
 **When to use subdirectory:**
 - If milestone has >20 tasks
@@ -403,12 +361,16 @@ See [development-plan/milestone-1-details.md] for task breakdown.
 
 **Audience:** Future you, future Claude sessions
 
+**Purpose:** Document "what happened" (historical record)
+
 **Must contain:**
 - What was attempted
 - What worked / what didn't
 - Decisions made
 - Open questions
 - Next session starting point
+
+**Integration with task tracking:** Devlogs document work history. For active task tracking ("what's next"), use the subtask skill.
 
 **File naming:** `YYYY-MM-DD.md` (or `YYYY-MM-DD-session-N.md` for multiple sessions/day)
 
@@ -557,26 +519,6 @@ See [technical-design/jsonl-format.md] for schema details.
 
 **Placeholder files:** Acceptable as explicit next-up action items. Mark with "TODO" status and populate before milestone completion.
 
-### Updating STATUS.md
-
-**Update after every session:**
-```bash
-# At end of session
-1. Update "Last Updated" date
-2. Move completed items from "Next Actions" to "Recent Completions"
-3. Add new blockers if discovered
-4. Write 3 new "Next Actions"
-```
-
-**Link from devlog:**
-```markdown
-# In devlog/YYYY-MM-DD.md
-## Session End
-Updated [STATUS.md](../../STATUS.md):
-- Completed: [task]
-- Next: [task]
-```
-
 ### Entry Points for Common Questions
 
 Each major doc should have "When to read this" section at top:
@@ -596,7 +538,7 @@ Each major doc should have "When to read this" section at top:
 
 **Claude should read in order:**
 1. `CLAUDE.md` - Quick reference, architecture overview
-2. `STATUS.md` - Current milestone, blockers, next actions
+2. `.claude/todo.md` - Current tasks and priorities
 3. Active milestone in `development-plan.md` - Detailed task checklist
 4. `docs/dev/devlog/YYYY-MM-DD.md` - Last session details
 5. Task-specific docs as needed
@@ -604,7 +546,7 @@ Each major doc should have "When to read this" section at top:
 ### Starting a New Task
 
 **Claude should read:**
-1. `STATUS.md` - Verify this is the right task
+1. `.claude/todo.md` - Verify this is the right task
 2. Relevant section of `development-plan.md` - Check off completed tasks, understand remaining work
 3. Relevant section of `technical-design.md` - Understand subsystem
 4. Previous devlog entries about this component
@@ -645,9 +587,9 @@ This project does things. See docs/ for more.
 
 **Stale documentation:**
 ```markdown
-# STATUS.md
-Last Updated: 2024-06-15
-[6 months out of date]
+# .claude/todo.md
+- [x] Task completed 6 months ago (still marked as pending)
+[Never updated]
 ```
 
 **Design docs in wrong place:**
@@ -695,11 +637,12 @@ For architecture: See [docs/dev/technical-design.md]
 ```
 
 **Living documentation:**
-```markdown
+```bash
 # At end of every session
-git add STATUS.md docs/dev/devlog/YYYY-MM-DD.md
-git commit -m "Update status and devlog"
+git add .claude/todo.md docs/dev/devlog/YYYY-MM-DD.md
+git commit -m "Update tasks and devlog"
 ```
+See subtask skill for task management procedures.
 
 **Extracted design docs:**
 ```python
@@ -718,7 +661,6 @@ Starting a new project? Create these files:
 - [ ] README.md (user-facing, mark status)
 - [ ] HACKING.md (contributor setup)
 - [ ] CLAUDE.md (LLM quick-ref)
-- [ ] STATUS.md (current milestone)
 
 # docs/dev/ structure
 - [ ] docs/dev/design-rationale.md (why decisions)
@@ -758,14 +700,14 @@ When deviating, keep principles:
 ## Maintenance
 
 **After every session:**
-1. Update STATUS.md
+1. Update .claude/todo.md (see subtask skill)
 2. Create/update devlog entry
 3. Update CLAUDE.md "Last Session" link
 4. Update relevant design docs if decisions made
 
 **After milestone completion:**
 1. Update development-plan.md
-2. Update STATUS.md for next milestone
+2. Update .claude/todo.md for next milestone
 3. Create devlog summary entry
 4. Archive/resolve any design-incubators
 
@@ -775,7 +717,7 @@ When deviating, keep principles:
 3. Update README/HACKING if APIs changed
 
 [HACKING.md]: HACKING.md
-[STATUS.md]: STATUS.md
+[.claude/todo.md]: .claude/todo.md
 [docs/dev/technical-design.md]: docs/dev/technical-design.md
 [docs/dev/design-rationale.md]: docs/dev/design-rationale.md
 [docs/examples/]: docs/examples/

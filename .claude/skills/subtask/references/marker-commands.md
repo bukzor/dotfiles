@@ -54,6 +54,18 @@ When assistant reads `.claude/todo.md`:
 
 **Persistence:** Changes written to `.claude/todo.md`, committed via git.
 
+**File creation:** If `.claude/todo.md` doesn't exist, `todo push:` creates it using `skeleton/.claude/todo.md` template via `bin/ensure-todo-md`.
+
+**Ownership:** All files include header `<anthropic-skill-ownership subtask />` for clear ownership signaling.
+
+### todo push: Implementation
+
+When agent encounters `todo push: DESC`:
+
+1. **Ensure file exists:** Run `~/.claude/skills/subtask/bin/ensure-todo-md` (idempotent, prints path)
+2. **Append task:** Edit the file to append `- [ ] DESC` before "## Later" section (or at end if no Later section)
+3. **Verify:** Read file to confirm task added
+
 ## Implementation Details
 
 ### TodoWrite Tool Disabled
