@@ -14,14 +14,14 @@ mkdir -p docs/{adr,architecture,milestones,devlog,examples}
 
 echo "✅ Created directory structure"
 
-# Create .claude/README.md (CLAUDE.md)
-if [ ! -f .claude/README.md ]; then
-  cat > .claude/README.md <<'EOF'
+# Create CLAUDE.md
+if [ ! -f CLAUDE.md ]; then
+  cat > CLAUDE.md <<'EOF'
 # Development Guide for Claude
 
 ## Quick Reference
 
-**Current state:** Check `.claude/todo.d/` for pending tasks, or latest [devlog entry](../docs/devlog/).
+**Current state:** Check `.claude/todo.d/` for pending tasks, or latest [devlog entry](docs/devlog/).
 
 ## Common Tasks
 
@@ -31,7 +31,7 @@ TODO: Document common development tasks with brief summaries and links to detail
 
 TODO: 3-5 sentence summary of how the system works.
 
-See [docs/architecture/overview.md](../docs/architecture/overview.md) for details.
+See [docs/architecture/overview.md](docs/architecture/overview.md) for details.
 
 ## Key Files
 
@@ -39,9 +39,9 @@ TODO: List important files and what they do.
 
 ## Decision History
 
-See [docs/adr/](../docs/adr/) for architecture decisions.
+See [docs/adr/](docs/adr/) for architecture decisions.
 EOF
-  echo "✅ Created .claude/README.md"
+  echo "✅ Created CLAUDE.md"
 fi
 
 # Create .gitkeep for todo.d
@@ -73,19 +73,13 @@ if [ ! -f CONTRIBUTING.md ]; then
   cat > CONTRIBUTING.md <<'EOF'
 # Contributing
 
-## For Human Contributors
-
-### Setup
+## Setup
 
 TODO: Development setup instructions
 
-### Running Tests
+## Running Tests
 
 TODO: How to run tests
-
-## For LLM Development Assistants
-
-See [.claude/README.md](.claude/README.md) for agent-specific guidance.
 EOF
   echo "✅ Created CONTRIBUTING.md"
 fi
@@ -175,7 +169,7 @@ echo ""
 echo "🎉 Documentation structure initialized!"
 echo ""
 echo "Next steps:"
-echo "  1. Edit .claude/README.md with project-specific guidance"
+echo "  1. Edit CLAUDE.md with project-specific guidance"
 echo "  2. Create TODOs as needed: $SKILL_DIR/scripts/new-todo.sh \"Task title\""
 echo "  3. Create first ADR: $SKILL_DIR/scripts/new-adr.sh \"Your decision\""
 echo "  4. At session end: $SKILL_DIR/scripts/session-end.sh"
