@@ -1,3 +1,20 @@
+---
+cost-benefit-sweh:
+  timebox:
+    @value: 0.75
+    rationale: |
+      Most work done (21 files extracted). Remaining: category READMEs,
+      overview files, fix broken links in creating-documentation.md.
+      High context loss - category structure is in working memory right now.
+  benefit-2w:
+    @value: 1.5
+    rationale: |
+      Consolidation complete, one source of truth. Without this, Claude
+      misses scattered docs, documents things incorrectly, requiring
+      corrections. Each miss costs ~20-30 min. Over 2 weeks across
+      multiple sessions, prevents 3-5 occurrences = 1-2+ SWEh saved.
+---
+
 # Destructure must-read-before.d/creating-documentation.md into references.d/ llm.d structure
 
 **Priority:** Medium
@@ -42,10 +59,9 @@ Split into references.d/ with llm.d-style categorization:
      - [x] guidelines.d/ (linking, DRY, subdirs, entry-points, anti-patterns)
      - [x] workflows.d/ (LLM consumption, maintenance, checklist, when to deviate)
    - [x] Repeat until doc fully factored
-   - [ ] Create category CLAUDE.md files with maintenance guidance
-   - [ ] Create category overview files (file-types.md, etc.)
-   - [ ] Create schemas (if needed for frontmatter)
 3. [ ] Update references to point to new structure
+   - [ ] Fix stale references in SKILL.md
+   - [ ] Create schemas (if needed for frontmatter)
 
 ## Open Questions
 

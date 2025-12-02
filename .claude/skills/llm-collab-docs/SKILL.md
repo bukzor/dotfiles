@@ -31,12 +31,25 @@ Skip for:
 **Problem:** Mixing audiences wastes everyone's time.
 
 **Pattern:** Different files for different audiences/purposes:
-- README.md → users (what it does, how to use)
-- CONTRIBUTING.md → contributors (how to develop)
-- CLAUDE.md → agents (architecture, conventions) - auto-loaded at root
-- docs/adr/ → why (decision rationale)
-- docs/architecture/ → what/how (technical design)
-- docs/devlog/ → when (session history, handoffs)
+```
+project/
+├── README.md                 # Users: what it does, how to use
+├── HACKING.md                # Contributors: how to develop
+├── CLAUDE.md                 # Agents: architecture, conventions
+├── .claude/
+│   ├── todo.md               # Current tasks (via subtask skill)
+│   └── todo.d/               # Detailed task breakdowns
+├── docs/
+│   ├── adr/                  # Why: decision rationale
+│   ├── architecture/         # What/how: technical design
+│   ├── dev/
+│   │   ├── design-rationale.md
+│   │   ├── technical-design.md
+│   │   ├── development-plan.md
+│   │   └── devlog/           # When: session history
+│   └── examples/             # Usage recipes
+└── design-incubators/        # Unsolved design problems
+```
 
 **Tradeoff:** More files to maintain vs clearer purpose per file.
 
@@ -218,21 +231,18 @@ Reads and displays: CLAUDE.md, latest devlog, recent ADRs.
 
 ## Reference Material
 
-### references/creating-documentation.md
+### references.d/
 
-Complete 780-line guide covering:
-- Detailed file purposes and templates
-- Linking conventions ("always provide context, never bare links")
-- When to use subdirectories (">200 lines")
-- Anti-patterns from experience
-- LLM consumption patterns
-- Maintenance checklists
+Factored reference docs in three categories:
+
+- **file-types.d/** - What each doc type should contain (README, CLAUDE.md, ADRs, devlog, etc.)
+- **guidelines.d/** - How to write docs (linking, DRY, subdirectories, anti-patterns)
+- **workflows.d/** - How to use docs (LLM consumption patterns, maintenance, new project checklist)
 
 **Load when:**
 - Setting up documentation for first time
 - Unsure where information belongs
-- Want to understand full rationale
-- Teaching the system to others
+- Want detailed guidance on a specific file type
 
 **Don't load when:**
 - Just need quick reminder (use this SKILL.md instead)
