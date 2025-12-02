@@ -1,37 +1,44 @@
-# Update devlog template to remove task management (pure history + idea capture to ideas.d)
+# Update devlog template to remove task management redundancy
 
 **Priority:** Medium
-**Complexity:** [Low/Medium/High]
-**Context:** [Link to related docs/issues]
+**Complexity:** Low
+**Context:** subtask skill handles task tracking; devlog should avoid time-wasting redundancy
 
 ## Problem Statement
 
-[What needs to be done and why?]
+Devlog template (skeleton/docs/devlog/YYYY-MM-DD.md) has "Next Session" section that duplicates `.claude/todo.md` purpose from subtask skill. This creates time-wasting redundancy.
 
 ## Current Situation
 
-[What's the current state?]
+Template includes:
+- Focus (goal for session)
+- Completed/Attempted/Discovered
+- Decisions Made
+- Open Questions
+- **Next Session** (with "Start here" and "Blockers") ← REDUNDANT
+- Links
 
 ## Proposed Solution
 
-[How should this be addressed?]
+Remove "Next Session" section from `skeleton/docs/devlog/YYYY-MM-DD.md`. Task tracking lives in `.claude/todo.md` (subtask skill), not devlog.
+
+**Note:** Broader devlog reevaluation is a separate strategic todo (see todo.d/2025-11-29-000).
 
 ## Implementation Steps
 
-1. [ ] First step
-2. [ ] Second step
-3. [ ] Third step
+1. [ ] Edit `skeleton/docs/devlog/YYYY-MM-DD.md`
+2. [ ] Remove "Next Session" section (lines 33-36)
+3. [ ] Verify template still makes sense without it
 
 ## Open Questions
 
-- [Question 1]
-- [Question 2]
+None. This is a tactical fix, not strategic reevaluation.
 
 ## Success Criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+- [ ] "Next Session" section removed from template
+- [ ] No time-wasting duplication with .claude/todo.md
 
 ## Notes
 
-[Additional context, references, etc.]
+User doesn't love current devlog sections overall, but complete reevaluation is separate work (todo.d/2025-11-29-000). This task is just the immediate redundancy fix.
