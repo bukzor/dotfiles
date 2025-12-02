@@ -38,8 +38,10 @@ Split into references.d/ with llm.d-style categorization:
      - [x] Add ROADMAP.md documentation
      - [x] Add milestones documentation
      - [x] Add architecture documentation
-   - [~] Identify and extract next category from remainder
-   - [ ] Repeat until doc fully factored
+   - [x] Identify and extract next category from remainder
+     - [x] guidelines.d/ (linking, DRY, subdirs, entry-points, anti-patterns)
+     - [x] workflows.d/ (LLM consumption, maintenance, checklist, when to deviate)
+   - [x] Repeat until doc fully factored
    - [ ] Create category CLAUDE.md files with maintenance guidance
    - [ ] Create category overview files (file-types.md, etc.)
    - [ ] Create schemas (if needed for frontmatter)
