@@ -2,7 +2,7 @@
   - [x] Fix errors in must-read-before.d/creating-documentation.md
   - [x] Extract all content to references.d/ (file-types, guidelines, workflows)
   - [x] Remaining: schemas, update references
-- [ ] todo.d/2025-12-02-001 (create category overview files) — Low
+- [x] todo.d/2025-12-02-001 (create category overview files) — Low
 - [x] todo.d/2025-12-02-000 (factor SKILL.md above the fold) — Medium
 - [ ] Decide fate of creating-documentation.md (delete vs replace with index)
 - [ ] Consider must-read-before trigger for llm-collab-docs skill
