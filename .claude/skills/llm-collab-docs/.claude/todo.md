@@ -10,7 +10,10 @@
 - [ ] todo.d/2025-11-29-001 (document blocking pattern in subtask skill) — High/Low
 - [ ] todo.d/2025-11-26-002 (devlog template redundancy fix) — Medium/Low
 - [ ] todo.d/2025-11-26-001 (ideas.d/ pattern) — Medium/Low
-- [ ] Update init-docs to create docs/dev/ structure — Low
+- [ ] Replace heredocs in bin/ scripts with skeleton/ copies
+  - [ ] init-docs: CLAUDE.md heredoc → skeleton/CLAUDE.md
+  - [ ] init-docs: docs/dev/ structure
+  - [ ] Scan for other heredocs that should use skeleton/
 
 ## Later
 
