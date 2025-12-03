@@ -1,6 +1,13 @@
 ---
 name: subtask
 description: "Load when:\n\n1. user gives a terse command starting with \"subtask\" or \"todo\" OR\n2. working with multiple tasks OR\n3. user asks a question during a task"
+setup: |
+    All projects that depend on this skill should have as `CLAUDE.md` frontmatter:
+
+    ```yaml
+    depends:
+        - skills/subtask
+    ```
 ---
 
 # Subtask Management
@@ -13,9 +20,9 @@ Four-tier task decomposition system for managing work at different granularities
 
 **Purpose:** Track current tasks, priorities, and blockers across sessions
 
-**Artifacts** (paths relative to project root):
-- `.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
-- `.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
+**Artifacts:**
+- `$PWD/.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
+- `$PWD/.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
 - Conversation context - Ephemeral subtasks (Tier 1)
 
 **Integration:** Works alongside devlog documentation - tasks track "what's next" (forward-looking), devlogs document "what happened" (historical). See "Integration with Devlog" section below.

@@ -1,6 +1,13 @@
 ---
 name: llm-collab-docs
-description: "Load when:\n\n1. Working on projects with 10-20+ agent sessions per day OR\n2. Parallel explorations create conflicting implementations OR\n3. Agents need structured handoffs between sessions"
+description: "Load when:\n\n1. After making significant decisions (to document as ADR)\n2. Before ending a work session (to document in devlog)\n3. When setting up documentation for a multi-session project\n4. When user asks about coordinating work across sessions"
+setup: |
+    All projects that depend on this skill should have as `CLAUDE.md` frontmatter:
+
+    ```yaml
+    depends:
+        - skills/llm-collab-docs
+    ```
 ---
 
 # LLM-Collaborative Documentation
@@ -10,19 +17,6 @@ Principles and helpers for human-LLM agent swarm collaboration on long-running p
 **Note:** This skill focuses on documentation patterns. For task management across sessions, use the `subtask` skill which handles ephemeral, tactical, and strategic task tracking.
 
 > **Status:** Locally maintained, iteratively improving. Expect rough edges.
-
-## When to Use
-
-Consider these patterns when:
-- Working with 10-20+ agent sessions per day
-- Parallel exploration creates conflicting partial implementations
-- Agents need to hand off work to each other
-- User frequently asks "What's next?" or loses thread
-- Context waste from loading irrelevant documentation
-
-Skip for:
-- Single-session or short-lived work
-- Simple projects where coordination overhead exceeds value
 
 ## Core Principles
 
@@ -151,20 +145,6 @@ Browse <https:references.d/> for categorized guides:
 - **guidelines.d/** - How to write effective docs
 - **workflows.d/** - How to use and maintain docs
 
-## Adopting in Projects
-
-Add to your project's CLAUDE.md (see <https:skeleton/CLAUDE.md>):
-
-```markdown
-## Documentation System
-
-This project uses llm-collab-docs patterns:
-- ADRs in docs/adr/ (date-based)
-- Devlogs in docs/devlog/
-
-Load the llm-collab-docs skill for helper scripts and pattern details.
-```
-
 ## Success Indicators
 
 These patterns are working when:
@@ -174,3 +154,12 @@ These patterns are working when:
 - Conflicts resolve through temporal ordering
 - Context loading feels efficient
 - Both human and agents can drop in/out
+
+## Design Goals
+
+These patterns address:
+- Projects with 10-20+ agent sessions per day
+- Parallel exploration creating conflicting partial implementations
+- Agents needing to hand off work to each other
+- User frequently asking "What's next?" or losing thread
+- Context waste from loading irrelevant documentation

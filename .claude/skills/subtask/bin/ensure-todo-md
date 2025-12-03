@@ -11,4 +11,4 @@ if [ ! -f .claude/todo.md ]; then
   cp "$SKELETON" .claude/todo.md
 fi
 
-echo ".claude/todo.md"
+echo "$PWD/.claude/todo.md"
