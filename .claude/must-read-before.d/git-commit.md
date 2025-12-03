@@ -26,6 +26,7 @@ Group into single-topic commits by:
 ### Untracked Files
 
 **ASK before assuming.** Present untracked files to the user and confirm disposition:
+- **Unrelated work**: Leave as-is (not this commit's concern)
 - **Scratch/test files**: Remove (`rm`)
 - **Tool internals**: Gitignore (e.g., `plans/`, `hooks/`, `*.log`)
 - **Legitimate new files**: Commit
