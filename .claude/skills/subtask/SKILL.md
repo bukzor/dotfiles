@@ -13,7 +13,7 @@ Four-tier task decomposition system for managing work at different granularities
 
 **Purpose:** Track current tasks, priorities, and blockers across sessions
 
-**Artifacts:**
+**Artifacts** (paths relative to project root):
 - `.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
 - `.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
 - Conversation context - Ephemeral subtasks (Tier 1)
@@ -68,7 +68,9 @@ Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains
 
 ## Example: subtask list
 
-When user requests `subtask list`, enumerate pending work from conversation context using markdown list format with status indicators:
+When user requests `subtask list`, enumerate pending work from conversation context using markdown list format with status indicators.
+
+**Important:** Wrap subtask lists in a code fence (```) to prevent the client from stripping status indicators. Without a code fence, `- [x]` renders as a checked checkbox with no visible marker.
 
 ```
 - [x] Completed item
