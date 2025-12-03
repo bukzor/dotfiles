@@ -15,7 +15,8 @@ TITLE="$*"
 
 # Ensure we're in project root
 if [ ! -d "docs/adr" ]; then
-  echo "Error: docs/adr/ directory not found. Run from project root or use init-docs.sh first."
+  echo "Error: docs/adr/ not found in $PWD"
+  echo "If this is the right location, run: mkdir -p docs/adr && !!"
   exit 1
 fi
 
