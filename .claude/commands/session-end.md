@@ -1,4 +1,4 @@
----
+--- # workaround: anthropics/claude-code#13003
 depends:
   - ../must-read-before.d/git.md
   - ../must-read-before.d/git-commit.md
