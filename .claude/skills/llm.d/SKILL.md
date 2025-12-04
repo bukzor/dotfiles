@@ -1,10 +1,13 @@
 ---
 name: llm.d
 description: "Load when:\n\n1. Creating structured knowledge bases (.d/ directories) OR\n2. Organizing facts/tasks for multi-agent LLM access OR\n3. Need grep-able metadata with schema validation"
+---
+--- # workaround: anthropics/claude-code#13005
 setup: |
     All projects that depend on this skill should have as `CLAUDE.md` frontmatter:
 
     ```yaml
+    --- # workaround: anthropics/claude-code#13003
     depends:
         - skills/llm.d
     ```
@@ -24,16 +27,26 @@ future agents, and progressive disclosure via overview files.
 **Structure**:
 
 ```
-topic.d/
+project/                        # plain container
+├── CLAUDE.md                   # agent maintenance
+├── README.md                   # navigation hub (plain containers only)
+├── category1.jsonschema.yaml   # schema (required if frontmatter used)
+├── category1.md                # optional summary of category1.d/
 ├── category1.d/
+│   ├── CLAUDE.md
 │   ├── item1.md                # optional frontmatter + prose
-│   ├── item2.md
-│   └── CLAUDE.md               # maintenance guide for future agents
-├── category1.jsonschema.yaml   # required if frontmatter used
-├── category1.md                # overview (helps decide to read .d/)
-├── CLAUDE.md                   # common principles across categories
-└── README.md                   # navigation hub
+│   └── item2.md
+├── category2.d/                # no summary needed here
+│   ├── CLAUDE.md
+│   └── nested.d/
+│       ├── CLAUDE.md
+│       └── item.md
 ```
+
+**Navigation**:
+- `x.md` summarizes `x.d/` when it helps avoid reading the whole directory
+- `README.md` as navigation hub when a plain directory has multiple `.d/` collections
+- `CLAUDE.md` at each level guides future agents
 
 **File format**: Markdown prose, optionally with YAML frontmatter. If
 frontmatter is used, schema is required to prevent drift.
@@ -102,7 +115,7 @@ comparisons.
 1. Identify homogeneous categories → `.d/` directories
 2. Design schemas for frontmatter → `x.jsonschema.yaml` (if using frontmatter)
 3. Create CLAUDE.md guides (root + per-directory)
-4. Create overview files (`x.md` for each `x.d/`)
+4. Create overview files (`x.md`) where summaries help
 5. Populate content files
 6. Validate with provided script (if using frontmatter)
 

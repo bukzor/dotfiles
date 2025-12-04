@@ -88,7 +88,7 @@ Create `category.jsonschema.yaml` with these fields.
 
 ### 3. Create Directory Structure
 ```bash
-mkdir -p project.d/{category1.d,category2.d,category3.d}
+mkdir -p {category1.d,category2.d,category3.d}
 ```
 
 ### 4. Write Schemas
@@ -101,16 +101,15 @@ Use JSON Schema Draft 07 format in YAML.
 
 **Per-category**: Specific guidance for that category
 
-### 6. Create Overview Files
-Write `category1.md` describing what's in `category1.d/`
-
-Focus on helping readers decide whether to dive deep.
+### 6. Create Overview Files (where helpful)
+Write `category1.md` when a summary helps readers decide whether to dive into
+`category1.d/`.
 
 ### 7. Populate Content
 Create individual files following schemas.
 
-### 8. Add README.md
-Navigation hub explaining the entire knowledge base.
+### 8. Add README.md (only when needed)
+Navigation hub, only when a plain directory contains multiple `.d/` collections.
 
 ### 9. Validate
 Run validation script on all files.
@@ -134,9 +133,9 @@ Run validation script on all files.
 1. Create new `.d/` directory
 2. Design schema (`category.jsonschema.yaml`)
 3. Write CLAUDE.md for category
-4. Write overview (`category.md`)
+4. Write overview (`category.md`) if helpful
 5. Create first example file
-6. Update README.md navigation
+6. Update README.md if present
 
 ## Anti-Patterns
 
