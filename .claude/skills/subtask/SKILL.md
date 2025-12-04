@@ -1,13 +1,17 @@
 ---
 name: subtask
 description: "Load when:\n\n1. user gives a terse command starting with \"subtask\" or \"todo\" OR\n2. working with multiple tasks OR\n3. user asks a question during a task"
+---
+--- # workaround: anthropics/claude-code#13005
 setup: |
     All projects that depend on this skill should have as `CLAUDE.md` frontmatter:
 
     ```yaml
+    --- # workaround: anthropics/claude-code#13003
     depends:
-        - skills/subtask
+    - skills/subtask
     ```
+default: subtask load
 ---
 
 # Subtask Management
@@ -31,28 +35,35 @@ Four-tier task decomposition system for managing work at different granularities
 
 Support task decomposition at four granularities, from finest to coarsest:
 
-**Tier 0: Conversational** - Question preemption (pattern, not tool)
-**Tier 1: Ephemeral** - Session subtasks via marker commands (in-context)
-**Tier 2: Tactical** - Cross-session checkboxes in `.claude/todo.md`
-**Tier 3: Strategic** - Planning files in `.claude/todo.d/YYYY-MM-DD-NNN-title.md`
+0. Conversational -- Question preemption (pattern, not tool)
+1. Ephemeral -- Session subtasks via marker commands (in-context)
+2. Tactical -- Cross-session checkboxes in `.claude/todo.md`
+3. Strategic -- Planning files in `.claude/todo.d/YYYY-MM-DD-NNN-title.md`
 
 ## Marker Commands
 
 ### Ephemeral (Tier 1)
 
-- `subtask list:` - Enumerate pending work from conversation context
-- `subtask prepend:` - Signal priority shift, refocus on new work stream
-- `subtask push: DESC` - Add ephemeral subtask to working memory
-- `subtask pop:` - Mark current ephemeral subtask complete
+These mostly notional, only reified on demand.
+
+- `subtask prepend` -- Signal priority shift, refocus on new work stream
+- `subtask push` - Append a subtask to the queue
+- `subtask pop` -- Mark current subtask complete
+- `subtask list` -- Enumerate pending work from conversation context
 
 ### Persistent (Tier 2 & 3)
 
-- `subtask load:` - Session start: read `.claude/todo.md` and enumerate tactical todos
-- `subtask save:` - Session end: review incomplete ephemeral subtasks, categorize as tactical/strategic/abandon
-- `todo push: DESC` - Append `- [ ] DESC` to `.claude/todo.md` (tactical)
-- `todo pop:` - Mark the current task (should be first) as complete
-- `todo list:` - Read and display `.claude/todo.md`
-- `todo clear:` - Remove all completed items from the list
+- `subtask load`
+    1. read `.claude/todo.md`
+    2. list `.claude/todo.d/`
+- `subtask save`
+    1. review chat history for subtasks that are both incomplete and not yet persisted
+    2. categorize as tactical/strategic/abandon
+- `session end` -- Run `bin/session-end` script
+- `todo push` - Append a task
+- `todo pop` -- Mark the current task (should be first) as complete
+- `todo list` -- Read and display `.claude/todo.md`
+- `todo clear` -- Remove all completed items from the list
 
 **File initialization:** `bin/ensure-todo-md` creates `.claude/todo.md` from skeleton if missing (idempotent).
 
@@ -77,7 +88,12 @@ Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains
 
 When user requests `subtask list`, enumerate pending work from conversation context using markdown list format with status indicators.
 
-**Important:** Wrap subtask lists in a code fence (```) to prevent the client from stripping status indicators. Without a code fence, `- [x]` renders as a checked checkbox with no visible marker.
+**Important:** Wrap task lists in a "code fence" to prevent the client from
+stripping status indicators. Without a code fence, `- [x]` and `- [ ]` are
+rendered as `-`.
+
+````
+Example output:
 
 ```
 - [x] Completed item
@@ -87,25 +103,27 @@ When user requests `subtask list`, enumerate pending work from conversation cont
 - [ ] Pending item
 ```
 
+````
+
 ## Session Lifecycle
 
-**Start:** `subtask load:` reads tactical todos from `.claude/todo.md`
+**Start:** `subtask load` reads tactical todos from `.claude/todo.md`
 
-**During:** Work with ephemeral subtasks (`subtask push:`/`pop:`/`prepend:`/`list:`)
+**During:** Work with ephemeral subtasks (`subtask push`/`pop`/`prepend`/`list`)
 
-**End:** `subtask save:` reviews incomplete work:
-- Tactical → `todo push:` to `.claude/todo.md`
+**End:** `subtask save` reviews incomplete work:
+- Tactical → `todo push` to `.claude/todo.md`
 - Strategic → `bin/new-todo "title"` creates planning file
 - Trivial → abandon
 
 ## Agent Initiative
 
-Proactively suggest `subtask save:` when detecting:
+Proactively suggest `subtask save` when detecting:
 - User signals wrap-up: "gotta go", "that's all", "wrapping up"
 - Long conversation with visible incomplete ephemeral work
 - Abrupt topic shift leaving work dangling
 
-Phrase as: "Before we move on, should I `subtask save:` to review what's incomplete?"
+Phrase as: "Before we move on, should I `subtask save` to review what's incomplete?"
 
 ## Integration with Devlog
 
@@ -115,7 +133,7 @@ Task tracking and devlog documentation are complementary systems:
 **Devlogs (historical):** Document "what happened" - decisions, discoveries, outcomes
 
 **At session end:**
-1. `subtask save:` reviews incomplete work → updates `.claude/todo.md`
+1. `subtask save` reviews incomplete work → updates `.claude/todo.md`
 2. Create/update devlog entry documenting session narrative
 
 **For devlog structure and conventions**, load the llm-collab-docs skill.
