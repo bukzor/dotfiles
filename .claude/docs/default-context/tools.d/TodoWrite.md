@@ -1,7 +1,3 @@
-# TodoWrite
-
-## Full Instructions
-
 Use this tool to create and manage a structured task list for your current coding session. This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
 It also helps the user understand the progress of the task and overall progress of their requests.
 
@@ -124,7 +120,7 @@ The assistant did not use the todo list because this is an informational request
 <example>
 User: Can you add a comment to the calculateTotal function to explain what it does?
 Assistant: Sure, let me add a comment to the calculateTotal function to explain what it does.
-* Uses the ${R5} tool to add a comment to the calculateTotal function *
+* Uses the Edit tool to add a comment to the calculateTotal function *
 
 <reasoning>
 The assistant did not use the todo list because this is a single, straightforward task confined to one location in the code. Adding a comment doesn't require tracking multiple steps or systematic organization.
@@ -184,4 +180,3 @@ The assistant did not use the todo list because this is a single command executi
      - activeForm: "Fixing authentication bug"
 
 When in doubt, use this tool. Being proactive with task management demonstrates attentiveness and ensures you complete all requirements successfully.
-

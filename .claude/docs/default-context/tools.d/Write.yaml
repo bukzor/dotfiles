@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.85      # When writing new files
+frequency: 0.3          # Less common than editing
+turns_with: 1           # Direct write
+turns_without: 2        # Bash echo/cat heredoc
+error_with: 0.03        # Rarely fails
+error_without: 0.15     # Bash heredoc escaping issues
+substitutability: 0.6   # Bash can write files
+definition_kb: 0.7      # Small definition
+call_kb: 0.3            # Just confirms write

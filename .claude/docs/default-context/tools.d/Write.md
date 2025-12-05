@@ -1,11 +1,3 @@
-# Write
-
-## Description
-
-Write a file to the local filesystem.
-
-## Full Instructions
-
 Writes a file to the local filesystem.
 
 Usage:

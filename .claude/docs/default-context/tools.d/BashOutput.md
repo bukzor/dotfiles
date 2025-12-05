@@ -1,10 +1,3 @@
-# BashOutput
-
-## Description
-
-Retrieves output from a background bash shell.
-
-## Full Instructions
 
 - Retrieves output from a running or completed background bash shell
 - Takes a shell_id parameter identifying the shell

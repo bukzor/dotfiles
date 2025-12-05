@@ -1,10 +1,3 @@
-# WebSearch
-
-## Description
-
-Search the web for information.
-
-## Full Instructions
 
 - Allows Claude to search the web and use the results to inform responses
 - Provides up-to-date information for current events and recent data
@@ -29,5 +22,5 @@ Usage notes:
   - Web search is only available in the US
 
 IMPORTANT - Use the correct year in search queries:
-  - You MUST use the current year when searching for recent information, documentation, or current events.
+  - Today's date is 2025-12-05. You MUST use this year when searching for recent information, documentation, or current events.
   - Example: If today is 2025-07-15 and the user asks for "latest React docs", search for "React documentation 2025", NOT "React documentation 2024"

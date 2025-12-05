@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.99      # Almost always the right choice for shell operations
+frequency: 0.8          # Used in most sessions
+turns_with: 1           # Direct execution
+turns_without: 5        # Would need to describe commands textually, no execution
+error_with: 0.1         # Commands can fail, typos, permissions
+error_without: 0.8      # Can't really do shell work without execution
+substitutability: 0.2   # No real substitute for shell execution
+definition_kb: 3.2      # Large definition with many usage notes
+call_kb: 2              # Typical command output

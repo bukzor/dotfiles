@@ -1,0 +1,7 @@
+enablement: 0.14
+turn_efficiency: 2.0
+accuracy_boost: 1.042
+penalty: 0.949
+benefit: 0.015
+cost: 0.65
+value: 0.02

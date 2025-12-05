@@ -1,10 +1,3 @@
-# WebFetch
-
-## Description
-
-Fetch and process content from a URL.
-
-## Full Instructions
 
 - Fetches content from a specified URL and processes it using an AI model
 - Takes a URL and a prompt as input

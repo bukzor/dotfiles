@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.85      # When code intelligence needed
+frequency: 0.1          # Occasional - go-to-definition, references
+turns_with: 1           # Direct code navigation
+turns_without: 5        # Grep + manual navigation
+error_with: 0.15        # Server not configured
+error_without: 0.3      # Grep misses semantic info
+substitutability: 0.5   # Grep/glob can find things
+definition_kb: 1.4      # Moderate definition
+call_kb: 2              # Location/symbol results

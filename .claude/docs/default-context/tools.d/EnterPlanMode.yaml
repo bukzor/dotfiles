@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.7       # For complex planning
+frequency: 0.05         # Rare - complex tasks only
+turns_with: 1           # Mode switch
+turns_without: 2        # Can write plan without mode
+error_with: 0.02        # Rarely fails
+error_without: 0.1      # Unstructured planning less reliable
+substitutability: 0.7   # Can just write plans directly
+definition_kb: 0.5      # Small definition
+call_kb: 0.2            # Just mode confirmation

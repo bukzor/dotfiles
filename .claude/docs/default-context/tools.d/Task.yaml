@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.8       # For complex multi-step work
+frequency: 0.3          # Not every task needs subagents
+turns_with: 1           # Single delegation
+turns_without: 10       # Many manual steps
+error_with: 0.1         # Agent failures possible
+error_without: 0.3      # Manual multi-step more error-prone
+substitutability: 0.3   # No real substitute for autonomous agents
+definition_kb: 1.8      # Moderate definition
+call_kb: 5              # Agent response

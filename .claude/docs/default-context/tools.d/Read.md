@@ -1,11 +1,3 @@
-# Read
-
-## Description
-
-Reads a file from the local filesystem.
-
-## Full Instructions
-
 Reads a file from the local filesystem. You can access any file directly by using this tool.
 Assume this tool is able to read all files on the machine. If the User provides a path to a file assume that path is valid. It is okay to read a file that does not exist; an error will be returned.
 

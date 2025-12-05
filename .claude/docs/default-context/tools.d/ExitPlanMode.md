@@ -1,11 +1,3 @@
-# ExitPlanMode
-
-## Description
-
-Prompts the user to exit plan mode and start coding.
-
-## Full Instructions
-
 Use this tool when you are in plan mode and have finished writing your plan to the plan file and are ready for user approval.
 
 ## How This Tool Works

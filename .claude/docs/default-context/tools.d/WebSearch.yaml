@@ -1,0 +1,13 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (definition_kb + call_kb × frequency)
+
+essentiality: 0.9       # When searching web, essential
+frequency: 0.1          # Occasional
+turns_with: 1           # Direct search
+turns_without: 10       # WebFetch + guessing URLs
+error_with: 0.05        # Occasionally fails
+error_without: 0.6      # Very hard without it
+substitutability: 0.1   # No real substitute
+definition_kb: 1.4      # Moderate definition
+call_kb: 4              # Search results

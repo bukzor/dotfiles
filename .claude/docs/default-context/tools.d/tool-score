@@ -1,0 +1,54 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml"]
+# ///
+"""Compute and record tool scores to {tool}.score.yaml files."""
+
+from pathlib import Path
+
+import yaml
+
+
+def compute_metrics(name: str, est: dict) -> dict:
+    """Compute derived metrics from input estimates."""
+    enablement = est["essentiality"] * est["frequency"]
+    turn_efficiency = est["turns_without"] / est["turns_with"]
+    accuracy_boost = (1 - est["error_with"]) / (1 - est["error_without"])
+    penalty = est["substitutability"] ** 0.322
+
+    benefit = enablement * turn_efficiency * accuracy_boost * (1 - penalty)
+    cost = est["definition_kb"] + (est["call_kb"] * est["frequency"])
+
+    value = benefit / cost  # benefit per kB
+
+    return {
+        "enablement": round(enablement, 3),
+        "turn_efficiency": round(turn_efficiency, 2),
+        "accuracy_boost": round(accuracy_boost, 3),
+        "penalty": round(penalty, 3),
+        "benefit": round(benefit, 3),
+        "cost": round(cost, 2),
+        "value": round(value, 2),
+    }
+
+
+def main():
+    tools_dir = Path(__file__).parent
+
+    for yaml_path in sorted(tools_dir.glob("*.yaml")):
+        if yaml_path.name.endswith(".score.yaml"):
+            continue
+        name = yaml_path.stem
+        est = yaml.safe_load(yaml_path.read_text())
+        metrics = compute_metrics(name, est)
+
+        score_path = tools_dir / f"{name}.score.yaml"
+        score_path.write_text(
+            yaml.dump(metrics, sort_keys=False, default_flow_style=False)
+        )
+        print(f"{name}: value={metrics['value']}")
+
+
+if __name__ == "__main__":
+    main()
