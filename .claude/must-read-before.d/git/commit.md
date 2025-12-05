@@ -1,6 +1,6 @@
 ---
-depends:
-  - ./git.md
+requires:
+  - ./all-operations.md
 ---
 
 ## Git Commit
