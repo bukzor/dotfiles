@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.9       # When finding files, usually the right tool
 frequency: 0.4          # Used often but not every task
@@ -9,5 +9,4 @@ turns_without: 2        # find/ls via Bash
 error_with: 0.01        # Almost never fails
 error_without: 0.1      # Bash find more error-prone
 substitutability: 0.7   # Bash find covers most cases
-definition_kb: 0.65     # Small definition
 call_kb: 1              # List of file paths

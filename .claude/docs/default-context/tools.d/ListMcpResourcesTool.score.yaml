@@ -1,7 +1,8 @@
-enablement: 0.016
-turn_efficiency: 5.0
-accuracy_boost: 9.0
-penalty: 0.476
-benefit: 0.377
-cost: 0.44
-value: 0.86
+ListMcpResourcesTool:
+  enablement: 0.016
+  turn_efficiency: 5.0
+  accuracy_boost: 9.0
+  penalty: 0.476
+  benefit: 0.377
+  cost: 0.383
+  value: 0.985

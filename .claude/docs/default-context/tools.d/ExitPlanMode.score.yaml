@@ -1,7 +1,8 @@
-enablement: 0.04
-turn_efficiency: 2.0
-accuracy_boost: 1.089
-penalty: 0.848
-benefit: 0.013
-cost: 2.01
-value: 0.01
+ExitPlanMode:
+  enablement: 0.04
+  turn_efficiency: 2.0
+  accuracy_boost: 1.09
+  penalty: 0.848
+  benefit: 0.0132
+  cost: 1.89
+  value: 0.00698

@@ -1,0 +1,31 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml"]
+# ///
+"""Compute and record tool scores to {tool}.score.yaml files."""
+
+import subprocess
+from pathlib import Path
+
+import yaml
+
+
+def main():
+    bin_dir = Path(__file__).parent
+    tools_dir = bin_dir.parent
+    tool_scores_show = bin_dir / "tool-scores-show"
+
+    output = subprocess.check_output([tool_scores_show], text=True)
+    all_scores = yaml.safe_load(output)
+
+    for name, metrics in all_scores.items():
+        score_path = tools_dir / f"{name}.score.yaml"
+        score_path.write_text(
+            yaml.dump({name: metrics}, sort_keys=False, default_flow_style=False)
+        )
+        print(f"{name}: value={metrics['value']}")
+
+
+if __name__ == "__main__":
+    main()

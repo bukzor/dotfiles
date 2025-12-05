@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.5       # Helpful but not essential
 frequency: 0.2          # Complex multi-step tasks
@@ -9,5 +9,4 @@ turns_without: 1        # Mental tracking works
 error_with: 0.02        # Rarely fails
 error_without: 0.1      # More likely to miss steps
 substitutability: 0.8   # Can track mentally or in text
-definition_kb: 9.7      # Very large definition with examples
 call_kb: 0.3            # Just confirms update

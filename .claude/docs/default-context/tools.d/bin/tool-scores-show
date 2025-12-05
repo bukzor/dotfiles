@@ -9,16 +9,16 @@ from pathlib import Path
 
 import yaml
 
-# TODO: use .md file size once extraction is fixed (many are truncated/corrupt)
-# def get_definition_kb(tools_dir: Path, name: str) -> float:
-#     """Get definition size in kB from the tool's .md file."""
-#     md_path = tools_dir / f"{name}.md"
-#     if md_path.exists():
-#         return md_path.stat().st_size / 1024
-#     return 0.1  # Default if no .md file
+
+def get_definition_kb(tools_dir: Path, name: str) -> float:
+    """Get definition size in kB from the tool's .md file."""
+    md_path = tools_dir / f"{name}.md"
+    if md_path.exists():
+        return md_path.stat().st_size / 1024
+    return 0.1  # Default if no .md file
 
 
-def compute_metrics(name: str, est: dict) -> dict:
+def compute_metrics(tools_dir: Path, name: str, est: dict) -> dict:
     """Compute derived metrics from input estimates."""
     enablement = est["essentiality"] * est["frequency"]
     turn_efficiency = est["turns_without"] / est["turns_with"]
@@ -26,7 +26,8 @@ def compute_metrics(name: str, est: dict) -> dict:
     penalty = est["substitutability"] ** 0.322
 
     benefit = enablement * turn_efficiency * accuracy_boost * (1 - penalty)
-    cost = est["definition_kb"] + (est["call_kb"] * est["frequency"])
+    definition_kb = get_definition_kb(tools_dir, name)
+    cost = definition_kb + (est["call_kb"] * est["frequency"])
 
     value = benefit / cost  # benefit per kB
 
@@ -43,7 +44,7 @@ def compute_metrics(name: str, est: dict) -> dict:
 
 
 def main():
-    tools_dir = Path(__file__).parent
+    tools_dir = Path(__file__).parent.parent
 
     results = {}
     for yaml_path in sorted(tools_dir.glob("*.yaml")):
@@ -51,15 +52,16 @@ def main():
             continue
         name = yaml_path.stem
         est = yaml.safe_load(yaml_path.read_text())
-        m = compute_metrics(name, est)
+        m = compute_metrics(tools_dir, name, est)
+        sf = lambda x: float(f"{x:.3g}")
         results[name] = {
-            "enablement": round(m["enablement"], 3),
-            "turn_efficiency": round(m["turn_efficiency"], 2),
-            "accuracy_boost": round(m["accuracy_boost"], 3),
-            "penalty": round(m["penalty"], 3),
-            "benefit": round(m["benefit"], 3),
-            "cost": round(m["cost"], 2),
-            "value": round(m["value"], 2),
+            "enablement": sf(m["enablement"]),
+            "turn_efficiency": sf(m["turn_efficiency"]),
+            "accuracy_boost": sf(m["accuracy_boost"]),
+            "penalty": sf(m["penalty"]),
+            "benefit": sf(m["benefit"]),
+            "cost": sf(m["cost"]),
+            "value": sf(m["value"]),
         }
 
     print(yaml.dump(results, sort_keys=False, default_flow_style=False))

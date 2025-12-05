@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.95      # When editing, almost always the right tool
 frequency: 0.6          # Most coding tasks involve editing
@@ -9,5 +9,4 @@ turns_without: 4        # Would need Write (full file) or sed/awk via Bash
 error_with: 0.05        # Failures on non-unique strings
 error_without: 0.25     # Write overwrites entire file, sed/awk complex
 substitutability: 0.5   # Write can substitute for many cases
-definition_kb: 1.2      # Moderate definition
 call_kb: 0.5            # Just confirms the edit

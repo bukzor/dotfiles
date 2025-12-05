@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.95      # When editing notebooks, essential
 frequency: 0.05         # Rare - only Jupyter work
@@ -9,5 +9,4 @@ turns_without: 4        # JSON manipulation via Edit
 error_with: 0.05        # Some failures possible
 error_without: 0.3      # JSON editing very error-prone
 substitutability: 0.4   # Edit can work but complex
-definition_kb: 0.6      # Small definition
 call_kb: 0.5            # Just confirms edit

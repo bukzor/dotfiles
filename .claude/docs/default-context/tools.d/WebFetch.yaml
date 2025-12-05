@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.8       # When fetching web content
 frequency: 0.15         # Occasional documentation/API lookups
@@ -9,5 +9,4 @@ turns_without: 4        # Bash curl + manual parsing
 error_with: 0.1         # Timeouts, redirects, blocks
 error_without: 0.25     # Curl parsing more error-prone
 substitutability: 0.5   # Curl can work for basic fetches
-definition_kb: 1.2      # Moderate definition
 call_kb: 10             # Web content can be large

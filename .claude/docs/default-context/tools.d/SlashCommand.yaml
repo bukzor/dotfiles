@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.85      # When command needed, usually right tool
 frequency: 0.08         # Occasional
@@ -9,5 +9,4 @@ turns_without: 3        # Manual command file reading
 error_with: 0.05        # Command not found
 error_without: 0.15     # Manual expansion more error-prone
 substitutability: 0.5   # Can read command files manually
-definition_kb: 1        # Moderate definition
 call_kb: 2              # Command expansion

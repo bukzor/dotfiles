@@ -1,7 +1,8 @@
-enablement: 0.068
-turn_efficiency: 3.0
-accuracy_boost: 1.118
-penalty: 0.8
-benefit: 0.046
-cost: 1.16
-value: 0.04
+SlashCommand:
+  enablement: 0.068
+  turn_efficiency: 3.0
+  accuracy_boost: 1.12
+  penalty: 0.8
+  benefit: 0.0456
+  cost: 1.46
+  value: 0.0311

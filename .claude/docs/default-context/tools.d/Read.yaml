@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md size + call_kb × frequency)
 
 essentiality: 0.95      # When needed, almost always the right tool
 frequency: 0.7          # Most tasks involve reading files
@@ -9,5 +9,4 @@ turns_without: 3        # Would need Bash cat, parse output, retry on truncation
 error_with: 0.02        # Rare failures (permissions, binary files)
 error_without: 0.15     # Bash cat has encoding issues, truncation, no line numbers
 substitutability: 0.6   # Bash cat covers ~60% of use cases adequately
-definition_kb: 2        # Estimated full definition size
 call_kb: 8              # Avg file content returned (~2k lines)

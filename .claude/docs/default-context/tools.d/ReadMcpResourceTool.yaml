@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.85      # When reading MCP resources
 frequency: 0.02         # Very rare - MCP-specific work
@@ -9,5 +9,4 @@ turns_without: 5        # No real substitute
 error_with: 0.1         # Server/URI issues
 error_without: 0.9      # Can't read MCP resources otherwise
 substitutability: 0.1   # No substitute
-definition_kb: 0.3      # Very small definition
 call_kb: 5              # Resource content

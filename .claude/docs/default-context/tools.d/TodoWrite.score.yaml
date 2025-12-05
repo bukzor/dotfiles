@@ -1,7 +1,8 @@
-enablement: 0.1
-turn_efficiency: 1.0
-accuracy_boost: 1.089
-penalty: 0.931
-benefit: 0.008
-cost: 9.76
-value: 0.0
+TodoWrite:
+  enablement: 0.1
+  turn_efficiency: 1.0
+  accuracy_boost: 1.09
+  penalty: 0.931
+  benefit: 0.00755
+  cost: 9.53
+  value: 0.000792

@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.95      # When searching content, best tool
 frequency: 0.5          # Common for exploration
@@ -9,5 +9,4 @@ turns_without: 2        # bash grep/rg
 error_with: 0.02        # Rarely fails
 error_without: 0.12     # Bash grep permission/output issues
 substitutability: 0.65  # Bash rg covers most cases
-definition_kb: 1        # Moderate definition
 call_kb: 3              # Search results

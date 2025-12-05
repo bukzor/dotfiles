@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.7       # When clarification needed
 frequency: 0.2          # Not every task needs clarification
@@ -9,5 +9,4 @@ turns_without: 2        # Just ask in text
 error_with: 0.01        # Rarely fails
 error_without: 0.05     # Text questions work fine
 substitutability: 0.85  # Plain text questions cover most cases
-definition_kb: 0.55     # Small definition
 call_kb: 0.5            # User response

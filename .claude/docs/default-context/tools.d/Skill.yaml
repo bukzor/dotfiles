@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.85      # When skill needed, usually right tool
 frequency: 0.1          # Occasional specialized tasks
@@ -9,5 +9,4 @@ turns_without: 5        # Would need manual skill prompts
 error_with: 0.05        # Skill loading failures
 error_without: 0.2      # Manual methods more error-prone
 substitutability: 0.4   # Can manually expand skills
-definition_kb: 0.7      # Small definition
 call_kb: 2              # Skill expansion

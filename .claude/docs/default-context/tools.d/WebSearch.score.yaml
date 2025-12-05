@@ -1,7 +1,8 @@
-enablement: 0.09
-turn_efficiency: 10.0
-accuracy_boost: 2.375
-penalty: 0.476
-benefit: 1.119
-cost: 1.8
-value: 0.62
+WebSearch:
+  enablement: 0.09
+  turn_efficiency: 10.0
+  accuracy_boost: 2.37
+  penalty: 0.476
+  benefit: 1.12
+  cost: 1.71
+  value: 0.656

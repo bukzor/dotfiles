@@ -1,6 +1,6 @@
 # Tool cost/benefit estimates
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
-# Cost in kB (definition_kb + call_kb × frequency)
+# Cost in kB (.md file size + call_kb × frequency)
 
 essentiality: 0.95      # When needed, essential
 frequency: 0.02         # Very rare
@@ -9,5 +9,4 @@ turns_without: 3        # Manual kill via Bash
 error_with: 0.01        # Rarely fails
 error_without: 0.2      # Bash kill can miss
 substitutability: 0.6   # Bash kill can work
-definition_kb: 0.35     # Very small definition
 call_kb: 0.1            # Just status

@@ -1,7 +1,8 @@
-enablement: 0.019
-turn_efficiency: 3.0
-accuracy_boost: 1.237
-penalty: 0.848
-benefit: 0.011
-cost: 0.35
-value: 0.03
+KillShell:
+  enablement: 0.019
+  turn_efficiency: 3.0
+  accuracy_boost: 1.24
+  penalty: 0.848
+  benefit: 0.0107
+  cost: 0.259
+  value: 0.0413

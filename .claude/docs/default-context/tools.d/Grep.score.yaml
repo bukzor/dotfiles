@@ -1,7 +1,8 @@
-enablement: 0.475
-turn_efficiency: 2.0
-accuracy_boost: 1.114
-penalty: 0.87
-benefit: 0.137
-cost: 2.5
-value: 0.05
+Grep:
+  enablement: 0.475
+  turn_efficiency: 2.0
+  accuracy_boost: 1.11
+  penalty: 0.87
+  benefit: 0.137
+  cost: 2.34
+  value: 0.0584

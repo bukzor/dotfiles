@@ -1,7 +1,8 @@
-enablement: 0.048
-turn_efficiency: 4.0
-accuracy_boost: 1.357
-penalty: 0.744
-benefit: 0.066
-cost: 0.62
-value: 0.11
+NotebookEdit:
+  enablement: 0.0475
+  turn_efficiency: 4.0
+  accuracy_boost: 1.36
+  penalty: 0.744
+  benefit: 0.0659
+  cost: 0.526
+  value: 0.125

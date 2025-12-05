@@ -1,7 +1,8 @@
-enablement: 0.12
-turn_efficiency: 4.0
-accuracy_boost: 1.2
-penalty: 0.8
-benefit: 0.115
-cost: 2.7
-value: 0.04
+WebFetch:
+  enablement: 0.12
+  turn_efficiency: 4.0
+  accuracy_boost: 1.2
+  penalty: 0.8
+  benefit: 0.115
+  cost: 2.63
+  value: 0.0438

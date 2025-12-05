@@ -1,7 +1,8 @@
-enablement: 0.045
-turn_efficiency: 3.0
-accuracy_boost: 1.187
-penalty: 0.848
-benefit: 0.024
-cost: 0.4
-value: 0.06
+StructuredOutput:
+  enablement: 0.045
+  turn_efficiency: 3.0
+  accuracy_boost: 1.19
+  penalty: 0.848
+  benefit: 0.0243
+  cost: 0.399
+  value: 0.061

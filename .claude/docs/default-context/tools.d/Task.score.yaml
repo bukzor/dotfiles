@@ -1,7 +1,8 @@
-enablement: 0.24
-turn_efficiency: 10.0
-accuracy_boost: 1.286
-penalty: 0.679
-benefit: 0.992
-cost: 3.3
-value: 0.3
+Task:
+  enablement: 0.24
+  turn_efficiency: 10.0
+  accuracy_boost: 1.29
+  penalty: 0.679
+  benefit: 0.992
+  cost: 7.22
+  value: 0.137

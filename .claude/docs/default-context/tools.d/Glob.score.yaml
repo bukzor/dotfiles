@@ -1,7 +1,8 @@
-enablement: 0.36
-turn_efficiency: 2.0
-accuracy_boost: 1.1
-penalty: 0.892
-benefit: 0.086
-cost: 1.05
-value: 0.08
+Glob:
+  enablement: 0.36
+  turn_efficiency: 2.0
+  accuracy_boost: 1.1
+  penalty: 0.892
+  benefit: 0.0859
+  cost: 0.918
+  value: 0.0937

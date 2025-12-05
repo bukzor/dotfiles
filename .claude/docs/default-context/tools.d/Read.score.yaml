@@ -1,7 +1,8 @@
-enablement: 0.665
-turn_efficiency: 3.0
-accuracy_boost: 1.153
-penalty: 0.848
-benefit: 0.349
-cost: 7.6
-value: 0.05
+Read:
+  enablement: 0.665
+  turn_efficiency: 3.0
+  accuracy_boost: 1.15
+  penalty: 0.848
+  benefit: 0.349
+  cost: 7.31
+  value: 0.0477
