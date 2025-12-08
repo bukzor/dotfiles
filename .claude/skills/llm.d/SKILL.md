@@ -38,6 +38,7 @@ project/                        # plain container
 │   └── item2.md
 ├── category2.d/                # no summary needed here
 │   ├── CLAUDE.md
+│   ├── nested.jsonschema.yaml  # x.jsonschema.yaml validates x.d/*.md
 │   └── nested.d/
 │       ├── CLAUDE.md
 │       └── item.md
@@ -138,7 +139,7 @@ searching one 500-line file.
 
 ## Tools Provided
 
-### scripts/validate-frontmatter.py
+### bin/validate-frontmatter
 
 **Purpose**: Catch frontmatter schema violations (error prevention)
 
@@ -148,16 +149,20 @@ schema mismatches.
 **Usage**:
 
 ```bash
-scripts/validate-frontmatter.py category.d/*.md
-```
+bin/validate-frontmatter                  # Validate current directory (default)
+bin/validate-frontmatter path/to/project  # Validate specific directory
+bin/validate-frontmatter category.d/      # Validate one category
+bin/validate-frontmatter file.md          # Validate single file
 ```
 
-Auto-detects schema from directory structure.
+Recursively finds and validates `.d/` directories. Auto-detects schemas. Skips CLAUDE.md files.
+
+**Recommended**: Run `bin/validate-frontmatter` before committing changes.
 
 ## References
 
 - `references/pattern-guide.md` - Complete pattern explanation
 - `references/schema-design.md` - Schema design guidance
-- `references/complete-example.md` - Real-world example (ai-coding-tools-facts.d)
+- `references/complete-example.md` - Complete example (birthday party planning)
 
 Load as needed for detailed guidance.

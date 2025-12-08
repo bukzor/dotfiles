@@ -211,6 +211,4 @@ Run validation script on all files.
 ## Tool Support
 
 **Validation** (prevents errors):
-- `scripts/validate-frontmatter.py` - Check schema compliance
-
-**Recommended**: Run validation before committing changes.
+- `bin/validate-frontmatter` - Check schema compliance recursively
