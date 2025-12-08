@@ -55,34 +55,34 @@ frontmatter is used, schema is required to prevent drift.
 
 ### 1. Directory Listing = Source of Truth
 
-**Never enumerate directory contents in documentation.**
+**CLAUDE.md enables maintenance decisions, not content discovery.**
 
-❌ Wrong: "Tools include: Goose, Aider, Cline, Cursor..." ✅ Right: "Browse
-tools.d/ for individual tool profiles"
+After reading, Claude must determine: "Does X belong here?" Content discovery is `ls`.
 
-**Why**: Enumerations become stale. Directory listings (ls, find) stay current.
+❌ "Tools: Goose, Aider..." / "PRs: #123, #456..." / "Contains: api.md, auth.md"
+
+Never enumerate—including "snapshots" or "current state."
 
 ### 2. CLAUDE.md for Future Agents
 
 **Root CLAUDE.md**: Common principles (pushed up from per-directory guides)
-**Per-directory CLAUDE.md**: Category-specific guidance for creating files in
-that `.d/`
+**Per-directory CLAUDE.md**: Category-specific guidance for that `.d/`
 
-**Purpose**: Help future agents (possibly different instances, models, or you
-later) maintain and extend the collection without rediscovering patterns.
+After reading `x.d/CLAUDE.md`, agent must know:
+- What belongs here (concept, not enumeration)
+- What does NOT belong (boundaries)
+- When to add/read files here
 
-### 3. Overview Files (x.md)
+### 3. Summary Files (x.md)
 
-**Each `x.md` describes what's in `x.d/` conceptually** - helps readers decide
-whether to dive into details.
+**Created only at user request.** Summarizes `x.d/` to help decide whether to dive in.
 
-Focus on:
+If present, requires frontmatter:
+```yaml
+last-updated: YYYY-MM-DD
+```
 
-- What's there (concept, not enumeration)
-- When to read it
-- What's NOT there (boundaries)
-
-**Not**: Directory listings, detailed content summaries.
+Listings aren't helpful here—`ls` serves users better.
 
 ### 4. Homogeneous `.d/` Collections
 
