@@ -1,0 +1,14 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Schema for cake decisions in cake.d/
+type: object
+additionalProperties: false
+required:
+  - status
+properties:
+  status:
+    description: Whether this aspect of the cake is finalized
+    type: string
+    enum: [decided, pending]
+  decision:
+    description: The chosen option (present when status is decided)
+    type: string

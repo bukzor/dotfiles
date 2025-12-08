@@ -1,0 +1,19 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Schema for guest profiles in guests.d/
+type: object
+additionalProperties: false
+required:
+  - rsvp
+properties:
+  rsvp:
+    description: Current RSVP status for this guest
+    type: string
+    enum: [confirmed, pending, declined]
+  allergies:
+    description: Food allergies that affect menu planning (empty array if none)
+    type: array
+    items:
+      type: string
+  parent-contact:
+    description: Phone number for guest's parent/guardian
+    type: string

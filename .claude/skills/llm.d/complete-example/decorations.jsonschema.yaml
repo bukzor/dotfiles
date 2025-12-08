@@ -1,0 +1,15 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Schema for decoration items in decorations.d/
+type: object
+additionalProperties: false
+required:
+  - status
+  - budget
+properties:
+  status:
+    description: Whether this decoration item is finalized
+    type: string
+    enum: [decided, pending]
+  budget:
+    description: Allocated or spent amount in dollars
+    type: number

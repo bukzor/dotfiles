@@ -29,7 +29,7 @@ repository:
   format: uri  # Validate URLs
 
 date:
-  pattern: '^\d{4}(-\d{2})?$'  # YYYY or YYYY-MM
+  type: date  # YAML parses ISO dates (2024-03-10) as date objects
 
 additionalProperties: false  # Strict validation recommended
 ```

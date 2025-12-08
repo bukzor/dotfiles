@@ -1,0 +1,18 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Schema for food items in food.d/
+type: object
+additionalProperties: false
+required:
+  - status
+  - budget
+properties:
+  status:
+    description: Whether this food item is finalized or still being decided
+    type: string
+    enum: [decided, pending]
+  budget:
+    description: Allocated or spent amount in dollars
+    type: number
+  last-updated:
+    description: Required for summary files (e.g., cake.md summarizing cake.d/)
+    type: date

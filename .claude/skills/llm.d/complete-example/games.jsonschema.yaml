@@ -1,0 +1,27 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Schema for party games in games.d/
+type: object
+additionalProperties: false
+required:
+  - duration-minutes
+  - players
+  - location
+properties:
+  duration-minutes:
+    description: Expected time for this activity
+    type: integer
+  players:
+    description: "Player count range, e.g., '4-10' or '6-8'"
+    type: string
+    pattern: '^\d+-\d+$'
+  location:
+    description: Where the game takes place (backyard, living-room, etc.)
+    type: string
+  backup-location:
+    description: Alternative location if primary unavailable (e.g., weather)
+    type: string
+  materials:
+    description: Items needed to run this game
+    type: array
+    items:
+      type: string
