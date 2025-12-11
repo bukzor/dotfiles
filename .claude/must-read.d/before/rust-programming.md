@@ -2,7 +2,7 @@
 
 ## MCP Tools
 
-The rust-analyzer MCP server is lazy-loaded. See `~/.claude/must-read-before.d/lazy-loading/mcp.md`
+The rust-analyzer MCP server is lazy-loaded. See `~/.claude/must-read.d/before/lazy-loading/mcp.md`
 
 Configuration for `.mcp.json`:
 

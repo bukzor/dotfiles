@@ -76,9 +76,9 @@ git commit -C ORIG_HEAD -- <intended-paths...>
 
 This preserves the original commit message while scoping to the correct paths.
 
-### For llm-collab-docs Projects
+### For llm-collab Projects
 
-If project CLAUDE.md has `depends: skills/llm-collab-docs`, before committing:
+If project CLAUDE.md has `depends: skills/llm-collab`, before committing:
 - Update `.claude/todo.md` with completed/new tasks
 - Create or update devlog entry documenting the session
 
