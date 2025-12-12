@@ -1,0 +1,89 @@
+#!/bin/bash
+# Initialize LLM-collaborative documentation structure
+
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+PROJECT_ROOT=${1:-.}
+cd "$PROJECT_ROOT"
+
+# Locate skeleton directory
+HERE="$(cd "$(dirname "$0")"; pwd)"
+SKILL_DIR="$(cd "$HERE/.." && pwd)"
+SKELETON="$SKILL_DIR/skeleton"
+
+echo "🚀 Initializing LLM-collaborative documentation structure..."
+
+# Create directory structure
+mkdir -p .claude/todo.d
+mkdir -p docs/{adr,architecture,milestones,devlog,examples}
+
+echo "✅ Created directory structure"
+
+# Create CLAUDE.md
+if [ ! -f CLAUDE.md ]; then
+  cp "$SKELETON/CLAUDE.md" CLAUDE.md
+  echo "✅ Created CLAUDE.md"
+fi
+
+# Create .gitkeep for todo.d
+if [ ! -f .claude/todo.d/.gitkeep ]; then
+  touch .claude/todo.d/.gitkeep
+  echo "✅ Created .claude/todo.d/ directory"
+fi
+
+# Create ROADMAP.md
+if [ ! -f ROADMAP.md ]; then
+  cp "$SKELETON/ROADMAP.md" ROADMAP.md
+  echo "✅ Created ROADMAP.md"
+fi
+
+# Create CONTRIBUTING.md
+if [ ! -f CONTRIBUTING.md ]; then
+  cp "$SKELETON/CONTRIBUTING.md" CONTRIBUTING.md
+  echo "✅ Created CONTRIBUTING.md"
+fi
+
+# Create docs/adr/CLAUDE.md
+if [ ! -f docs/adr/CLAUDE.md ]; then
+  cp "$SKELETON/docs/adr/CLAUDE.md" docs/adr/CLAUDE.md
+  echo "✅ Created docs/adr/CLAUDE.md"
+fi
+
+# Create docs/devlog/CLAUDE.md
+if [ ! -f docs/devlog/CLAUDE.md ]; then
+  cp "$SKELETON/docs/devlog/CLAUDE.md" docs/devlog/CLAUDE.md
+  echo "✅ Created docs/devlog/CLAUDE.md"
+fi
+
+# Create docs/architecture/overview.md
+if [ ! -f docs/architecture/overview.md ]; then
+  cp "$SKELETON/docs/architecture/overview.md" docs/architecture/overview.md
+  echo "✅ Created docs/architecture/overview.md"
+fi
+
+echo "✅ Helper scripts available at: $SKILL_DIR/bin/"
+
+# Create first devlog entry
+if [ ! -f "docs/devlog/$(date +%Y-%m-%d).md" ]; then
+  "$HERE/llm-collab-devlog"
+  echo "✅ Created first devlog entry"
+fi
+
+echo ""
+echo "🎉 Documentation structure initialized!"
+echo ""
+echo "Next steps:"
+echo "  1. Edit CLAUDE.md with project-specific guidance"
+echo "  2. Create ADRs: llm-collab-adr \"Your decision\""
+echo "  3. Create devlogs: llm-collab-devlog"
