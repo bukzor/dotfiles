@@ -16,6 +16,7 @@
   - [x] llm-collab-adr: heredoc → sed from skeleton template
   - [x] llm-collab-idea: heredoc → sed from skeleton template
   - [x] Created missing skeleton/docs/adr/README.md
+- [ ] Check other scripts for docs/ → docs/dev/ migration needed (scan llm-collab and other skills)
 
 ## Later
 
