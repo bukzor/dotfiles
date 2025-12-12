@@ -11,13 +11,20 @@ git -C /path/to/project diff HEAD~1
 
 ### Path Scoping
 
-Scope operations to specific paths:
+Always scope operations to specific paths. Use `.` for current directory:
 
 ```bash
-git status <path>
-git diff <path>
-git log <path>
+git status -s .
+git diff .
+git log --oneline -10 .
 git commit <path...> -m "message"
+```
+
+Other paths:
+```bash
+git status -s path/to/file
+git diff path/to/directory/
+git commit path1 path2 path3 -m "message"
 ```
 
 ### Index Hygiene
