@@ -27,7 +27,7 @@ skill/
 │       └── todo.d/
 │           └── YYYY-MM-DD-000-example-task.md
 ├── bin/
-│   └── new-todo
+│   └── llm-subtask-todo
 └── SKILL.md
 ```
 
@@ -37,7 +37,7 @@ cp "$SKELETON" "$FILE"
 ```
 
 **Templates include:**
-- Ownership header: `<anthropic-skill-ownership subtask />`
+- Ownership header: `<anthropic-skill-ownership llm-subtask />`
 - Section headers
 - Example content with placeholders
 

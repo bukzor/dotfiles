@@ -6,8 +6,8 @@
 ## Context
 
 Skills often have related concerns that overlap. For example:
-- The llm-collab-docs skill defines devlog structure
-- The subtask skill manages task tracking that integrates with devlogs
+- The llm-collab skill defines devlog structure
+- The llm-subtask skill manages task tracking that integrates with devlogs
 
 When skills need to reference each other's domains, they can either:
 1. Duplicate the content (causing drift and maintenance burden)
@@ -18,7 +18,7 @@ When skills need to reference each other's domains, they can either:
 Skills reference each other using the "load X skill" pattern:
 
 ```markdown
-**For devlog structure and conventions**, load the llm-collab-docs skill.
+**For devlog structure and conventions**, load the llm-collab skill.
 ```
 
 This pattern:
@@ -27,14 +27,14 @@ This pattern:
 - Provides enough context for the user to understand why
 
 **Reciprocal references:** Both skills should reference each other at their integration points. For example:
-- subtask skill: "For devlog conventions, load llm-collab-docs skill"
-- llm-collab-docs devlog section: "For task tracking, use the subtask skill"
+- llm-subtask skill: "For devlog conventions, load llm-collab skill"
+- llm-collab devlog section: "For task tracking, use the llm-subtask skill"
 
 ## Alternatives Considered
 
 ### Direct file path links
 ```markdown
-See ~/.claude/skills/subtask/SKILL.md for task tracking.
+See ~/.claude/skills/llm-subtask/SKILL.md for task tracking.
 ```
 - **Pros:** Direct, works without skill system
 - **Cons:** Brittle paths, bypasses skill loading, doesn't trigger skill context

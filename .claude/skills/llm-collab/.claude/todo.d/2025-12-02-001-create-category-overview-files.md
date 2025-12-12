@@ -1,15 +1,15 @@
-# Create category overview files for references.d/
+# Create category overview files for references.kb/
 
 **Priority:** Low
 **Complexity:** Low
-**Context:** references.d/ has three categories without overview/index files
+**Context:** references.kb/ has three categories without overview/index files
 
 ## Problem Statement
 
-references.d/ has three category directories without guidance on what they contain or when to read them:
-- file-types.d/
-- guidelines.d/
-- workflows.d/
+references.kb/ has three category directories without guidance on what they contain or when to read them:
+- file-types.kb/
+- guidelines.kb/
+- workflows.kb/
 
 Users/LLMs may not know which category to load for their question.
 
@@ -19,21 +19,21 @@ Add overview files at category level:
 
 **Option A: README.md per category**
 ```
-references.d/file-types.d/README.md
-references.d/guidelines.d/README.md
-references.d/workflows.d/README.md
+references.kb/file-types.kb/README.md
+references.kb/guidelines.kb/README.md
+references.kb/workflows.kb/README.md
 ```
 
 **Option B: CLAUDE.md per category (LLM-specific guidance)**
 ```
-references.d/file-types.d/CLAUDE.md
-references.d/guidelines.d/CLAUDE.md
-references.d/workflows.d/CLAUDE.md
+references.kb/file-types.kb/CLAUDE.md
+references.kb/guidelines.kb/CLAUDE.md
+references.kb/workflows.kb/CLAUDE.md
 ```
 
 **Option C: Both** (README for humans, CLAUDE.md for agents)
 
-**Option D: Single references.d/README.md** (index all three categories)
+**Option D: Single references.kb/README.md** (index all three categories)
 
 ## Implementation Steps
 

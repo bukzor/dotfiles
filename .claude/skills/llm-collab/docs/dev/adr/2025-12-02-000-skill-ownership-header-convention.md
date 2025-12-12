@@ -15,10 +15,10 @@ When documentation and configuration files are managed by Claude Code skills, th
 Files managed by skills include an XML ownership header at the top:
 
 ```xml
-<anthropic-skill-ownership subtask />
+<anthropic-skill-ownership llm-subtask />
 ```
 
-Where `subtask` is replaced with the owning skill name.
+Where `llm-subtask` is replaced with the owning skill name.
 
 **Placement:** First line of file, before any content.
 
@@ -26,13 +26,13 @@ Where `subtask` is replaced with the owning skill name.
 - Unambiguous, parseable syntax
 - Self-closing tag is minimal
 - Works in markdown, comments, anywhere
-- Extensible if needed (e.g., `<anthropic-skill-ownership subtask version="1.0" />`)
+- Extensible if needed (e.g., `<anthropic-skill-ownership llm-subtask version="1.0" />`)
 
 ## Alternatives Considered
 
 ### Markdown comment
 ```markdown
-<!-- Managed by subtask skill -->
+<!-- Managed by llm-subtask skill -->
 ```
 - **Pros:** Familiar syntax, invisible in rendered markdown
 - **Cons:** Not parseable, varies by file type, easy to confuse with regular comments
@@ -40,7 +40,7 @@ Where `subtask` is replaced with the owning skill name.
 ### YAML frontmatter
 ```yaml
 ---
-skill: subtask
+skill: llm-subtask
 ---
 ```
 - **Pros:** Standard in many tools
@@ -48,7 +48,7 @@ skill: subtask
 
 ### Filename convention
 ```
-.subtask-managed/todo.md
+.llm-subtask-managed/todo.md
 ```
 - **Pros:** Visible in filesystem
 - **Cons:** Changes file paths, awkward nested directories

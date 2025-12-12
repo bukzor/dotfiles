@@ -45,14 +45,14 @@ Add `.claude/ideas.d/YYYY-MM-DD-NNN-title.md` pattern following same structure a
 
 ## Implementation Steps
 
-1. [ ] Create `.claude/ideas.d/` directory
-2. [ ] Create template file (similar to todo.d/ template)
-3. [ ] Create `scripts/new-idea.sh` helper script
+1. [x] Create `.claude/ideas.d/` directory (skeleton has it)
+2. [x] Create template file (similar to todo.d/ template)
+3. [x] Create `bin/llm-collab-idea` helper script
    - Auto-increment YYYY-MM-DD-NNN pattern
    - Create from template
    - Support DATE= for backdating
-4. [ ] Update SKILL.md to document ideas.d/ pattern and lifecycle
-5. [ ] Add example idea file for reference
+4. [x] Update SKILL.md to document ideas.d/ pattern and lifecycle
+5. [x] Add example idea file for reference (skeleton has it)
 
 ## Open Questions
 
@@ -61,10 +61,10 @@ Add `.claude/ideas.d/YYYY-MM-DD-NNN-title.md` pattern following same structure a
 
 ## Success Criteria
 
-- [ ] ideas.d/ directory exists with template
-- [ ] new-idea.sh script works (creates dated, numbered files)
-- [ ] SKILL.md documents the pattern
-- [ ] Clear guidance on when to use ideas.d/ vs todo.d/
+- [x] ideas.d/ directory exists with template
+- [x] new-idea.sh script works (creates dated, numbered files)
+- [x] SKILL.md documents the pattern
+- [x] Clear guidance on when to use ideas.d/ vs todo.d/
 
 ## Notes
 

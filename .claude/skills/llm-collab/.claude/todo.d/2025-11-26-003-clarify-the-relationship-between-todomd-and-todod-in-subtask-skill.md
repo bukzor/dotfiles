@@ -23,7 +23,7 @@ Add section showing how strategic todos are referenced from todo.md using relati
 **Example pattern from llm-collab-docs `.claude/todo.md`:**
 ```markdown
 - [ ] todo.d/2025-11-26-000-destructure-must-read-beforedcreating-documentationmd-into-referencesd-llmd-structure.md
-  - [ ] Finalize references.d/ categorization structure
+  - [ ] Finalize references.kb/ categorization structure
   - [ ] Split content into small focused files
 ```
 
