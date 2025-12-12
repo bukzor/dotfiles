@@ -1,0 +1,57 @@
+#!/bin/bash
+# Create new TODO file with date-based auto-incrementing number
+
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+if [ -z "${1:-}" ]; then
+  echo >&2 "Usage: new-todo \"TODO title\""
+  echo >&2 "       DATE=YYYY-MM-DD new-todo \"TODO title\"  (for backdating)"
+  exit 1
+fi
+
+TITLE="$*"
+
+# Check .claude/ exists (signal we're in right place)
+if [ ! -d ".claude" ]; then
+  echo >&2 "Error: .claude/ not found in $PWD"
+  echo >&2 "If this is the right location, run: mkdir -p .claude && !!"
+  exit 1
+fi
+
+# Ensure todo.d/ exists within .claude/
+mkdir -p .claude/todo.d
+
+DATE=${DATE:-$(date +%Y-%m-%d)}
+LAST=$(find .claude/todo.d -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
+
+if [ -z "$LAST" ]; then
+  NUM="000"
+else
+  # Extract number after date prefix
+  LAST_NUM=$(basename "$LAST" | sed -E "s/^$DATE-([0-9]{3})-.*/\1/")
+  NUM=$(printf "%03d" $((10#$LAST_NUM + 1)))
+fi
+
+# Create slug from title
+SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
+FILE=".claude/todo.d/$DATE-$NUM-$SLUG.md"
+
+# Get skeleton template path
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SKELETON="$SCRIPT_DIR/../skeleton/.claude/todo.d/YYYY-MM-DD-000-example-task.md"
+
+# Copy skeleton template
+cp "$SKELETON" "$FILE"
+
+echo "✅ Created $FILE"

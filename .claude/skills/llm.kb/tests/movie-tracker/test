@@ -1,0 +1,62 @@
+#!/bin/bash
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+cd "$(dirname "$0")"
+workdir="$(mktemp -d)"
+fakehome="$(mktemp -d)"
+
+# Delayed cleanup: setsid detaches from process group so it survives test exit
+setsid sh -c "sleep 600; rm -rf '$workdir' '$fakehome'" >/dev/null 2>&1 &
+
+# Set up fake home with only the skill definition and credentials
+mkdir -p "$fakehome/.claude/skills/llm.kb"
+cp ~/.claude/skills/llm.kb/SKILL.md "$fakehome/.claude/skills/llm.kb/"
+ln -s ~/.claude/.credentials.json "$fakehome/.claude/"
+
+# Set up working directory
+cp -ar . "$workdir"
+cd "$workdir"
+
+echo "## Working directory: $workdir"
+echo "## Fake home: $fakehome"
+
+allowed='Read Write Edit(*) Bash(mkdir:*) Bash(cat:*) Bash(tail:*) Glob Skill'
+
+echo "## Phase 1: Create knowledge base"
+HOME="$fakehome" claude -p 'Execute the task in CLAUDE.md' \
+    --output-format stream-json \
+    --verbose \
+    --model haiku \
+    --add-dir "$workdir" \
+    --allowedTools "$allowed" |
+  tee claude-session.jsonl |
+  claude-jsonl-display
+
+echo "## Phase 1 artifacts:"
+find . -type f -print0 | xargs -0 wc
+
+echo "## Phase 2: Test multi-agent handoff"
+rm CLAUDE.d/movie-tracker.md
+
+HOME="$fakehome" claude -p 'What sci-fi movies have I watched?' \
+    --output-format stream-json \
+    --verbose \
+    --model haiku \
+    --add-dir "$workdir" \
+    --allowedTools "$allowed" |
+  tee -a claude-session.jsonl |
+  claude-jsonl-display
+
+echo "## Final artifacts:"
+find . -type f -print0 | xargs -0 wc

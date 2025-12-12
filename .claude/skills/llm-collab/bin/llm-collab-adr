@@ -27,15 +27,31 @@ fi
 
 TITLE="$*"
 
+# Migrate old location to new location if needed
+if [ -d "docs/adr" ]; then
+  if [ -d "docs/dev/adr" ]; then
+    echo >&2 "Error: Both docs/adr/ and docs/dev/adr/ exist - manual resolution required"
+    exit 1
+  fi
+  echo >&2 "⚠️  Found docs/adr/ - migrating to docs/dev/adr/"
+  mkdir -p docs/dev
+  if git mv docs/adr docs/dev/adr 2>/dev/null; then
+    echo >&2 "✅ Migrated docs/adr/ → docs/dev/adr/ (git mv)"
+  else
+    mv docs/adr docs/dev/adr
+    echo >&2 "✅ Migrated docs/adr/ → docs/dev/adr/ (mv)"
+  fi
+fi
+
 # Ensure we're in project root
-if [ ! -d "docs/adr" ]; then
-  echo >&2 "Error: docs/adr/ not found in $PWD"
-  echo >&2 "If this is the right location, run: mkdir -p docs/adr && !!"
+if [ ! -d "docs/dev/adr" ]; then
+  echo >&2 "Error: docs/dev/adr/ not found in $PWD"
+  echo >&2 "If this is the right location, run: mkdir -p docs/dev/adr && !!"
   exit 1
 fi
 
 DATE=${DATE:-$(date +%Y-%m-%d)}
-LAST=$(find docs/adr -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
+LAST=$(find docs/dev/adr -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
 
 if [ -z "$LAST" ]; then
   NUM="000"
@@ -47,9 +63,9 @@ fi
 
 # Create slug from title
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
-FILE="docs/adr/$DATE-$NUM-$SLUG.md"
+FILE="docs/dev/adr/$DATE-$NUM-$SLUG.md"
 
 sed -e "s/Example Decision Title/$TITLE/g" -e "s/YYYY-MM-DD/$DATE/g" \
-    "$SKELETON/docs/adr/YYYY-MM-DD-000-example-decision.md" > "$FILE"
+    "$SKELETON/docs/dev/adr/YYYY-MM-DD-000-example-decision.md" > "$FILE"
 
 echo "✅ Created $FILE"

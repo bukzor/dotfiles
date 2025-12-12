@@ -1,0 +1,31 @@
+#!/bin/bash
+# Ensure .claude/todo.md exists (idempotent)
+# Prints path to stdout
+
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+# Check .claude/ exists (signal we're in right place)
+if [ ! -d ".claude" ]; then
+  echo >&2 "Error: .claude/ not found in $PWD"
+  echo >&2 "If this is the right location, run: mkdir -p .claude && !!"
+  exit 1
+fi
+
+if [ ! -f .claude/todo.md ]; then
+  HERE="$(cd "$(dirname "$0")"; pwd)"
+  SKELETON="$HERE/../skeleton/.claude/todo.md"
+  cp "$SKELETON" .claude/todo.md
+fi
+
+echo "$PWD/.claude/todo.md"

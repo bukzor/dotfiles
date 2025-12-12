@@ -1,0 +1,70 @@
+#!/bin/bash
+# Session start helper - reads key files for orientation
+
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+HERE="$(cd "$(dirname "$0")"; pwd)"
+
+echo "📖 Reading session context..."
+echo ""
+
+# Read CLAUDE.md
+if [ -f CLAUDE.md ]; then
+  echo "=== CLAUDE.md ==="
+  cat CLAUDE.md
+  echo ""
+fi
+
+# List pending TODOs
+if [ -d .claude/todo.d ]; then
+  TODO_FILES=$(find .claude/todo.d -maxdepth 1 -name '*.md' -print0 | xargs -r0 ls -1t)
+  if [ -n "$TODO_FILES" ]; then
+    echo "=== Pending TODOs (.claude/todo.d/) ==="
+    echo "$TODO_FILES" | while read -r todo; do
+      TITLE=$(sed -n '1s/^# //p' "$todo")
+      echo "  - $TITLE ($(basename "$todo"))"
+    done
+    echo ""
+  fi
+fi
+
+# Read latest devlog
+if [ -d docs/devlog ]; then
+  LAST_LOG=$(find docs/devlog -maxdepth 1 -name '*.md' -print0 | xargs -r0 ls -1t | sed -n '/README/d; 1p')
+  if [ -n "$LAST_LOG" ]; then
+    echo "=== Latest Devlog: $(basename "$LAST_LOG") ==="
+    cat "$LAST_LOG"
+    echo ""
+  fi
+fi
+
+# Show recent ADRs
+if [ -d docs/adr ]; then
+  ADR_FILES=$(find docs/adr -maxdepth 1 -name '*.md' -print0 | xargs -r0 ls -1t | sed -n '/README/d; 1,3p')
+  if [ -n "$ADR_FILES" ]; then
+    echo "=== Recent ADRs ==="
+    echo "$ADR_FILES" | while read -r adr; do
+      TITLE=$(sed -n '1s/^# //p' "$adr")
+      echo "  - $TITLE ($(basename "$adr"))"
+    done
+    echo ""
+  fi
+fi
+
+echo "✅ Session context loaded"
+echo ""
+echo "Quick commands:"
+echo "  - Create TODO: $HERE/new-todo.sh \"Task title\""
+echo "  - Create ADR: $HERE/new-adr.sh \"Decision title\""
+echo "  - Create devlog: $HERE/new-devlog.sh"

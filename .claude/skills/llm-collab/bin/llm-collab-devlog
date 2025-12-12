@@ -27,14 +27,30 @@ fi
 
 TITLE="$*"
 
-if [ ! -d "docs/devlog" ]; then
-  echo >&2 "Error: docs/devlog/ not found in $PWD"
-  echo >&2 "If this is the right location, run: mkdir -p docs/devlog && !!"
+# Migrate old location to new location if needed
+if [ -d "docs/devlog" ]; then
+  if [ -d "docs/dev/devlog" ]; then
+    echo >&2 "Error: Both docs/devlog/ and docs/dev/devlog/ exist - manual resolution required"
+    exit 1
+  fi
+  echo >&2 "⚠️  Found docs/devlog/ - migrating to docs/dev/devlog/"
+  mkdir -p docs/dev
+  if git mv docs/devlog docs/dev/devlog 2>/dev/null; then
+    echo >&2 "✅ Migrated docs/devlog/ → docs/dev/devlog/ (git mv)"
+  else
+    mv docs/devlog docs/dev/devlog
+    echo >&2 "✅ Migrated docs/devlog/ → docs/dev/devlog/ (mv)"
+  fi
+fi
+
+if [ ! -d "docs/dev/devlog" ]; then
+  echo >&2 "Error: docs/dev/devlog/ not found in $PWD"
+  echo >&2 "If this is the right location, run: mkdir -p docs/dev/devlog && !!"
   exit 1
 fi
 
 DATE=${DATE:-$(date +%Y-%m-%d)}
-LAST=$(find docs/devlog -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
+LAST=$(find docs/dev/devlog -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
 
 if [ -z "$LAST" ]; then
   NUM="000"
@@ -46,9 +62,9 @@ fi
 
 # Create slug from title
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
-FILE="docs/devlog/$DATE-$NUM-$SLUG.md"
+FILE="docs/dev/devlog/$DATE-$NUM-$SLUG.md"
 
 sed -e "s/YYYY-MM-DD/$DATE/g" \
-    "$SKELETON/docs/devlog/YYYY-MM-DD-000-example-entry.md" > "$FILE"
+    "$SKELETON/docs/dev/devlog/YYYY-MM-DD-000-example-entry.md" > "$FILE"
 
 echo "Created $FILE"
