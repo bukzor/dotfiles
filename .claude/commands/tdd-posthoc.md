@@ -1,4 +1,4 @@
----
+--- # workaround: anthropics/claude-code#13003
 requires:
   - Skill(llm.kb)
 ---
@@ -11,56 +11,67 @@ Test-driven development applied retroactively to existing code. Use when code ex
 
 1. **Read the implementation** - understand the code thoroughly before attempting to break it
 
-2. **Plan breakages** - before reading or running tests, list ways to break the code. Assume existing tests are non-functional. Record the plan (see "Tracking" below).
+2. **Plan mutations** - before reading tests, existing mutation plans, or running tests:
+   a. List mutations verbally in the conversation (not just mentally)
+   b. Assume existing tests are non-functional. The goal is independent reasoning about breakages.
 
-3. **Pick a breakage** - select one not yet addressed from the plan. Consider adding any new ideas that come to mind.
+3. **Verify/record mutations** - for each planned mutation:
+   - If a file exists that appears to match, read it to verify alignment
+   - If no matching file exists, create one with `status: todo`
+   - Note which of yours overlap with existing, which are unique
 
-4. **Inject the bug** - modify the implementation to be subtly wrong
+4. **Pick a mutation** - select a `status: todo` item. If exhausted, ask the user. Stop when neither has more ideas.
 
-5. **Run tests**
-   - If tests pass: coverage is deficient, continue to step 6
-   - If tests fail: tests already catch this bug - mark as "done", revert, repeat from step 3
+5. **Inject the bug**
 
-6. **Strengthen tests**
-   - First, find an existing test whose name suggests it should catch this bug
-   - If found, strengthen it to actually catch the bug
-   - If not found, add a new test with a clear name describing what it tests (following surrounding style)
+6. **Harden tests** (see below)
 
-7. **Verify test fails** - the injected bug should now cause test failure
+7. **Revert** the mutation
 
-8. **Minimally fix** - change the implementation just enough to pass the test. Mark the breakage as "done". Consider adding any new breakage ideas to the plan.
+8. **Repeat** from step 4
 
-9. **Repeat** - continue from step 3. If plan exhausted, consider new ideas or ask the user. Stop when neither has more ideas.
+## Harden Tests
+
+Strengthen until tests reliably catch the injected bug:
+
+1. Run tests - should fail
+   - If pass: add or improve a test to catch this bug, repeat from 1
+2. Try to create buggy-passing code
+   - If you can: tighten the test to reject this variant, repeat from 1
+3. Revert bug, run tests - should pass
+   - If pass: `git add` test and implementation changes, mark `status: done`, return
+   - If fail: revert test changes, mark `status: gap`, return
 
 ## Tracking
 
-Record breakage plans in `docs/dev/functional-testing.kb/`. If it doesn't exist, create it per Skill(llm.kb). Each breakage is one file with frontmatter:
+Record mutations in `docs/dev/mutation-testing.kb/`. If it doesn't exist, create it per Skill(llm.kb). Each mutation is one file with frontmatter per the schema in Appendix A.
 
-```yaml
----
-status: todo | done
----
-```
-
-- `todo` - not yet attempted
-- `done` - verified that an appropriately-named test fails when this is broken
-
-File names describe the breakage (e.g., `mode-changes-ignored.md`, `deletions-not-detected.md`).
+File names describe the mutation - how to break the code, not the symptom.
 
 ## Principles
 
-- **Don't read tests first** - tests may give false confidence; read implementation and reason about what could break
+- **Don't read tests or existing plans first** - tests may give false confidence; existing plans short-circuit your reasoning. Read ONLY the implementation, then reason independently about what could break. Record your plan BEFORE looking at what others identified.
 - **Equality over partial matching** - prefer `assert_eq!(actual, expected)` over `assert!(actual.contains(...))`
 - **Tests should panic on exceptions** - use `unwrap()` freely in tests; treat it as "assert ok"
 - **Minimal fixes expose more bugs** - a fix that passes one test but fails another reveals coverage gaps
 
-## Example Bug Categories
+## Appendix A: Schema
 
-- Missing comparisons (checking A but not B)
-- Off-by-one in loops or indices
-- Wrong operator (< vs <=, && vs ||)
-- Missing null/empty checks
-- Type coercion issues
-- Boundary conditions
-- State mutations in wrong order
-- Missing cleanup/rollback on error paths
+```yaml
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: Mutation Testing
+description: Tracks planned code mutations for post-hoc TDD
+
+type: object
+required: [status]
+additionalProperties: false
+
+properties:
+  status:
+    type: string
+    enum: [todo, done, gap]
+    description: |
+      todo - not yet attempted
+      done - tests reliably catch this mutation
+      gap - unable to harden tests (deferred to Opus)
+```
