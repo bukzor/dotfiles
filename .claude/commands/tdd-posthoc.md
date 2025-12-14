@@ -7,6 +7,13 @@ requires:
 
 Test-driven development applied retroactively to existing code. Use when code exists but test coverage is uncertain.
 
+## Principles
+
+- **Inject the bug first** - never write tests without a bug injected. The procedure exists to prevent writing tests that pass by accident.
+- **Don't read tests or existing plans first** - tests may give false confidence; existing plans short-circuit your reasoning. Read ONLY the implementation, then reason independently about what could break.
+- **Equality over partial matching** - prefer `assert_eq!(actual, expected)` over `assert!(actual.contains(...))`
+- **Tests should panic on exceptions** - use `unwrap()` freely in tests; treat it as "assert ok"
+
 ## Procedure
 
 1. **Read the implementation** - understand the code thoroughly before attempting to break it
@@ -26,34 +33,26 @@ Test-driven development applied retroactively to existing code. Use when code ex
 
 6. **Harden tests** (see below)
 
-7. **Revert** the mutation
-
-8. **Repeat** from step 4
+7. **Repeat** from step 4
 
 ## Harden Tests
 
 Strengthen until tests reliably catch the injected bug:
 
-1. Run tests - should fail
-   - If pass: add or improve a test to catch this bug, repeat from 1
-2. Try to create buggy-passing code
-   - If you can: tighten the test to reject this variant, repeat from 1
-3. Revert bug, run tests - should pass
-   - If pass: `git add` test and implementation changes, mark `status: done`, return
-   - If fail: revert test changes, mark `status: gap`, return
+0. Add or improve a test to catch the bug, then run tests
+   - If tests pass:
+     - try again, but after 2-5 attempts: revert test changes, mark `status: gap`
+1. Try to create buggy-passing code
+   - If you can: repeat from 0
+2. Revert bug, run tests - should pass
+   - If pass: `git add` test and implementation changes, mark `status: done`
+   - If fail: revert test changes, mark `status: gap`
 
 ## Tracking
 
 Record mutations in `docs/dev/mutation-testing.kb/`. If it doesn't exist, create it per Skill(llm.kb). Each mutation is one file with frontmatter per the schema in Appendix A.
 
 File names describe the mutation - how to break the code, not the symptom.
-
-## Principles
-
-- **Don't read tests or existing plans first** - tests may give false confidence; existing plans short-circuit your reasoning. Read ONLY the implementation, then reason independently about what could break. Record your plan BEFORE looking at what others identified.
-- **Equality over partial matching** - prefer `assert_eq!(actual, expected)` over `assert!(actual.contains(...))`
-- **Tests should panic on exceptions** - use `unwrap()` freely in tests; treat it as "assert ok"
-- **Minimal fixes expose more bugs** - a fix that passes one test but fails another reveals coverage gaps
 
 ## Appendix A: Schema
 
