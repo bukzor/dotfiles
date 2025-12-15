@@ -9,7 +9,7 @@
 
 ```bash
 git add .claude/todo.md docs/dev/devlog/YYYY-MM-DD.md
-git commit -m "Update tasks and devlog"
+git commit-staged .claude/todo.md docs/dev/devlog/YYYY-MM-DD.md -- -m "Update tasks and devlog"
 ```
 
 ## After Milestone Completion

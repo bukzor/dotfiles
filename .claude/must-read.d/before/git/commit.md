@@ -7,17 +7,25 @@ requires:
 
 ### Always Use git-commit-staged
 
+> **Note:** `git-commit-staged` is maintained locally at `~/repo/github.com/bukzor/git-partial.prototyping/git-commit-staged/`. Beta quality — report bugs, fix as we go.
+
 ```bash
 git add paths...
-git commit-staged -m "message" paths...
+git commit-staged paths... -- -m "message"
 ```
 
 Never use `git commit -- paths` - it commits from working copy, not index.
 
 **Dry-run first:**
 ```bash
-git commit-staged -n -m "message" paths...
+git commit-staged -n paths...
 ```
+
+Arguments after `--` are passed through to `git commit`, enabling:
+- `--amend`, `--fixup`, `-C` (message reuse)
+- GPG signing (`-S`)
+- Commit hooks
+- Editor integration (`-e`)
 
 ### Inferring Commit Boundaries
 
@@ -54,7 +62,8 @@ Before amending, verify:
 - It hasn't been pushed to main/master
 - Never amend other developers' commits
 
-Use `git commit --amend` for the last commit, `git commit --fixup SHA` for older commits.
+Use `git commit-staged paths... -- --amend --no-edit` for the last commit,
+`git commit-staged paths... -- --fixup SHA` for older commits.
 
 ### Commit Message Format
 
@@ -64,6 +73,9 @@ Use heredoc to prevent shell escaping failures:
 bash <<'BASH'
 git -C <directory> add path/to/file1 path/to/dir/
 git -C <directory> commit-staged \
+  path/to/file1 \
+  path/to/dir/ \
+  -- \
   -m "Short summary usable as PR title
 
 Describe the change in more detail, usable as PR description.
@@ -71,10 +83,7 @@ Focus on why over what.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>" \
-  path/to/file1 \
-  path/to/dir/ \
-;
+Co-Authored-By: Claude <noreply@anthropic.com>"
 BASH
 ```
 
@@ -84,7 +93,7 @@ If a commit accidentally includes staged files from the dirty index:
 
 ```bash
 git reset --soft HEAD^
-git commit-staged -m "$(git log -1 --format=%B ORIG_HEAD)" <intended-paths...>
+git commit-staged <intended-paths...> -- -C ORIG_HEAD
 ```
 
 This preserves the original commit message while scoping to the correct paths.
