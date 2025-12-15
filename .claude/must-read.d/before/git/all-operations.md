@@ -31,6 +31,6 @@ git commit path1 path2 path3 -m "message"
 
 The index may contain staged changes unrelated to current work. Treat index modification as destructive.
 
-- Avoid `git add` for tracked files -- commit paths directly
-- `git add` only for untracked files that must be committed
-- When committing, specify paths to bypass the index
+- Stage changes with `git add` before committing
+- Use `git commit-staged` to commit only staged changes at specific paths
+- Never use `git commit -- paths` - it commits from working copy, not the index

@@ -5,6 +5,20 @@ requires:
 
 ## Git Commit
 
+### Always Use git-commit-staged
+
+```bash
+git add paths...
+git commit-staged -m "message" paths...
+```
+
+Never use `git commit -- paths` - it commits from working copy, not index.
+
+**Dry-run first:**
+```bash
+git commit-staged -n -m "message" paths...
+```
+
 ### Inferring Commit Boundaries
 
 Use mtime to understand the temporal structure of uncommitted changes:
@@ -48,11 +62,8 @@ Use heredoc to prevent shell escaping failures:
 
 ```bash
 bash <<'BASH'
-git \
-  -C <directory> \
-  commit \
-    path/to/file1 \
-    path/to/dir/ \
+git -C <directory> add path/to/file1 path/to/dir/
+git -C <directory> commit-staged \
   -m "Short summary usable as PR title
 
 Describe the change in more detail, usable as PR description.
@@ -61,6 +72,8 @@ Focus on why over what.
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>" \
+  path/to/file1 \
+  path/to/dir/ \
 ;
 BASH
 ```
@@ -71,7 +84,7 @@ If a commit accidentally includes staged files from the dirty index:
 
 ```bash
 git reset --soft HEAD^
-git commit -C ORIG_HEAD -- <intended-paths...>
+git commit-staged -m "$(git log -1 --format=%B ORIG_HEAD)" <intended-paths...>
 ```
 
 This preserves the original commit message while scoping to the correct paths.
