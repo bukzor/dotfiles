@@ -42,17 +42,25 @@ Strengthen until tests reliably catch the injected bug:
 0. Add or improve a test to catch the bug, then run tests
    - If tests pass:
      - try again, but after 2-5 attempts: revert test changes, mark `status: gap`
+       - document what was tried in `## Test Result`
 1. Try to create buggy-passing code
    - If you can: repeat from 0
 2. Revert bug, run tests - should pass
    - If pass: `git add` test and implementation changes, mark `status: done`
+     - document which tests catch it in `## Test Coverage`
    - If fail: revert test changes, mark `status: gap`
+     - document the over-constraint in `## Test Result`
 
 ## Tracking
 
 Record mutations in `docs/dev/mutation-testing.kb/`. If it doesn't exist, create it per Skill(llm.kb). Each mutation is one file with frontmatter per the schema in Appendix A.
 
-File names describe the mutation - how to break the code, not the symptom.
+- File names describe the mutation - how to break the code, not the symptom
+- Body sections:
+  - Description paragraph: what the bug would cause
+  - `## Injection`: specific code change to make
+  - `## Test Coverage` (done): which tests catch it
+  - `## Test Result` (gap): why tests couldn't catch it
 
 ## Appendix A: Schema
 
@@ -73,4 +81,7 @@ properties:
       todo - not yet attempted
       done - tests reliably catch this mutation
       gap - unable to harden tests (deferred to Opus)
+  attempts:
+    type: integer
+    description: Number of strengthening attempts (required for gap)
 ```
