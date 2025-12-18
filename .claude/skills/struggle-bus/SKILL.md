@@ -1,6 +1,6 @@
 ---
 name: struggle-bus
-description: "Load when:\n\n1. User says \"struggle bus\" or \"manual breathing\" OR\n2. User asks \"why did you [unexpected behavior]\" OR\n3. Multiple clarification attempts fail"
+description: "Agent MUST load when:\n\n1. User says \"struggle bus\" or \"manual breathing\" OR\n2. User asks \"why did you [unexpected behavior]\" OR\n3. Multiple clarification attempts fail"
 ---
 
 # Struggle Bus
@@ -80,7 +80,7 @@ Determine if this is:
 If rails are warranted, propose specific updates to:
 
 - CLAUDE.md (add clarifying context or instructions)
-- must-read-before.d/ files (document the ambiguity)
+- must-read.d/before/ files (document the ambiguity)
 - Settings or permissions (if tool-related)
 
 ## Output Format

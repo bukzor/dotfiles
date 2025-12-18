@@ -1,6 +1,6 @@
 ---
-name: subtask
-description: "Agent MUST load when:\n\n1. user gives a terse command starting with \"subtask\" or \"todo\" OR\n2. user mentions multiple things to do in one message OR\n3. user interrupts with a question before current work completes"
+name: llm-subtask
+description: "Agent MUST load when:\n\n1. user gives a terse command starting with \"subtask\" or \"todo\" OR\n2. working with multiple tasks OR\n3. user asks a question during a task"
 ---
 --- # workaround: anthropics/claude-code#13005
 setup: |
@@ -9,7 +9,7 @@ setup: |
     ```yaml
     --- # workaround: anthropics/claude-code#13003
     depends:
-    - skills/subtask
+    - skills/llm-subtask
     ```
 
     And include a "Current Work" section pointing to the todo system:
@@ -17,7 +17,7 @@ setup: |
     ```markdown
     ## Current Work
 
-    Check `.claude/todo.md` and `.claude/todo.d/` for active efforts. Load `Skill(subtask)` for maintenance.
+    Check `.claude/todo.md` and `.claude/todo.d/` for active efforts. Load `Skill("llm-subtask")` for maintenance.
     ```
 
     This gives future sessions a clear entry point for ongoing/planned work.
@@ -75,11 +75,11 @@ These mostly notional, only reified on demand.
 - `todo list` -- Read and display `.claude/todo.md`
 - `todo clear` -- Remove all completed items from the list
 
-**File initialization:** `bin/ensure-todo-md` creates `.claude/todo.md` from skeleton if missing (idempotent).
+**File initialization:** `bin/llm-subtask-init` creates `.claude/todo.md` from skeleton if missing (idempotent).
 
 ### Strategic (Tier 3)
 
-Create planning files via: `~/.claude/skills/subtask/bin/new-todo "Task title"`
+Create planning files via: `~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"`
 
 ## Integration: todo.md + todo.d/
 
@@ -152,7 +152,7 @@ Example output:
 
 **End:** `subtask save` reviews incomplete work:
 - Tactical → `todo push` to `.claude/todo.md`
-- Strategic → `bin/new-todo "title"` creates planning file
+- Strategic → `bin/llm-subtask-todo "title"` creates planning file
 - Trivial → abandon
 
 ## Agent Initiative
@@ -175,7 +175,7 @@ Task tracking and devlog documentation are complementary systems:
 1. `subtask save` reviews incomplete work → updates `.claude/todo.md`
 2. Create/update devlog entry documenting session narrative
 
-**For devlog structure and conventions**, load the llm-collab-docs skill.
+**For devlog structure and conventions**, load the llm-collab skill.
 
 ## References
 

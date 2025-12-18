@@ -60,33 +60,17 @@ knows what belongs here -- not what's currently here.
 - Root CLAUDE.md -- common principles (pushed up from per-directory guides)
 - Per-directory CLAUDE.md -- category-specific guidance for that `.kb/`
 
-Root CLAUDE.md must contain:
+Root CLAUDE.md must have frontmatter declaring this skill:
 
 ```markdown
-## CLAUDE.d/
-
-Your context is incomplete. Run:
-
-    Bash(tail -n9999 CLAUDE.d/**/*.md)
-```
-
-Then create/overwrite `CLAUDE.d/llm-kb.md`:
-
-```bash
-mkdir -p CLAUDE.d
-cat >CLAUDE.d/llm-kb.md <<'EOF'
----
+--- # workaround: anthropics/claude-code#13003
 requires:
-    - skills/llm.kb
+    - Skill(llm.kb)
 ---
-
-# Knowledge Base
-
-This project stores queryable data in `.kb/` directory collections.
-To answer questions about this project, explore these directories.
-See `$CATEGORY.kb/CLAUDE.md` for category-specific guidance.
-EOF
 ```
+
+This ensures any agent working in the project loads the pattern and knows to
+explore `.kb/` directories for queryable data.
 
 After reading `$CATEGORY.kb/CLAUDE.md`, agent must know:
 - What belongs here (concept, not enumeration)

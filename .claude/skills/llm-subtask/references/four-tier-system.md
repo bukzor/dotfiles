@@ -96,7 +96,7 @@ subtask pop:
 └── 2025-11-25-001-fix-authentication-bug.md
 ```
 
-**Creation:** `~/.claude/skills/subtask/bin/new-todo "Task title"`
+**Creation:** `~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"`
 
 **File structure:** Each file contains:
 - Problem statement and context
@@ -120,7 +120,7 @@ subtask pop:
 | Answer question before resuming | 0: Conversational | Pattern |
 | Track work in current conversation | 1: Ephemeral | `subtask push:`/`pop:` |
 | Remember across conversations | 2: Tactical | `todo push:` |
-| Plan complex multi-session work | 3: Strategic | `bin/new-todo` |
+| Plan complex multi-session work | 3: Strategic | `bin/llm-subtask-todo` |
 
 ## Promotion Flow
 
@@ -128,7 +128,7 @@ Work naturally flows from fine → coarse grain as importance/complexity increas
 
 1. **Ephemeral work** during conversation
 2. Conversation ending? Important items → `todo push:` (tactical)
-3. Tactical item needs planning? → `bin/new-todo` (strategic)
+3. Tactical item needs planning? → `bin/llm-subtask-todo` (strategic)
 
 Demotion also occurs:
 - Strategic planning complete → decompose to tactical checkboxes

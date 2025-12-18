@@ -19,9 +19,18 @@ HERE="$(cd "$(dirname "$0")"; pwd)"
 SKILL_DIR="$(cd "$HERE/.." && pwd)"
 SKELETON="$SKILL_DIR/skeleton"
 
+DRY_RUN=0
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -n|--dry-run) DRY_RUN=1; shift ;;
+    *) echo >&2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
 if [ -z "${1:-}" ]; then
-  echo >&2 "Usage: new-adr \"Decision title\""
-  echo >&2 "       DATE=YYYY-MM-DD new-adr \"Decision title\"  (for backdating)"
+  echo >&2 "Usage: llm-collab-adr [-n|--dry-run] \"Decision title\""
+  echo >&2 "       DATE=YYYY-MM-DD llm-collab-adr \"Decision title\"  (for backdating)"
+  echo >&2 "       -n, --dry-run: print path without creating file"
   exit 1
 fi
 
@@ -65,7 +74,13 @@ fi
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
 FILE="docs/dev/adr/$DATE-$NUM-$SLUG.md"
 
+echo "$FILE"
+
+if (( DRY_RUN )); then
+  exit 0
+fi
+
 sed -e "s/Example Decision Title/$TITLE/g" -e "s/YYYY-MM-DD/$DATE/g" \
     "$SKELETON/docs/dev/adr/YYYY-MM-DD-000-example-decision.md" > "$FILE"
 
-echo "✅ Created $FILE"
+echo >&2 "✅ Created"

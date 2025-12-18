@@ -22,10 +22,10 @@ Create a TODO file when:
 
 ```bash
 # Create new TODO (copies skeleton template)
-~/.claude/skills/subtask/bin/new-todo "Task title"
+~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"
 
 # Backdate a TODO
-DATE=2025-11-25 ~/.claude/skills/subtask/bin/new-todo "Task title"
+DATE=2025-11-25 ~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"
 
 # List all TODOs
 ls -1t .claude/todo.d/*.md
@@ -38,10 +38,10 @@ grep -l "keyword" .claude/todo.d/*.md
 
 All task files include ownership header:
 ```xml
-<anthropic-skill-ownership subtask />
+<anthropic-skill-ownership llm-subtask />
 ```
 
-See `~/.claude/skills/subtask/skeleton/.claude/todo.d/` for template structure.
+See `~/.claude/skills/llm-subtask/skeleton/.claude/todo.d/` for template structure.
 
 ## Active TODOs
 

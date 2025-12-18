@@ -16,6 +16,11 @@ Skills declare a `setup:` field in their SKILL.md frontmatter instructing projec
 
 ```yaml
 # In SKILL.md
+---
+name: skillname
+description: "Load when..."
+---
+--- # workaround: anthropics/claude-code#13005
 setup: |
     All projects that depend on this skill should have as `CLAUDE.md` frontmatter:
 
@@ -23,20 +28,34 @@ setup: |
     depends:
         - skills/skillname
     ```
+---
 ```
 
 ```yaml
 # In project CLAUDE.md
+--- # workaround: anthropics/claude-code#13003
 depends:
-    - skills/llm-collab-docs
-    - skills/subtask
+    - skills/llm-collab
+    - skills/llm-subtask
+---
 ```
 
 This solves Problem A. Problem B (first-time loading) is addressed by action-based triggers in the skill description.
 
+## Implementation Notes
+
+**Frontmatter stripping workarounds:**
+
+Due to Claude Code bugs where frontmatter is stripped before showing files to the model, workarounds are required:
+
+- **CLAUDE.md files** ([#13003](https://github.com/anthropics/claude-code/issues/13003)): Add comment on first `---` line
+- **SKILL.md files** ([#13005](https://github.com/anthropics/claude-code/issues/13005)): Split frontmatter - load-bearing fields (`name:`, `description:`) in first block, custom fields (`setup:`) in second block with workaround comment
+
+These workarounds ensure the model can see the `depends:` and `setup:` instructions.
+
 ## Alternatives Considered
 
-### Lazy-loading trigger files in must-read-before.d/
+### Lazy-loading trigger files in must-read.d/before/
 - **Pros:** Automatic detection based on file patterns
 - **Cons:** Chicken-and-egg problem; if pattern exists, project should already have depends:
 

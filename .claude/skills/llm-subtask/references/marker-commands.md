@@ -54,15 +54,15 @@ When assistant reads `.claude/todo.md`:
 
 **Persistence:** Changes written to `.claude/todo.md`, committed via git.
 
-**File creation:** If `.claude/todo.md` doesn't exist, `todo push:` creates it using `skeleton/.claude/todo.md` template via `bin/ensure-todo-md`.
+**File creation:** If `.claude/todo.md` doesn't exist, `todo push:` creates it using `skeleton/.claude/todo.md` template via `bin/llm-subtask-init`.
 
-**Ownership:** All files include header `<anthropic-skill-ownership subtask />` for clear ownership signaling.
+**Ownership:** All files include header `<anthropic-skill-ownership llm-subtask />` for clear ownership signaling.
 
 ### todo push: Implementation
 
 When agent encounters `todo push: DESC`:
 
-1. **Ensure file exists:** Run `~/.claude/skills/subtask/bin/ensure-todo-md` (idempotent, prints path)
+1. **Ensure file exists:** Run `~/.claude/skills/llm-subtask/bin/llm-subtask-init` (idempotent, prints path)
 2. **Append task:** Edit the file to append `- [ ] DESC` before "## Later" section (or at end if no Later section)
 3. **Verify:** Read file to confirm task added
 
@@ -134,7 +134,7 @@ Want context on any of these?
 1. Review ephemeral subtasks from conversation
 2. Categorize each with user:
    - Tactical → `todo push:` to `.claude/todo.md`
-   - Strategic → `bin/new-todo` creates planning file
+   - Strategic → `bin/llm-subtask-todo` creates planning file
    - Trivial → abandon
 3. Execute appropriate persistence operation
 

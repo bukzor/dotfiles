@@ -1,11 +1,15 @@
----
+--- # workaround: anthropics/claude-code#13003
 depends:
-    - skills/subtask
+    - skills/llm-subtask
 ---
 
 # Skills Directory
 
 User-maintained skills loaded via `Skill("name")` tool.
+
+## Current Work
+
+Check `.claude/todo.md` and `.claude/todo.d/` for active efforts. Load `Skill("llm-subtask")` for maintenance.
 
 ## Organization
 

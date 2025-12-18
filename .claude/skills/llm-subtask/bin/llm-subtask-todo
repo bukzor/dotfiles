@@ -15,8 +15,8 @@ if (( ${DEBUG:-0} > 0 )); then
 fi
 
 if [ -z "${1:-}" ]; then
-  echo >&2 "Usage: new-todo \"TODO title\""
-  echo >&2 "       DATE=YYYY-MM-DD new-todo \"TODO title\"  (for backdating)"
+  echo >&2 "Usage: llm-subtask-todo \"TODO title\""
+  echo >&2 "       DATE=YYYY-MM-DD llm-subtask-todo \"TODO title\"  (for backdating)"
   exit 1
 fi
 
