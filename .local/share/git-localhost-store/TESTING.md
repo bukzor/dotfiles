@@ -181,15 +181,10 @@ ls -la  # Should still have existing.txt
 Tests `git commit --allow-empty` on a freshly initialized repository.
 
 ```bash
-# Setup
-TEST_DIR=~/tmp/test-empty-commit
-rm -rf "$TEST_DIR" ~/.local/state/git-localhost-store/repos/*-tmp-test--empty--commit
-mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
-
-# Test
-git init
-git commit --allow-empty -m 'test empty commit'
+./test-empty-commit
 ```
+
+This test is expected to fail (exits with code 128).
 
 **Current Behavior (BROKEN):**
 ```

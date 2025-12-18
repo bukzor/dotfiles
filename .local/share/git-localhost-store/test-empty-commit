@@ -1,0 +1,94 @@
+#!/bin/bash
+# Test empty commit on fresh repo (currently FAILS)
+# Usage: ./test-empty-commit [test-dir]
+
+set -euo pipefail
+
+TEMPLATE="$HOME/.local/share/git-localhost-store/template-repo"
+STATE="$HOME/.local/state/git-localhost-store/repos"
+TEST_DIR="${1:-/tmp/test-empty-commit-$$}"
+
+echo "=== Test: git commit --allow-empty on fresh repo (KNOWN FAILURE) ==="
+echo "Template: $TEMPLATE"
+echo "Test dir: $TEST_DIR"
+echo
+
+# Create test dir first (claude-path needs it to exist)
+mkdir -p "$TEST_DIR"
+ENCODED=$(claude-path "$TEST_DIR")
+
+# Clean up any previous object store for this path
+rm -rf "$STATE/$ENCODED"
+
+# Remove and recreate test dir
+rm -rf "$TEST_DIR"
+mkdir -p "$TEST_DIR"
+
+# Create test repo using explicit template (not ~/.gitconfig)
+echo "=== Running: git init ==="
+(cd "$TEST_DIR" && git init --template="$TEMPLATE")
+
+echo
+echo "=== After git init ==="
+echo ".git type: $(file "$TEST_DIR/.git" | cut -d: -f2)"
+
+# Check if object store was created (it shouldn't be yet)
+if [ -d "$STATE/$ENCODED" ]; then
+    echo "Object store: EXISTS (unexpected at this stage)"
+    ls "$STATE/$ENCODED"
+else
+    echo "Object store: not yet (expected)"
+fi
+
+echo
+echo "=== Running: git commit --allow-empty ==="
+set +e
+(cd "$TEST_DIR" && git commit --allow-empty -m "test empty commit" 2>&1)
+EXIT_CODE=$?
+set -e
+
+echo
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "✅ SUCCESS - commit worked!"
+
+    echo
+    echo "=== After git commit attempt ==="
+    echo ".git type: $(file "$TEST_DIR/.git" 2>&1 | cut -d: -f2)"
+    if [ -d "$STATE/$ENCODED" ]; then
+        echo "Object store contents:"
+        ls "$STATE/$ENCODED"
+        echo
+        echo "Has objects/: $( [ -d "$STATE/$ENCODED/objects" ] && echo YES || echo NO )"
+        echo "Has HEAD (not .lock): $( [ -f "$STATE/$ENCODED/HEAD" ] && echo YES || echo NO )"
+    else
+        echo "Object store: NOT CREATED"
+    fi
+
+    echo
+    echo "=== Cleanup ==="
+    rm -rf "$TEST_DIR"
+    rm -rf "$STATE/$ENCODED"
+    echo "Done."
+else
+    echo "❌ FAILED - exit code $EXIT_CODE"
+
+    echo
+    echo "=== After git commit attempt ==="
+    echo ".git type: $(file "$TEST_DIR/.git" 2>&1 | cut -d: -f2)"
+    if [ -d "$STATE/$ENCODED" ]; then
+        echo "Object store contents:"
+        ls "$STATE/$ENCODED"
+        echo
+        echo "Has objects/: $( [ -d "$STATE/$ENCODED/objects" ] && echo YES || echo NO )"
+        echo "Has HEAD (not .lock): $( [ -f "$STATE/$ENCODED/HEAD" ] && echo YES || echo NO )"
+    else
+        echo "Object store: NOT CREATED"
+    fi
+
+    echo
+    echo "=== Cleanup ==="
+    rm -rf "$TEST_DIR"
+    rm -rf "$STATE/$ENCODED"
+    echo "KNOWN FAILURE - test demonstrates bug"
+    exit $EXIT_CODE
+fi
