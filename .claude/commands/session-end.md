@@ -1,23 +1,30 @@
 --- # workaround: anthropics/claude-code#13003
 depends:
-  - ../must-read-before.d/git.md
-  - ../must-read-before.d/git-commit.md
+  - ../must-read.d/before/git/all-operations.md
+  - ../must-read.d/before/git/commit.md
+requires:
+  - Skill(llm-collab)
+  - Skill(llm-subtask)
+  - Command(commit)
 ---
 
 # Session End
 
-Wrap up the current session by handling loose ends and reviewing changes.
+Persist your work.
 
-## Workflow
+Key questions:
 
-1. **Check for loose ends**: Run `subtask list:` to enumerate incomplete ephemeral work
-2. **Triage each item** with user:
-   - Complete now (if quick)
-   - Persist as tactical todo (`todo push:`)
-   - Persist as strategic todo (`new-todo`)
-   - Abandon (if trivial/no longer relevant)
-3. **Review session changes**: Check git status in relevant directories
-   - Current repo: `git status`
-   - Skills directory: `git -C ~/.claude/skills status`
-   - Other modified repos as needed
-4. **Commit changes**: Use `/commit` for each repo with uncommitted work
+- Will the next claude have more than enough to excel at their followup tasks?
+- Are all  unfinished work, inconsitencies, "loose ends" documented?
+- Is there anything you know that future claude would want or need, but not have?
+- Any cleanup we should do before we go, to reduce future claude/user confusion?
+
+Steps:
+
+- first, run Bash(date -Is) to check the date -- it may have been many days since the last turn
+    - if so you may need to look around to ensure you're up-to-date on current status
+- If confident, rectify. Otherwise, ask.
+- After changes, re-check the key questions.
+- When everything looks good:
+    1. summarize the state of affairs for user
+    2. Then answer the question: Are we good to go? If not, re-start, from the top.

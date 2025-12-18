@@ -9,7 +9,7 @@ Orient to the current project by reading key context files.
 
 ## Workflow
 
-1. **Read CLAUDE.md** if present in current directory
+1. Bash(date -Is)
 2. **List pending TODOs** from `.claude/todo.d/`:
    - Show title and filename for each
    - Sort by date (most recent first)
