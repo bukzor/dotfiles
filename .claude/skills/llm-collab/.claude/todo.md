@@ -17,6 +17,10 @@
   - [x] llm-collab-idea: heredoc → sed from skeleton template
   - [x] Created missing skeleton/docs/adr/README.md
 - [ ] Check other scripts for docs/ → docs/dev/ migration needed (scan llm-collab and other skills)
+  - [~] llm-collab-adr: added --dry-run flag, updated help text (not committed)
+  - [~] skeleton/docs/dev/devlog/: new files exist, old skeleton/docs/devlog/ not yet deleted
+  - [ ] Verify llm-collab-devlog script still works
+  - [ ] Check other skill scripts for similar migration needs
 
 ## Later
 
