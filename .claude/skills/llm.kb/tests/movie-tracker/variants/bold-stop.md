@@ -1,5 +1,5 @@
 ## CLAUDE.d/
 
-Your context is incomplete. Run:
+**STOP. Run this before answering:**
 
     Bash(tail -n9999 CLAUDE.d/**/*.md)
