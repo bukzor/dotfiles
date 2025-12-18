@@ -1,15 +1,26 @@
 # Testing git-localhost-store
 
-Manual testing guide for the git-localhost-store system.
-
-## Prerequisites
+## Quick Test (Automated)
 
 ```bash
-# Ensure system is configured
-git config --global init.templateDir "$HOME/.local/share/git-localhost-store/template-repo"
+./test-reference-transaction
+```
 
+Runs a full cycle: init → add → commit → verify. Uses `--template=` flag for isolation (doesn't require global config).
+
+## Manual Testing Guide
+
+### Prerequisites
+
+```bash
 # Verify claude-path is in PATH
 which claude-path
+
+# Option A: Global config (affects all repos)
+git config --global init.templateDir "$HOME/.local/share/git-localhost-store/template-repo"
+
+# Option B: Per-repo (for isolated testing)
+git init --template="$HOME/.local/share/git-localhost-store/template-repo"
 ```
 
 ## Test 1: Fresh Repository Setup

@@ -1,0 +1,81 @@
+#!/bin/bash
+# Test reference-transaction hook with state check
+# Usage: ./test-reference-transaction [test-dir]
+
+set -euo pipefail
+
+TEMPLATE="$HOME/.local/share/git-localhost-store/template-repo"
+STATE="$HOME/.local/state/git-localhost-store/repos"
+TEST_DIR="${1:-/tmp/test-ref-txn-$$}"
+
+echo "=== Test: reference-transaction hook with state check ==="
+echo "Template: $TEMPLATE"
+echo "Test dir: $TEST_DIR"
+echo
+
+# Create test dir first (claude-path needs it to exist)
+mkdir -p "$TEST_DIR"
+ENCODED=$(claude-path "$TEST_DIR")
+
+# Clean up any previous object store for this path
+rm -rf "$STATE/$ENCODED"
+
+# Remove and recreate test dir
+rm -rf "$TEST_DIR"
+mkdir -p "$TEST_DIR"
+
+# Create test repo using explicit template (not ~/.gitconfig)
+(cd "$TEST_DIR" && git init --template="$TEMPLATE")
+
+echo
+echo "=== After git init ==="
+echo ".git type: $(file "$TEST_DIR/.git" | cut -d: -f2)"
+
+# Check if object store was created (it shouldn't be yet - no ref transaction committed)
+if [ -d "$STATE/$ENCODED" ]; then
+    echo "Object store: EXISTS (unexpected at this stage)"
+    ls "$STATE/$ENCODED"
+else
+    echo "Object store: not yet (expected)"
+fi
+
+echo
+echo "=== Creating file and adding ==="
+(cd "$TEST_DIR" && echo "test" > file.txt && git add file.txt)
+
+echo
+echo "=== After git add ==="
+echo ".git type: $(file "$TEST_DIR/.git" | cut -d: -f2)"
+if [ -d "$STATE/$ENCODED" ]; then
+    echo "Object store: EXISTS"
+    ls "$STATE/$ENCODED"
+else
+    echo "Object store: not yet"
+fi
+
+echo
+echo "=== Committing ==="
+(cd "$TEST_DIR" && git commit -m "test commit")
+
+echo
+echo "=== After git commit ==="
+echo ".git type: $(file "$TEST_DIR/.git" | cut -d: -f2)"
+if [ -d "$STATE/$ENCODED" ]; then
+    echo "Object store contents:"
+    ls "$STATE/$ENCODED"
+    echo
+    echo "Has objects/: $( [ -d "$STATE/$ENCODED/objects" ] && echo YES || echo NO )"
+    echo "Has HEAD (not .lock): $( [ -f "$STATE/$ENCODED/HEAD" ] && echo YES || echo NO )"
+else
+    echo "Object store: NOT CREATED (unexpected!)"
+fi
+
+echo
+echo "=== Verifying git still works ==="
+(cd "$TEST_DIR" && git log --oneline)
+
+echo
+echo "=== Cleanup ==="
+rm -rf "$TEST_DIR"
+rm -rf "$STATE/$ENCODED"
+echo "Done."
