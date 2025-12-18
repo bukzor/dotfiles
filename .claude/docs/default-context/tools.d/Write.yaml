@@ -2,6 +2,8 @@
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
 # Cost in kB (.md file size + call_kb × frequency)
 
+source_examples: Write.examples.d/
+
 essentiality: 0.85      # When writing new files
 frequency: 0.3          # Less common than editing
 turns_with: 1           # Direct write

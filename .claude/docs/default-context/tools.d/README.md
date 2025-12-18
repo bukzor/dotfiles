@@ -65,6 +65,32 @@ bin/tool-scores-update                  # regenerate .score.yaml files
 bin/tool-scores-rank                    # display sorted by value (descending)
 ```
 
+## Example Files
+
+Estimates in `.yaml` files can be grounded in example transcripts:
+
+```
+X.examples.d/
+  with.md      # task completed using the tool
+  without.md   # same task without the tool
+```
+
+Convention: `X.yaml` estimates are informed by `X.examples.d/`. The yaml may include `source_examples: X.examples.d/` to make this explicit.
+
+Example format uses `---` delimited sections:
+```
+---
+user: request
+---
+assistant: tool call
+---
+tool_result: output
+---
+assistant: response
+```
+
+See `~/claude/llm-tool-cost-benefit-analysis/` for the underlying cost model and parsing tools.
+
 ## Notes
 
 - Large definitions hurt disproportionately due to triangular context cost (definition × turns)

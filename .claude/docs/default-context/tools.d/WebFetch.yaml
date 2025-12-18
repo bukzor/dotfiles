@@ -2,6 +2,8 @@
 # See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
 # Cost in kB (.md file size + call_kb × frequency)
 
+source_examples: WebFetch.examples.d/
+
 essentiality: 0.8       # When fetching web content
 frequency: 0.15         # Occasional documentation/API lookups
 turns_with: 1           # Direct fetch + AI processing
