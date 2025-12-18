@@ -55,3 +55,24 @@ package/
 /.pants.d
 /dist/
 .aider*
+
+# Claude state files
+.claude.json
+.claude.json.*
+
+# Tool/runtime directories
+.android/
+.bun/
+.gnupg/
+.obsidian/
+.opam/
+.parallel/
+.pki/
+.pyenv/
+.solargraph/
+.terraform.d/
+.vscode/
+
+# Misc transient
+.sqlite_history
+*.tmp

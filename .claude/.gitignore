@@ -8,3 +8,5 @@ todos/
 file-history/
 statsig/
 plans/
+stats-cache.json
+plugins/

@@ -1,2 +1,19 @@
 cros-garcon.conf
 weston.ini
+
+# App-managed configs
+Code/
+dconf/
+github-copilot/
+glib-2.0/
+go/
+gtk-3.0/
+lazyvim/
+lvim2/
+menus/
+ngrok/
+obsidian/
+pudb/
+
+# Lock files
+**/lazy-lock.json
