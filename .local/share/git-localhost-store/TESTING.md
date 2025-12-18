@@ -176,7 +176,39 @@ ls -la  # Should still have existing.txt
 - All files present and unchanged
 - Git operations work normally
 
-## Test 6: Edge Cases
+## Test 6: Empty Commit on Fresh Repo (KNOWN FAILURE)
+
+Tests `git commit --allow-empty` on a freshly initialized repository.
+
+```bash
+# Setup
+TEST_DIR=~/tmp/test-empty-commit
+rm -rf "$TEST_DIR" ~/.local/state/git-localhost-store/repos/*-tmp-test--empty--commit
+mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
+
+# Test
+git init
+git commit --allow-empty -m 'test empty commit'
+```
+
+**Current Behavior (BROKEN):**
+```
+✓ Creating object store: ...
+fatal: could not open '.git/COMMIT_EDITMSG': Not a Directory
+```
+
+**Root Cause:**
+- `reference-transaction` hook fires during commit with state "committed"
+- At this point, git has created the branch (so `.git/refs/heads/` is not empty)
+- Hook runs `git-restore-repo` which converts `.git` from directory → file
+- Git tries to write `.git/COMMIT_EDITMSG` but fails because `.git` is now a file
+
+**Expected:**
+- Commit should succeed
+- Object store should be created
+- `.git` should be converted to worktree link
+
+## Test 7: Edge Cases
 
 ### Empty recovery (no commits yet)
 
@@ -230,7 +262,7 @@ git add trigger  # Should ERROR with "Cannot safely merge"
 - Hook fails
 - Local .git unchanged
 
-## Test 7: Path Encoding
+## Test 8: Path Encoding
 
 Verify path encoding works correctly for various paths.
 
