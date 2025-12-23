@@ -67,7 +67,7 @@ The intended pattern:
 
 ## Success Criteria
 
-- [ ] Claude using llm.d skill does not enumerate contents in any `.md` file
+- [ ] Claude using llm.kb skill does not enumerate contents in any `.md` file
 - [ ] Claude correctly distinguishes overview (decision aid) from index (listing)
 - [ ] Prohibition survives task framing that pushes toward concreteness
 

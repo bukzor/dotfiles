@@ -17,7 +17,7 @@ setup: |
     ```markdown
     ## Current Work
 
-    Check `.claude/todo.md` and `.claude/todo.d/` for active efforts. Load `Skill("llm-subtask")` for maintenance.
+    Check `.claude/todo.md` and `.claude/todo.kb/` for active efforts. Load `Skill("llm-subtask")` for maintenance.
     ```
 
     This gives future sessions a clear entry point for ongoing/planned work.
@@ -36,7 +36,7 @@ Four-tier task decomposition system for managing work at different granularities
 
 **Artifacts:**
 - `$PWD/.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
-- `$PWD/.claude/todo.d/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
+- `$PWD/.claude/todo.kb/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
 - Conversation context - Ephemeral subtasks (Tier 1)
 
 **Integration:** Works alongside devlog documentation - tasks track "what's next" (forward-looking), devlogs document "what happened" (historical). See "Integration with Devlog" section below.
@@ -48,7 +48,7 @@ Support task decomposition at four granularities, from finest to coarsest:
 0. Conversational -- Question preemption (pattern, not tool)
 1. Ephemeral -- Session subtasks via marker commands (in-context)
 2. Tactical -- Cross-session checkboxes in `.claude/todo.md`
-3. Strategic -- Planning files in `.claude/todo.d/YYYY-MM-DD-NNN-title.md`
+3. Strategic -- Planning files in `.claude/todo.kb/YYYY-MM-DD-NNN-title.md`
 
 ## Marker Commands
 
@@ -65,7 +65,7 @@ These mostly notional, only reified on demand.
 
 - `subtask load`
     1. read `.claude/todo.md`
-    2. list `.claude/todo.d/`
+    2. list `.claude/todo.kb/`
 - `subtask save`
     1. review chat history for subtasks that are both incomplete and not yet persisted
     2. categorize as tactical/strategic/abandon
@@ -81,13 +81,13 @@ These mostly notional, only reified on demand.
 
 Create planning files via: `~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"`
 
-## Integration: todo.md + todo.d/
+## Integration: todo.md + todo.kb/
 
-Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains both inline tasks and references to planning files in <https:todo.d/>.
+Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains both inline tasks and references to planning files in <https:todo.kb/>.
 
 **Example pattern:**
 ```markdown
-- [ ] <https:todo.d/2025-11-26-001-research-local-climbing-gyms.md>
+- [ ] <https:todo.kb/2025-11-26-001-research-local-climbing-gyms.md>
 - [ ] Buy climbing shoes
   - [ ] Measure foot size
   - [ ] Check REI sale section

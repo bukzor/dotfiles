@@ -24,7 +24,7 @@ docs/milestones/
 1. **Goal** - What this milestone achieves (1-2 sentences)
 2. **Success Criteria** - How we know it's complete (checkboxes)
 3. **Scope** - What's included (and explicitly excluded)
-4. **Tasks** - Work breakdown (can link to .claude/todo.d/ for tactical details)
+4. **Tasks** - Work breakdown (can link to .claude/todo.kb/ for tactical details)
 
 **Optional sections:**
 - Dependencies on other milestones
@@ -60,7 +60,7 @@ Establish project structure and development environment.
 
 ## Tasks
 
-See [.claude/todo.d/2025-01-15-000-initial-setup.md](../../.claude/todo.d/2025-01-15-000-initial-setup.md)
+See [.claude/todo.kb/2025-01-15-000-initial-setup.md](../../.claude/todo.kb/2025-01-15-000-initial-setup.md)
 ```
 
 **Integration with ROADMAP.md:**

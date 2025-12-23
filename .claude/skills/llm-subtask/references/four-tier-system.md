@@ -83,7 +83,7 @@ subtask pop:
 
 ## Tier 3: Strategic Todos
 
-**Pattern:** Planning files in `.claude/todo.d/YYYY-MM-DD-NNN-title.md`.
+**Pattern:** Planning files in `.claude/todo.kb/YYYY-MM-DD-NNN-title.md`.
 
 **Scope:** Cross-session, needs planning/design
 
@@ -91,7 +91,7 @@ subtask pop:
 
 **Format:**
 ```
-.claude/todo.d/
+.claude/todo.kb/
 ├── 2025-11-25-000-create-subtask-skill.md
 └── 2025-11-25-001-fix-authentication-bug.md
 ```
@@ -111,7 +111,7 @@ subtask pop:
 - Dependencies or blockers exist
 - Handing off work with full context to future session
 
-**Discovery:** `ls -t .claude/todo.d/` shows chronologically, `grep -l "keyword" .claude/todo.d/*.md` finds specific items.
+**Discovery:** `ls -t .claude/todo.kb/` shows chronologically, `grep -l "keyword" .claude/todo.kb/*.md` finds specific items.
 
 ## Tier Selection Guide
 

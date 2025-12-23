@@ -39,10 +39,10 @@ if [ -f CLAUDE.md ]; then
 fi
 
 # List pending TODOs
-if [ -d .claude/todo.d ]; then
-  TODO_FILES=$(find .claude/todo.d -maxdepth 1 -name '*.md' -print0 | xargs -r0 ls -1t)
+if [ -d .claude/todo.kb ]; then
+  TODO_FILES=$(find .claude/todo.kb -maxdepth 1 -name '*.md' -print0 | xargs -r0 ls -1t)
   if [ -n "$TODO_FILES" ]; then
-    echo "=== Pending TODOs (.claude/todo.d/) ==="
+    echo "=== Pending TODOs (.claude/todo.kb/) ==="
     echo "$TODO_FILES" | while read -r todo; do
       TITLE=$(sed -n '1s/^# //p' "$todo")
       echo "  - $TITLE ($(basename "$todo"))"

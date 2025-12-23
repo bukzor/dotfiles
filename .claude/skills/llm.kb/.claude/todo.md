@@ -7,4 +7,4 @@
 
 ## Later
 
-- [ ] todo.d/2025-12-04-000 (Claude enumerates contents despite explicit prohibition)
+- [ ] todo.kb/2025-12-04-000 (Claude enumerates contents despite explicit prohibition)

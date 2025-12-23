@@ -28,7 +28,7 @@ This caused repeated confusion during this session.
 
 ## Current Situation
 
-The subtask skill documents todo.md and todo.d/ patterns but doesn't explain how to represent blocking/dependency relationships using nesting.
+The subtask skill documents todo.md and todo.kb/ patterns but doesn't explain how to represent blocking/dependency relationships using nesting.
 
 ## Proposed Solution
 
@@ -59,7 +59,7 @@ Not:
 
 ## Open Questions
 
-- Should this go in SKILL.md or references/todo.d-pattern.md?
+- Should this go in SKILL.md or references/todo.kb-pattern.md?
 - Should we show multi-level blocking chains?
 
 ## Success Criteria

@@ -44,14 +44,14 @@ TITLE="$*"
 # Ensure we're in project root
 if [ ! -d ".claude" ]; then
   echo >&2 "Error: .claude/ not found in $PWD"
-  echo >&2 "If this is the right location, run: mkdir -p .claude/ideas.d && !!"
+  echo >&2 "If this is the right location, run: mkdir -p .claude/ideas.kb && !!"
   exit 1
 fi
 
-mkdir -p .claude/ideas.d
+mkdir -p .claude/ideas.kb
 
 DATE=${DATE:-$(date +%Y-%m-%d)}
-LAST=$(find .claude/ideas.d -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
+LAST=$(find .claude/ideas.kb -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
 
 if [ -z "$LAST" ]; then
   NUM="000"
@@ -63,7 +63,7 @@ fi
 
 # Create slug from title
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
-FILE=".claude/ideas.d/$DATE-$NUM-$SLUG.md"
+FILE=".claude/ideas.kb/$DATE-$NUM-$SLUG.md"
 
 echo "$FILE"
 
@@ -72,6 +72,6 @@ if (( DRY_RUN )); then
 fi
 
 sed -e "s/Example Idea Title/$TITLE/g" -e "s/YYYY-MM-DD/$DATE/g" \
-    "$SKELETON/.claude/ideas.d/YYYY-MM-DD-000-example-idea.md" > "$FILE"
+    "$SKELETON/.claude/ideas.kb/YYYY-MM-DD-000-example-idea.md" > "$FILE"
 
 echo >&2 "✅ Created"

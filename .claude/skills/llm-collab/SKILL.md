@@ -35,8 +35,8 @@ project/
 ├── CLAUDE.md                 # Agents: architecture, conventions
 ├── .claude/
 │   ├── todo.md               # Current tasks (via subtask skill)
-│   ├── todo.d/               # Detailed task breakdowns
-│   └── ideas.d/              # Unprioritized ideas (may become todos)
+│   ├── todo.kb/               # Detailed task breakdowns
+│   └── ideas.kb/              # Unprioritized ideas (may become todos)
 ├── docs/
 │   ├── adr/                  # Why: decision rationale
 │   ├── architecture/         # What/how: technical design
@@ -147,19 +147,19 @@ All scripts support `--help` for details.
 
 ## Ideas Pattern
 
-`.claude/ideas.d/` captures unprioritized ideas without disrupting focused work.
+`.claude/ideas.kb/` captures unprioritized ideas without disrupting focused work.
 
 **When to use:** Mid-task inspiration that deserves capture but not immediate pursuit.
 
 **Lifecycle:**
 1. **Exploring** — Initial capture, may be refined over time
-2. **Promoted** → Becomes `todo.d/` entry when ready for action
+2. **Promoted** → Becomes `todo.kb/` entry when ready for action
 3. **Rejected** → Document reasoning (optionally as ADR), delete file
 4. **Forgotten** — Acceptable; important ideas resurface naturally
 
 **Key distinction:**
-- `todo.d/` = committed work, will be done
-- `ideas.d/` = speculative, might never happen
+- `todo.kb/` = committed work, will be done
+- `ideas.kb/` = speculative, might never happen
 
 ## Detailed References
 

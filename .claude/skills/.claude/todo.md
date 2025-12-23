@@ -9,5 +9,5 @@
 - [x] ADR: lib/python/{libname}/ for testable Python with symlinks
 - [x] Rename llm.d → llm.kb
 - [ ] Reconsider claude-style slug script behavior with `.` and `/` chars; fix preexisting filenames if changed
-- [x] todo.d/2025-12-11-000-complete-entangled-commit-separation-for-naming-refactor.md
-- [ ] todo.d/2025-12-11-001-decide-ideasd-naming-convention.md
+- [x] todo.kb/2025-12-11-000-complete-entangled-commit-separation-for-naming-refactor.md (deleted)
+- [x] ADR: unify directory naming to .kb (docs/dev/adr/2025-12-11-001--unify-directory-naming-to-kb-suffix.md)

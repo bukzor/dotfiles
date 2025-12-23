@@ -33,7 +33,7 @@ Template has:
 - Completed/Attempted/Discovered
 - Decisions Made
 - Open Questions
-- ~~Next Session~~ (being removed in todo.d/2025-11-26-002)
+- ~~Next Session~~ (being removed in todo.kb/2025-11-26-002)
 - Links
 
 User feedback: "I don't love any of these sections"
@@ -45,7 +45,7 @@ To be determined through strategic planning session.
 Questions to explore:
 - What is devlog actually for? (history, handoffs, discovery log, something else?)
 - What information is valuable to record vs time-wasting overhead?
-- How does devlog complement (not duplicate) ADRs, todo.md, ideas.d/?
+- How does devlog complement (not duplicate) ADRs, todo.md, ideas.kb/?
 - What sections would actually get used vs ignored?
 
 ## Implementation Steps
@@ -71,4 +71,4 @@ Questions to explore:
 
 ## Notes
 
-This is strategic planning, not a quick fix. The immediate redundancy fix (removing "Next Session") is handled in todo.d/2025-11-26-002.
+This is strategic planning, not a quick fix. The immediate redundancy fix (removing "Next Session") is handled in todo.kb/2025-11-26-002.

@@ -28,10 +28,10 @@ Create a TODO file when:
 DATE=2025-11-25 ~/.claude/skills/llm-subtask/bin/llm-subtask-todo "Task title"
 
 # List all TODOs
-ls -1t .claude/todo.d/*.md
+ls -1t .claude/todo.kb/*.md
 
 # Find specific TODO
-grep -l "keyword" .claude/todo.d/*.md
+grep -l "keyword" .claude/todo.kb/*.md
 ```
 
 ## File Structure
@@ -41,7 +41,7 @@ All task files include ownership header:
 <anthropic-skill-ownership llm-subtask />
 ```
 
-See `~/.claude/skills/llm-subtask/skeleton/.claude/todo.d/` for template structure.
+See `~/.claude/skills/llm-subtask/skeleton/.claude/todo.kb/` for template structure.
 
 ## Active TODOs
 

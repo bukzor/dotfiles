@@ -2,7 +2,7 @@
 
 ## Quick Reference
 
-**Current state:** Check `.claude/todo.d/` for pending tasks, or latest [devlog entry](../docs/devlog/).
+**Current state:** Check `.claude/todo.kb/` for pending tasks, or latest [devlog entry](../docs/devlog/).
 
 ## Common Tasks
 

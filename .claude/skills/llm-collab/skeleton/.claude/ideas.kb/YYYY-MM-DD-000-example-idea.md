@@ -4,7 +4,7 @@ cost-benefit-sweh:
     @value: 0.5  # SWE-hours (one SWEh ≈ 60 focused minutes)
     rationale: |
       TODO: How long is this idea worth exploring before deciding to
-      promote (to todo.d) or abandon?
+      promote (to todo.kb) or abandon?
   benefit-2w:
     @value: 2.0  # or just: 2.0
     rationale: |
@@ -38,4 +38,4 @@ cost-benefit-sweh:
 
 ## Lifecycle
 
-**Status:** Exploring | Promoted to todo.d/YYYY-MM-DD-NNN-title.md | Abandoned (see ADR/reasoning)
+**Status:** Exploring | Promoted to todo.kb/YYYY-MM-DD-NNN-title.md | Abandoned (see ADR/reasoning)

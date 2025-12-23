@@ -38,7 +38,7 @@ SKELETON="$SKILL_DIR/skeleton"
 echo "🚀 Initializing LLM-collaborative documentation structure..."
 
 # Create directory structure
-mkdir -p .claude/todo.d
+mkdir -p .claude/todo.kb
 mkdir -p docs/{adr,architecture,milestones,devlog,examples}
 
 echo "✅ Created directory structure"
@@ -49,10 +49,10 @@ if [ ! -f CLAUDE.md ]; then
   echo "✅ Created CLAUDE.md"
 fi
 
-# Create .gitkeep for todo.d
-if [ ! -f .claude/todo.d/.gitkeep ]; then
-  touch .claude/todo.d/.gitkeep
-  echo "✅ Created .claude/todo.d/ directory"
+# Create .gitkeep for todo.kb
+if [ ! -f .claude/todo.kb/.gitkeep ]; then
+  touch .claude/todo.kb/.gitkeep
+  echo "✅ Created .claude/todo.kb/ directory"
 fi
 
 # Create ROADMAP.md

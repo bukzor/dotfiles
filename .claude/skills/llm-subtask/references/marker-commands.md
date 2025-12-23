@@ -120,7 +120,7 @@ Pending tactical todos:
 - [ ] Refactor session-start.sh
 - [ ] Update SKILL.md references
 
-Strategic items available in .claude/todo.d/:
+Strategic items available in .claude/todo.kb/:
 - 2025-11-25-000-create-subtask-skill.md
 
 Want context on any of these?
