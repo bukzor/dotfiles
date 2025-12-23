@@ -16,7 +16,16 @@ Always scope operations to specific paths. Use `.` for current directory:
 ```bash
 git status -s .
 git diff .
-git log --oneline -10 .
+git l -n10 .
+```
+
+### Log
+
+Use `git l` (alias) instead of `git log --oneline`. It provides graph, ISO date, and relative time:
+
+```bash
+git l -n5 .           # recent commits at path
+git l -n10            # recent commits in repo
 ```
 
 Other paths:
