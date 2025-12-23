@@ -25,3 +25,4 @@
 ## Later
 
 - [ ] todo.d/2025-11-29-000 (devlog reevaluation - strategic) — Medium/High
+- [ ] todo.d/2025-11-26-003 (clarify todo.md/todo.d relationship in subtask skill docs)
