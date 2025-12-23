@@ -20,17 +20,22 @@ SKILL_DIR="$(cd "$HERE/.." && pwd)"
 SKELETON="$SKILL_DIR/skeleton"
 
 DRY_RUN=0
+usage() {
+  echo >&2 "Usage: llm-collab-adr [-n|--name-only] \"Decision title\""
+  echo >&2 "       DATE=YYYY-MM-DD llm-collab-adr \"Decision title\"  (for backdating)"
+  echo >&2 "       -n, --name-only: print path without creating file"
+}
+
 while [[ "${1:-}" == -* ]]; do
   case "$1" in
-    -n|--dry-run) DRY_RUN=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    -n|--name-only) DRY_RUN=1; shift ;;
     *) echo >&2 "Unknown option: $1"; exit 1 ;;
   esac
 done
 
 if [ -z "${1:-}" ]; then
-  echo >&2 "Usage: llm-collab-adr [-n|--dry-run] \"Decision title\""
-  echo >&2 "       DATE=YYYY-MM-DD llm-collab-adr \"Decision title\"  (for backdating)"
-  echo >&2 "       -n, --dry-run: print path without creating file"
+  usage
   exit 1
 fi
 

@@ -19,9 +19,23 @@ HERE="$(cd "$(dirname "$0")"; pwd)"
 SKILL_DIR="$(cd "$HERE/.." && pwd)"
 SKELETON="$SKILL_DIR/skeleton"
 
-if [ -z "${1:-}" ]; then
-  echo >&2 "Usage: llm-collab-idea \"Idea title\""
+DRY_RUN=0
+usage() {
+  echo >&2 "Usage: llm-collab-idea [-n|--name-only] \"Idea title\""
   echo >&2 "       DATE=YYYY-MM-DD llm-collab-idea \"Idea title\"  (for backdating)"
+  echo >&2 "       -n, --name-only: print path without creating file"
+}
+
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -n|--name-only) DRY_RUN=1; shift ;;
+    *) echo >&2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+if [ -z "${1:-}" ]; then
+  usage
   exit 1
 fi
 
@@ -51,7 +65,13 @@ fi
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
 FILE=".claude/ideas.d/$DATE-$NUM-$SLUG.md"
 
+echo "$FILE"
+
+if (( DRY_RUN )); then
+  exit 0
+fi
+
 sed -e "s/Example Idea Title/$TITLE/g" -e "s/YYYY-MM-DD/$DATE/g" \
     "$SKELETON/.claude/ideas.d/YYYY-MM-DD-000-example-idea.md" > "$FILE"
 
-echo "Created $FILE"
+echo >&2 "✅ Created"

@@ -19,9 +19,23 @@ HERE="$(cd "$(dirname "$0")"; pwd)"
 SKILL_DIR="$(cd "$HERE/.." && pwd)"
 SKELETON="$SKILL_DIR/skeleton"
 
-if [ -z "${1:-}" ]; then
-  echo >&2 "Usage: llm-collab-devlog \"Entry title\""
+DRY_RUN=0
+usage() {
+  echo >&2 "Usage: llm-collab-devlog [-n|--name-only] \"Entry title\""
   echo >&2 "       DATE=YYYY-MM-DD llm-collab-devlog \"Entry title\"  (for backdating)"
+  echo >&2 "       -n, --name-only: print path without creating file"
+}
+
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -n|--name-only) DRY_RUN=1; shift ;;
+    *) echo >&2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+if [ -z "${1:-}" ]; then
+  usage
   exit 1
 fi
 
@@ -64,7 +78,13 @@ fi
 SLUG=$(echo "$TITLE" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')
 FILE="docs/dev/devlog/$DATE-$NUM-$SLUG.md"
 
+echo "$FILE"
+
+if (( DRY_RUN )); then
+  exit 0
+fi
+
 sed -e "s/YYYY-MM-DD/$DATE/g" \
     "$SKELETON/docs/dev/devlog/YYYY-MM-DD-000-example-entry.md" > "$FILE"
 
-echo "Created $FILE"
+echo >&2 "✅ Created"

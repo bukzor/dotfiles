@@ -14,6 +14,18 @@ if (( ${DEBUG:-0} > 0 )); then
   set -x
 fi
 
+usage() {
+  echo >&2 "Usage: llm-collab-session-start"
+  echo >&2 "       Read key files for session orientation"
+}
+
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    *) echo >&2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
 HERE="$(cd "$(dirname "$0")"; pwd)"
 
 echo "📖 Reading session context..."

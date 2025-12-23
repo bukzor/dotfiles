@@ -15,6 +15,19 @@ if (( ${DEBUG:-0} > 0 )); then
   set -x
 fi
 
+usage() {
+  echo >&2 "Usage: llm-subtask-init"
+  echo >&2 "       Ensure .claude/todo.md exists (idempotent)"
+  echo >&2 "       Prints path to stdout"
+}
+
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    *) echo >&2 "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
 # Check .claude/ exists (signal we're in right place)
 if [ ! -d ".claude" ]; then
   echo >&2 "Error: .claude/ not found in $PWD"
