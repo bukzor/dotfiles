@@ -1,5 +1,14 @@
 <anthropic-skill-ownership llm-subtask />
 
+---
+required-reading:
+  - ~/.claude/skills/llm-collab/SKILL.md
+  - ~/.claude/skills/llm-collab/skeleton/
+suggested-reading:
+  - ~/.claude/skills/llm.kb/SKILL.md
+related-effort: ~/repo/github.com/bukzor/prototype.chatfs/.claude/todo.kb/2026-01-02-000-harmonize-with-llm-skills.md
+---
+
 # Update skeleton to match docs/dev/ pattern from git-partial
 
 **Priority:** High
