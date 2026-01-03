@@ -46,7 +46,7 @@ class TestFormatType:
                 "type": {"primitive": "str"},
             }
         }
-        assert format_type(ty) == ["&'a", ["str"]]
+        assert format_type(ty) == ["&", "'a", ["str"]]
 
     def test_borrowed_ref_mutable(self):
         ty = {
@@ -56,7 +56,7 @@ class TestFormatType:
                 "type": {"primitive": "str"},
             }
         }
-        assert format_type(ty) == ["&'a mut", ["str"]]
+        assert format_type(ty) == ["&", "'a", "mut", ["str"]]
 
     def test_slice(self):
         """This was missing in early jq version."""
@@ -239,7 +239,7 @@ class TestAstToString:
         assert ast_to_string(ast1) != ast_to_string(ast2)
 
     def test_borrowed_ref(self):
-        ast = ["impl", ["for", "&'a", ["str"]], ["item", "foo"]]
+        ast = ["impl", ["for", "&", "'a", ["str"]], ["item", "foo"]]
         assert ast_to_string(ast) == "impl &'a str::foo"
 
     def test_slice(self):

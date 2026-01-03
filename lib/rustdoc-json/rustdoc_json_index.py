@@ -27,17 +27,14 @@ def format_type(ty: Json) -> Ast:
         case {"generic": g}:
             return [g]
 
-        case {"borrowed_ref": {"lifetime": lt, "is_mutable": True, "type": inner}}:
-            return [f"&{lt} mut", format_type(inner)]
-
-        case {"borrowed_ref": {"lifetime": lt, "type": inner}}:
-            return [f"&{lt}", format_type(inner)]
-
-        case {"borrowed_ref": {"is_mutable": True, "type": inner}}:
-            return ["&mut", format_type(inner)]
-
-        case {"borrowed_ref": {"type": inner}}:
-            return ["&", format_type(inner)]
+        case {"borrowed_ref": {"lifetime": lt, "is_mutable": mut, "type": inner}}:
+            result = ["&"]
+            if lt is not None:
+                result.append(lt)
+            if mut:
+                result.append("mut")
+            result.append(format_type(inner))
+            return result
 
         case {"slice": inner}:
             return ["slice", format_type(inner)]
@@ -131,8 +128,9 @@ def ast_to_string(ast: Ast) -> str:
 
     def type_to_str(t: Ast) -> str:
         match t:
-            case [head, inner] if isinstance(head, str) and head.startswith("&"):
-                return f"{head} {type_to_str(inner)}"
+            case ["&", *rest, inner] if isinstance(inner, list):
+                prefix = "&" + " ".join(rest)
+                return f"{prefix} {type_to_str(inner)}"
             case ["slice", inner]:
                 return f"[{type_to_str(inner)}]"
             case ["array", inner, length]:
