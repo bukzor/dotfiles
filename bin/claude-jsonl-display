@@ -5,10 +5,21 @@ import json
 import signal
 import sys
 from dataclasses import dataclass
-from typing import Any, Callable, Generator, TypeGuard
+from typing import Any, Callable, Generator, NamedTuple, TypeGuard
 
 
 Content = dict[str, Any]
+
+
+class Output(NamedTuple):
+    text: str
+    dest: str = "stderr"
+
+    def print(self) -> None:
+        if self.dest == "stdout":
+            print(self.text)
+        else:
+            print(self.text, file=sys.stderr)
 
 
 @dataclass(frozen=True)
@@ -197,8 +208,14 @@ def format_user_message(content: Content, state: State) -> str:
         else:
             return format_boxed_message("USER", text, state, Color.BLUE)
     elif content_type == "tool_result":
-        is_error = content["is_error"]
+        is_error = content.get("is_error", False)
         result_content = content["content"]
+        if isinstance(result_content, list):
+            assert len(result_content) == 1, result_content
+            result_content = result_content[0]
+            assert isinstance(result_content, dict), result_content
+            assert 'text' in result_content, result_content
+            result_content = result_content['text']
         if is_error:
             return format_boxed_message(
                 "Tool Result ❌ ERROR", result_content, state, Color.RED
@@ -246,8 +263,8 @@ def format_assistant_message(content: Content, state: State) -> str:
         return format_unknown("assistant_content", content, state)
 
 
-def format_result(content: Content) -> str:
-    """Format session result/end message"""
+def format_result(content: Content) -> tuple[str, str]:
+    """Format session result/end message. Returns (stderr_output, stdout_result)."""
     duration = content["duration_ms"]
     num_turns = content["num_turns"]
     cost = content["total_cost_usd"]
@@ -270,12 +287,9 @@ def format_result(content: Content) -> str:
 
     if len(permission_denials) > 0:
         lines.append(f"## Permission denials: {len(permission_denials)}")
-    else:
-        pass  # No permission denials to report
 
-    lines.append(format_boxed_message("", result_content, "FIN", Color.CYAN))
-
-    return "\n".join(lines)
+    stderr_output = "\n".join(lines)
+    return stderr_output, result_content
 
 
 def format_summary(content: Content) -> str:
@@ -285,25 +299,31 @@ def format_summary(content: Content) -> str:
 
 def format_turn(
     formatter: Formatter, content: Content, state: State
-) -> Generator[tuple[str, State], None, None]:
+) -> Generator[tuple[Output, State], None, None]:
     """Format a user or assistant turn (may contain multiple content blocks)"""
     contents = normalize_contents(content["message"]["content"])
     for content in contents:
-        yield formatter(content, state), state
+        try:
+            yield Output(formatter(content, state)), state
+        except:
+            raise ValueError(json.dumps(content, indent=2))
         state = State(state.role, state.msg_num, state.sub_num + 1)
 
 
 def format_item(
     content: Content, state: State
-) -> Generator[tuple[str, State], None, None]:
-    """Format a single transcript content, yielding (output, state) tuples"""
+) -> Generator[tuple[Output, State], None, None]:
+    """Format a single transcript content, yielding (Output, state) tuples"""
     item_type = content.get("type")
 
     if item_type == "stream_event":
-        yield format_stream_event(content), state
+        yield Output(format_stream_event(content)), state
 
     elif item_type == "system":
-        yield format_system(content), state
+        if content['subtype'] == 'local_command':
+            yield Output(format_boxed_message("local command", content['content'], state, Color.BLUE)), state
+        else:
+            yield Output(format_system(content)), state
 
     elif item_type == "user":
         yield from format_turn(format_user_message, content, state)
@@ -312,16 +332,18 @@ def format_item(
         yield from format_turn(format_assistant_message, content, state)
 
     elif item_type == "result":
-        yield format_result(content), state
+        stderr_output, stdout_result = format_result(content)
+        yield Output(stderr_output), state
+        yield Output(stdout_result, "stdout"), state
 
     elif item_type == "file-history-snapshot":
-        yield format_snapshot(content), state
+        yield Output(format_snapshot(content)), state
 
     elif item_type == "summary":
-        yield format_summary(content), state
+        yield Output(format_summary(content)), state
 
     else:
-        yield format_unknown("item_type", content, state), state
+        yield Output(format_unknown("item_type", content, state)), state
 
 
 def main():
@@ -345,7 +367,7 @@ def main():
         state = update_state(content, state)
 
         for output, state in format_item(content, state):
-            print(output)
+            output.print()
 
 
 if __name__ == "__main__":
