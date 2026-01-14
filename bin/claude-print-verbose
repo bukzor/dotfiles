@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+# Wrap claude --print with verbose streaming JSON, formatted for human reading.
+# All arguments are passed through to claude.
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+exec claude --print --verbose --output-format stream-json "$@" |
+  claude-jsonl-display

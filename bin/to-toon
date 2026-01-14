@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+HERE="$(dirname "$(readlink -f "$0")")"
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+if (( DEBUG > 4 )); then
+  tee_or_cat() { tee "$@"; }
+else
+  tee_or_cat() { cat > "$1"; }
+fi
+
+tmp=./trash/to-toon
+mkdir -p "$tmp"
+SCRATCH="$(mktemp -d "$tmp/XXXXXX")"
+PYTHONPATH=~/lib/pythonpath python -m bukzor.to_toon "$SCRATCH" |
+  tee "$SCRATCH/raw.log" |
+  claude-jsonl-display \
+    2> >(tee_or_cat "$SCRATCH/formatted.log" >&2) \
+  ;
