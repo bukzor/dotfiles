@@ -32,9 +32,13 @@ export EDITOR=vim
 export MAKEFLAGS="-j $(($(nproc) * 3))"
 export HOMEBREW_CC=clang
 
+# set claude to always ultrathink
+# any higher value sets 21332 as the number...
+# https://github.com/anthropics/claude-code/issues/11211
+export MAX_THINKING_TOKENS=63999
+
 export PREFIX=$HOME/prefix
 export GOPATH="$PREFIX/golang"
-export CARGO_INSTALL_ROOT="$PREFIX/cargo"
 
 export VOLTA_HOME="$HOME/.volta"
 
@@ -43,11 +47,18 @@ export VOLTA_HOME="$HOME/.volta"
 path prepend PATH <<EOF
   $HOME/.local/share/nvim/mason/bin
   $HOME/bin/shim
-  $PREFIX/pnpm/bin
-  $GOROOT/bin
   /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /usr/sbin
+  /sbin
+
+  $GOROOT/bin
+
+  $HOME/.bun/bin
   $VOLTA_HOME/bin
-  $CARGO_INSTALL_ROOT/bin
+  $PREFIX/pnpm/bin
+
+  $PREFIX/cargo/bin
   $HOME/.cargo/bin
 
   # enable ~/bin/ unconditionally, so we can create it after login
@@ -55,8 +66,4 @@ path prepend PATH <<EOF
   $HOME/bin
 EOF
 
-## for preferred_shell in "$(which zsh)"; do
-##   if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
-##     SHELL="$preferred_shell" exec "$preferred_shell" -il
-##   fi
-## done
+alias login="source ~/.profile"

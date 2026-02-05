@@ -41,6 +41,7 @@ Dropbox/
 package/
 .rustup
 .cargo
+!.cargo/config.toml
 .volta
 .npm
 .dropbox
