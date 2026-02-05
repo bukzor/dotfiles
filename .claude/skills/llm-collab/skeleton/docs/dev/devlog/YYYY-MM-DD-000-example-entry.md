@@ -4,33 +4,21 @@
 
 [What was the goal for this session?]
 
-## What Happened
-
-### Completed
-
--
-
-### Attempted
-
--
-
-### Discovered
-
--
-
-## Decisions Made
+## Decisions
 
 ### [Decision Name]
 
-**Rationale:** [Why]
-**Alternatives:** [What we didn't choose]
-**Impact:** [What this affects]
+**Rationale:** [Why this approach]
+**Alternatives considered:** [What we didn't choose and why not]
+
+## Conventions Established
+
+- [Patterns or principles discovered that future work should follow]
 
 ## Open Questions
 
 -
 
-## Links
+## References
 
-- [Related devlog entries]
-- [Design docs updated/created]
+- [Sources, related entries, and docs that informed this work]

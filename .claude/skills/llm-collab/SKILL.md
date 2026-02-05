@@ -1,6 +1,6 @@
 ---
 name: llm-collab
-description: "Agent MUST load when:\n\n1. After making significant decisions (to document as ADR)\n2. Before ending a work session (to document in devlog)\n3. When setting up documentation for a multi-session project\n4. When user asks about coordinating work across sessions"
+description: "Agent MUST load for ADRs, devlogs, and multi-session documentation setup"
 ---
 --- # workaround: anthropics/claude-code#13005
 setup: |
@@ -78,10 +78,10 @@ references.kb/: [Categorized guides: file-types.kb/, guidelines.kb/, workflows.k
 
 **Problem:** Agent swarm loses alignment between sessions.
 
-**Pattern:** Explicit handoffs via devlog "Next Session" sections:
-- Each session documents: Focus, What Happened, Decisions, Next Session
-- "Next Session" section explicitly says what to do next
-- Latest devlog provides immediate context for incoming agent
+**Pattern:** Devlogs capture what diffs can't: reasoning, principles, conventions.
+- Decisions and their rationale (especially rejected alternatives)
+- Conventions established and principles discovered
+- Tradeoffs that shaped the approach
 
 **For task tracking:** Use the `subtask` skill for managing ephemeral, tactical, and strategic tasks.
 

@@ -9,16 +9,15 @@ Chronological record of development sessions.
 
 ## What Belongs
 
-Each devlog entry captures:
-- What was attempted
-- What worked / what didn't
-- Decisions made (link to ADRs if formalized)
-- Open questions
-- Next session starting point
+Devlogs capture what diffs can't — reasoning, principles, conventions:
+- Decisions and their rationale (especially rejected alternatives)
+- Conventions established and principles discovered
+- Tradeoffs that shaped the approach
 
 ## What Does NOT Belong
 
-- Active task tracking (use TodoWrite for current work)
+- Lists of completed items (that's `git log`)
+- Active task tracking (that's the todo system)
 - Architectural decisions (→ docs/adr/)
 - Code documentation (→ inline comments, docstrings)
 
