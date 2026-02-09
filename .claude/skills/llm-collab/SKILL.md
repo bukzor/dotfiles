@@ -15,7 +15,7 @@ setup: |
 
 # LLM-Collaborative Documentation
 
-Principles and helpers for human-LLM agent swarm collaboration on long-running projects. Provides documentation patterns for coordination across agents, temporal conflict resolution, and just-in-time context loading through structured files (ADRs, devlogs, ideas), progressive-detail guides, and optional scripts.
+Principles and helpers for human-LLM agent swarm collaboration on long-running projects. Provides documentation patterns for coordination across agents, temporal conflict resolution, and just-in-time context loading through structured files (ADRs, devlogs), progressive-detail guides, and optional scripts.
 
 **Note:** This skill focuses on documentation patterns. For task management across sessions, use the `llm-subtask` skill which handles ephemeral, tactical, and strategic task tracking.
 
@@ -33,10 +33,6 @@ project/
 ├── README.md                 # Users: what it does, how to use
 ├── HACKING.md                # Contributors: how to develop
 ├── CLAUDE.md                 # Agents: architecture, conventions
-├── .claude/
-│   ├── todo.md               # Current tasks (via subtask skill)
-│   ├── todo.kb/               # Detailed task breakdowns
-│   └── ideas.kb/              # Unprioritized ideas (may become todos)
 ├── docs/
 │   ├── adr/                  # Why: decision rationale
 │   ├── architecture/         # What/how: technical design
@@ -130,9 +126,6 @@ references.kb/: [Categorized guides: file-types.kb/, guidelines.kb/, workflows.k
 # Document a significant decision
 ~/.claude/skills/llm-collab/bin/llm-collab-adr "Decision title"
 
-# Capture an idea for later
-~/.claude/skills/llm-collab/bin/llm-collab-idea "Idea title"
-
 # Record what happened this session
 ~/.claude/skills/llm-collab/bin/llm-collab-devlog
 
@@ -144,22 +137,6 @@ DATE=2025-11-19 ~/.claude/skills/llm-collab/bin/llm-collab-adr "Decision title"
 ```
 
 All scripts support `--help` for details.
-
-## Ideas Pattern
-
-`.claude/ideas.kb/` captures unprioritized ideas without disrupting focused work.
-
-**When to use:** Mid-task inspiration that deserves capture but not immediate pursuit.
-
-**Lifecycle:**
-1. **Exploring** — Initial capture, may be refined over time
-2. **Promoted** → Becomes `todo.kb/` entry when ready for action
-3. **Rejected** → Document reasoning (optionally as ADR), delete file
-4. **Forgotten** — Acceptable; important ideas resurface naturally
-
-**Key distinction:**
-- `todo.kb/` = committed work, will be done
-- `ideas.kb/` = speculative, might never happen
 
 ## Detailed References
 

@@ -1,4 +1,5 @@
 ---
+anthropic-skill-ownership: llm-subtask
 cost-benefit-sweh:
   timebox:
     @value: 0.5  # SWE-hours (one SWEh ≈ 60 focused minutes)

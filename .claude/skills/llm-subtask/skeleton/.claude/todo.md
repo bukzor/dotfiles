@@ -1,4 +1,6 @@
-<anthropic-skill-ownership llm-subtask />
+---
+anthropic-skill-ownership: llm-subtask
+---
 
 - [ ] First task
 - [~] Second task

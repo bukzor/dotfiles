@@ -35,10 +35,20 @@ if [ ! -d ".claude" ]; then
   exit 1
 fi
 
+HERE="$(cd "$(dirname "$0")"; pwd)"
+SKELETON="$HERE/../skeleton/.claude"
+
+# Create todo.md (only if missing - contains user content)
 if [ ! -f .claude/todo.md ]; then
-  HERE="$(cd "$(dirname "$0")"; pwd)"
-  SKELETON="$HERE/../skeleton/.claude/todo.md"
-  cp "$SKELETON" .claude/todo.md
+  cp "$SKELETON/todo.md" .claude/todo.md
 fi
+
+# Create todo.kb/ with CLAUDE.md
+mkdir -p .claude/todo.kb
+cp "$SKELETON/todo.kb/CLAUDE.md" .claude/todo.kb/CLAUDE.md
+
+# Create ideas.kb/ with CLAUDE.md
+mkdir -p .claude/ideas.kb
+cp "$SKELETON/ideas.kb/CLAUDE.md" .claude/ideas.kb/CLAUDE.md
 
 echo "$PWD/.claude/todo.md"

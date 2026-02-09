@@ -37,9 +37,41 @@ SKELETON="$SKILL_DIR/skeleton"
 
 echo "🚀 Initializing LLM-collaborative documentation structure..."
 
+# Migrate old docs/adr to docs/dev/adr if needed
+if [ -d "docs/adr" ]; then
+  if [ -d "docs/dev/adr" ]; then
+    echo >&2 "Error: Both docs/adr/ and docs/dev/adr/ exist - manual resolution required"
+    exit 1
+  fi
+  echo "⚠️  Found docs/adr/ - migrating to docs/dev/adr/"
+  mkdir -p docs/dev
+  if git mv docs/adr docs/dev/adr 2>/dev/null; then
+    echo "✅ Migrated docs/adr/ → docs/dev/adr/ (git mv)"
+  else
+    mv docs/adr docs/dev/adr
+    echo "✅ Migrated docs/adr/ → docs/dev/adr/ (mv)"
+  fi
+fi
+
+# Migrate old docs/devlog to docs/dev/devlog if needed
+if [ -d "docs/devlog" ]; then
+  if [ -d "docs/dev/devlog" ]; then
+    echo >&2 "Error: Both docs/devlog/ and docs/dev/devlog/ exist - manual resolution required"
+    exit 1
+  fi
+  echo "⚠️  Found docs/devlog/ - migrating to docs/dev/devlog/"
+  mkdir -p docs/dev
+  if git mv docs/devlog docs/dev/devlog 2>/dev/null; then
+    echo "✅ Migrated docs/devlog/ → docs/dev/devlog/ (git mv)"
+  else
+    mv docs/devlog docs/dev/devlog
+    echo "✅ Migrated docs/devlog/ → docs/dev/devlog/ (mv)"
+  fi
+fi
+
 # Create directory structure
-mkdir -p .claude/todo.kb
-mkdir -p docs/{adr,architecture,milestones,devlog,examples}
+mkdir -p docs/dev/{adr,devlog}
+mkdir -p docs/{architecture,milestones,examples}
 
 echo "✅ Created directory structure"
 
@@ -47,12 +79,6 @@ echo "✅ Created directory structure"
 if [ ! -f CLAUDE.md ]; then
   cp "$SKELETON/CLAUDE.md" CLAUDE.md
   echo "✅ Created CLAUDE.md"
-fi
-
-# Create .gitkeep for todo.kb
-if [ ! -f .claude/todo.kb/.gitkeep ]; then
-  touch .claude/todo.kb/.gitkeep
-  echo "✅ Created .claude/todo.kb/ directory"
 fi
 
 # Create ROADMAP.md
@@ -67,16 +93,16 @@ if [ ! -f CONTRIBUTING.md ]; then
   echo "✅ Created CONTRIBUTING.md"
 fi
 
-# Create docs/adr/CLAUDE.md
-if [ ! -f docs/adr/CLAUDE.md ]; then
-  cp "$SKELETON/docs/adr/CLAUDE.md" docs/adr/CLAUDE.md
-  echo "✅ Created docs/adr/CLAUDE.md"
+# Create docs/dev/adr/CLAUDE.md
+if [ ! -f docs/dev/adr/CLAUDE.md ]; then
+  cp "$SKELETON/docs/dev/adr/CLAUDE.md" docs/dev/adr/CLAUDE.md
+  echo "✅ Created docs/dev/adr/CLAUDE.md"
 fi
 
-# Create docs/devlog/CLAUDE.md
-if [ ! -f docs/devlog/CLAUDE.md ]; then
-  cp "$SKELETON/docs/devlog/CLAUDE.md" docs/devlog/CLAUDE.md
-  echo "✅ Created docs/devlog/CLAUDE.md"
+# Create docs/dev/devlog/CLAUDE.md
+if [ ! -f docs/dev/devlog/CLAUDE.md ]; then
+  cp "$SKELETON/docs/dev/devlog/CLAUDE.md" docs/dev/devlog/CLAUDE.md
+  echo "✅ Created docs/dev/devlog/CLAUDE.md"
 fi
 
 # Create docs/architecture/overview.md
@@ -87,9 +113,10 @@ fi
 
 echo "✅ Helper scripts available at: $SKILL_DIR/bin/"
 
-# Create first devlog entry
-if [ ! -f "docs/devlog/$(date +%Y-%m-%d).md" ]; then
-  "$HERE/llm-collab-devlog"
+# Create first devlog entry (only for brand-new projects)
+# After migration, check for any existing entries (old or new naming format)
+if ! find docs/dev/devlog -maxdepth 1 -type f -name "*.md" ! -name "CLAUDE.md" ! -name "README.md" | grep -q .; then
+  "$HERE/llm-collab-devlog" "Project initialization"
   echo "✅ Created first devlog entry"
 fi
 

@@ -21,15 +21,15 @@ SKELETON="$SKILL_DIR/skeleton"
 
 DRY_RUN=0
 usage() {
-  echo >&2 "Usage: llm-collab-idea [-n|--name-only] \"Idea title\""
-  echo >&2 "       DATE=YYYY-MM-DD llm-collab-idea \"Idea title\"  (for backdating)"
-  echo >&2 "       -n, --name-only: print path without creating file"
+  echo >&2 "Usage: llm-subtask-idea [-n|--dry-run] \"Idea title\""
+  echo >&2 "       DATE=YYYY-MM-DD llm-subtask-idea \"Idea title\"  (for backdating)"
+  echo >&2 "       -n, --dry-run: print path without creating file"
 }
 
 while [[ "${1:-}" == -* ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
-    -n|--name-only) DRY_RUN=1; shift ;;
+    -n|--dry-run) DRY_RUN=1; shift ;;
     *) echo >&2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -49,6 +49,7 @@ if [ ! -d ".claude" ]; then
 fi
 
 mkdir -p .claude/ideas.kb
+cp "$SKELETON/.claude/ideas.kb/CLAUDE.md" .claude/ideas.kb/CLAUDE.md
 
 DATE=${DATE:-$(date +%Y-%m-%d)}
 LAST=$(find .claude/ideas.kb -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")

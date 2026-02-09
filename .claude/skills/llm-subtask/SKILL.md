@@ -1,6 +1,6 @@
 ---
 name: llm-subtask
-description: "Agent MUST load when:\n\n1. user gives a terse command starting with \"subtask\" or \"todo\" OR\n2. working with multiple tasks OR\n3. user asks a question during a task"
+description: "Agent MUST load for 'subtask'/'todo' commands, multi-task work, or mid-task questions"
 ---
 --- # workaround: anthropics/claude-code#13005
 setup: |
@@ -37,6 +37,7 @@ Four-tier task decomposition system for managing work at different granularities
 **Artifacts:**
 - `$PWD/.claude/todo.md` - Quick checklist of active tasks (Tier 2: Tactical)
 - `$PWD/.claude/todo.kb/YYYY-MM-DD-NNN-title.md` - Detailed task breakdowns (Tier 3: Strategic)
+- `$PWD/.claude/ideas.kb/YYYY-MM-DD-NNN-title.md` - Unprioritized ideas (may become todos)
 - Conversation context - Ephemeral subtasks (Tier 1)
 
 **Integration:** Works alongside devlog documentation - tasks track "what's next" (forward-looking), devlogs document "what happened" (historical). See "Integration with Devlog" section below.
@@ -73,7 +74,7 @@ These mostly notional, only reified on demand.
 - `todo push` - Append a task
 - `todo pop` -- Mark the current task (should be first) as complete
 - `todo list` -- Read and display `.claude/todo.md`
-- `todo clear` -- Remove all completed items from the list
+- `todo clear` -- Remove all completed items from the list. Verify devlog coverage first; also remove completed `todo.kb/` files.
 
 **File initialization:** `bin/llm-subtask-init` creates `.claude/todo.md` from skeleton if missing (idempotent).
 
@@ -123,6 +124,8 @@ When tasks have dependencies, **nest prerequisites under goals**, not goals unde
 
 Work flows bottom-up: buy bread → make sandwiches → host dinner party.
 
+**Granularity:** Items representing >60 minutes of work are hiding scope. Decompose until each subtask is a single focused effort.
+
 ## Example: subtask list
 
 When user requests `subtask list`, enumerate pending work from conversation context using markdown list format with status indicators.
@@ -148,6 +151,8 @@ Example output:
 
 **Start:** `subtask load` reads tactical todos from `.claude/todo.md`
 
+**Uncommitted [x] markers are unverified claims.** Check `git status` — if todo.md has uncommitted changes, verify completed items before trusting them.
+
 **During:** Work with ephemeral subtasks (`subtask push`/`pop`/`prepend`/`list`)
 
 **End:** `subtask save` reviews incomplete work:
@@ -164,6 +169,8 @@ Proactively suggest `subtask save` when detecting:
 
 Phrase as: "Before we move on, should I `subtask save` to review what's incomplete?"
 
+Proactively suggest `todo clear` when completed items outnumber or clutter the remaining work — stale checkboxes obscure what's actually next.
+
 ## Integration with Devlog
 
 Task tracking and devlog documentation are complementary systems:
@@ -176,6 +183,24 @@ Task tracking and devlog documentation are complementary systems:
 2. Create/update devlog entry documenting session narrative
 
 **For devlog structure and conventions**, load the llm-collab skill.
+
+## Ideas Pattern
+
+`.claude/ideas.kb/` captures unprioritized ideas without disrupting focused work.
+
+**When to use:** Mid-task inspiration that deserves capture but not immediate pursuit.
+
+**Lifecycle:**
+1. **Exploring** — Initial capture, may be refined over time
+2. **Promoted** → Becomes `todo.kb/` entry when ready for action
+3. **Rejected** → Document reasoning (optionally as ADR), delete file
+4. **Forgotten** — Acceptable; important ideas resurface naturally
+
+**Key distinction:**
+- `todo.kb/` = committed work, will be done
+- `ideas.kb/` = speculative, might never happen
+
+**Create ideas via:** `~/.claude/skills/llm-subtask/bin/llm-subtask-idea "Idea title"`
 
 ## References
 

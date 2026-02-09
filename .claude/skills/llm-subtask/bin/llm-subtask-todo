@@ -16,15 +16,15 @@ fi
 
 DRY_RUN=0
 usage() {
-  echo >&2 "Usage: llm-subtask-todo [-n|--name-only] \"TODO title\""
+  echo >&2 "Usage: llm-subtask-todo [-n|--dry-run] \"TODO title\""
   echo >&2 "       DATE=YYYY-MM-DD llm-subtask-todo \"TODO title\"  (for backdating)"
-  echo >&2 "       -n, --name-only: print path without creating file"
+  echo >&2 "       -n, --dry-run: print path without creating file"
 }
 
 while [[ "${1:-}" == -* ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
-    -n|--name-only) DRY_RUN=1; shift ;;
+    -n|--dry-run) DRY_RUN=1; shift ;;
     *) echo >&2 "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -43,8 +43,13 @@ if [ ! -d ".claude" ]; then
   exit 1
 fi
 
-# Ensure todo.kb/ exists within .claude/
+# Locate skeleton directory
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+SKELETON="$SCRIPT_DIR/../skeleton/.claude"
+
+# Ensure todo.kb/ exists with CLAUDE.md
 mkdir -p .claude/todo.kb
+cp "$SKELETON/todo.kb/CLAUDE.md" .claude/todo.kb/CLAUDE.md
 
 DATE=${DATE:-$(date +%Y-%m-%d)}
 LAST=$(find .claude/todo.kb -maxdepth 1 -name "$DATE-*" -print0 2>/dev/null | xargs -r0 ls -1t | sed -n '1p' || echo "")
@@ -67,11 +72,7 @@ if (( DRY_RUN )); then
   exit 0
 fi
 
-# Get skeleton template path
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-SKELETON="$SCRIPT_DIR/../skeleton/.claude/todo.kb/YYYY-MM-DD-000-example-task.md"
-
 # Copy skeleton template
-cp "$SKELETON" "$FILE"
+cp "$SKELETON/todo.kb/YYYY-MM-DD-000-example-task.md" "$FILE"
 
 echo >&2 "✅ Created"
