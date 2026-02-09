@@ -25,5 +25,6 @@
 
 ## Later
 
+- [ ] todo.kb/2026-02-09-000 (design.kb pattern for living design docs)
 - [ ] todo.kb/2025-11-29-000 (devlog reevaluation - strategic) — Medium/High
 - [ ] todo.kb/2025-11-26-003 (clarify todo.md/todo.kb relationship in subtask skill docs)

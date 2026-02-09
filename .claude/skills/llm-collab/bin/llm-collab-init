@@ -71,7 +71,6 @@ fi
 
 # Create directory structure
 mkdir -p docs/dev/{adr,devlog}
-mkdir -p docs/{architecture,milestones,examples}
 
 echo "✅ Created directory structure"
 
@@ -81,16 +80,10 @@ if [ ! -f CLAUDE.md ]; then
   echo "✅ Created CLAUDE.md"
 fi
 
-# Create ROADMAP.md
-if [ ! -f ROADMAP.md ]; then
-  cp "$SKELETON/ROADMAP.md" ROADMAP.md
-  echo "✅ Created ROADMAP.md"
-fi
-
-# Create CONTRIBUTING.md
-if [ ! -f CONTRIBUTING.md ]; then
-  cp "$SKELETON/CONTRIBUTING.md" CONTRIBUTING.md
-  echo "✅ Created CONTRIBUTING.md"
+# Create HACKING.md
+if [ ! -f HACKING.md ]; then
+  cp "$SKELETON/HACKING.md" HACKING.md
+  echo "✅ Created HACKING.md"
 fi
 
 # Create docs/dev/adr/CLAUDE.md
@@ -103,12 +96,6 @@ fi
 if [ ! -f docs/dev/devlog/CLAUDE.md ]; then
   cp "$SKELETON/docs/dev/devlog/CLAUDE.md" docs/dev/devlog/CLAUDE.md
   echo "✅ Created docs/dev/devlog/CLAUDE.md"
-fi
-
-# Create docs/architecture/overview.md
-if [ ! -f docs/architecture/overview.md ]; then
-  cp "$SKELETON/docs/architecture/overview.md" docs/architecture/overview.md
-  echo "✅ Created docs/architecture/overview.md"
 fi
 
 echo "✅ Helper scripts available at: $SKILL_DIR/bin/"
