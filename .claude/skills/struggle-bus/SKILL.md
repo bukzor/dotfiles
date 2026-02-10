@@ -1,6 +1,6 @@
 ---
 name: struggle-bus
-description: "Agent MUST load when:\n\n1. User says \"struggle bus\" or \"manual breathing\" OR\n2. User asks \"why did you [unexpected behavior]\" OR\n3. Multiple clarification attempts fail"
+description: "Agent MUST load for 'struggle bus', 'manual breathing', or repeated misunderstandings"
 ---
 
 # Struggle Bus
