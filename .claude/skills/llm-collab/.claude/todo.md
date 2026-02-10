@@ -25,7 +25,7 @@
 
 ## Later
 
-- [ ] todo.kb/2026-02-09-001 (cleanup stale path references) — skeleton, references.kb, TESTING.md
+- [x] todo.kb/2026-02-09-001 (cleanup stale path references) — skeleton, references.kb, TESTING.md
 - [x] todo.kb/2026-02-09-000 (design.kb pattern for living design docs) — pattern designed, implemented
   - [x] Design structure and traceability model
   - [x] Document pattern (references/how-to-document-design-knowledge.md)

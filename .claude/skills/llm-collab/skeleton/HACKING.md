@@ -6,7 +6,7 @@
 
 ## Project Structure
 
-[Brief overview, link to docs/architecture/overview.md]
+[Brief overview, link to docs/dev/design/]
 
 ## Running Tests
 
@@ -22,8 +22,8 @@
 
 ## Architecture
 
-See [docs/architecture/overview.md] for details.
+See [docs/dev/design/](docs/dev/design/) for design documentation.
 
 ## Design Decisions
 
-See [docs/adr/](docs/adr/) for architecture decision records.
+See [docs/dev/adr/](docs/dev/adr/) for architecture decision records.

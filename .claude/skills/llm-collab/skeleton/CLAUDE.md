@@ -11,7 +11,7 @@ depends:
 [2-3 sentence summary] → See [HACKING.md#section](HACKING.md#section)
 
 **Understanding [key concept]:**
-[Brief explanation] → See [docs/dev/technical-design.md#concept](docs/dev/technical-design.md#concept)
+[Brief explanation] → See [docs/dev/design/](docs/dev/design/)
 
 **Current tasks:** See [.claude/todo.md] for active work and priorities.
 
@@ -20,14 +20,14 @@ depends:
 [3-5 sentence summary of how the system works]
 
 **Key subsystems:**
-- [Subsystem 1]: [One sentence] → [Link to docs/dev/technical-design/subsystem-1.md]
-- [Subsystem 2]: [One sentence] → [Link to docs/dev/technical-design/subsystem-2.md]
+- [Subsystem 1]: [One sentence] → [Link to docs/dev/design/050-components.kb/]
+- [Subsystem 2]: [One sentence] → [Link to docs/dev/design/050-components.kb/]
 
 ## Data Flow
 
 [Brief description or ASCII diagram showing how data moves through system]
 
-See [docs/dev/technical-design.md#data-flow](docs/dev/technical-design.md#data-flow) for details.
+See [docs/dev/design/](docs/dev/design/) for details.
 
 ## Key Files
 

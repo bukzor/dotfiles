@@ -3,7 +3,7 @@
 Each major doc should have "When to read this" section at top:
 
 ```markdown
-# design-rationale.md
+# docs/dev/design/040-design.kb/caching.md
 
 **Read this when:**
 - Questioning why a design decision was made

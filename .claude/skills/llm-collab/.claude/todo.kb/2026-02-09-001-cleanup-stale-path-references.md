@@ -40,10 +40,14 @@ Files with stale references:
 
 ## Implementation
 
-1. [ ] Update skeleton files to reference design/ and technical-policy.kb/
-2. [ ] Remove or update file-types.kb entries for removed types
-3. [ ] Update workflows.kb/ and guidelines.kb/ to reflect new patterns
-4. [ ] Update TESTING.md to test new skeleton structure
+1. [x] Update skeleton files to reference design/ and technical-policy.kb/
+2. [x] Remove or update file-types.kb entries for removed types
+3. [x] Update workflows.kb/ and guidelines.kb/ to reflect new patterns
+4. [x] Update TESTING.md to test new skeleton structure
+
+## Notes
+
+- Milestone/phase planning gap documented in llm-subtask/.claude/todo.kb/2026-02-10-000
 
 ## Related
 

@@ -44,11 +44,11 @@ cd ~/.claude/skills/llm-collab
 
 # Files llm-collab-init expects to copy
 test -f skeleton/CLAUDE.md && echo "✓ CLAUDE.md" || echo "✗ CLAUDE.md"
-test -f skeleton/ROADMAP.md && echo "✓ ROADMAP.md" || echo "✗ ROADMAP.md"
-test -f skeleton/CONTRIBUTING.md && echo "✓ CONTRIBUTING.md" || echo "✗ CONTRIBUTING.md"
+test -f skeleton/HACKING.md && echo "✓ HACKING.md" || echo "✗ HACKING.md"
 test -f skeleton/docs/dev/adr/CLAUDE.md && echo "✓ docs/dev/adr/CLAUDE.md" || echo "✗ docs/dev/adr/CLAUDE.md"
 test -f skeleton/docs/dev/devlog/CLAUDE.md && echo "✓ docs/dev/devlog/CLAUDE.md" || echo "✗ docs/dev/devlog/CLAUDE.md"
-test -f skeleton/docs/architecture/overview.md && echo "✓ docs/architecture/overview.md" || echo "✗ docs/architecture/overview.md"
+test -f skeleton/docs/dev/design/CLAUDE.md && echo "✓ docs/dev/design/CLAUDE.md" || echo "✗ docs/dev/design/CLAUDE.md"
+test -f skeleton/docs/dev/technical-policy.kb/CLAUDE.md && echo "✓ docs/dev/technical-policy.kb/CLAUDE.md" || echo "✗ docs/dev/technical-policy.kb/CLAUDE.md"
 
 # Files llm-collab-devlog expects
 test -f skeleton/docs/dev/devlog/YYYY-MM-DD-000-example-entry.md && echo "✓ devlog template" || echo "✗ devlog template"
@@ -56,8 +56,8 @@ test -f skeleton/docs/dev/devlog/YYYY-MM-DD-000-example-entry.md && echo "✓ de
 # Files llm-collab-adr expects
 test -f skeleton/docs/dev/adr/YYYY-MM-DD-000-example-decision.md && echo "✓ adr template" || echo "✗ adr template"
 
-# Files llm-collab-idea expects
-test -f skeleton/.claude/ideas.kb/YYYY-MM-DD-000-example-idea.md && echo "✓ idea template" || echo "✗ idea template"
+# TODO: llm-collab-idea not yet implemented (see todo.kb/2025-11-26-001)
+# test -f skeleton/.claude/ideas.kb/YYYY-MM-DD-000-example-idea.md && echo "✓ idea template" || echo "✗ idea template"
 ```
 
 **Expected:** All checks pass. Any `✗` indicates a script/skeleton mismatch.
@@ -80,9 +80,9 @@ echo "--- devlog exit: $? ---"
 ~/.claude/skills/llm-collab/bin/llm-collab-adr "Test decision"
 echo "--- adr exit: $? ---"
 
-# 4. Create idea
-~/.claude/skills/llm-collab/bin/llm-collab-idea "Test idea"
-echo "--- idea exit: $? ---"
+# TODO: llm-collab-idea not yet implemented (see todo.kb/2025-11-26-001)
+# ~/.claude/skills/llm-collab/bin/llm-collab-idea "Test idea"
+# echo "--- idea exit: $? ---"
 
 # 5. Verify structure
 echo "--- Structure ---"
@@ -93,10 +93,11 @@ rm -rf "$tmpdir"
 ```
 
 **Expected:** All exit codes 0. Structure includes:
-- `CLAUDE.md`, `ROADMAP.md`, `CONTRIBUTING.md`
+- `CLAUDE.md`, `HACKING.md`
 - `docs/dev/adr/CLAUDE.md` + dated ADR file
 - `docs/dev/devlog/CLAUDE.md` + dated devlog file
-- `.claude/ideas.kb/` + dated idea file
+- `docs/dev/design/CLAUDE.md`
+<!-- TODO: ideas.kb not yet implemented (see todo.kb/2025-11-26-001) -->
 
 ## Script Path Audit
 

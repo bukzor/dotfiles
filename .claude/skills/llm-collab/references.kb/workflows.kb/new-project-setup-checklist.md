@@ -8,19 +8,12 @@
 - [ ] CLAUDE.md (LLM quick-ref)
 ```
 
-## docs/ Structure
+## docs/dev/ Structure
 
 ```
-- [ ] docs/adr/CLAUDE.md (directory guide)
-- [ ] docs/devlog/CLAUDE.md (directory guide)
-- [ ] docs/architecture/overview.md (system overview)
-```
-
-## Optional (Create as Needed)
-
-```
-- [ ] docs/examples/ (usage recipes)
-- [ ] design-incubators/ (unsolved problems)
+- [ ] docs/dev/adr/CLAUDE.md (directory guide)
+- [ ] docs/dev/devlog/CLAUDE.md (directory guide)
+- [ ] docs/dev/design/CLAUDE.md (design knowledge breadcrumb)
 ```
 
 ## Quick Setup

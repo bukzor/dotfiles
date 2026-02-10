@@ -14,8 +14,6 @@
 
 [Basic example]
 
-See [docs/examples/] for more.
-
 ## Contributing
 
 See [HACKING.md].

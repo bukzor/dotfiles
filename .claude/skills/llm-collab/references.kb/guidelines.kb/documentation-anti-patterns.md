@@ -8,7 +8,7 @@
 Plumbing tools use JSONL. One object per line. This enables streaming...
 [30 lines of explanation]
 
-# technical-design.md
+# docs/dev/design/050-components.kb/plumbing.md
 [Exact same 30 lines]
 ```
 
@@ -36,7 +36,7 @@ This project does things. See docs/ for more.
 # Some random .py file
 # DESIGN NOTE: We chose this approach because of X, Y, Z considerations
 # and evaluated alternatives A, B, C before deciding...
-[300 line comment that should be in design-rationale.md]
+[300 line comment that should be in docs/dev/design/ or an ADR]
 ```
 
 ## Do This Instead
@@ -45,17 +45,16 @@ This project does things. See docs/ for more.
 ```markdown
 # CLAUDE.md
 Plumbing uses JSONL (one object/line) for streaming and jq compatibility.
-See [technical-design.md#jsonl](docs/dev/technical-design.md#jsonl).
+See [design](docs/dev/design/).
 
-# technical-design.md
+# docs/dev/design/050-components.kb/plumbing.md
 ## JSONL Format
 One JSON object per line enables streaming, composition, future migration.
-See [technical-design/jsonl-format.md] for schema.
 ```
 
 **Contextual links:**
 ```markdown
-See [caching strategy](technical-design/caching.md) for lazy-loading implementation.
+See [caching component](docs/dev/design/050-components.kb/caching.md) for lazy-loading.
 ```
 
 **Progressive disclosure:**
@@ -69,7 +68,7 @@ Install: [Quick steps]
 Usage: [Basic example]
 
 For development: See [HACKING.md]
-For architecture: See [docs/dev/technical-design.md]
+For architecture: See [docs/dev/design/]
 ```
 
 **Extracted design docs:**
