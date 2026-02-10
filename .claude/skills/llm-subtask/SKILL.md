@@ -26,7 +26,14 @@ default: subtask load
 
 # Subtask Management
 
-Four-tier task decomposition system for managing work at different granularities: conversational, ephemeral, tactical, and strategic. Use when breaking down complex work into manageable pieces, coordinating across sessions, or transitioning between persistence tiers.
+Four-tier task decomposition (finest to coarsest):
+
+0. Conversational -- Question preemption (pattern, not tool)
+1. Ephemeral -- In-context subtasks via marker commands
+2. Tactical -- Cross-session checkboxes in `.claude/todo.md`
+3. Strategic -- Planning files in `.claude/todo.kb/`
+
+Use when breaking down complex work, coordinating across sessions, or transitioning between tiers.
 
 ## Overview
 
@@ -40,25 +47,14 @@ Four-tier task decomposition system for managing work at different granularities
 - `$PWD/.claude/ideas.kb/YYYY-MM-DD-NNN-title.md` - Unprioritized ideas (may become todos)
 - Conversation context - Ephemeral subtasks (Tier 1)
 
-**Integration:** Works alongside devlog documentation - tasks track "what's next" (forward-looking), devlogs document "what happened" (historical). See "Integration with Devlog" section below.
-
-## Four Tiers
-
-Support task decomposition at four granularities, from finest to coarsest:
-
-0. Conversational -- Question preemption (pattern, not tool)
-1. Ephemeral -- Session subtasks via marker commands (in-context)
-2. Tactical -- Cross-session checkboxes in `.claude/todo.md`
-3. Strategic -- Planning files in `.claude/todo.kb/YYYY-MM-DD-NNN-title.md`
-
 ## Marker Commands
 
 ### Ephemeral (Tier 1)
 
-These mostly notional, only reified on demand.
+Mostly notional, only reified on demand.
 
 - `subtask prepend` -- Signal priority shift, refocus on new work stream
-- `subtask push` - Append a subtask to the queue
+- `subtask push` -- Append a subtask to the queue
 - `subtask pop` -- Mark current subtask complete
 - `subtask list` -- Enumerate pending work from conversation context
 
@@ -68,13 +64,17 @@ These mostly notional, only reified on demand.
     1. read `.claude/todo.md`
     2. list `.claude/todo.kb/`
 - `subtask save`
-    1. review chat history for subtasks that are both incomplete and not yet persisted
-    2. categorize as tactical/strategic/abandon
+    1. review chat history for incomplete, unpersisted subtasks
+    2. items with subtasks → `todo.kb/` (strategic); all others → `todo.md` (tactical)
+    3. confirm with user before abandoning anything
 - `session end` -- Run `bin/session-end` script
-- `todo push` - Append a task
+- `todo push` -- Append a task
 - `todo pop` -- Mark the current task (should be first) as complete
 - `todo list` -- Read and display `.claude/todo.md`
-- `todo clear` -- Remove all completed items from the list. Verify devlog coverage first; also remove completed `todo.kb/` files.
+- `todo clear`
+    1. for each `[x]` item, grep devlog for its key phrase
+    2. if no match, ask user before removing
+    3. also delete completed `todo.kb/` files
 
 **File initialization:** `bin/llm-subtask-init` creates `.claude/todo.md` from skeleton if missing (idempotent).
 
@@ -95,36 +95,17 @@ Tier 2 (tactical) and Tier 3 (strategic) work together: <https:todo.md> contains
 - [ ] Schedule first climbing session
 ```
 
-## Nesting Pattern: Goal-First
+## Nesting: Goal-First
 
-When tasks have dependencies, **nest prerequisites under goals**, not goals under prerequisites.
+Nest prerequisites under goals. Children complete before parent.
 
-**Correct:** Goal is parent, blockers are children
 ```markdown
 - [ ] Make a sandwich
   - [ ] Buy bread
   - [ ] Buy cheese
 ```
 
-**Incorrect:** Blocker is parent, goal is child
-```markdown
-- [ ] Buy bread
-  - [ ] Make a sandwich
-```
-
-**Rationale:** You check off children first (buy bread, buy cheese), then parent (make sandwich). This matches execution order—children complete before parent can complete.
-
-**Multi-level chains:** Same principle applies recursively
-```markdown
-- [ ] Host dinner party
-  - [ ] Make sandwiches
-    - [ ] Buy bread
-  - [ ] Set table
-```
-
-Work flows bottom-up: buy bread → make sandwiches → host dinner party.
-
-**Granularity:** Items representing >60 minutes of work are hiding scope. Decompose until each subtask is a single focused effort.
+**Granularity:** Items >60 minutes are hiding scope. Decompose until each subtask is a single focused effort.
 
 ## Example: subtask list
 
@@ -155,34 +136,13 @@ Example output:
 
 **During:** Work with ephemeral subtasks (`subtask push`/`pop`/`prepend`/`list`)
 
-**End:** `subtask save` reviews incomplete work:
-- Tactical → `todo push` to `.claude/todo.md`
-- Strategic → `bin/llm-subtask-todo "title"` creates planning file
-- Trivial → abandon
+**End:** `subtask save` + update devlog (load llm-collab skill for devlog conventions)
 
 ## Agent Initiative
 
-Proactively suggest `subtask save` when detecting:
-- User signals wrap-up: "gotta go", "that's all", "wrapping up"
-- Long conversation with visible incomplete ephemeral work
-- Abrupt topic shift leaving work dangling
+Suggest `subtask save` when user says "done", "wrap up", "gotta go", or "that's all".
 
-Phrase as: "Before we move on, should I `subtask save` to review what's incomplete?"
-
-Proactively suggest `todo clear` when completed items outnumber or clutter the remaining work — stale checkboxes obscure what's actually next.
-
-## Integration with Devlog
-
-Task tracking and devlog documentation are complementary systems:
-
-**Tasks (forward-looking):** Track "what's next" - active work, priorities, blockers
-**Devlogs (historical):** Document "what happened" - decisions, discoveries, outcomes
-
-**At session end:**
-1. `subtask save` reviews incomplete work → updates `.claude/todo.md`
-2. Create/update devlog entry documenting session narrative
-
-**For devlog structure and conventions**, load the llm-collab skill.
+Suggest `todo clear` when `[x]` items outnumber `[ ]` items in todo.md.
 
 ## Ideas Pattern
 
