@@ -16,12 +16,12 @@
   - [x] llm-collab-adr: heredoc → sed from skeleton template
   - [x] llm-collab-idea: heredoc → sed from skeleton template
   - [x] Created missing skeleton/docs/adr/README.md
-- [~] Check other scripts for docs/ → docs/dev/ migration needed (scan llm-collab and other skills)
+- [x] Check other scripts for docs/ → docs/dev/ migration needed (scan llm-collab and other skills)
   - [x] All bin/ scripts: rename -n|--name-only → -n|--dry-run (adr, devlog, idea, subtask-todo)
   - [x] skeleton/docs/dev/devlog/: old dir deleted, new dir exists with content
-  - [ ] Verify llm-collab-devlog script still works
-  - [ ] Run TESTING.md to verify bin/ scripts work with new paths
-  - [ ] Check other skill scripts for similar migration needs
+  - [x] Verify llm-collab-devlog script still works
+  - [x] Run TESTING.md to verify bin/ scripts work with new paths
+  - [x] Check other skill scripts for similar migration needs (none have docs/ refs)
 
 ## Later
 
