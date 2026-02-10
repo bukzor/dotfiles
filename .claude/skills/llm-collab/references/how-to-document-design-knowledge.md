@@ -55,24 +55,26 @@ Why this project exists. Often a single file.
 
 Objectives the project aims to achieve. One file per goal.
 
-- Concrete, assessable outcomes
-- Independent enough to evaluate separately
-- Stable over the project lifetime
+In OKR terms, these are *objectives* — qualitative outcomes that key results
+(requirements) make measurable.
 
-Example: `portable.md`, `performant.md`, `testable.md`
+- Aspirational but achievable
+- Stable over the project lifetime
+- Each spawns one or more requirements that prove achievement
 
 ### 030-requirements.kb/
 
-Key results that must be achieved. One file per requirement.
+Key results and acceptance criteria. One file per requirement.
+
+If goals are *objectives*, requirements are *key results* — the measurable
+outcomes that demonstrate goal achievement.
 
 Each requirement MUST trace to at least one goal via `why[]`. If it doesn't
 trace to a goal, it's probably a technical policy, not a requirement.
 
-- Measurable or verifiable conditions
-- Necessary for achieving goals
-- Constraints on the solution space
-
-Example: `browser-parallelism.md` (why: portable, performant)
+- Verifiable by running or testing the system
+- Stakeholders could confirm satisfaction
+- Constrains behavior, not implementation
 
 ### 040-design.kb/
 
@@ -116,8 +118,6 @@ Cross-cutting normative guidance. Lives at `docs/dev/technical-policy.kb/`.
 - Performance guidelines
 
 One file per policy. Links to whatever level it serves via `why[]`.
-
-Example: `no-hot-path-allocs.md` (why: requirements/throughput-budget)
 
 ## The why[] Frontmatter
 
