@@ -1,6 +1,6 @@
 # Documentation Conventions
 
-Meta-decisions about how llm.d documentation is written.
+Meta-decisions about how llm.kb documentation is written.
 
 ## Placeholders
 

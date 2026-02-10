@@ -8,3 +8,4 @@
 ## Later
 
 - [ ] todo.kb/2025-12-04-000 (Claude enumerates contents despite explicit prohibition)
+- [ ] todo.kb/2026-02-09-000 (Schema reuse with $ref)

@@ -1,6 +1,6 @@
-# llm.d Test Scenarios
+# llm.kb Test Scenarios
 
-Manual test scenarios for validating llm.d skill behavior.
+Manual test scenarios for validating llm.kb skill behavior.
 
 ## Running a Test
 
@@ -15,4 +15,4 @@ Each scenario is a directory containing:
 - `CLAUDE.md` — Task prompt + evaluation criteria
 - `.claude/` — Optional scenario-specific configuration
 
-Scenarios should test specific failure modes or edge cases of the llm.d pattern.
+Scenarios should test specific failure modes or edge cases of the llm.kb pattern.

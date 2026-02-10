@@ -53,6 +53,7 @@ Docs referencing `.d/`:
 - [ ] Update docs/documentation-conventions.md
 - [ ] Mark ADR 2025-12-03-000 as Accepted
 - [ ] Verify: `grep -r '\.d/' .` shows only acceptable uses (CLAUDE.d/ pattern is separate)
+- [ ] Add auto-migrate step to scripts that read/write `.kb/` directories (like llm-collab-devlog does for docs/devlog → docs/dev/devlog)
 
 ## Success Criteria
 

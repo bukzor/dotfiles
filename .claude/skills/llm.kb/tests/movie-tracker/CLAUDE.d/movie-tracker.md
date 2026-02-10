@@ -11,5 +11,5 @@ each film. Add summary files only where they'd help beyond `ls`.
 ## Steps
 
 0. List all context information you've been provided
-1. Skill("llm.d") -- load the pattern
+1. Skill("llm.kb") -- load the pattern
 2. Create the knowledge base following the pattern

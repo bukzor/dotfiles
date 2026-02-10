@@ -1,6 +1,6 @@
 ---
 name: llm.kb
-description: "Agent MUST load when:\n\n1. Creating structured knowledge bases (.kb/ directories) OR\n2. Organizing facts/tasks for multi-agent LLM access OR\n3. Need grep-able metadata with schema validation"
+description: "Agent MUST load for .kb/ directories and structured multi-agent knowledge bases"
 ---
 --- # workaround: anthropics/claude-code#13005
 setup: |
@@ -80,6 +80,13 @@ After reading `$CATEGORY.kb/CLAUDE.md`, agent must know:
 Content discovery is `ls`. Never enumerate in CLAUDE.md.
 
 ❌ "Tools: Goose, Aider..." / "PRs: #123, #456..." / "Contains: api.md, auth.md"
+
+## Frontmatter Directives
+
+CLAUDE.md files use frontmatter to give agents operational instructions. These are **action triggers**, not passive metadata.
+
+- `requires:` — Read these files before acting in this directory.
+- `depends:` — Read when relevant.
 
 ### Content Files ($ITEM.md in .kb/)
 

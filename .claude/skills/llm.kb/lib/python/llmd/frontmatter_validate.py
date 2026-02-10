@@ -16,6 +16,9 @@ from pathlib import Path
 from dataclasses import dataclass
 import argparse
 
+SUFFIX = '.kb'
+HIVE_PARTITION_MARKER = '='
+
 
 @dataclass(frozen=True)
 class ValidationResult:
@@ -60,21 +63,31 @@ def without_children(paths):
             seen.add(p)
 
 
+def is_kb_dir(path):
+    """Check if directory is a .kb/ or hive partition."""
+    return path.is_dir() and (path.name.endswith(SUFFIX) or HIVE_PARTITION_MARKER in path.name)
+
+
+def kb_subdirs(path):
+    """Get .kb/ and hive partition subdirectories."""
+    return [d for d in sorted(path.iterdir()) if is_kb_dir(d)]
+
+
 def validate_paths(paths, schema_override=None, depth=0):
     """Recursively validate paths, yielding ValidationResult objects."""
     for path in paths:
         p = Path(path)
 
-        if p.is_dir() and p.name.endswith('.d'):
+        if is_kb_dir(p):
             yield ValidationResult(depth, 'dir', p.name)
 
             for md_file in sorted(p.glob('*.md')):
                 yield from validate_one_file(md_file, schema_override, depth + 1)
 
-            yield from validate_paths(sorted(p.glob('*.d')), schema_override, depth + 1)
+            yield from validate_paths(kb_subdirs(p), schema_override, depth + 1)
 
         elif p.is_dir():
-            yield from validate_paths(without_children(p.glob('**/*.d')), schema_override, depth)
+            yield from validate_paths(without_children(p.glob(f'**/*{SUFFIX}')), schema_override, depth)
 
         elif p.is_file():
             yield from validate_one_file(p, schema_override, depth)
@@ -176,8 +189,8 @@ def validate_file(md_file, schema_override=None):
     schema_file = schema_override
     if not schema_file:
         parent = md_file.parent.name
-        if parent.endswith('.d'):
-            category = parent[:-2]
+        if parent.endswith(SUFFIX):
+            category = parent.removesuffix(SUFFIX)
             schema_file = md_file.parent.parent / f"{category}.jsonschema.yaml"
         else:
             return []  # Can't validate without schema
@@ -197,7 +210,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Validate markdown frontmatter against JSON schema'
     )
-    parser.add_argument('paths', nargs='*', default=['.'], help='Markdown files, .d/ directories, or directories containing .d/ subdirectories (default: .)')
+    parser.add_argument('paths', nargs='*', default=['.'], help=f'Markdown files, {SUFFIX}/ directories, or directories containing {SUFFIX}/ subdirectories (default: .)')
     parser.add_argument('--schema', help='Schema file (auto-detected if not provided)')
 
     args = parser.parse_args()

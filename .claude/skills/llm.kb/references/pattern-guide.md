@@ -1,4 +1,4 @@
-# The llm.d Pattern - Detailed Guide
+# The llm.kb Pattern - Detailed Guide
 
 ## Origins
 
