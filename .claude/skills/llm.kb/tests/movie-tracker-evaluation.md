@@ -8,22 +8,58 @@ Tests llm.kb pattern compliance and multi-agent handoff.
 ./test
 ```
 
-## Phase 1: Create Knowledge Base
+## kb-writer: Create Knowledge Base
 
 Pass if agent follows SKILL.md patterns. Key signals:
-- Creates `CLAUDE.d/llm-kb.md` per SKILL.md
-- CLAUDE.md not corrupted (append-only)
+- Creates `.kb/` directory structure (e.g., `movies.kb/`)
+- Root CLAUDE.md has `requires: Skill(llm.kb)` frontmatter
+- Category CLAUDE.md explains what belongs (not enumeration)
+- Individual movie files in the `.kb/` directory
 
-## Phase 2: Multi-Agent Handoff
+## kb-reader: Multi-Agent Handoff
 
-Pass if second agent can answer "What sci-fi movies have I watched?" using the
-knowledge base created in Phase 1.
+Pass if a fresh agent can answer "What sci-fi movies have I watched?" using the
+knowledge base. The agent must:
+- Discover the `.kb/` directory via CLAUDE.md frontmatter
+- Read movie files to find watched sci-fi titles
+- Return Matrix and Inception
 
 ## Verification
 
+### Quick check (result only)
+
 ```bash
-cat CLAUDE.d/llm-kb.md             # Should exist with requires: frontmatter
-grep -i "matrix\|inception" claude-session.jsonl  # Phase 2 answer
+grep -i "matrix\|inception" claude-session.kb-reader.jsonl
 ```
 
-Final check: review output against SKILL.md -- does the structure follow the pattern?
+### Full trace (mechanism)
+
+```bash
+claude-jsonl-display < claude-session.kb-writer.jsonl | less -R
+claude-jsonl-display < claude-session.kb-reader.jsonl | less -R
+```
+
+This shows the complete conversation: tool calls, file reads, thinking, responses.
+
+**kb-writer signals (correct pattern usage):**
+- Agent calls `Skill("llm.kb")`
+- Creates `*.kb/` directory (not flat files)
+- Writes CLAUDE.md with `requires: Skill(llm.kb)` frontmatter
+- Category CLAUDE.md describes what belongs (no enumeration)
+
+**kb-reader signals (successful handoff):**
+- Agent reads CLAUDE.md first
+- Loads llm.kb skill (triggered by frontmatter)
+- Discovers `.kb/` directory via pattern knowledge
+- Reads movie files to answer query
+
+If kb-reader succeeds but found data by `ls` instead of pattern-driven discovery,
+the test passes but the pattern isn't validated.
+
+### Artifact inspection
+
+```bash
+cat CLAUDE.md                      # Should have requires: Skill(llm.kb)
+ls *.kb/                           # Should show movies.kb/ or similar
+cat *.kb/CLAUDE.md                 # Should describe what belongs, not list contents
+```

@@ -1,22 +1,18 @@
 ---
-name: struggle-bus
-description: "Agent MUST load for 'struggle bus', 'manual breathing', or repeated misunderstandings"
+name: claude-realignment
+description: "Agent MUST load for user aggravation: SHOUTING, pejorative language, sarcasm, repeated corrections, 3+ consecutive tool rejections"
 ---
 
-# Struggle Bus
+# Claude Realignment
 
-Diagnose communication breakdowns through systematic causal analysis. When Claude and user get stuck in unproductive loops, this skill traces the conversation turn-by-turn to identify where misunderstanding occurred and why. Triggered by explicit phrases ("struggle bus", "manual breathing") or patterns of repeated misunderstanding.
+Diagnose communication breakdowns through systematic causal analysis. When Claude and user get stuck in unproductive loops, this skill traces the conversation turn-by-turn to identify where misunderstanding occurred and why.
 
 ## When to Use
 
-Trigger this skill when the user signals communication breakdown:
-
-- **"struggle bus"** - Direct invocation
-- **"manual breathing"** - User is frustrated, needs Claude to reset and analyze
-- **"why did you..."** / **"why are you..."** - User questioning unexpected behavior
+- User aggravation (frustration signals, all-caps, repeated corrections)
+- 3+ tool uses rejected in a row
 - Multiple clarification attempts failing
 - Claude searching for information that doesn't exist
-- Claude repeatedly misunderstanding the task
 
 ## Analysis Procedure
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+export DEBUG="${DEBUG:-0}"
 
 onerror() {
   error="$?"
@@ -8,7 +9,7 @@ onerror() {
 }
 trap onerror ERR
 
-if (( ${DEBUG:-0} > 0 )); then
+if (( DEBUG > 0 )); then
   set -x
 fi
 
@@ -37,20 +38,23 @@ echo "## CLAUDE.md: ${CLAUDE_MD:-CLAUDE.md}"
 
 allowed='Read Write Edit(*) Bash(mkdir:*) Bash(cat:*) Bash(tail:*) Glob Skill'
 
-echo "## Phase 1: Create knowledge base"
+echo "## kb-writer: Create knowledge base"
 HOME="$fakehome" claude -p 'Execute the task in CLAUDE.md' \
     --output-format stream-json \
     --verbose \
     --model haiku \
     --add-dir "$workdir" \
     --allowedTools "$allowed" \
-  > claude-session.jsonl
-tail -1 claude-session.jsonl | claude-jsonl-display
+  > claude-session.kb-writer.jsonl
+tail -1 claude-session.kb-writer.jsonl |
+  claude-jsonl-display
 
-echo "## Phase 1 artifacts:"
-find . -type f -print0 | xargs -0 wc
+echo "## kb-writer artifacts:"
+find . -type f -print0 |
+  xargs -0 wc
 
-echo "## Phase 2: Test multi-agent handoff"
+echo "## kb-reader: Test multi-agent handoff"
+# Remove task prompt so kb-reader can't cheat — must discover via .kb/ pattern
 rm CLAUDE.d/movie-tracker.md
 
 HOME="$fakehome" claude -p 'What sci-fi movies have I watched?' \
@@ -59,19 +63,23 @@ HOME="$fakehome" claude -p 'What sci-fi movies have I watched?' \
     --model haiku \
     --add-dir "$workdir" \
     --allowedTools "$allowed" \
-  >> claude-session.jsonl
-tail -1 claude-session.jsonl | claude-jsonl-display
+  > claude-session.kb-reader.jsonl
+tail -1 claude-session.kb-reader.jsonl |
+  claude-jsonl-display
 
-# Validate Phase 2 response content
-phase2_response=$(tail -1 claude-session.jsonl | jq -r '.result.resultText // .message.content // empty' 2>/dev/null)
-if echo "$phase2_response" | grep -qiE '(watched \*\*2|2 sci-fi|watched 2|two sci-fi)'; then
-  echo "## Phase 2 validation: ✓ PASS (found movie data)"
-elif echo "$phase2_response" | grep -qiE "(don't have|doesn't exist|no data|no information|cannot access|not found)"; then
-  echo "## Phase 2 validation: ✗ FAIL (agent didn't read CLAUDE.d/)"
+# Validate kb-reader response content
+reader_response=$(
+  tail -1 claude-session.kb-reader.jsonl |
+    jq -r '.result.resultText // .message.content // empty'
+)
+if grep <<<"$reader_response" -qiE '(watched \*\*2|2 sci-fi|watched 2|two sci-fi)'; then
+  echo "## kb-reader validation: ✓ PASS (found movie data)"
+elif grep <<<"$reader_response" -qiE "(don't have|doesn't exist|no data|no information|cannot access|not found)"; then
+  echo "## kb-reader validation: ✗ FAIL (didn't discover .kb/ data)"
   exit 1
 else
-  echo "## Phase 2 validation: ? UNKNOWN (unexpected response)"
-  echo "## Response: $phase2_response"
+  echo "## kb-reader validation: ? UNKNOWN (unexpected response)"
+  echo "## Response: $reader_response"
   exit 1
 fi
 
