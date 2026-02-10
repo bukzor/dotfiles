@@ -48,9 +48,11 @@ Three rounds of agent experiments on sttt-engine:
 - Round 2: Structure correct, but requirements were technical choices
 - Round 3: Full correct implementation after OKR/acceptance criteria refinements
 
-## Open Questions
+## Completion
 
-- Freshness hooks not yet implemented (session-end, ADR script reminders)
+Freshness hooks added:
+- session-end.md: key question about design.kb freshness
+- llm-collab-adr: reminder when docs/dev/design/ exists
 
 ## References
 

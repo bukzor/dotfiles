@@ -89,3 +89,8 @@ sed -e "s/Example Decision Title/$TITLE/g" -e "s/YYYY-MM-DD/$DATE/g" \
     "$SKELETON/docs/dev/adr/YYYY-MM-DD-000-example-decision.md" > "$FILE"
 
 echo >&2 "✅ Created"
+
+# Freshness hook: remind about design.kb if it exists
+if [ -d "docs/dev/design" ]; then
+  echo >&2 "💡 If this ADR affects design, update docs/dev/design/"
+fi

@@ -42,7 +42,7 @@ Key properties:
 2. [x] Document the pattern (references/how-to-document-design-knowledge.md)
 3. [x] Create skeleton/docs/dev/design/CLAUDE.md (breadcrumb only)
 4. [x] Update llm-collab-init to create design/CLAUDE.md
-5. [ ] Add freshness hooks (session-end reminder, ADR script output)
+5. [x] Add freshness hooks (session-end reminder, ADR script output)
 6. [x] Remove stale file references from SKILL.md
 7. [x] Update SKILL.md quick reference to mention design knowledge pattern
 
@@ -63,5 +63,5 @@ Also removed:
 - [x] Pattern documented
 - [x] Skeleton updated
 - [x] Init script creates breadcrumb
-- [ ] Freshness hooks installed
+- [x] Freshness hooks installed
 - [x] SKILL.md references cleaned up

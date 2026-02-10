@@ -18,11 +18,12 @@ Key questions:
 - Are all  unfinished work, inconsitencies, "loose ends" documented?
 - Is there anything you know that future claude would want or need, but not have?
 - Any cleanup we should do before we go, to reduce future claude/user confusion?
+- If design.kb/ exists: do the docs still match reality after this session's changes?
 
 Steps:
 
-- first, run Bash(date -Is) to check the date -- it may have been many days since the last turn
-    - if so you may need to look around to ensure you're up-to-date on current status
+- Bash(date -Is)
+- Review diff before committing (see `before/git/commit.md`)
 - If confident, rectify. Otherwise, ask.
 - After changes, re-check the key questions.
 - When everything looks good:
