@@ -1,6 +1,6 @@
 # Design .kb pattern for living design documentation
 
-**Priority:** Low (Later)
+**Priority:** Medium
 **Complexity:** Medium
 **Context:** Replace static design-rationale.md etc with llm.kb-style progressive docs
 
@@ -10,28 +10,41 @@ The skeleton included static design doc templates (`design-rationale.md`, `techn
 1. Integration with llm.kb's context-aware loading
 2. Policy triggers to keep them fresh
 
-## Current Situation
+## Solution (Designed 2026-02-09)
 
-These files were removed from skeleton (2026-02-09) as unused cruft. But the underlying need remains: projects benefit from living design documentation that's:
-- Deeper than CLAUDE.md's architecture overview
-- More distilled than reading through all ADRs
-- Kept fresh through policy, not discipline
-
-## Proposed Solution
-
-Replace static templates with llm.kb pattern:
+Numbered abstraction levels with why[] traceability, plus cross-cutting technical policy:
 
 ```
-docs/dev/design.kb/
-├── CLAUDE.md          # Load triggers + freshness policy
-├── rationale.md       # Living distillation of why
-└── technical.md       # How it works at depth
+docs/dev/
+├── design.md                    # Summary
+├── design/
+│   ├── CLAUDE.md                # Points to pattern doc
+│   ├── 000-background.kb/       # Context outsiders need
+│   ├── 010-mission.kb/          # Why this exists
+│   ├── 020-goals.kb/            # Objectives
+│   ├── 030-requirements.kb/     # Key results (traces to goals)
+│   ├── 040-design.kb/           # Structures/architecture
+│   ├── 050-components.kb/       # System pieces
+│   └── 060-deliverables.kb/     # Maps to source code
+├── technical-policy.md          # Summary
+└── technical-policy.kb/         # Cross-cutting normative guidance
 ```
 
-**Freshness mechanisms:**
-- CLAUDE.md triggers: "Load when making architectural changes"
-- Helper script output: "Consider updating docs/dev/design.kb/"
-- Possibly: ADR template reminder to check design docs
+Key properties:
+- Levels form five-whys stack: "why?" up, "how?" down
+- why[] frontmatter enables upward traversal
+- All levels optional -- projects grow into structure
+- Pattern doc at references/how-to-document-design-knowledge.md
+
+## Implementation Steps
+
+1. [x] Design the structure and traceability model
+2. [x] Document the pattern (references/how-to-document-design-knowledge.md)
+3. [x] Create skeleton/docs/dev/design/CLAUDE.md (breadcrumb only)
+4. [x] Update llm-collab-init to create design/CLAUDE.md
+5. [ ] Add freshness hooks (session-end reminder, ADR script output)
+6. [x] Remove stale file references from SKILL.md
+7. [x] Update SKILL.md quick reference to mention design knowledge pattern
 
 ## Removed Files (for reference)
 
@@ -45,23 +58,10 @@ Also removed:
 - `skeleton/docs/milestones/` - superseded by llm-subtask
 - `skeleton/docs/examples/` - unused
 
-## Implementation Steps
-
-1. [ ] Design the design.kb structure and CLAUDE.md triggers
-2. [ ] Create skeleton files for docs/dev/design.kb/
-3. [ ] Update init script to create design.kb/ structure
-4. [ ] Add freshness reminders to llm-collab-adr output
-5. [ ] Document the pattern in SKILL.md
-
-## Open Questions
-
-- How aggressive should freshness reminders be?
-- Should design.kb be optional (created on demand) or always created?
-- What's the right granularity? One big doc vs many small ones?
-
 ## Success Criteria
 
-- [ ] design.kb pattern documented
-- [ ] Skeleton files exist
-- [ ] Init script creates them
-- [ ] Freshness policy prevents staleness
+- [x] Pattern documented
+- [x] Skeleton updated
+- [x] Init script creates breadcrumb
+- [ ] Freshness hooks installed
+- [x] SKILL.md references cleaned up

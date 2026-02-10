@@ -25,6 +25,14 @@
 
 ## Later
 
-- [ ] todo.kb/2026-02-09-000 (design.kb pattern for living design docs)
+- [ ] todo.kb/2026-02-09-001 (cleanup stale path references) — skeleton, references.kb, TESTING.md
+- [~] todo.kb/2026-02-09-000 (design.kb pattern for living design docs) — pattern designed, mostly implemented
+  - [x] Design structure and traceability model
+  - [x] Document pattern (references/how-to-document-design-knowledge.md)
+  - [x] Create skeleton/docs/dev/design/CLAUDE.md
+  - [x] Update llm-collab-init script
+  - [ ] Add freshness hooks (session-end, ADR script)
+  - [x] Remove stale file references from SKILL.md
+  - [x] Update SKILL.md quick reference
 - [ ] todo.kb/2025-11-29-000 (devlog reevaluation - strategic) — Medium/High
 - [ ] todo.kb/2025-11-26-003 (clarify todo.md/todo.kb relationship in subtask skill docs)

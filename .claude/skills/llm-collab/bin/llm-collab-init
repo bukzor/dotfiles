@@ -70,7 +70,7 @@ if [ -d "docs/devlog" ]; then
 fi
 
 # Create directory structure
-mkdir -p docs/dev/{adr,devlog}
+mkdir -p docs/dev/{adr,devlog,design,technical-policy.kb}
 
 echo "✅ Created directory structure"
 
@@ -96,6 +96,18 @@ fi
 if [ ! -f docs/dev/devlog/CLAUDE.md ]; then
   cp "$SKELETON/docs/dev/devlog/CLAUDE.md" docs/dev/devlog/CLAUDE.md
   echo "✅ Created docs/dev/devlog/CLAUDE.md"
+fi
+
+# Create docs/dev/design/CLAUDE.md
+if [ ! -f docs/dev/design/CLAUDE.md ]; then
+  cp "$SKELETON/docs/dev/design/CLAUDE.md" docs/dev/design/CLAUDE.md
+  echo "✅ Created docs/dev/design/CLAUDE.md"
+fi
+
+# Create docs/dev/technical-policy.kb/CLAUDE.md
+if [ ! -f docs/dev/technical-policy.kb/CLAUDE.md ]; then
+  cp "$SKELETON/docs/dev/technical-policy.kb/CLAUDE.md" docs/dev/technical-policy.kb/CLAUDE.md
+  echo "✅ Created docs/dev/technical-policy.kb/CLAUDE.md"
 fi
 
 echo "✅ Helper scripts available at: $SKILL_DIR/bin/"

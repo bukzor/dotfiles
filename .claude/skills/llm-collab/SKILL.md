@@ -33,16 +33,10 @@ project/
 ├── README.md                 # Users: what it does, how to use
 ├── HACKING.md                # Contributors: how to develop
 ├── CLAUDE.md                 # Agents: architecture, conventions
-├── docs/
-│   ├── adr/                  # Why: decision rationale
-│   ├── architecture/         # What/how: technical design
-│   ├── dev/
-│   │   ├── design-rationale.md
-│   │   ├── technical-design.md
-│   │   ├── development-plan.md
-│   │   └── devlog/           # When: session history
-│   └── examples/             # Usage recipes
-└── design-incubators/        # Unsolved design problems
+└── docs/dev/
+    ├── adr/                  # Why: decision rationale
+    ├── devlog/               # When: session history
+    └── design/               # What/how: living design knowledge
 ```
 
 ### 2. Tiered Detail
@@ -90,6 +84,28 @@ references.kb/: [Categorized guides: file-types.kb/, guidelines.kb/, workflows.k
 - `docs/devlog/` directory contains session history—directory itself is the index
 - Avoid maintaining separate index files that can drift
 
+### 6. Design Knowledge
+
+**Problem:** CLAUDE.md is too brief for deep understanding; ADRs are too granular.
+
+**Pattern:** Use `docs/dev/design/` for living design documentation:
+- Deeper than CLAUDE.md, more distilled than ADRs
+- Organized by abstraction level (goals → requirements → design → components)
+- Linked via `why[]` frontmatter for traceability
+
+**When to read:** Orienting on architecture, before significant changes.
+
+**When to update:** After architectural ADRs, when onboarding reveals gaps.
+
+See `references/how-to-document-design-knowledge.md` for the full pattern.
+
+## Frontmatter Directives
+
+CLAUDE.md files use frontmatter to give agents operational instructions. These are **action triggers**, not passive metadata.
+
+- `requires:` — Read these files before acting in this directory.
+- `depends:` — Read when relevant.
+
 ## Adaptation Guidelines
 
 **These are patterns, not rules.** Adapt based on:
@@ -116,6 +132,7 @@ references.kb/: [Categorized guides: file-types.kb/, guidelines.kb/, workflows.k
 - ADRs: <https:references.kb/file-types.kb/ADRs.md>
 - Devlogs: <https:references.kb/file-types.kb/devlog.md>
 - CLAUDE.md: <https:references.kb/file-types.kb/CLAUDE.md>
+- Design knowledge: <https:references/how-to-document-design-knowledge.md>
 - Browse all: <https:references.kb/file-types.kb/>
 
 **Common tasks:**
@@ -144,6 +161,9 @@ Browse <https:references.kb/> for categorized guides:
 - **file-types.kb/** - What each doc type should contain
 - **guidelines.kb/** - How to write effective docs
 - **workflows.kb/** - How to use and maintain docs
+
+Standalone references:
+- **references/how-to-document-design-knowledge.md** - Living design documentation pattern
 
 ## Success Indicators
 
