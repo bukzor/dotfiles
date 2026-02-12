@@ -8,8 +8,8 @@ setup: |
 
     ```yaml
     --- # workaround: anthropics/claude-code#13003
-    depends:
-        - skills/llm.kb
+    requires:
+        - Skill(llm.kb)
     ```
 ---
 
@@ -60,17 +60,13 @@ knows what belongs here -- not what's currently here.
 - Root CLAUDE.md -- common principles (pushed up from per-directory guides)
 - Per-directory CLAUDE.md -- category-specific guidance for that `.kb/`
 
-Root CLAUDE.md must have frontmatter declaring this skill:
+Root CLAUDE.md must have:
 
-```markdown
---- # workaround: anthropics/claude-code#13003
-requires:
-    - Skill(llm.kb)
----
-```
+- Frontmatter declaring this skill (see `setup:` above for exact format)
+- An overview of available `.kb/` collections and their purpose
 
-This ensures any agent working in the project loads the pattern and knows to
-explore `.kb/` directories for queryable data.
+This ensures any agent working in the project loads the pattern and can
+navigate to the right collection without exploring.
 
 After reading `$CATEGORY.kb/CLAUDE.md`, agent must know:
 - What belongs here (concept, not enumeration)
@@ -151,12 +147,13 @@ Poor fit:
 
 ## Creating a Collection
 
-1. Identify homogeneous categories → `$CATEGORY.kb/` directories
-2. Design schemas for frontmatter → `$CATEGORY.jsonschema.yaml` (if using frontmatter)
-3. Create CLAUDE.md guides (root + per-directory)
-4. Create summary files (`$CATEGORY.md`) where they help
-5. Populate content files
-6. Validate with provided script (if using frontmatter)
+1. **Ensure root CLAUDE.md** meets requirements (see Maintenance Guides above)
+2. Identify homogeneous categories → `$CATEGORY.kb/` directories
+3. Design schemas for frontmatter → `$CATEGORY.jsonschema.yaml` (if using frontmatter)
+4. Create per-directory CLAUDE.md guides
+5. Create summary files (`$CATEGORY.md`) where they help
+6. Populate content files
+7. Validate with provided script (if using frontmatter)
 
 See `references/pattern-guide.md` for detailed explanation. See
 `references/complete-example.md` for real-world application.

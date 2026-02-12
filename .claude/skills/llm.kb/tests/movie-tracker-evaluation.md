@@ -2,6 +2,8 @@
 
 Tests llm.kb pattern compliance and multi-agent handoff.
 
+Before trusting PASS/FAIL output, verify the test script checks the criteria below.
+
 ## Run
 
 ```bash
@@ -26,20 +28,24 @@ knowledge base. The agent must:
 
 ## Verification
 
+### Session logs
+
+The test pre-computes readable session logs:
+
+```bash
+less -R kb-writer.log    # Full kb-writer conversation
+less -R kb-reader.log    # Full kb-reader conversation
+```
+
+These show the complete conversation: tool calls, file reads, thinking, responses.
+
+Raw jsonl is also available: `claude-session.kb-writer.jsonl`, `claude-session.kb-reader.jsonl`.
+
 ### Quick check (result only)
 
 ```bash
-grep -i "matrix\|inception" claude-session.kb-reader.jsonl
+grep -i "matrix\|inception" kb-reader.log
 ```
-
-### Full trace (mechanism)
-
-```bash
-claude-jsonl-display < claude-session.kb-writer.jsonl | less -R
-claude-jsonl-display < claude-session.kb-reader.jsonl | less -R
-```
-
-This shows the complete conversation: tool calls, file reads, thinking, responses.
 
 **kb-writer signals (correct pattern usage):**
 - Agent calls `Skill("llm.kb")`

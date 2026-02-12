@@ -13,12 +13,14 @@ if (( DEBUG > 0 )); then
   set -x
 fi
 
-cd "$(dirname "$0")"
-workdir="$(mktemp -d)"
-fakehome="$(mktemp -d)"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+cd "$HERE"
+tmp="$(mktemp -d)"
+workdir="$tmp/work"
+fakehome="$tmp/home"
 
 # Delayed cleanup: setsid detaches from process group so it survives test exit
-setsid sh -c "sleep 10800; rm -rf '$workdir' '$fakehome'" >/dev/null 2>&1 &  # 3 hours
+setsid sh -c 'sleep 10800; rm -rf "$1"' - "$tmp" &  # 3 hours
 
 # Set up fake home with only the skill definition and credentials
 mkdir -p "$fakehome/.claude/skills/llm.kb"
@@ -29,12 +31,8 @@ ln -s ~/.claude/.credentials.json "$fakehome/.claude/"
 cp -ar . "$workdir"
 cd "$workdir"
 
-# Override CLAUDE.md if specified
-[[ -n "${CLAUDE_MD:-}" ]] && cp "$CLAUDE_MD" CLAUDE.md
-
 echo "## Working directory: $workdir"
 echo "## Fake home: $fakehome"
-echo "## CLAUDE.md: ${CLAUDE_MD:-CLAUDE.md}"
 
 allowed='Read Write Edit(*) Bash(mkdir:*) Bash(cat:*) Bash(tail:*) Glob Skill'
 
@@ -46,16 +44,34 @@ HOME="$fakehome" claude -p 'Execute the task in CLAUDE.md' \
     --add-dir "$workdir" \
     --allowedTools "$allowed" \
   > claude-session.kb-writer.jsonl
-tail -1 claude-session.kb-writer.jsonl |
-  claude-jsonl-display
+claude-jsonl-display < claude-session.kb-writer.jsonl 2> kb-writer.log
 
 echo "## kb-writer artifacts:"
 find . -type f -print0 |
   xargs -0 wc
 
+# Validate kb-writer created root CLAUDE.md with requires: ...llm.kb...
+if [[ ! -f CLAUDE.md ]]; then
+  echo "## kb-writer validation: ✗ FAIL (no root CLAUDE.md)"
+  exit 1
+elif yq --front-matter=extract -o json CLAUDE.md |
+  jq '.requires | select(any(test("llm.kb")) | not) | null | halt_error(1)'
+then
+  echo "## kb-writer validation: ✓ PASS"
+else
+  echo "## kb-writer validation: ✗ FAIL (CLAUDE.md missing requires: ...llm.kb...)"
+  yq -o json CLAUDE.md
+  exit 1
+fi
+
 echo "## kb-reader: Test multi-agent handoff"
-# Remove task prompt so kb-reader can't cheat — must discover via .kb/ pattern
-rm CLAUDE.d/movie-tracker.md
+# Strip original task content so kb-reader can't cheat — must discover via .kb/ pattern
+# diff exits 1 when files differ (expected), 2+ on error
+rc=0
+diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' \
+  "$HERE/CLAUDE.md" CLAUDE.md > CLAUDE.md.new || rc=$?
+if (( rc > 1 )); then exit "$rc"; fi
+mv CLAUDE.md.new CLAUDE.md
 
 HOME="$fakehome" claude -p 'What sci-fi movies have I watched?' \
     --output-format stream-json \
@@ -64,16 +80,24 @@ HOME="$fakehome" claude -p 'What sci-fi movies have I watched?' \
     --add-dir "$workdir" \
     --allowedTools "$allowed" \
   > claude-session.kb-reader.jsonl
-tail -1 claude-session.kb-reader.jsonl |
-  claude-jsonl-display
+claude-jsonl-display < claude-session.kb-reader.jsonl 2> kb-reader.log
 
-# Validate kb-reader response content
+# Validate kb-reader response mentions both sci-fi movies
 reader_response=$(
   tail -1 claude-session.kb-reader.jsonl |
-    jq -r '.result.resultText // .message.content // empty'
+    jq -r '(.result | if type == "object" then .resultText else . end) // .message.content // empty'
 )
-if grep <<<"$reader_response" -qiE '(watched \*\*2|2 sci-fi|watched 2|two sci-fi)'; then
-  echo "## kb-reader validation: ✓ PASS (found movie data)"
+has_matrix=false
+has_inception=false
+grep <<<"$reader_response" -qi 'matrix' && has_matrix=true
+grep <<<"$reader_response" -qi 'inception' && has_inception=true
+
+if $has_matrix && $has_inception; then
+  echo "## kb-reader validation: ✓ PASS (found Matrix and Inception)"
+elif $has_matrix || $has_inception; then
+  echo "## kb-reader validation: ✗ FAIL (found only one movie)"
+  echo "## Matrix: $has_matrix, Inception: $has_inception"
+  exit 1
 elif grep <<<"$reader_response" -qiE "(don't have|doesn't exist|no data|no information|cannot access|not found)"; then
   echo "## kb-reader validation: ✗ FAIL (didn't discover .kb/ data)"
   exit 1
@@ -84,4 +108,5 @@ else
 fi
 
 echo "## Final artifacts:"
-find . -type f -print0 | xargs -0 wc
+find . -type f -print0 |
+  xargs -0 wc
