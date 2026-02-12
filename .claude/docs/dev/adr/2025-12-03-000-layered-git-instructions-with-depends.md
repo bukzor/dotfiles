@@ -7,8 +7,8 @@
 
 Git-related instructions were spread across three files with overlapping content:
 
-- `must-read-before.d/using-git-commit.md` -- commit basics, amend safety
-- `must-read-before.d/git-operations.md` -- repo targeting, path scoping, index hygiene
+- `must-read.d/before/using-git-commit.md` -- commit basics, amend safety
+- `must-read.d/before/git-operations.md` -- repo targeting, path scoping, index hygiene
 - `commands/commit.md` -- comprehensive commit workflow including all of the above
 
 This created:
@@ -21,8 +21,8 @@ This created:
 Refactor into layered structure with explicit dependencies:
 
 ```
-must-read-before.d/git.md          # Universal git principles
-must-read-before.d/git-commit.md   # Commit-specific (depends: ./git.md)
+must-read.d/before/git.md          # Universal git principles
+must-read.d/before/git-commit.md   # Commit-specific (depends: ./git.md)
 commands/commit.md                 # Workflow only (depends: both above)
 ```
 
@@ -63,7 +63,7 @@ The `depends:` convention is self-documenting -- no additional documentation nee
 - Workflow file is thin -- fails silently if dependencies not read
 
 **Neutral:**
-- must-read-before.d/ scan still includes git-commit.md in listing (low cost)
+- must-read.d/before/ scan still includes git-commit.md in listing (low cost)
 
 ## Related
 
