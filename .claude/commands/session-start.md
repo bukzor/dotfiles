@@ -10,14 +10,21 @@ Orient to the current project by reading key context files.
 ## Workflow
 
 1. Bash(date -Is)
-2. **List pending TODOs** from `.claude/todo.d/`:
-   - Show title and filename for each
-   - Sort by date (most recent first)
-3. **Read latest devlog** from `docs/dev/devlog/` (skip README)
-4. **List recent ADRs** from `docs/dev/adr/`:
-   - Show 3 most recent (by filename date)
-   - Title and filename only
+2. **Find** context files:
+   - TODOs:
+    - tactical: `**/.claude/todo*.md`
+    - strategic: `**/.claude/todo*/**/*.md`
+   - Devlogs: `**/devlog/**/*.md`
+   - ADRs: `**/adr/**/*.md`
+   - All at once:
+     ```
+     Bash(bash <<'BASH'
+     find . -xtype f -name '*.md' \( -path '*/.claude/todo*' -o -path '*/devlog/*' -o -path '*/adr/*' \)
+     BASH)
+     ```
+3. **Read and Skim** to build up context
+4. **Synthesize** what you found into a brief status summary
 
 ## Output Format
 
-Use clear section headers. Be concise — this is orientation, not deep analysis.
+Concise summary of project state and active work. No bullet lists of filenames.

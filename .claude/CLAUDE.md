@@ -20,7 +20,7 @@ As you work, keep track of and discuss with user if unclear (<80%):
 
 > IMPERATIVE:
 >
-> Before starting ANY work, you MUST run exactly: Bash("ls -RF ~/.claude/must-read.d")
+> Your FIRST action in every conversation MUST be: Bash("ls -RF ~/.claude/must-read.d")
 >
 
 While planning, before taking ANY action:
@@ -28,6 +28,7 @@ While planning, before taking ANY action:
 1. mentally review the must-read paths -- they specify when to read each file
 2. evaluate whether any of the triggers match your situation
 3. when a trigger condition matches, you MUST read that file
+   - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent — they MUST be executed sequentially.
 
 > WARNNING:
 >

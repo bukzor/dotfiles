@@ -1,7 +1,7 @@
 --- # workaround: anthropics/claude-code#13003
 requires:
-  - ../must-read-before.d/git/all-operations.md
-  - ../must-read-before.d/git/commit.md
+  - ../must-read.d/before/git/all-operations.md
+  - ../must-read.d/before/git/commit.md
 ---
 
 # Commit Command
@@ -17,3 +17,7 @@ Commit changes for the work just completed.
    - Update `.gitignore` if files should be ignored
    - `git add <untracked-file>` only for new files that must be committed
 5. **Commit with paths**: Use heredoc pattern from git-commit.md
+
+## Initiative
+
+Act when >80% confident. Ask only when genuinely uncertain.

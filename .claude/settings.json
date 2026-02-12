@@ -16,9 +16,8 @@
       "Bash(wc:*)",
       "Bash(file:*)",
       "Bash(uname:*)",
+      "Bash(mkdir -p:*)",
       "Bash(ps:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git show:*)",
       "Bash(git branch:*)",
@@ -57,12 +56,11 @@
       "Bash(git reset:*)"
     ],
     "additionalDirectories": [
-      "~/.claude/must-read-before.d",
+      "~/.claude/must-read.d",
       "~/",
       "~/.claude"
     ]
   },
-  "strict-mcp-config",
   "alwaysThinkingEnabled": true,
   "//hooks": {
     "//PreToolUse": [
