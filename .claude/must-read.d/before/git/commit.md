@@ -5,27 +5,62 @@ requires:
 
 ## Git Commit
 
-### Always Use git-commit-staged
+### Tools
 
-> **Note:** `git-commit-staged` is maintained locally at `~/repo/github.com/bukzor/git-partial.prototyping/git-commit-staged/`. Beta quality — report bugs, fix as we go.
+Two local commands you must use for commits:
+
+- **`git commit-staged`** — commits staged state at specified paths
+- **`git commit-files`** — stages from working tree, then commits (equivalent to
+  `git add` + `git commit-staged`)
+
+> Maintained at `~/repo/github.com/bukzor/git-partial.prototyping/`. Beta
+> quality.
+
+### Why
+
+In a polyrepo with parallel agents, the index contains staged changes from other
+work. Standard `git commit` would include those unrelated changes. These tools
+commit only specified paths, ignoring other staged state.
+
+### General Case: git commit-staged
+
+Commits whatever is staged at the specified paths:
 
 ```bash
-git add paths...
 git commit-staged paths... -- -m "message"
 ```
 
-Never use `git commit -- paths` - it commits from working copy, not index.
+Works regardless of how changes got staged — by you, another agent, or prior
+work. Commits exactly the staged state at those paths, nothing more.
 
 **Dry-run first:**
+
 ```bash
 git commit-staged -n paths...
 ```
 
-Arguments after `--` are passed through to `git commit`, enabling:
+Arguments after `--` pass through to `git commit`:
+
 - `--amend`, `--fixup`, `-C` (message reuse)
 - GPG signing (`-S`)
 - Commit hooks
-- Editor integration (`-e`)
+
+### Common Case: git commit-files
+
+When you want to commit your working tree edits (the typical "I edited files,
+now commit them" workflow):
+
+```bash
+git commit-files paths... -- -m "message"
+```
+
+Stages from working tree, then commits. Lists paths once instead of twice.
+
+**Dry-run:**
+
+```bash
+git commit-files -n paths...
+```
 
 ### Inferring Commit Boundaries
 
@@ -36,31 +71,48 @@ git status -s <path> | awk '{print $2}' | xargs --replace find {} -type f -print
 ```
 
 This reveals work sessions and natural commit boundaries. Apply when:
+
 - Changes span multiple days or sessions
 - Multiple unrelated files appear in status
 - Conversation context doesn't clearly indicate which changes to commit
 
 Group into single-topic commits by:
+
 1. **Time clustering**: Files modified within minutes likely belong together
-2. **Logical grouping**: Files in the same feature/directory often form one commit
+2. **Logical grouping**: Files in the same feature/directory often form one
+   commit
 3. **Chronological order**: Commit oldest changes first to preserve history
 
 ### Untracked Files
 
-**ASK before assuming.** Present untracked files to the user and confirm disposition:
-- **Unrelated work**: Leave as-is (not this commit's concern)
-- **Scratch/test files**: Remove (`rm`)
-- **Tool internals**: Gitignore (e.g., `plans/`, `hooks/`, `*.log`)
+**Prefer asking** when disposition is unclear. Use judgment for obvious cases.
+
+- **Unrelated work**: Leave as-is
+- **Scratch files**: `mv trash/` (prefer over `rm`)
+- **Build artifacts**: Gitignore
 - **Legitimate new files**: Commit
 
-Do not commit untracked files without explicit confirmation.
+### History Rewriting (Amend, Rebase, Force-Push)
 
-### Amend Safety
+Behavior depends on the repo's `git-caution` level.
 
-Before amending, verify:
-- You authored the commit: `git log -1 --format='%an %ae'`
-- It hasn't been pushed to main/master
-- Never amend other developers' commits
+1. Check CLAUDE.md frontmatter for `git-caution: solo|personal|shared`
+2. If absent, infer:
+   - Repo owned by `bukzor` (remote URL or filesystem path) → `personal`
+     - Record `git-caution: personal` in CLAUDE.md frontmatter
+   - Otherwise → `shared`
+
+| Level      | Amend                | Force-push                              | Main branch                    |
+| ---------- | -------------------- | --------------------------------------- | ------------------------------ |
+| `solo`     | Freely               | Freely                                  | Is the working branch          |
+| `personal` | Freely               | `--force-with-lease`                    | Prefer clean, user's call      |
+| `shared`   | Own unpushed commits | Own branches only, `--force-with-lease` | Never without explicit request |
+
+Reflog makes all local operations recoverable.
+
+**Amending your own commits from this session needs no verification.** Verify
+authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
+(session start, unfamiliar repo, shared branch).
 
 Use `git commit-staged paths... -- --amend --no-edit` for the last commit,
 `git commit-staged paths... -- --fixup SHA` for older commits.
@@ -98,10 +150,14 @@ git commit-staged <intended-paths...> -- -C ORIG_HEAD
 
 This preserves the original commit message while scoping to the correct paths.
 
-### For llm-collab Projects
+### Before Committing
 
-If project CLAUDE.md has `depends: skills/llm-collab`, before committing:
-- Update `.claude/todo.md` with completed/new tasks
-- Create or update devlog entry documenting the session
+- Review the full diff
+  - Verify it matches intent
+  - Catch your own mistakes
+  - Notice if other agents' changes got mixed in
+- Double-check docs still accurate after code changes
+- If (CLAUDE.md depends on) `Skill(llm-subtask)`: update todo files
+- If `Skill(llm-collab)`: update devlog if session-notable
 
-Include these in the commit.
+Include doc/todo updates in the commit.

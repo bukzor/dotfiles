@@ -68,9 +68,26 @@ data = json.load(sys.stdin)  # Let it raise if JSON is invalid
 result = process_data(data)   # Let it raise if there's a bug
 ```
 
+## Control Flow
+
+### Exhaustive Case Analysis
+
+When branching on finite value sets (enums, literals), use explicit else that raises:
+
+- `match`/`case` with `case _: raise AssertionError(value)`
+- `if`/`elif`/`else` with `else: raise AssertionError(value)`
+
+Never implicit else (early return). The unreachable raise catches bugs when the set grows.
+
 ## Code Structure
 
 ### Avoid Spaghetti Code
 - Break complex functions into small, well-named helper functions
 - Each function should be easily understandable in isolation
 - Prefer composition over deeply nested logic
+
+## Testing
+
+When writing or modifying tests, follow `tdd-workflow.md`. This applies to all
+codebases—your own or others'—and is especially valuable in unfamiliar code where
+tests verify your understanding before you change behavior.

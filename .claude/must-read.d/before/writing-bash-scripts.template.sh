@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+export DEBUG="${DEBUG:-0}"
 
 onerror() {
   error="$?"
@@ -10,7 +11,7 @@ trap onerror ERR
 
 # Constants and functions here
 
-if (( ${DEBUG:-0} > 0 )); then
+if (( DEBUG > 0 )); then
   set -x
 fi
 

@@ -18,6 +18,8 @@ Equivalent to Python's `try: ...; except: print(...)` — obviously wrong there,
 
 Avoid `-f` flags — they suppress errors. Use `rm -r` not `rm -rf`.
 
+For empty directory trees, use `rmdir -p` — fails safely if non-empty. Never `rm -rf` without reading contents first.
+
 ### Pipelines
 
 Long pipelines: newline-indent after pipe operators.
