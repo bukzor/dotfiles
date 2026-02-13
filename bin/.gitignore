@@ -1,5 +1,8 @@
 # un-ignore non-hidden files
 ![!.]*
 
+# but re-ignore Python bytecode
+__pycache__/
+
 # this is a symlink to one of my alert- scripts, depending on working environment
 alert

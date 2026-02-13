@@ -8,6 +8,20 @@ demo*
 .sommelierrc
 .emscripten
 
+# Python bytecode
+__pycache__/
+
+# Ruby
+.bundle/
+
+# Vim plugin directories (managed by plugin manager)
+.vim/plugged/
+
+# Chrome OS symlinks to host filesystem
+Downloads
+GoogleDrive
+MyFiles
+
 # files with transient data
 .local/state/
 .viminfo
