@@ -53,4 +53,4 @@ while providing a stronger keyword for truly mandatory prerequisites.
 ## Related
 
 - Extends: 2025-12-03-000-layered-git-instructions-with-depends.md
-- Related to: git/all-operations.md, git/commit.md, commands/commit.md
+- Related to: git/ANY-git-command.md, git/commit.md, commands/commit.md

@@ -1,6 +1,6 @@
 --- # workaround: anthropics/claude-code#13003
 depends:
-  - ../must-read.d/before/git/all-operations.md
+  - ../must-read.d/before/git/ANY-git-command.md
   - ../must-read.d/before/git/commit.md
 requires:
   - Skill(llm-collab)

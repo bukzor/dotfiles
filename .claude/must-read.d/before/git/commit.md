@@ -1,6 +1,6 @@
 ---
 requires:
-  - ./all-operations.md
+  - ./ANY-git-command.md
 ---
 
 ## Git Commit
