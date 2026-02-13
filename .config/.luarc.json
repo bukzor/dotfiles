@@ -6,5 +6,5 @@
         "${3rd}/luv/library",
         "${3rd}/luassert/library"
     ],
-    "workspace.maxPreload": 1000
+    "workspace.maxPreload": 4000
 }

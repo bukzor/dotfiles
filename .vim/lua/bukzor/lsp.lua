@@ -62,7 +62,8 @@ end
 function M.init()
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
   vim.api.nvim_create_augroup(M.au_loclist, { clear = true })
-  vim.api.nvim_create_augroup("END", { clear = true })
+
+  --vim.api.nvim_create_augroup("END")
   M.lsp_attached = {}
   M.lsp_formatting = {}
 end
@@ -71,6 +72,7 @@ function M.setup()
   M.unload()
   M.init()
 
+  vim.cmd("hi link LspInlayHint Comment")
   M.setup_mason()
   M.setup_lspconfig()
   M.setup_mason_lspconfig()

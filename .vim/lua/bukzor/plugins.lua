@@ -1,13 +1,13 @@
 local M = {}
 
-M.LAZY_HOME = vim.fs.normalize(vim.fn.stdpath("config") .. "/pack/lazy/opt")
+M.LAZY_HOME = vim.fn.stdpath("config") .. "/pack/lazy/opt"
 
 function M.setup()
-  M.bootstrap()
+  M.bootstrap_lazy()
   M.config()
 end
 
-function M.bootstrap()
+function M.bootstrap_lazy()
   -- https://github.com/folke/lazy.nvim#-installation
   local lazypath = M.LAZY_HOME .. "/lazy.nvim"
   if not vim.loop.fs_stat(lazypath .. "/.git/") then
@@ -34,10 +34,13 @@ function M.config()
       -- the plugin framework
       "folke/lazy.nvim",
 
+      -- icons
+      "echasnovski/mini.nvim",
+      "nvim-tree/nvim-web-devicons",
+
       -- helpfully show keystrokes
       {
         "folke/which-key.nvim",
-        opts = {},
         dependencies = {
           "nvim-lua/plenary.nvim",
         },
@@ -110,9 +113,7 @@ function M.config()
     {
       root = M.LAZY_HOME,
       dev = {
-        path = vim.fs.normalize(
-          vim.fn.stdpath("config") .. "/pack/invented-here/start"
-        ),
+        path = vim.fn.stdpath("config") .. "/pack/invented-here/start",
       },
       install = {
         colorscheme = { "gruvbox", "habamax", "slate" },

@@ -26,6 +26,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead Brewfile      set filetype=ruby
 
     autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<jq\>', 'jq')
+    autocmd BufNewFile,BufRead *    call g:RegexFiletype('\<uv run\>', 'python')
 
     autocmd FileType go set ts=2
 augroup end

@@ -18,7 +18,7 @@ end
 function M.del(keymaps)
   for _, keymap in pairs(keymaps) do
     modes, lhs, rhs, opts = unpack(keymap)
-    vim.keymap.del(modes, lhs, opts)
+    pcall(vim.keymap.del, modes, lhs, opts)
   end
 end
 

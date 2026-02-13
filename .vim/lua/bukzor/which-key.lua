@@ -20,6 +20,9 @@ end
 function M.config()
   local wk = M.reset()
 
+  -- TODO steal from:
+  --    https://www.lunarvim.org/docs/beginners-guide/keybinds-overview
+
   wk.register(
     {
       A = nil,

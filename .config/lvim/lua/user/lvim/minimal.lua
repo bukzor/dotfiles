@@ -1,0 +1,1 @@
+lvim.colorscheme = "gruvbox-material"
