@@ -1,5 +1,9 @@
 SHELL=/bin/bash
 
+# Prefer anacron for periodic jobs (daily, weekly) -- it handles missed runs.
+# Reserve cron for @reboot and @hourly infrastructure.
+# See: ~/.config/anacron/anacrontab
+
 @reboot insync-headless start >/dev/null 2>&1
 
 # Auto-reload crontab from VCS
