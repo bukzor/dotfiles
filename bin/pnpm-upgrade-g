@@ -1,0 +1,60 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+# Safe replacement for `pnpm -g update`.
+#
+# pnpm -g update replaces packages in the virtual store but does NOT
+# regenerate bin stubs, leaving them pointing at deleted version dirs.
+# This script uses `pnpm add -g <pkg>@latest` which does the full
+# install + bin-link cycle, then syncs the packageManager pin in
+# ~/package.json so corepack stays in agreement.
+
+PACKAGE_JSON="$HOME/package.json"
+
+packages() {
+  pnpm ls -g --depth=0 --json |
+    jq -r '.[].dependencies | keys[]'
+}
+
+sync_package_manager_pin() {
+  local version
+  version="$(pnpm -v)"
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg v "$version" '.packageManager = "pnpm@" + $v' "$PACKAGE_JSON" > "$tmp"
+  mv "$tmp" "$PACKAGE_JSON"
+}
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+# Build the argument list: each package@latest
+args=()
+while IFS= read -r pkg; do
+  args+=("${pkg}@latest")
+done < <(packages)
+
+if (( ${#args[@]} == 0 )); then
+  echo >&2 "No global packages found"
+  exit 1
+fi
+
+echo "Upgrading ${#args[@]} global packages:"
+printf '  %s\n' "${args[@]}"
+echo
+
+pnpm add -g "${args[@]}"
+
+echo
+echo "Syncing packageManager pin..."
+sync_package_manager_pin
+echo "  packageManager: $(jq -r .packageManager "$PACKAGE_JSON")"
