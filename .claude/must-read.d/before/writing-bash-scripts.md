@@ -1,6 +1,6 @@
 ---
 requires:
-  - shell-commands.md
+  - ANY-shell-commands.md
 ---
 
 ## Shell Scripting
