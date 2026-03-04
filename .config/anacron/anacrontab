@@ -1,5 +1,6 @@
-SHELL=/bin/bash
+# NOTE: anacron ignores SHELL= and always uses /bin/sh
+# Use POSIX-compatible syntax only.
 
 # period(days)  delay(min)  job-id       command
-1               5           pnpm-update    source /home/bukzor/.profile; ( echo .; date -Ins; logrotate-cron pnpm-upgrade-g ) >> /tmp/bukzor-cron.log
-1               10          claude-update  source /home/bukzor/.profile; ( echo .; date -Ins; logrotate-cron claude update ) >> /tmp/bukzor-cron.log
+1               5           pnpm-update    set -e; . /home/bukzor/.profile; logrotate-cron pnpm-upgrade-g
+1               10          claude-update  set -e; . /home/bukzor/.profile; logrotate-cron claude update
