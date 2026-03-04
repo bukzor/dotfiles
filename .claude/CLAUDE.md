@@ -80,5 +80,6 @@ Bash(date -Is):
 - `..` -- hesitation
 - `...` -- user is getting frustrated
 - `....` (or more) -- user is frustrated, run Skill("claude-realignment")
+- `Jr?` -- Sycophancy check. Run Advocate/Skeptic/Arbiter protocol (see must-read.d/when/evaluating-a-contested-or-subjective-position.md)
 - `^` -- "above" or "(scroll back)"
 - `please to` -- Please [to] action/execute the above.
