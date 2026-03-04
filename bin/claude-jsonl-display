@@ -211,11 +211,13 @@ def format_user_message(content: Content, state: State) -> str:
         is_error = content.get("is_error", False)
         result_content = content["content"]
         if isinstance(result_content, list):
-            assert len(result_content) == 1, result_content
-            result_content = result_content[0]
-            assert isinstance(result_content, dict), result_content
-            assert 'text' in result_content, result_content
-            result_content = result_content['text']
+            parts: list[str] = []
+            for item in result_content:
+                if isinstance(item, dict) and 'text' in item:
+                    parts.append(item['text'])
+                else:
+                    parts.append(json.dumps(item, indent=2))
+            result_content = "\n".join(parts)
         if is_error:
             return format_boxed_message(
                 "Tool Result ❌ ERROR", result_content, state, Color.RED
@@ -320,10 +322,13 @@ def format_item(
         yield Output(format_stream_event(content)), state
 
     elif item_type == "system":
-        if content['subtype'] == 'local_command':
+        subtype = content.get('subtype', '')
+        if subtype == 'local_command':
             yield Output(format_boxed_message("local command", content['content'], state, Color.BLUE)), state
-        else:
+        elif subtype == 'init':
             yield Output(format_system(content)), state
+        else:
+            yield Output(format_unknown(f"system/{subtype}", content, state)), state
 
     elif item_type == "user":
         yield from format_turn(format_user_message, content, state)
@@ -342,6 +347,9 @@ def format_item(
     elif item_type == "summary":
         yield Output(format_summary(content)), state
 
+    elif item_type == "progress":
+        pass  # hook progress events — no useful display content
+
     else:
         yield Output(format_unknown("item_type", content, state)), state
 
@@ -352,7 +360,7 @@ def main():
 
     state = State("", 0, 0)
 
-    for line in sys.stdin:
+    for line_num, line in enumerate(sys.stdin, 1):
         line = line.strip()
         if not line:
             continue
@@ -360,14 +368,26 @@ def main():
         try:
             content = json.loads(line)
         except json.JSONDecodeError as error:
-            print("WARN: unable to decode json:", error, file=sys.stderr)
+            print(f"WARN: unable to decode json (line {line_num}):", error, file=sys.stderr)
             print(" ", repr(line), file=sys.stderr)
             continue
 
-        state = update_state(content, state)
+        try:
+            state = update_state(content, state)
 
-        for output, state in format_item(content, state):
-            output.print()
+            for output, state in format_item(content, state):
+                output.print()
+        except Exception:
+            sys.stderr.flush()
+            print(
+                f"\n{'='*60}\n"
+                f"ERROR processing JSONL record (line {line_num}):\n"
+                f"  type={content.get('type', '?')}\n"
+                f"  subtype={content.get('subtype', '')}\n"
+                f"{'='*60}",
+                file=sys.stderr,
+            )
+            raise
 
 
 if __name__ == "__main__":

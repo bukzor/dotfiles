@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+for jsonl in "$@"; do
+  log="${jsonl%.jsonl}.log"
+  if [[ -e "$log" && "$log" -nt "$jsonl" ]]; then
+    echo >&2 "skip (up to date): $log"
+    continue
+  fi
+  echo >&2 "converting: $jsonl -> $log"
+  claude-jsonl-display < "$jsonl" 2> "$log.tmp"
+  mv "$log.tmp" "$log"
+done
