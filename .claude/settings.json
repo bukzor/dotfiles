@@ -61,8 +61,26 @@
       "~/.claude"
     ]
   },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
   "alwaysThinkingEnabled": true,
-  "//hooks": {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bash-preamble.py"
+          }
+        ]
+      }
+    ]
+  },
+  "//hooks-disabled": {
     "//PreToolUse": [
       {
         "matcher": "Bash",

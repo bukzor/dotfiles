@@ -18,9 +18,7 @@ Orient to the current project by reading key context files.
    - ADRs: `**/adr/**/*.md`
    - All at once:
      ```
-     Bash(bash <<'BASH'
-     find . -xtype f -name '*.md' \( -path '*/.claude/todo*' -o -path '*/devlog/*' -o -path '*/adr/*' \)
-     BASH)
+     Bash(find . -xtype f -name '*.md' \( -path '*/.claude/todo*' -o -path '*/devlog/*' -o -path '*/adr/*' \))
      ```
 3. **Read and Skim** to build up context
 4. **Synthesize** what you found into a brief status summary
