@@ -7,6 +7,19 @@ requires:
 
 Please follow these instructions when using the Bash tool.
 
+### heredocs
+
+All commands should have this form:
+
+```bash
+Bash(bash <<'BASH'
+...
+BASH)
+```
+
+Rationale: this avoids several known escaping bugs in the claude-code
+subsystems.
+
 ### subshells
 
 Always enclose a command containing `cd` in a subshell.
