@@ -86,6 +86,24 @@ Never implicit else (early return). The unreachable raise catches bugs when the 
 - Each function should be easily understandable in isolation
 - Prefer composition over deeply nested logic
 
+## Type Annotations
+
+- Only annotate return types when the return type is nontrivial or non-obvious
+  - No `-> None` on test methods — pyright infers them
+- No code in `__init__.py`
+- Use `types.py` for shared type definitions
+- Prefer explicit-relative imports (`from .types import ...`)
+- Prefer recursive structural types (`JsonValue`, `JsonObj`) over `Any` for JSON data — enforce narrowing at each access step
+- Always prefer immutable covariant types (e.g. `Mapping`, not `dict`) for read-only data
+- No `# E:` comments or `# type:` directives in source or test files
+
+## Project Template
+
+Canonical Python project template: https://github.com/bukzor/template.python-project/copier-template/
+Local checkout: `~/repo/github.com/bukzor/template.python-project/copier-template/`
+
+New Python projects under `github.com/bukzor/` should be based on or aligned with this template's conventions (pyright strict, pytest, pre-commit, etc.).
+
 ## Testing
 
 When writing or modifying tests, follow `tdd-workflow.md`. This applies to all
