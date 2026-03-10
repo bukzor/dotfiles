@@ -1,4 +1,14 @@
-# bash-preamble.py — Manual Tests
+# bash-preamble.py — Tests
+
+## Doctests
+
+```bash
+python3 -m doctest ~/.claude/hooks/bash-preamble.py -v
+```
+
+Run before committing. All changes must include doctest updates.
+
+## Manual Tests (Bash tool)
 
 Run each command via the Claude Code Bash tool and verify the expected output.
 
