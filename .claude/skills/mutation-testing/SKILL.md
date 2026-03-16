@@ -1,3 +1,7 @@
+---
+name: mutation-testing
+description: "Post-hoc TDD via mutation testing — inject bugs, harden tests"
+---
 --- # workaround: anthropics/claude-code#13003
 requires:
   - Skill(llm.kb)
