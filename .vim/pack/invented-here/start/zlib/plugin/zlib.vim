@@ -20,8 +20,8 @@ augroup zlib
 augroup END
 
 function! s:detect_zlib()
-  " Skip if no file
-  if expand('%') == ''
+  " Skip if no file or file doesn't exist (e.g. vscode-neovim pseudo-buffers)
+  if expand('%') == '' || !filereadable(expand('%'))
     return
   endif
 
@@ -32,9 +32,19 @@ function! s:detect_zlib()
     return
   endif
 
-  if header_blob[0] != 0x78
+  let cmf = header_blob[0]
+  let flg = header_blob[1]
+  let deflate_byte = header_blob[2]
+  if cmf != 0x78
     return
   endif
+
+  " Validate header and detect compression level; throws on invalid header
+  try
+    call s:detect_compression_level(cmf, flg, deflate_byte)
+  catch /^zlib:/
+    return
+  endtry
 
   " Check for zlib-flate availability
   if !executable('zlib-flate')
@@ -43,11 +53,6 @@ function! s:detect_zlib()
     echohl None
     return
   endif
-
-  " Detect compression level from header and payload before decompression
-  let flg = header_blob[1]
-  let deflate_byte = header_blob[2]
-  call s:detect_compression_level(flg, deflate_byte)
 
   " Try to decompress - zlib-flate will validate the header
   let decompressed_str = system('zlib-flate -uncompress < ' . shellescape(expand('%:p')))
@@ -89,28 +94,47 @@ function! s:detect_zlib()
   endif
 endfunction
 
-function! s:detect_compression_level(flg, deflate_byte)
-  " Decode zlib compression level from header bytes
-  " FLG byte bits 6-7 encode FLEVEL (compression level hint):
-  "   FLEVEL 0 (bits 00) → levels 0-1
-  "   FLEVEL 1 (bits 01) → levels 2-5
-  "   FLEVEL 2 (bits 10) → level 6
-  "   FLEVEL 3 (bits 11) → levels 7-9
+function! s:detect_compression_level(cmf, flg, deflate_byte)
+  " Validate zlib header and decode compression level.
+  " Throws 'zlib: ...' on invalid header.
   "
-  " For FLEVEL 0, check DEFLATE block type (bits 1-2 of deflate_byte):
-  "   BTYPE 00 (stored) → level 0
-  "   BTYPE 01/10 (compressed) → level 1
+  " Header layout:
+  "   CMF byte: bits 0-3 = CM (method), bits 4-7 = CINFO (window size)
+  "   FLG byte: bits 0-4 = FCHECK, bit 5 = FDICT, bits 6-7 = FLEVEL
+  "   DEFLATE first byte: bit 0 = BFINAL, bits 1-2 = BTYPE, bits 3-7 = varies
+  "
+  " FLEVEL compression level hint:
+  "   0 (bits 00) → levels 0-1
+  "   1 (bits 01) → levels 2-5
+  "   2 (bits 10) → level 6
+  "   3 (bits 11) → levels 7-9
+  "
+  " BTYPE (used when FLEVEL=0 to distinguish level 0 vs 1):
+  "   00 = stored, 01 = fixed Huffman, 10 = dynamic Huffman, 11 = reserved
 
+  " FCHECK: (CMF*256 + FLG) must be divisible by 31
+  if (a:cmf * 256 + a:flg) % 31 != 0
+    throw 'zlib: invalid header checksum'
+  endif
+
+  " BTYPE must not be reserved (11)
+  let btype = and(a:deflate_byte, 0x06) / 2
+  if btype == 3
+    throw 'zlib: reserved BTYPE'
+  endif
+
+  " Stored blocks (BTYPE=0): padding bits 3-7 must be zero
+  if btype == 0 && and(a:deflate_byte, 0xF8) != 0
+    throw 'zlib: invalid stored block padding'
+  endif
+
+  " Decode compression level from FLEVEL and BTYPE
   let flevel = and(a:flg, 0xC0) / 64
 
   if flevel == 0
-    " Check DEFLATE block type to distinguish level 0 vs 1
-    let btype = and(a:deflate_byte, 0x06) / 2
     if btype == 0
-      " Stored block (uncompressed)
       let b:zlib_comp_level = 0
     else
-      " Compressed block
       let b:zlib_comp_level = 1
     endif
   elseif flevel == 1
