@@ -1,5 +1,10 @@
 # Rust Programming
 
+## Design Rules
+
+See `~/.claude/design-rules.kb/rust.kb/` for Rust-specific API design principles,
+and `~/.claude/design-rules.kb/` for language-agnostic rules.
+
 ## Documentation Lookup
 
 For Rust API questions, use `rustdoc-json` to fetch docs.rs JSON:
