@@ -18,7 +18,7 @@ Key questions:
 - Are all  unfinished work, inconsitencies, "loose ends" documented?
 - Is there anything you know that future claude would want or need, but not have?
 - Any cleanup we should do before we go, to reduce future claude/user confusion?
-- If design.kb/ exists: do the docs still match reality after this session's changes?
+- If `Skill(llm-design-kb)`: run the maintenance checklist from that skill
 
 Steps:
 
