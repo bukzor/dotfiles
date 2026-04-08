@@ -1,0 +1,25 @@
+[project]
+name = "bukzor.home"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+
+[dependency-groups]
+dev = [
+    "bukzor-home",
+    # "pix2tex>=0.1.4",  # pulls in torch/nvidia
+    "pyyaml>=6.0.3",
+    "ruamel-yaml>=0.18.15",
+    "litellm[proxy]>=1.83.4",
+]
+
+[tool.uv.workspace]
+members = [
+    "repo/github.com/bukzor/bukzor.rust-practice/claude-jsonl-display/python",
+    ".",
+    ".",
+]
+
+[tool.uv.sources]
+bukzor-home = { workspace = true }
