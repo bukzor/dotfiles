@@ -12,3 +12,4 @@ stats-cache.json
 plugins/
 cache/
 paste-cache/
+sessions/

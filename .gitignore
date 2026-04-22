@@ -3,6 +3,7 @@
 demo*
 *.strace
 *.bak
+*~
 
 # don't care
 .sommelierrc
@@ -91,3 +92,80 @@ package/
 # Misc transient
 .sqlite_history
 *.tmp
+
+# ---------------------------------------------------------------------------
+# Windows user profile (host is %USERPROFILE%, never VCS)
+# ---------------------------------------------------------------------------
+
+# Registry hives and transactional logs
+NTUSER.DAT
+NTUSER.DAT{*}.TxR.*
+NTUSER.DAT{*}.TM*
+ntuser.dat.LOG*
+ntuser.ini
+
+# Windows-XP-era backward-compat junctions (inaccessible reparse points)
+/Application Data
+/Cookies
+/Local Settings
+/My Documents
+/NetHood
+/PrintHood
+/Recent
+/SendTo
+/Start Menu
+/Templates
+
+# Other host-local Windows state
+.wslconfig
+.git-for-windows-updater
+_viminfo
+
+# ---------------------------------------------------------------------------
+# Windows shell / user-data folders — bulk content, not VCS
+# ---------------------------------------------------------------------------
+/3D Objects/
+/AppData/
+/Contacts/
+/Desktop/
+/Documents/
+/Favorites/
+/Links/
+/Music/
+/OneDrive/
+/Pictures/
+/Saved Games/
+/Searches/
+/Videos/
+
+# ---------------------------------------------------------------------------
+# Package managers / runtimes / caches on Windows
+# ---------------------------------------------------------------------------
+.chocolatey/
+.dotnet/
+.gradle/
+.ipynb_checkpoints/
+.ipython/
+.m2/
+.matplotlib/
+.nuget/
+.nx/
+.spyder-py3/
+.templateengine/
+/packages/
+/scoop/
+
+# ---------------------------------------------------------------------------
+# Bulk external trees (game installs, VM rootfs, etc.)
+# ---------------------------------------------------------------------------
+/curseforge/
+/hlserver/
+/wsl/
+
+# ---------------------------------------------------------------------------
+# IDE / source-checkout holder dirs (each subdir has its own VCS).
+# Unlike /repo/, these should NOT be materialized on clone.
+# ---------------------------------------------------------------------------
+/AndroidStudioProjects/
+/PycharmProjects/
+/source/
