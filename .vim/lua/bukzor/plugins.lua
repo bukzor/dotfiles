@@ -109,6 +109,15 @@ function M.config()
 
       -- show LSPs' hints inline
       { "lvimuser/lsp-inlayhints.nvim", opts = {} },
+
+      -- render ANSI escape sequences as colors (view-only via concealer)
+      {
+        "0xferrous/ansi.nvim",
+        opts = {
+          auto_enable = true,
+          filetypes = { "log" },
+        },
+      },
     },
     {
       root = M.LAZY_HOME,

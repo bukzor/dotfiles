@@ -21,6 +21,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.wgsl        set filetype=wgsl
     autocmd BufNewFile,BufRead *.go.erb      set filetype=go.eruby
     autocmd BufNewFile,BufRead *.sls         set filetype=sls.yaml.jinja
+    autocmd BufNewFile,BufRead *.log         set filetype=log
 
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead Brewfile      set filetype=ruby
