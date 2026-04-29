@@ -23,7 +23,7 @@ M.mason_install = {
     "jsonnet_ls",  -- jsonnet
     "tflint",      -- terraform
     "terraformls", -- terraform-ls: terraform
-    "tsserver",    -- typescript
+    "ts_ls",       -- typescript
     "vimls",       --vim
     "clangd",      -- c/c++
     "gopls",       -- golang
@@ -135,28 +135,29 @@ function M.on_attach_lspconfig(client, bufnr)
 end
 
 function M.setup_mason_lspconfig()
-  local mason_lspconfig = require("mason-lspconfig")
-  mason_lspconfig.setup({
-    ensure_installed = M.mason_install["lspconfig"],
-  })
-  mason_lspconfig.setup_handlers({
-    M.mason_lspconfig_handler
-  })
-end
-
-function M.mason_lspconfig_handler(server_name) -- default handler (optional)
-  M.lsp_attached[server_name] = "lspconfig"
-  M.log("lspconfig handler: %s", server_name)
-  local setup = {
+  -- mason-lspconfig 2.0+ replaced setup_handlers with vim.lsp.config + automatic_enable.
+  -- Default config applied to every server.
+  vim.lsp.config("*", {
     on_attach = M.on_attach_lspconfig,
-  }
-  if server_name == "rust_analyzer" then
-    setup["settings"] = {
-      ["rust-analyzer"] = { diagnostics = { disabled = { "inactive-code" } } }
-    }
+  })
+
+  vim.lsp.config("rust_analyzer", {
+    settings = {
+      ["rust-analyzer"] = { diagnostics = { disabled = { "inactive-code" } } },
+    },
+  })
+
+  -- Mark all lspconfig-managed servers before null-ls setup runs, so
+  -- M.null_ls_handler can suppress null-ls sources whose names collide.
+  for _, server_name in ipairs(M.mason_install["lspconfig"]) do
+    M.lsp_attached[server_name] = "lspconfig"
+    M.log("lspconfig handler: %s", server_name)
   end
 
-  require("lspconfig")[server_name].setup(setup)
+  require("mason-lspconfig").setup({
+    ensure_installed = M.mason_install["lspconfig"],
+    -- automatic_enable defaults to true: installed servers get vim.lsp.enable()'d.
+  })
 end
 
 function M.setup_mason_null_ls()
