@@ -1,12 +1,10 @@
 #!/bin/bash
-# Ensure object store is set up before first commit
+# git-localhost-store: catch fresh-init repos before first commit.
 
 set -euo pipefail
 
-STORE_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store"
-
-# Check if .git is still a directory (not yet converted to worktree)
-if [ -d .git ]; then
-    # Run the setup
-    "$STORE_HOME/bin/git-restore-repo"
+if [ -L .git ]; then
+  exit 0
 fi
+
+"${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-restore-repo"

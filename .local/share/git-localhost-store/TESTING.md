@@ -16,7 +16,7 @@ Runs a full cycle: init → add → commit → verify. Uses `--template=` flag f
 # Verify claude-path is in PATH
 which claude-path
 
-# Option A: Global config (affects all repos)
+# Option A: Global config (affects all new repos)
 git config --global init.templateDir "$HOME/.local/share/git-localhost-store/template-repo"
 
 # Option B: Per-repo (for isolated testing)
@@ -25,12 +25,12 @@ git init --template="$HOME/.local/share/git-localhost-store/template-repo"
 
 ## Test 1: Fresh Repository Setup
 
-Creates a new repo and verifies object store is created.
+Creates a new repo and verifies the store is created and `.git` becomes a symlink.
 
 ```bash
 # Setup
 TEST_DIR=~/tmp/test-fresh
-rm -rf "$TEST_DIR" ~/.local/state/git-localhost-store/repos/*-tmp-test--fresh
+rm -rf "$TEST_DIR" ~/.local/state/git-localhost-store/repos/-home-*-tmp-test--fresh
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 
 # Test
@@ -39,21 +39,21 @@ echo "test content" > file.txt
 git add file.txt
 
 # Verify
-# - Should see "✓ Creating object store" message
-# - Should see trace output with colored $ prompt
-ls -la .git  # Should be a file, not directory
-cat .git     # Should contain gitdir: pointing to object store
-git status   # Should work normally
+ls -la .git           # Should be a symbolic link → ~/.local/state/...
+readlink .git         # Should print the store path
+cat .git/HEAD         # Should resolve through the symlink and print "ref: refs/heads/main"
+git status            # Should work normally
 ```
 
 **Expected:**
-- `.git` is a file pointing to worktree in object store
-- Object store created at `~/.local/state/git-localhost-store/repos/-<encoded-path>/`
+- `.git` is a symlink → `~/.local/state/git-localhost-store/repos/<encoded>/`
+- The store directory contains `HEAD`, `objects/`, `refs/`, `config`, `hooks/`
+- `cat .git/HEAD` resolves through the symlink and prints the ref
 - `git status` shows file.txt staged
 
 ## Test 2: Commit and Verify Storage
 
-Verifies commits are stored in object store.
+Verifies commits land in the store.
 
 ```bash
 # Continuing from Test 1
@@ -61,11 +61,11 @@ git commit -m "First commit"
 echo "second line" >> file.txt
 git commit -am "Second commit"
 
-# Verify object store has commits
+# Verify the store has commits
 ENCODED=$(claude-path "$PWD")
 STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
 ls -la "$STORE"
-ls -la "$STORE/objects/"  # Should have pack or loose objects
+ls -la "$STORE/objects/"     # Should have pack or loose objects
 ls -la "$STORE/refs/heads/"  # Should have main branch
 git --git-dir="$STORE" log --oneline  # Should show commits
 ```
@@ -74,7 +74,7 @@ git --git-dir="$STORE" log --oneline  # Should show commits
 - Two commits exist
 - Objects stored in `$STORE/objects/`
 - Refs in `$STORE/refs/heads/main`
-- Commits visible via git --git-dir
+- Commits visible via `git --git-dir`
 
 ## Test 3: Recovery After Deletion
 
@@ -82,69 +82,35 @@ The critical test: verify recovery after `rm -rf`.
 
 ```bash
 # Continuing from Test 2
-# Record current state
 git log --oneline > /tmp/before.log
-ls -la > /tmp/files-before.txt
 
 # Destroy working directory
 cd ~/tmp
 rm -rf test-fresh
 
-# Verify object store survived
+# Verify the store survived
 STORE="$HOME/.local/state/git-localhost-store/repos/-home-$(whoami)-tmp-test--fresh"
-git --git-dir="$STORE" log --oneline  # Should still show commits
+ls "$STORE/objects/"                    # Still there
+git --git-dir="$STORE" log --oneline    # Still shows commits
 
 # Recovery
 mkdir test-fresh && cd test-fresh
-git init
-touch dummy  # Create untracked file
-git add dummy
+git init                                # Hook detects existing store; symlink recreated
+git checkout -- .                       # Restore tracked files
 
 # Verify recovery
 git log --oneline > /tmp/after.log
-diff /tmp/before.log /tmp/after.log  # Should be identical
-ls -la  # Should have file.txt restored, dummy present
-cat file.txt  # Should have content from both commits
+diff /tmp/before.log /tmp/after.log     # Should be identical
+ls -la                                   # file.txt restored
+cat file.txt                            # Should have content from both commits
 ```
 
 **Expected:**
-- Message: "✓ Found existing object store - recovering..."
-- Trace shows: `$ rm -rf .git`, `$ mkdir -p ...`, `$ git restore file.txt`
-- `file.txt` restored with full content
-- `dummy` file preserved (not deleted)
+- Pre-existing store is detected; the new `.git` becomes a symlink to it
+- `git checkout -- .` restores tracked files
 - All commits present in `git log`
 
-## Test 4: Multiple Worktrees
-
-Verify multiple worktrees can be added to the same object store.
-
-```bash
-# Continuing from Test 3
-STORE="$HOME/.local/state/git-localhost-store/repos/-home-$(whoami)-tmp-test--fresh"
-
-# Add second worktree
-git --git-dir="$STORE" worktree add ~/tmp/test-fresh-wt2
-
-# Test both worktrees
-cd ~/tmp/test-fresh-wt2
-echo "worktree 2" > wt2.txt
-git add wt2.txt
-git commit -m "From worktree 2"
-
-cd ~/tmp/test-fresh
-git fetch --all  # Not needed with worktrees, but verify
-git log --oneline  # Should show commit from wt2
-
-# Verify worktree listing
-git --git-dir="$STORE" worktree list
-```
-
-**Expected:**
-- Both worktrees listed
-- Commits from wt2 visible in original worktree
-- Both worktrees share same object store
-
-## Test 5: Existing Repo Conversion
+## Test 4: Existing Repo Conversion
 
 Apply git-localhost-store to an existing repo with history.
 
@@ -153,57 +119,46 @@ Apply git-localhost-store to an existing repo with history.
 TEST_DIR=~/tmp/test-existing
 rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
-git init --template=""  # Skip our template
+git init --template=""
 
 # Create some history
 echo "existing" > existing.txt
 git add existing.txt
 git commit -m "Existing commit"
 
-# Now apply git-localhost-store
-git add .  # Trigger our hook
+# Apply git-localhost-store
+git-restore-repo
 
 # Verify
-ls -la .git  # Should now be a file
-cat .git     # Should point to object store
-git log --oneline  # Should show existing commit
-ls -la  # Should still have existing.txt
+ls -la .git                # Symlink
+git log --oneline          # Existing commit preserved
+ls -la                     # existing.txt still there
 ```
 
 **Expected:**
 - Existing commits preserved
-- `.git` converted to worktree file
+- `.git` converted to symlink → store
 - All files present and unchanged
 - Git operations work normally
 
-## Test 6: Empty Commit on Fresh Repo (KNOWN FAILURE)
-
-Tests `git commit --allow-empty` on a freshly initialized repository.
+## Test 5: Empty Commit on Fresh Repo
 
 ```bash
-./test-empty-commit
+TEST_DIR=~/tmp/test-empty-commit
+rm -rf "$TEST_DIR"
+mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
+git init --template="$HOME/.local/share/git-localhost-store/template-repo"
+git commit --allow-empty -m "test empty commit"
+ls -la .git
+git log --oneline
 ```
-
-This test is expected to fail (exits with code 128).
-
-**Current Behavior (BROKEN):**
-```
-✓ Creating object store: ...
-fatal: could not open '.git/COMMIT_EDITMSG': Not a Directory
-```
-
-**Root Cause:**
-- `reference-transaction` hook fires during commit with state "committed"
-- At this point, git has created the branch (so `.git/refs/heads/` is not empty)
-- Hook runs `git-restore-repo` which converts `.git` from directory → file
-- Git tries to write `.git/COMMIT_EDITMSG` but fails because `.git` is now a file
 
 **Expected:**
-- Commit should succeed
-- Object store should be created
-- `.git` should be converted to worktree link
+- Commit succeeds
+- `.git` becomes a symlink (the `reference-transaction` hook fires after the commit's ref txn lands)
+- Object store created with the empty commit's tree
 
-## Test 7: Edge Cases
+## Test 6: Edge Cases
 
 ### Empty recovery (no commits yet)
 
@@ -213,71 +168,110 @@ rm -rf "$TEST_DIR"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 git init
 
-# Trigger setup without any commits
+# Trigger conversion without commits — happens on first add
 touch dummy
 git add dummy
 
-# Delete and recover
-cd ~/tmp && rm -rf test-empty
-mkdir test-empty && cd test-empty
-git init
-touch another
-git add another
-
-# Verify: should work but have no history
-git log  # Should fail (no commits)
+ls -la .git           # Should be a symlink
+git log               # Should fail with "does not have any commits yet"
 ```
 
-### Conflicting state (local commits + object store exists)
+### Conflicting state (existing local repo + existing store)
 
 ```bash
-# This should ERROR and refuse to proceed
 TEST_DIR=~/tmp/test-conflict
 ENCODED=$(claude-path "$TEST_DIR")
 STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
 
-# Create object store manually
-mkdir -p "$STORE"
-git init --bare "$STORE"
-
-# Create conflicting local repo
+# Create a store first
+rm -rf "$STORE" "$TEST_DIR"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
-git init --template=""
-echo "local" > local.txt
-git add local.txt
-git commit -m "Local commit"
+git init --template="$HOME/.local/share/git-localhost-store/template-repo"
+echo "first" > f && git add f && git commit -m "first"
 
-# Try to trigger our hook
-touch trigger
-git add trigger  # Should ERROR with "Cannot safely merge"
+# Tear down only the workdir
+cd ~/tmp && rm -rf test-conflict
+
+# Try to create a NEW conflicting repo at the same path
+mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
+git init --template=""    # not using our template
+echo "different" > different.txt
+git add different.txt
+git commit -m "Conflicting local commit"
+
+# Now run git-restore-repo manually
+git-restore-repo
 ```
 
 **Expected:**
-- Error message: "❌ .git has existing commits but object store exists"
-- Hook fails
-- Local .git unchanged
+- `git-restore-repo` refuses with `❌ Store already exists: ...`
+- Local `.git` unchanged
+- User intervention required (decide which side to keep)
 
-## Test 8: Path Encoding
+## Test 7: Path Encoding
 
-Verify path encoding works correctly for various paths.
+Verify path encoding works for various inputs.
 
 ```bash
-# Test various path types
 claude-path "/home/user/projects/repo"
 claude-path "/home/user/my-repo"
 claude-path "/home/user/my--special--repo"
 
-# Create repos with special characters
+# Repos with special characters round-trip through the store
 mkdir -p ~/tmp/test-with-hyphens && cd ~/tmp/test-with-hyphens
 git init && touch f && git add f
-ls ~/.local/state/git-localhost-store/repos/  # Verify encoding
+ls ~/.local/state/git-localhost-store/repos/  # The encoded name should appear
 
-# Verify recovery works with encoded paths
+# Recovery still works through the encoding
 cd ~/tmp && rm -rf test-with-hyphens
 mkdir test-with-hyphens && cd test-with-hyphens
-git init && touch t && git add t
-git log  # Should work if recovery successful
+git init
+git checkout -- .  # If anything was committed; harmless if not
 ```
+
+## Test 8: Migrate from Legacy Layout
+
+Verify `migrate-from-gitfile` converts a legacy gitfile-style repo.
+
+```bash
+TEST_DIR=~/tmp/test-migrate
+LEGACY_STORE=~/tmp/test-migrate.legacy-store
+rm -rf "$TEST_DIR" "$LEGACY_STORE"
+mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
+
+# Build a legacy-layout repo by hand:
+git init --template=""
+echo "legacy" > legacy.txt && git add legacy.txt && git commit -m "legacy commit"
+
+mv .git "$LEGACY_STORE"
+git config -f "$LEGACY_STORE/config" core.bare true
+mkdir -p "$LEGACY_STORE/worktrees/test-migrate"
+echo "$TEST_DIR/.git" > "$LEGACY_STORE/worktrees/test-migrate/gitdir"
+echo "../.." > "$LEGACY_STORE/worktrees/test-migrate/commondir"
+cp "$LEGACY_STORE/HEAD" "$LEGACY_STORE/worktrees/test-migrate/HEAD"
+mkdir -p "$LEGACY_STORE/worktrees/test-migrate/refs"
+mv "$LEGACY_STORE/index" "$LEGACY_STORE/worktrees/test-migrate/index"
+echo "gitdir: $LEGACY_STORE/worktrees/test-migrate" > .git
+
+# .git is now a regular file (gitfile)
+ls -la .git
+cat .git/HEAD 2>&1 || true   # Should error: "Not a directory"
+
+# Migrate
+migrate-from-gitfile "$TEST_DIR"
+
+# Verify
+ls -la .git                  # Symlink now
+cat .git/HEAD                # Reads cleanly
+git log --oneline            # Commit preserved
+```
+
+**Expected:**
+- `cat .git/HEAD` errors before migration ("Not a directory")
+- Migration prints xtrace-style steps
+- `.git` is a symlink afterward
+- All commits preserved
+- `cat .git/HEAD` reads cleanly via the symlink
 
 ## Cleanup
 
@@ -286,9 +280,7 @@ git log  # Should work if recovery successful
 rm -rf ~/tmp/test-*
 
 # Optional: Remove all test object stores
-rm -rf ~/.local/state/git-localhost-store/repos/-*-tmp-test--*
-
-# Keep the system configured for real use
+rm -rf ~/.local/state/git-localhost-store/repos/-home-*-tmp-test--*
 ```
 
 ## Common Issues
@@ -304,9 +296,9 @@ rm -rf ~/.local/state/git-localhost-store/repos/-*-tmp-test--*
 
 ### Object store not created
 - Check hook is executable: `ls -la ~/.local/share/git-localhost-store/template-repo/hooks/post-index-change`
-- Check state directory exists: `ls -la ~/.local/state/git-localhost-store/`
+- Check state directory parent exists: `ls -la ~/.local/state/`
 
 ### Recovery doesn't work
 - Verify object store exists: `ls ~/.local/state/git-localhost-store/repos/`
 - Check encoding matches: `claude-path ~/tmp/test-repo`
-- Look for corresponding directory in repos/
+- Look for the corresponding directory under `repos/`

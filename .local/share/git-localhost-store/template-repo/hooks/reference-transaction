@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ensure object store is set up after ref transactions complete
+# git-localhost-store: convert .git to symlink after refs land.
 # State $1: prepared (locks held), committed (safe), aborted
 
 set -euo pipefail
@@ -11,14 +11,18 @@ if (( DEBUG > 0 )); then
 fi
 
 if [[ "${1:-}" != "committed" ]]; then
-  # Only act after transaction completes
   exit 0
-elif [ ! -d .git ]; then
-  # Already converted to worktree
-  exit 0
-elif [ -z "$(ls -A .git/refs/heads 2>/dev/null)" ]; then
-  # Fresh git init (no branches yet) - let post-index-change handle it
-  exit 0
-else
-  "${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-restore-repo"
 fi
+
+# Already converted: .git is a symlink, not a real directory.
+if [ -L .git ]; then
+  exit 0
+fi
+
+# No refs yet (fresh init) — let post-index-change / pre-commit handle it.
+if [ -z "$(ls -A .git/refs/heads 2>/dev/null)" ] \
+   && [ -z "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
+  exit 0
+fi
+
+"${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-restore-repo"

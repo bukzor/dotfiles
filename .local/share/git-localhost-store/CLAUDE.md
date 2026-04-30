@@ -4,130 +4,92 @@ Instructions for AI agents maintaining and modifying this system.
 
 ## Overview
 
-git-localhost-store protects local git repositories from accidental deletion by storing all objects in a central, path-encoded location. When you `rm -rf` a working directory, the commits survive and can be recovered.
+git-localhost-store protects local git repositories from accidental deletion by
+storing all objects in a central, path-encoded location. When you `rm -rf` a
+working directory, the commits survive in the store and can be recovered.
 
 ## Architecture
 
-**Core concept:** Use git worktrees to share objects between working directory and protected store.
+**Core concept:** the working directory's `.git` is a symlink to a regular
+gitdir kept in a central, path-encoded location.
 
 ```
-~/.local/share/git-localhost-store/          (version controlled)
-├── bin/
-│   ├── init           # Setup script
-│   └── claude-path -> ~/bin/claude-path
-├── template-repo/     # Git init template
-│   └── hooks/
-│       ├── post-index-change  # Triggers setup on first git add
-│       ├── post-init          # Core worktree setup logic
-│       └── pre-commit         # Triggers setup before commit
-├── CLAUDE.md          # This file
-├── README.md          # User documentation
-└── TESTING.md         # Manual testing guide
+<workdir>/.git -> ~/.local/state/git-localhost-store/repos/<encoded-path>/
 
-~/.local/state/git-localhost-store/          (not version controlled)
-└── repos/
-    └── <encoded-path>/        # Bare git repo (object store)
-        ├── objects/           # Shared objects
-        ├── refs/              # Shared refs
-        └── worktrees/
-            └── <basename>/    # Worktree metadata
-                ├── HEAD
-                ├── gitdir     # Points to working dir .git file
-                ├── commondir  # Points to ../.. (bare repo)
-                ├── index
-                └── refs/      # Worktree-specific refs
+~/.local/state/git-localhost-store/repos/<encoded-path>/
+├── HEAD
+├── index
+├── refs/
+├── objects/
+├── packed-refs
+├── config            # core.bare = false
+└── hooks/
 ```
 
-## Key Design Decisions
+`.git/HEAD`, `.git/refs/heads/...`, etc. resolve through the symlink as
+ordinary files. Naive readers (lazy.nvim, custom shell helpers, IDE plugins)
+that do `io.open("$repo/.git/HEAD")` work without modification. Git itself
+follows the symlink the same way it would follow a real `.git/` directory.
 
-### Why Worktrees?
+## Legacy gitfile layout
 
-Initially tried:
-1. **Alternates + symlinked refs** - Git doesn't like symlinked refs
-2. **Alternates + push-based sync** - Required 3 sync hooks, complex
+A previous incarnation of this system used a different layout, where `.git`
+was a regular file containing `gitdir: <store>/worktrees/<name>` (a "gitfile"
+in git terminology), and the store was a bare repo with a per-worktree
+subdir holding HEAD/index/refs. That layout is correct for git itself but
+broke naive `.git/<x>` readers; see
+`docs/adr/2026-04-30-000-switch-from-gitfile-to-symlink-layout.md` for the
+analysis and decision to switch.
 
-Worktrees are git's native solution:
-- Objects automatically shared
-- Refs automatically shared
-- No sync hooks needed
-- Multiple worktrees supported naturally
+The migration tool `bin/migrate-from-gitfile` brings such repos into the
+current symlink layout. `bin/audit-gitfiles` lists candidates.
 
-### Why Not Symlink Entire .git?
+## Path Encoding
 
-Bare repos require `core.worktree` config which only supports one worktree. Modern worktrees use `$GIT_DIR/worktrees/` structure which supports multiple worktrees.
-
-### Path Encoding
-
-Uses Claude Code's encoding scheme via `~/bin/claude-path`:
+Working directory paths are encoded by `~/bin/claude-path`:
 ```
 /home/user/projects/repo → -home-user-projects-repo
 ```
-
-Hyphens in paths: `-` becomes `--`, `/` becomes `-`.
-
-This creates deterministic, collision-free storage paths.
+`-` becomes `--`, `/` becomes `-`. Deterministic and collision-free.
 
 ## Hook Logic Flow
 
+Hooks live in `template-repo/hooks/` and are copied into every newly-init'd
+or cloned repo via `init.templateDir`. They each call
+`bin/git-restore-repo`.
+
 ### post-index-change (triggered by `git add`)
 
-```bash
-if [ -d .git ]; then  # Not yet converted?
-    post-init         # Run setup
-fi
-```
-
-### post-init (core setup logic)
-
-1. **Check if object store exists**
-   - No: Move `.git` → object store, mark as bare
-   - Yes: Verify `.git` is empty, error if conflicts
-
-2. **Create worktree structure**
-   - `worktrees/<basename>/gitdir` → points to working dir `.git` file
-   - `worktrees/<basename>/commondir` → points to `../..` (bare repo root)
-   - `worktrees/<basename>/HEAD` → copy from bare repo
-   - `worktrees/<basename>/refs/` → empty directory
-   - Preserve index if exists (staged changes)
-
-3. **Convert working dir**
-   - Replace `.git/` directory with `.git` file
-   - Content: `gitdir: <path-to-worktree-dir>`
-
-4. **Recovery (if object store has commits)**
-   - Restore deleted tracked files: `git ls-files --deleted | ... | git restore`
-   - Does NOT restore modifications or delete untracked files
+Catches fresh `git init` repos that haven't yet hit `reference-transaction`.
 
 ### pre-commit (fallback)
 
-Same logic as post-index-change, catches cases where user commits without adding.
+Catches the case where the user commits without running `git add`.
+
+### reference-transaction (triggered on ref changes)
+
+Fires during `git clone` (after refs land) and during normal commits. Skips
+the "fresh init, no refs yet" case so the conversion happens at the right
+moment.
+
+All three hooks short-circuit when `.git` is already a symlink (idempotent).
+
+### bin/git-restore-repo
+
+The actual relocation: `mv .git <store>` then `ln -s <store> .git`. Refuses
+to operate if `.git` isn't a directory (asserts cleanly on unexpected
+states).
 
 ## Making Changes
 
-### Adding New Hook Logic
+### Hook idempotency
 
-Hooks should be **idempotent** - safe to run multiple times. Check state before modifying.
+All hooks must be safe to re-run. The current pattern: `if [ -L .git ]; then
+exit 0; fi`. If you hit a weird state in production, do **not** silently
+accommodate it — let the assertion in `git-restore-repo` fire so we learn
+what's actually out there.
 
-Good pattern:
-```bash
-if [ ! -f "$MARKER" ]; then
-    # Do setup
-    touch "$MARKER"
-fi
-```
-
-### Modifying Worktree Setup
-
-The worktree structure must match git's expectations:
-- `gitdir` file: absolute path to working dir `.git` file
-- `commondir` file: relative path `../..` to bare repo root
-- `HEAD` file: copy from bare repo or `ref: refs/heads/main`
-- `refs/` directory: must exist (even if empty)
-- `index` file: worktree-specific index (staged changes)
-
-Test changes thoroughly - see TESTING.md.
-
-### Trace Output
+### Trace output
 
 Use subshells for targeted tracing:
 ```bash
@@ -136,62 +98,66 @@ Use subshells for targeted tracing:
     command2
 )
 ```
+PS4 is `export PS4=$'\e[36m$\e[0m '` (teal `$`). Trace only the actual
+operations — not conditionals, assignments, echo statements.
 
-PS4 is set to teal `$` for readability: `export PS4=$'\e[36m$\e[0m '`
+The Python migration code uses the same convention via `bukzor.xtrace.run`,
+which prints the command in PS4 style before fork/exec.
 
-Only trace the most relevant commands. Avoid:
-- Conditionals (`if`, `[ ]`)
-- Variable assignments
-- Echo statements
+### Error handling
 
-### Error Handling
+- Use `set -euo pipefail`.
+- Print errors to stderr with `>&2`.
+- Exit non-zero with a message that explains what's wrong.
+- Never `|| true` to hide failures.
 
-Always fail loudly on errors:
-- Use `set -euo pipefail`
-- Print errors to stderr: `>&2`
-- Exit with non-zero status
-- Explain what went wrong and what user should do
+## Migration tooling
 
-Never hide errors with `|| true` unless specifically intended.
+`bin/migrate-from-gitfile <workdir>` (a bash wrapper around
+`python -m bukzor.git_localhost_store.migrate`) implements deterministic
+conversion from the legacy gitfile layout to the symlink layout:
+
+1. Discover layout from the workdir's gitfile.
+2. Run preconditions:
+   - `.git` is a regular file with `gitdir: ...` content
+   - `<store>/worktrees/` contains exactly one entry (multi-worktree-per-store
+     not supported)
+   - No in-progress ops (`MERGE_HEAD`, `rebase-merge/`, etc.)
+   - Per-worktree refs/ is empty
+   - No unexpected files in worktree dir
+   - Target store path doesn't already exist
+3. Execute steps:
+   - Install symlink-layout hooks into the store
+   - Promote worktree HEAD/index up one level
+   - Remove the worktrees subdir
+   - Set `core.bare = false`, drop `submodule.active` if present
+   - Move store from worktree-pointer style to single-tier
+   - Atomic gitfile→symlink swap (`ln -s` + `mv -Tf`)
+
+If preconditions fail, the script reports all of them and exits with code 1
+without touching anything.
 
 ## Testing
 
-Before committing changes:
+- `bin/audit-gitfiles` lists outstanding repos in the legacy layout.
+- For migration: synthesize a gitfile-layout repo in `~/trash/`, run
+  `migrate-from-gitfile`, verify `.git/HEAD` reads, `git status` works,
+  new commits land.
+- For hooks: `git -c init.templateDir=$HOME/trash/empty-template clone ...`
+  bypasses our template, useful for testing the manual conversion path.
 
-1. **Run manual tests** - See TESTING.md for complete test suite
-2. **Test fresh setup** - New repo from scratch
-3. **Test recovery** - Delete and restore
-4. **Test edge cases** - Empty repos, existing repos, conflicts
-
-Minimum test sequence:
-```bash
-# Fresh setup
-cd ~/tmp/test && git init && echo "test" > f && git add f && git commit -m "test"
-
-# Recovery
-cd ~/tmp && rm -rf test && mkdir test && cd test && git init && touch t && git add t
-
-# Verify
-git log  # Should show original commit
-ls -la   # Should have 'f' restored, 't' present
-```
+See `TESTING.md` for the manual test suite.
 
 ## Common Maintenance Tasks
 
 ### Updating Hook Logic
 
-1. Edit hook in `template-repo/hooks/`
-2. Test manually (see TESTING.md)
-3. Commit to dotfiles repo
-4. No need to update existing repos - hooks are copied at `git init` time
-
-### Adding New Features
-
-1. Check if it fits the "automatic protection" model
-2. Avoid requiring user interaction in hooks
-3. Document in README.md
-4. Add tests to TESTING.md
-5. Update this CLAUDE.md if architecture changes
+1. Edit a hook in `template-repo/hooks/`.
+2. Test against a fresh clone (the global `init.templateDir` makes new
+   clones pick up the change immediately).
+3. Existing repos retain the hooks copied at clone time — they pick up
+   changes only on re-init or via explicit re-install. The migration
+   tool re-installs hooks as part of its work.
 
 ### Debugging Issues
 
@@ -199,39 +165,49 @@ Check in order:
 1. Is `init.templateDir` configured? `git config --global init.templateDir`
 2. Are hooks executable? `ls -la template-repo/hooks/`
 3. Is `claude-path` in PATH? `which claude-path`
-4. Check hook output: Hooks write to stderr, visible during `git add`
-5. Examine object store: `ls -la ~/.local/state/git-localhost-store/repos/`
+4. Hook output: hooks write to stderr, visible during `git add` / `git
+   commit`.
+5. Inspect a store: `ls -la ~/.local/state/git-localhost-store/repos/<encoded>/`
+6. Check the workdir's `.git`: `ls -la .git` (should be a symlink) and
+   `cat .git/HEAD` (should produce `ref: ...` or a SHA).
 
-Enable more tracing by adding `set -x` to more commands in hooks.
+Enable verbose tracing by setting `DEBUG=1` in the hook env, or by adding
+`set -x` to specific spots.
 
 ## What NOT to Do
 
-❌ **Don't use `git config core.worktree`** - Only supports one worktree
-❌ **Don't symlink refs or HEAD** - Git doesn't handle this correctly
-❌ **Don't use `reset --hard`** - Too destructive during recovery
-❌ **Don't hide errors** - Let hooks fail visibly
-❌ **Don't enumerate directory contents in docs** - Goes stale quickly
+- ❌ **Don't symlink refs or HEAD individually** — symlink the whole
+  `.git`, not its contents.
+- ❌ **Don't quietly accommodate unknown `.git` shapes** — assert and
+  let the user (or future agent) elaborate proper handling once we
+  see a real case.
+- ❌ **Don't enumerate directory contents in docs** — goes stale.
+- ❌ **Don't hide errors** — `set -euo pipefail` and let things fail
+  visibly.
+
+## Documentation Conventions
+
+- ADRs in `docs/adr/`, date-prefixed. Append-only — historical decisions
+  are not edited.
+- Devlogs in `docs/dev/devlog/`, date-prefixed. Append-only.
+- TODOs in `.claude/todo.d/`.
+
+When working on this project, load the `llm-collab-docs` skill for helper
+scripts and pattern details.
 
 ## Related Files
 
-- **README.md** - User-facing documentation
-- **TESTING.md** - Manual testing procedures
-- **bin/init** - One-time setup script
-- **template-repo/hooks/*** - Git hooks (the actual implementation)
-
-## Documentation System
-
-This project uses llm-collab-docs patterns for coordination:
-- ADRs in docs/adr/ (date-based)
-- Devlogs in docs/devlog/
-- Persistent TODOs in .claude/todo.d/
-
-When working on this project, load the llm-collab-docs skill for helper scripts and pattern details.
+- **README.md** — User-facing documentation
+- **TESTING.md** — Manual testing procedures
+- **bin/git-restore-repo** — the relocator
+- **bin/migrate-from-gitfile** — converts legacy gitfile layout to symlink layout
+- **bin/audit-gitfiles** — lists repos still in the legacy layout
+- **template-repo/hooks/*** — git hooks
+- **lib/init** — one-time setup script
 
 ## Questions?
 
-When in doubt:
-- Read the git-worktree documentation: `man git-worktree`
-- Examine working system: `ls -la ~/.local/state/git-localhost-store/repos/*/worktrees/*/`
-- Test manually before committing
-- Keep it simple - less code is better code
+- Examine a working store:
+  `ls -la ~/.local/state/git-localhost-store/repos/<encoded>/`
+- Test manually before committing.
+- Keep it simple — less code is better code.

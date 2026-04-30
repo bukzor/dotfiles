@@ -4,27 +4,33 @@
 
 ## Problem
 
-A stray `rm -rf` can destroy weeks of work if you haven't pushed to a remote. Local git repositories are fragile and ephemeral.
+A stray `rm -rf` can destroy weeks of work if you haven't pushed to a
+remote. Local git repositories are fragile and ephemeral.
 
 ## Solution
 
-This system automatically stores all git objects in a protected central location, indexed by working directory path. Even if you delete your entire working directory, your commits are safe and recoverable.
+This system automatically stores all git objects in a protected central
+location, indexed by working directory path. Even if you delete your
+entire working directory, your commits are safe and recoverable.
 
 ## How It Works
 
-### Automatic Setup
+When you `git init` or `git clone` (or `git add` in a fresh repo), hooks
+automatically run `git-restore-repo` which:
 
-When you run `git init` or `git add` for the first time in a repo, hooks automatically run `git restore-repo` which:
+1. Moves `.git/` into a per-repo store under
+   `~/.local/state/git-localhost-store/repos/<encoded-path>/`.
+2. Replaces `.git` with a **symbolic link** to that store.
 
-1. Creates a worktree-based repository structure in `~/.local/state/git-localhost-store/repos/<encoded-path>/`
-2. Converts your `.git` directory to a worktree link
-3. Preserves all existing commits and index state
+After the swap, `.git` is a symlink rather than a directory. Git itself
+follows the symlink transparently. Naive readers (lazy.nvim, ad-hoc
+shell scripts, IDE plugins) that do `open(repo + "/.git/HEAD")` work
+unchanged because the symlink resolves through the filesystem.
 
-### Path Encoding
+### Path encoding
 
-Working directory paths are encoded using Claude Code's scheme to create unique, deterministic storage locations:
-
-```bash
+Working directory paths are encoded by `~/bin/claude-path`:
+```
 /home/bukzor/projects/myrepo → -home-bukzor-projects-myrepo
 ```
 
@@ -35,62 +41,100 @@ After `rm -rf` of a working directory:
 **Automatic (via hooks):**
 ```bash
 mkdir ~/projects/myrepo && cd ~/projects/myrepo
-git init  # Hook detects existing store and recovers everything
+git init
+# Hook detects existing store and recreates the symlink
+git checkout -- .  # Restore tracked files
 ```
 
-**Explicit (direct command):**
+**Explicit:**
 ```bash
 mkdir ~/projects/myrepo && cd ~/projects/myrepo
 git init
-git restore-repo  # Directly restore from store
+git-restore-repo  # equivalent to the hook path
+git checkout -- .
 ```
 
 ## Commands
 
-### `git restore-repo`
+### `git-restore-repo`
 
-Converts an existing git repository to use the localhost store, or recovers a deleted repository if the store already exists.
+Converts an existing git repository to use the localhost store, or
+recovers a deleted repository if the store already exists.
 
 **Usage:**
 ```bash
 cd /path/to/your/repo
-git restore-repo
+git-restore-repo
 ```
 
 **What it does:**
-- Detects if a store exists for this path
-- If no store: moves `.git` to the store location and sets up worktree
-- If store exists: recovers all commits and tracked files from the store
-- Preserves staged changes (index) and existing commits
-- Safe to run multiple times (idempotent)
+- Detects the store path from the working directory.
+- If `.git` is a directory: moves it to the store, replaces it with a
+  symlink. Idempotent.
+- If `.git` is already a symlink: no-op (`✓ Already a symlink`).
+- If `.git` is anything else (gitfile, missing, broken): asserts and
+  exits non-zero, leaving you to investigate.
 
-**When to use:**
-- Convert an existing repo to use localhost store
-- Recover after accidental `rm -rf`
-- Fix a broken worktree configuration
+**When to use:** Convert an existing repo, recover after `rm -rf`,
+or after changing the global hook config.
 
-**Note:** `git restore-repo` is automatically called by hooks on `git add` and `git commit`, so manual invocation is rarely needed.
+**Note:** `git-restore-repo` is automatically called by hooks; manual
+invocation is rarely needed.
+
+### `migrate-from-gitfile`
+
+Brings a repo from the legacy gitfile-pointer layout (where `.git` is a
+regular file containing `gitdir: ...`) to the current symlink layout.
+See `docs/adr/2026-04-30-000-switch-from-gitfile-to-symlink-layout.md`
+for context.
+
+```bash
+migrate-from-gitfile /path/to/legacy/repo
+```
+
+Refuses to operate unless preconditions hold (single-worktree-per-store,
+no in-progress git ops, etc.).
+
+### `audit-gitfiles`
+
+Lists workdirs whose `.git` is still a gitfile pointing into this
+system's store — i.e., candidates for `migrate-from-gitfile`.
+
+```bash
+audit-gitfiles [root]   # default root: $HOME
+```
+
+Pipe straight into the migrator when ready:
+```bash
+audit-gitfiles | xargs -rn1 migrate-from-gitfile
+```
 
 ## Structure
 
 ```
-~/.local/share/git-localhost-store/
+~/.local/share/git-localhost-store/   (version controlled in $HOME)
 ├── bin/
-│   ├── git-restore-repo # Core restore logic (user-facing)
-│   └── claude-path      # Symlink to ~/bin/claude-path
-├── lib/
-│   └── init             # Internal setup script
-├── template-repo/       # Git template directory
+│   ├── git-restore-repo       # the relocator
+│   ├── migrate-from-gitfile   # legacy → symlink layout migrator
+│   └── audit-gitfiles         # find unmigrated legacy repos
+├── template-repo/             # git init template
 │   └── hooks/
-│       ├── post-index-change # Calls git-restore-repo on git add
-│       └── pre-commit        # Calls git-restore-repo on git commit
-└── README.md            # This file
+│       ├── post-index-change
+│       ├── pre-commit
+│       └── reference-transaction
+├── lib/init                   # one-time setup helper
+├── CLAUDE.md                  # maintenance guide for AI agents
+├── README.md                  # this file
+└── TESTING.md                 # manual testing procedures
 
-~/.local/state/git-localhost-store/
-└── repos/               # Per-repo object stores (not version-controlled)
-    └── <encoded-path>/  # Worktree-structured repos
-        └── worktrees/
-            └── <name>/  # Per-worktree data
+~/.local/state/git-localhost-store/   (NOT version controlled)
+└── repos/
+    └── <encoded-path>/        # gitdir for one workdir
+        ├── HEAD
+        ├── index
+        ├── refs/, objects/, packed-refs
+        ├── config             # core.bare = false
+        └── hooks/             # copied from template at clone time
 ```
 
 ## Installation
@@ -100,28 +144,34 @@ Check your current setting:
 git config --global init.templateDir
 ```
 
-**Note**: If you already have a `init.templateDir` set, you'll need to merge your existing hooks into `template-repo/hooks/` before proceeding.
+**Note:** if you already have a template configured, merge its hooks
+into `template-repo/hooks/` first.
 
 Configure git to use the template:
 ```bash
 git config --global init.templateDir "$HOME/.local/share/git-localhost-store/template-repo"
 ```
 
-The state directory (`~/.local/state/git-localhost-store/repos/`) will be created automatically on first use.
+The state directory is created automatically on first use.
 
 ## Dependencies
 
-- `~/bin/claude-path` - Path encoding utility
-- Standard git hooks support
+- `~/bin/claude-path` — path encoding utility
+- A python interpreter on `PATH` (for `migrate-from-gitfile`)
+- `~/lib/pythonpath/bukzor/` on PYTHONPATH (the migration wrapper sets this
+  inline; see `bukzor.xtrace` and `bukzor.git_localhost_store.migrate`)
 
 ## Maintenance
 
 ### Check if a repo is using localhost store
 
 ```bash
-cat .git
-# Should show: gitdir: ~/.local/state/git-localhost-store/repos/<encoded-path>/worktrees/<name>
+ls -la .git
+# Expected: a symlink → ~/.local/state/git-localhost-store/repos/<encoded-path>
 ```
+
+If `.git` is a regular file containing `gitdir: ...` → legacy gitfile
+layout, run `migrate-from-gitfile` on the workdir.
 
 ### List all backed-up repos
 
@@ -129,34 +179,40 @@ cat .git
 ls ~/.local/state/git-localhost-store/repos/
 ```
 
-### Manually verify backup
+### Manually inspect a store
 
 ```bash
-# From within a git repo
-ENCODED=$(claude-path .)
-git --git-dir="$HOME/.local/state/git-localhost-store/repos/$ENCODED" log
+ENCODED=$(claude-path /path/to/workdir)
+ls -la ~/.local/state/git-localhost-store/repos/$ENCODED
 ```
 
 ## Limitations
 
-- Only protects commits and staged changes, not unstaged modifications
-- Recovery requires recreating directory at the exact original path
-- Object stores in state directory can still be manually deleted
-- Does not replace proper remote backups (GitHub, etc.)
+- Protects commits and staged changes, not unstaged modifications.
+- Recovery requires recreating the directory at the exact original path.
+- Object stores in the state directory can still be manually deleted.
+- Does not replace proper remote backups (GitHub, etc.).
+- Multi-worktree-per-store is not supported by this system's automation
+  (you can still use `git worktree add` from the central gitdir for
+  ad-hoc linked worktrees — that's just git native behavior).
 
 ## Design Principles
 
-- **Automatic**: Works without user intervention
-- **Transparent**: Normal git operations unchanged
-- **Deterministic**: Recovery path is predictable
-- **Explicit errors**: Failures are visible, not hidden
-- **No force operations**: Never uses git --force or destructive flags
+- **Automatic** — works without user intervention.
+- **Transparent to naive readers** — `.git/HEAD` resolves through the
+  symlink as an ordinary file.
+- **Deterministic** — recovery path is predictable from the workdir
+  path alone.
+- **Explicit errors** — failures are visible. No `|| true`.
+- **Idempotent** — hooks and `git-restore-repo` are safe to re-run.
 
 ## Future Work
 
-### Hook Composition (.d/ pattern)
+### Hook composition (.d/ pattern)
 
-Currently, git only supports one `init.templateDir`, making it difficult to merge multiple hook systems. A future enhancement could refactor hooks to use a `.d/` directory pattern:
+Currently, git only supports one `init.templateDir`, making it hard to
+compose multiple hook systems. A future enhancement: hooks-of-hooks via
+a `.d/` directory pattern.
 
 ```
 template-repo/hooks/
@@ -167,4 +223,4 @@ template-repo/hooks/
 │   └── 30-another-hook
 ```
 
-Each main hook would iterate through its `.d/` directory, executing scripts in order. This would make composing multiple hook systems trivial - just copy scripts into the appropriate `.d/` directory with numeric prefixes for ordering.
+Each hook iterates its `.d/` and dispatches in numeric order.
