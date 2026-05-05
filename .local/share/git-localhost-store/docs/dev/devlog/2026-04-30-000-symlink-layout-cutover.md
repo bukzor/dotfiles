@@ -154,23 +154,66 @@ User directed it. Committed.
 - **TESTING.md** rewritten to match the symlink layout end-to-end;
   added Test 8 covering `migrate-from-gitfile`.
 
-## Files Touched
-
-- `bin/git-restore-repo` — replaced (symlink relocator)
-- `bin/migrate-from-gitfile` — new (bash wrapper)
-- `bin/audit-gitfiles` — new
-- `template-repo/hooks/{pre-commit,post-index-change,reference-transaction}` — replaced
-- `CLAUDE.md` — rewritten for symlink layout
-- `README.md` — rewritten for symlink layout
-- `TESTING.md` — rewritten end-to-end for symlink layout
-- `docs/adr/2026-04-30-000-switch-from-gitfile-to-symlink-layout.md` — new
-- `docs/dev/devlog/2026-04-30-000-symlink-layout-cutover.md` — this file
-- `~/lib/pythonpath/bukzor/xtrace.py` — new
-- `~/lib/pythonpath/bukzor/git_localhost_store/migrate.py` — new
-
 ## Next Session
 
 **Start here:** Investigate the `~/claude/amazon-searches` audit oddity.
 Once explained, decide on batch migration of the remaining v1 repos.
 
 **Blockers:** None.
+
+## Post-Cutover Review (2026-04-30, same day, evening)
+
+Walking the diff with user surfaced a regression. The new
+`bin/git-restore-repo` collapsed the pre-cutover script's two-branch
+logic into a one-shot relocator.
+
+**Pre-cutover (`94cf56b`)** had an explicit recovery branch:
+
+```bash
+if [ ! -d "$OBJECT_STORE" ]; then
+    # First-time relocate
+else
+    echo "✓ Found existing object store - recovering..." >&2
+    if ! git_is_empty; then
+        exit 1   # .git has commits + store exists: hard fail
+    fi
+    rm -rf .git
+fi
+# ... then restore tracked-but-missing files:
+git ls-files --deleted | tr '\n' '\0' \
+  | xargs -0r sh -xc 'git restore "$@"' -
+```
+
+The `else` branch is *the recovery path* — what happens when the user
+runs `rm -rf workdir; git init`. It detects the existing store, adopts
+it, and restores tracked-but-missing files. That's why the bin is
+named "restore."
+
+**Post-cutover (`5a66e0f`):** if a store exists at the encoded path,
+`git-restore-repo` exits 1 with "Refusing to overwrite. Remove manually
+if intended." Recovery requires the user to know to `ln -s <store> .git`
+themselves — defeating the project's reason to exist.
+
+The cutover ADR and the body of this devlog frame the work as a layout
+swap. The behavior change wasn't deliberate — it got lost in the
+rewrite. The recovery branch needs to be added back in the symlink
+layout's idiom:
+
+```bash
+if [ -e "$STORE" ]; then
+    if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
+       || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
+        echo "❌ .git has commits but store exists at $STORE" >&2
+        exit 1
+    fi
+    rm -rf .git
+    ln -s "$STORE" .git
+    git ls-files --deleted -z | xargs -0r git restore --
+    echo "✓ Recovered: .git -> $STORE" >&2
+    exit 0
+fi
+```
+
+Bumped to top priority for next session, ahead of the audit-oddity
+investigation. Cutover is functionally regressed for the recovery path
+until this lands.

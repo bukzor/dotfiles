@@ -27,9 +27,22 @@ if [ ! -d .git ]; then
 fi
 
 if [ -e "$STORE" ]; then
-    echo "❌ Store already exists: $STORE" >&2
-    echo "   Refusing to overwrite. Remove manually if intended." >&2
-    exit 1
+    # Recovery: workdir was rm -rf'd, then re-init'd. Adopt the existing
+    # store and restore tracked files. Refuse only if the fresh .git has
+    # picked up commits (refs in heads or remotes) that would conflict.
+    if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
+       || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
+        echo "❌ .git has refs but store already exists: $STORE" >&2
+        echo "   Refusing to merge. Resolve manually." >&2
+        exit 1
+    fi
+    (set -x
+        rm -r .git
+        ln -s "$STORE" .git
+    )
+    git ls-files --deleted -z | xargs -0r git restore --
+    echo "✓ Recovered: .git -> $STORE" >&2
+    exit 0
 fi
 
 (set -x
