@@ -5,55 +5,76 @@ local mason_log_level = vim.log.levels.DEBUG;
 
 -- mason is in charge of installing various tools
 M.mason_install = {
-  -- lspconfig configures many language servers
+  -- LSP servers, registered with mason-lspconfig
   -- full list: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
   lspconfig = {
     "rust_analyzer", -- rust
     "lua_ls",        -- lua
     "pyright",       -- python
-    -- FIXME: none of these are valid
-    --- "jq", -- jq
-    --- "jqls", -- jq
-    --- "jqlsp", -- jq
-    --- "jq-ls", -- jq
-    --- "jq-lsp", -- jq
-    --- "jq_ls", -- jq
-    --- "jq_lsp", -- jq
-    "jsonls",      -- json
-    "jsonnet_ls",  -- jsonnet
-    "tflint",      -- terraform
-    "terraformls", -- terraform-ls: terraform
-    "ts_ls",       -- typescript
-    "vimls",       --vim
-    "clangd",      -- c/c++
-    "gopls",       -- golang
+    "jsonls",        -- json
+    "jsonnet_ls",    -- jsonnet
+    "tflint",        -- terraform
+    "terraformls",   -- terraform-ls: terraform
+    "ts_ls",         -- typescript
+    "vimls",         -- vim
+    "clangd",        -- c/c++
+    "gopls",         -- golang
   },
-  -- null-ls adapts CLI tools to the LSP protocol
-  -- full list: https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
-  ["null-ls"] = {
-    -- python
-    "black",
-    "isort",
-    -- most web-related files: js ts css html json jsonc markdown yaml
-    "prettierd",
-    -- shell
-    "shellcheck",    -- .sh
-    "fish",          -- .fish
-    "zsh",           -- .zsh
-    "dotenv_linter", -- .env
-    "gitlint",       -- git commit messages
-    --"commitlint",  -- needs configuration
-    "glslc",         -- GLSL
-    "tfsec",         -- terraform
-    "gofmt",         -- golang
+  -- Formatters, driven by conform.nvim, installed via mason-tool-installer.
+  -- Mason package names; see https://mason-registry.dev/registry/list.
+  formatters = {
+    "black",      -- python
+    "isort",      -- python imports
+    "prettierd",  -- js/ts/css/html/json/jsonc/markdown/yaml/...
+    -- gofmt ships with the go toolchain itself, not a mason package.
   },
+  -- Linters, driven by nvim-lint, installed via mason-tool-installer.
+  linters = {
+    "shellcheck",     -- sh/bash
+    "dotenv-linter",  -- .env files
+    "gitlint",        -- git commit messages
+    "tfsec",          -- terraform security scan
+    -- fish/zsh use the system shell binaries themselves (`-n` syntax check).
+    -- glslc would require shader-stage-aware invocation; deferred.
+  },
+}
+
+-- conform.nvim formatter pipeline per filetype (run in list order).
+M.conform_formatters_by_ft = {
+  python = { "isort", "black" },
+  javascript = { "prettierd" },
+  javascriptreact = { "prettierd" },
+  typescript = { "prettierd" },
+  typescriptreact = { "prettierd" },
+  vue = { "prettierd" },
+  svelte = { "prettierd" },
+  css = { "prettierd" },
+  scss = { "prettierd" },
+  less = { "prettierd" },
+  html = { "prettierd" },
+  json = { "prettierd" },
+  jsonc = { "prettierd" },
+  yaml = { "prettierd" },
+  markdown = { "prettierd" },
+  go = { "gofmt" },
+}
+
+-- nvim-lint linters per filetype. Linter names match nvim-lint's internal
+-- module names (underscores), not mason package names (dashes).
+M.lint_linters_by_ft = {
+  sh = { "shellcheck" },
+  bash = { "shellcheck" },
+  fish = { "fish" },
+  zsh = { "zsh" },
+  dotenv = { "dotenv_linter" },
+  gitcommit = { "gitlint" },
+  terraform = { "tfsec" },
 }
 
 M.au_format = "BukzorLspFormat"
 M.au_loclist = "BukzorLspLocList"
+M.au_lint = "BukzorLint"
 M.lsp_attached = nil
-M.lsp_formatting = nil
-M.ensure_installed_by = nil
 
 function M.log(...)
   require("mason-core.log").fmt_debug(...)
@@ -62,10 +83,9 @@ end
 function M.init()
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
   vim.api.nvim_create_augroup(M.au_loclist, { clear = true })
+  vim.api.nvim_create_augroup(M.au_lint, { clear = true })
 
-  --vim.api.nvim_create_augroup("END")
   M.lsp_attached = {}
-  M.lsp_formatting = {}
 end
 
 function M.setup()
@@ -76,26 +96,19 @@ function M.setup()
   M.setup_mason()
   M.setup_lspconfig()
   M.setup_mason_lspconfig()
-  M.setup_mason_null_ls()
+  M.setup_mason_tool_installer()
+  M.setup_conform()
+  M.setup_nvim_lint()
 end
 
 function M.unload()
-  local err
-  _, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_format)
-  if err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
-    error(err)
-  end
-
-  _, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_loclist)
-  if err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
-    error(err)
-  end
-  local _, _, null_ls_config = pcall(require, "null-ls.config")
-  if null_ls_config ~= nil then
-    null_ls_config.reset() -- otherwise it refuses to be configured
+  for _, group in ipairs({ M.au_format, M.au_loclist, M.au_lint }) do
+    local ok, err = pcall(vim.api.nvim_del_augroup_by_name, group)
+    if not ok and err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
+      error(err)
+    end
   end
   M.lsp_attached = {}
-  M.lsp_formatting = {}
 end
 
 function M.setup_mason()
@@ -124,7 +137,6 @@ function M.on_attach_lspconfig(client, bufnr)
   if client:supports_method("textDocument/inlayHint") then
     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
   end
-  M.on_attach_autoformat(client, bufnr)
 
   -- prevent jittery rendering by just always showing the sign column
   vim.opt_local.signcolumn = "yes:1"
@@ -148,72 +160,88 @@ function M.setup_mason_lspconfig()
     },
   })
 
-  -- Mark all lspconfig-managed servers before null-ls setup runs, so
-  -- M.null_ls_handler can suppress null-ls sources whose names collide.
-  for _, server_name in ipairs(M.mason_install["lspconfig"]) do
+  for _, server_name in ipairs(M.mason_install.lspconfig) do
     M.lsp_attached[server_name] = "lspconfig"
     M.log("lspconfig handler: %s", server_name)
   end
 
   require("mason-lspconfig").setup({
-    ensure_installed = M.mason_install["lspconfig"],
+    ensure_installed = M.mason_install.lspconfig,
     -- automatic_enable defaults to true: installed servers get vim.lsp.enable()'d.
   })
 end
 
-function M.setup_mason_null_ls()
-  -- https://github.com/jay-babu/mason-null-ls.nvim#example-config
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Formatting-on-save#code
-  require("null-ls").setup({ on_attach = M.on_attach_autoformat })
-  require("mason-null-ls").setup({
-    ensure_installed = M.mason_install["null-ls"],
-    automatic_installation = true,
-    -- pending https://github.com/jay-babu/mason-null-ls.nvim/pull/64
-    handlers = { M.null_ls_handler },
+function M.setup_mason_tool_installer()
+  local tools = {}
+  for _, name in ipairs(M.mason_install.formatters) do
+    table.insert(tools, name)
+  end
+  for _, name in ipairs(M.mason_install.linters) do
+    table.insert(tools, name)
+  end
+  require("mason-tool-installer").setup({
+    ensure_installed = tools,
+    auto_update = false,
+    run_on_start = true,
   })
 end
 
-function M.null_ls_handler(source, types)
-  -- `types` is a list with "diagnostics" "formatting" etc.
-  local configured = M.lsp_attached[source]
-  if configured then
-    M.log("null-ls handler: %s already configured: %s", source, configured)
-  else
-    local null_ls = require("null-ls")
-    vim.tbl_map(function(type)
-      -- initially copied from mason-null-ls.automatic_setup
-      null_ls.register(null_ls.builtins[type][source])
-      M.lsp_attached[source] = "null-ls"
-      M.log("null-ls handler: configured: %s %s", source, type)
-    end, types)
-  end
+function M.setup_conform()
+  require("conform").setup({
+    formatters_by_ft = M.conform_formatters_by_ft,
+    -- Format on save: use conform's formatters; fall back to attached LSP
+    -- formatter (e.g. rust_analyzer for rust, gopls for go-the-LSP, lua_ls).
+    format_on_save = function(bufnr)
+      if vim.bo[bufnr].readonly or not vim.bo[bufnr].modifiable then
+        return
+      end
+      return { timeout_ms = 1000, lsp_format = "fallback" }
+    end,
+  })
 end
 
-function M.on_attach_autoformat(client, bufnr)
-  if M.lsp_formatting[bufnr] ~= nil then
-    M.log(
-      "formatting: %s: %s (dup: %s)",
-      bufnr,
-      client.name,
-      M.lsp_formatting[bufnr]
-    )
-  end
+function M.setup_nvim_lint()
+  local lint = require("lint")
 
-  if client.supports_method("textDocument/formatting") then
-    vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      group = M.au_format,
-      buffer = bufnr,
-      callback = function()
-        vim.lsp.buf.format({ bufnr = bufnr })
-      end,
-      desc = "format on save: " .. client.name,
-    })
-    M.lsp_formatting[bufnr] = client.name
-    M.log("formatting: %s: %s ", bufnr, M.lsp_formatting[bufnr])
-  else
-    M.log("formatting: no support: %s", client.name)
-  end
+  -- Custom syntax-only linters for shells whose own binaries do the checking.
+  lint.linters.fish = {
+    cmd = "fish",
+    args = { "--no-execute" },
+    stdin = false,
+    append_fname = true,
+    stream = "stderr",
+    ignore_exitcode = true,
+    parser = require("lint.parser").from_pattern(
+      "([^%s]+) %(line (%d+)%): (.+)",
+      { "file", "lnum", "message" },
+      nil,
+      { source = "fish", severity = vim.diagnostic.severity.ERROR }
+    ),
+  }
+  lint.linters.zsh = {
+    cmd = "zsh",
+    args = { "-n" },
+    stdin = false,
+    append_fname = true,
+    stream = "stderr",
+    ignore_exitcode = true,
+    parser = require("lint.parser").from_pattern(
+      "([^:]+):(%d+): (.+)",
+      { "file", "lnum", "message" },
+      nil,
+      { source = "zsh", severity = vim.diagnostic.severity.ERROR }
+    ),
+  }
+
+  lint.linters_by_ft = M.lint_linters_by_ft
+
+  vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+    group = M.au_lint,
+    callback = function()
+      require("lint").try_lint()
+    end,
+    desc = "nvim-lint: try_lint on save / read / leave-insert",
+  })
 end
 
 function M.update_loclist_if_visible()

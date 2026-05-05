@@ -1,6 +1,7 @@
 --- # workaround: anthropics/claude-code#13003
 depends:
 - Skill(llm-subtask)
+- Skill(llm-kb)
 ---
 
 # bukzor's vim/neovim config
@@ -23,7 +24,7 @@ init.lua              -> lua/bukzor/init-nvim.lua  (symlink; the nvim entry poin
 lua/bukzor/           -- modular Lua config
   init-nvim.lua       -- entry: unload + source vim init.vim + bootstrap plugins
   plugins.lua         -- lazy.nvim spec
-  lsp.lua             -- mason / mason-lspconfig / null-ls / inlayhints wiring
+  lsp.lua             -- mason / mason-lspconfig / conform / nvim-lint wiring
   which-key.lua       -- keymap descriptions
   tree-sitter.lua     -- treesitter config
   aerial.lua          -- code outline
@@ -44,3 +45,9 @@ not in this repo's `lua/` tree.
 
 Check `.claude/todo.md` and `.claude/todo.kb/` for active efforts.
 Load `Skill("llm-subtask")` for maintenance.
+
+## Verification
+
+`testing.kb/` holds reusable manual-test recipes plus their last-known results.
+Re-run a recipe before assuming a surface still works; update its `last-tested`
+and `result` after running.

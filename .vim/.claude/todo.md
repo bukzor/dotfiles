@@ -2,14 +2,15 @@
 anthropic-skill-ownership: llm-subtask
 ---
 
-- [ ] Replace null-ls.nvim (archived) with conform.nvim + nvim-lint
-  - Interim (2026-05-05): swapped `jose-elias-alvarez/null-ls.nvim` → `nvimtools/none-ls.nvim` fork to unblock nvim 0.11 (`_request_name_to_capability` removed). Lua module name unchanged, mason-null-ls still works. Proper migration below still wanted.
-  - [ ] Add `stevearc/conform.nvim` to plugins.lua, port formatter list (black, isort, prettierd, shellcheck-as-formatter? no — formatters only: black, isort, prettierd, gofmt)
-  - [ ] Add `mfussenegger/nvim-lint` for linters/diagnostics (shellcheck, dotenv_linter, gitlint, tfsec, glslc, fish, zsh)
-  - [ ] Add `WhoIsSethDaniel/mason-tool-installer.nvim` for mason-side install of the binaries (replaces mason-null-ls.nvim)
-  - [ ] Move `M.on_attach_autoformat` BufWritePre logic onto conform's `format_on_save`
-  - [ ] Drop null-ls.nvim, mason-null-ls.nvim, and the `M.null_ls_handler` / `M.setup_mason_null_ls` from lsp.lua
-  - [ ] Verify: no more `vim.tbl_add_reverse_lookup`/`tbl_flatten`/`vim.validate` deprecation warnings in `:checkhealth`
+- [x] Replace null-ls.nvim (archived) with conform.nvim + nvim-lint
+  - [x] Add `stevearc/conform.nvim` (formatters: black, isort, prettierd, gofmt)
+  - [x] Add `mfussenegger/nvim-lint` (linters: shellcheck, dotenv-linter, gitlint, tfsec, fish, zsh)
+  - [x] Add `WhoIsSethDaniel/mason-tool-installer.nvim`
+  - [x] Move autoformat onto conform's `format_on_save` with `lsp_format = "fallback"`
+  - [x] Drop null-ls.nvim, mason-null-ls.nvim, `M.null_ls_handler`, `M.setup_mason_null_ls`, `M.on_attach_autoformat`
+  - [ ] glslc shader-linter migration — needs filetype-aware shader-stage flag; deferred (was a null-ls source)
+  - [ ] Verify in interactive nvim: no `vim.tbl_add_reverse_lookup`/`tbl_flatten`/`vim.validate` deprecation warnings in `:checkhealth`
+- [x] Stale mason venvs: `black`, `isort`, `gitlint` had shebangs pointing at non-existent Pythons. Fixed 2026-05-05 by `rm -r packages/<tool>` + `rm bin/<tool>`; `mason-tool-installer`'s `run_on_start = true` recreated the venvs against `python3.13`. See `testing.kb/mason-python-tools-runnable.md`.
 - [x] Replace lsp-inlayhints.nvim with built-in `vim.lsp.inlay_hint`
   - [x] In `M.on_attach_lspconfig`, swap `require("lsp-inlayhints").on_attach(client, bufnr)` for `vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })`
   - [x] Remove `lvimuser/lsp-inlayhints.nvim` from plugins.lua

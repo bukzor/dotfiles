@@ -90,17 +90,26 @@ function M.config()
         config = lsp.setup_lspconfig,
       },
 
+      -- Mason-side installer for non-LSP tools (formatters, linters).
       {
-        "jay-babu/mason-null-ls.nvim",
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        config = lsp.setup_mason_tool_installer,
+      },
+
+      -- Formatter framework with format-on-save.
+      {
+        "stevearc/conform.nvim",
+        event = { "BufWritePre" },
+        cmd = { "ConformInfo" },
+        config = lsp.setup_conform,
+      },
+
+      -- Linter framework: runs CLI linters and surfaces them as diagnostics.
+      {
+        "mfussenegger/nvim-lint",
         event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-          "williamboman/mason.nvim",
-          "nvim-lua/plenary.nvim",
-          -- nvimtools/none-ls.nvim is the maintained fork of the archived
-          -- jose-elias-alvarez/null-ls.nvim. Same `require("null-ls")` module name.
-          { "nvimtools/none-ls.nvim", name = "null-ls.nvim" },
-        },
-        config = lsp.setup_mason_null_ls,
+        config = lsp.setup_nvim_lint,
       },
 
       -- LSP code outline
