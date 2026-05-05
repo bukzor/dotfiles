@@ -96,7 +96,9 @@ function M.config()
         dependencies = {
           "williamboman/mason.nvim",
           "nvim-lua/plenary.nvim",
-          "jose-elias-alvarez/null-ls.nvim",
+          -- nvimtools/none-ls.nvim is the maintained fork of the archived
+          -- jose-elias-alvarez/null-ls.nvim. Same `require("null-ls")` module name.
+          { "nvimtools/none-ls.nvim", name = "null-ls.nvim" },
         },
         config = lsp.setup_mason_null_ls,
       },
@@ -107,8 +109,8 @@ function M.config()
         config = require("bukzor.aerial").setup,
       },
 
-      -- show LSPs' hints inline
-      { "lvimuser/lsp-inlayhints.nvim", opts = {} },
+      -- inline LSP hints handled by built-in `vim.lsp.inlay_hint` (nvim 0.10+);
+      -- see lsp.lua M.on_attach_lspconfig.
 
       -- render ANSI escape sequences as colors (view-only via concealer)
       {

@@ -93,7 +93,6 @@ function M.unload()
   local _, _, null_ls_config = pcall(require, "null-ls.config")
   if null_ls_config ~= nil then
     null_ls_config.reset() -- otherwise it refuses to be configured
-    require("lsp-inlayhints").reset()
   end
   M.lsp_attached = {}
   M.lsp_formatting = {}
@@ -122,7 +121,9 @@ function M.setup_lspconfig()
 end
 
 function M.on_attach_lspconfig(client, bufnr)
-  require("lsp-inlayhints").on_attach(client, bufnr)
+  if client:supports_method("textDocument/inlayHint") then
+    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+  end
   M.on_attach_autoformat(client, bufnr)
 
   -- prevent jittery rendering by just always showing the sign column
