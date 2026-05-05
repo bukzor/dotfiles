@@ -1,6 +1,18 @@
+--- # workaround: anthropics/claude-code#13003
+requires:
+    - Skill(llm-kb)
+depends:
+    - Skill(llm-collab)
+---
+
 # Maintenance Guide for git-localhost-store
 
 Instructions for AI agents maintaining and modifying this system.
+
+## Knowledge Bases
+
+- `docs/dev/testing.kb/` — manual test cases, one scenario per file.
+  Maintenance conventions in `docs/dev/testing.kb/CLAUDE.md`.
 
 ## Overview
 
