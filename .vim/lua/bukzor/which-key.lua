@@ -61,14 +61,19 @@ function M.config()
     end, desc = "List Folders" },
   })
 
+  local function diag_prev() vim.diagnostic.jump({ count = -1 }) end
+  local function diag_next() vim.diagnostic.jump({ count = 1 }) end
+  local function err_prev() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end
+  local function err_next() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end
+
   group("[", "Previous", {
-    { "d", vim.diagnostic.goto_prev, desc = "Prev Diagnostic" },
-    { "e", vim.diagnostic.goto_next, desc = "Prev Error" }, -- FIXME: rhs/desc disagree
+    { "d", diag_prev, desc = "Prev Diagnostic" },
+    { "e", err_prev, desc = "Prev Error" },
   })
 
   group("]", "Next", {
-    { "d", vim.diagnostic.goto_next, desc = "Next Diagnostic" },
-    { "e", vim.diagnostic.goto_next, desc = "Next Error" },
+    { "d", diag_next, desc = "Next Diagnostic" },
+    { "e", err_next, desc = "Next Error" },
   })
 
   group("g", "Goto", {

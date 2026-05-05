@@ -1,7 +1,7 @@
 require("bukzor.unload").unload_all() -- get a clean slate when/if reloading
 
 -- source the basic settings from viml configs, first
-local config_home = vim.fn.stdpath("config"):match("(.*)/")
+local config_home = vim.fs.dirname(vim.fn.stdpath("config") --[[@as string]])
 vim.cmd("source " .. config_home .. "/vim/init.vim")
 
 if vim.fn.has("nvim-0.8.0") == 1 then

@@ -15,7 +15,7 @@ anthropic-skill-ownership: llm-subtask
   - [x] Remove `lvimuser/lsp-inlayhints.nvim` from plugins.lua
   - [x] Remove the `require("lsp-inlayhints").reset()` call in `M.unload`
 - [ ] Fix tmux $TERM: in `~/.tmux.conf` set `set-option -g default-terminal "tmux-256color"`
-- [ ] Fix `[e` mapping in which-key.lua — currently calls `vim.diagnostic.goto_next` but desc says "Prev Error"; should be `goto_prev`
+- [x] Fix `[e` mapping in which-key.lua — currently calls `vim.diagnostic.goto_next` but desc says "Prev Error"; should be `goto_prev`
 - [ ] Silence node provider yarn error: `let g:loaded_node_provider = 0` in vim init (or install yarn — pnpm-only setup, prefer disabling)
 
 ## Later

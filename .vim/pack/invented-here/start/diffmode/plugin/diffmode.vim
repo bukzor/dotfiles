@@ -58,8 +58,8 @@ augroup diff_mode_plugin
   au User DiffModeEnter call DiffModeEnter()
   au User DiffModeExit call DiffModeExit()
 
-  nnoremap <Leader>df :call DiffToggle()<CR>
-  nnoremap <Leader>dw :call DiffToggleWhitespace()<CR>
+  nnoremap <Leader>df <Cmd>call DiffToggle()<CR>
+  nnoremap <Leader>dw <Cmd>call DiffToggleWhitespace()<CR>
 
   " diff bindings that are fine always-on
   "next diff

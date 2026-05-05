@@ -20,6 +20,11 @@ end
 
 function M.setup()
   vim.opt.runtimepath:append(M.treesitter_dir)
+  -- nvim-treesitter's TSConfig type lists `modules` as required, but it's an
+  -- internal/legacy slot users aren't meant to populate. The plugin's own docs
+  -- omit it. Disabling here is the upstream-recommended workaround, not a
+  -- general license to silence missing-fields elsewhere.
+  ---@diagnostic disable-next-line: missing-fields
   require("nvim-treesitter.configs").setup({
     -- A list of parser names, or "all"
     ensure_installed = {
