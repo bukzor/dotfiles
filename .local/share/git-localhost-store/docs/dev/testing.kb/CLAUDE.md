@@ -38,7 +38,7 @@ inherently ordered.
 ```bash
 which claude-path                                      # must be in $PATH
 export PATH="$HOME/.local/share/git-localhost-store/bin:$PATH"
-                                                       # for git-restore-repo,
+                                                       # for git-localhost-store,
                                                        # migrate-from-gitfile,
                                                        # audit-gitfiles
 git config --global init.templateDir                   # must point at

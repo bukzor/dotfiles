@@ -25,4 +25,4 @@ if [ -z "$(ls -A .git/refs/heads 2>/dev/null)" ] \
   exit 0
 fi
 
-"${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-restore-repo"
+"${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-localhost-store"

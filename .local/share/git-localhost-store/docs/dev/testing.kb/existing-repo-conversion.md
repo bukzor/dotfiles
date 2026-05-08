@@ -1,6 +1,6 @@
 # Test: Existing Repo Conversion
 
-What it tests: applying `git-restore-repo` to an already-existing repo
+What it tests: applying `git-localhost-store` to an already-existing repo
 (with history but a real `.git/` directory) converts it without losing
 any commits or tracked files.
 
@@ -19,7 +19,7 @@ git add existing.txt
 git -c user.email=t@t -c user.name=t commit -m "existing commit"
 
 # Convert
-git-restore-repo
+git-localhost-store
 ```
 
 ## Expected

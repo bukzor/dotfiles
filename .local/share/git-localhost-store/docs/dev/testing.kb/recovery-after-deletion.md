@@ -1,7 +1,7 @@
 # Test: Recovery After Deletion
 
 What it tests: `rm -rf workdir` followed by `mkdir workdir` and an
-explicit `git-restore-repo` call recovers the symlink and restores
+explicit `git-localhost-store` call recovers the symlink and restores
 deleted tracked files automatically.
 
 ```bash
@@ -28,23 +28,23 @@ git --git-dir="$STORE" log --oneline
 # Recover
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 git init -q
-git-restore-repo
+git-localhost-store
 ```
 
 ## Expected
 
-- `git-restore-repo` prints `✓ Recovered: .git -> $STORE`.
+- `git-localhost-store` prints `✓ Recovered: .git -> $STORE`.
 - `.git` is a symlink → `$STORE`.
 - `git log --oneline` matches `/tmp/before.log`.
 - `cat file.txt` prints `hello`.
 
 ## How recovery is triggered
 
-The recovery branch fires when `git-restore-repo` runs against a workdir
+The recovery branch fires when `git-localhost-store` runs against a workdir
 whose store already exists *and* whose local `.git` has no refs in
 `refs/heads/` or `refs/remotes/`. In practice that means:
 
-- An explicit `git-restore-repo` invocation (as shown above), OR
+- An explicit `git-localhost-store` invocation (as shown above), OR
 - Any hook-firing operation on a fresh `.git` — `git add` (post-index-change),
   `git commit` (pre-commit), or a ref-changing op (reference-transaction).
 

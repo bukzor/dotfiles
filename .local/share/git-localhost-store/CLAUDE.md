@@ -68,7 +68,7 @@ Working directory paths are encoded by `~/bin/claude-path`:
 
 Hooks live in `template-repo/hooks/` and are copied into every newly-init'd
 or cloned repo via `init.templateDir`. They each call
-`bin/git-restore-repo`.
+`bin/git-localhost-store`.
 
 ### post-index-change (triggered by `git add`)
 
@@ -86,7 +86,7 @@ moment.
 
 All three hooks short-circuit when `.git` is already a symlink (idempotent).
 
-### bin/git-restore-repo
+### bin/git-localhost-store
 
 The actual relocation: `mv .git <store>` then `ln -s <store> .git`. Refuses
 to operate if `.git` isn't a directory (asserts cleanly on unexpected
@@ -98,7 +98,7 @@ states).
 
 All hooks must be safe to re-run. The current pattern: `if [ -L .git ]; then
 exit 0; fi`. If you hit a weird state in production, do **not** silently
-accommodate it — let the assertion in `git-restore-repo` fire so we learn
+accommodate it — let the assertion in `git-localhost-store` fire so we learn
 what's actually out there.
 
 ### Trace output
@@ -211,7 +211,7 @@ scripts and pattern details.
 
 - **README.md** — User-facing documentation
 - **TESTING.md** — Manual testing procedures
-- **bin/git-restore-repo** — the relocator
+- **bin/git-localhost-store** — the relocator
 - **bin/migrate-from-gitfile** — converts legacy gitfile layout to symlink layout
 - **bin/audit-gitfiles** — lists repos still in the legacy layout
 - **template-repo/hooks/*** — git hooks

@@ -27,7 +27,7 @@ git add dummy
 ## Conflicting state (refs in fresh `.git` AND existing store)
 
 What it tests: when both a populated store *and* refs in the workdir's
-fresh `.git` exist, `git-restore-repo` refuses rather than silently
+fresh `.git` exist, `git-localhost-store` refuses rather than silently
 merging.
 
 ```bash
@@ -48,12 +48,12 @@ git -c init.templateDir= init -q "$TEST_DIR" --template=
 echo "0000000000000000000000000000000000000001" \
     > "$TEST_DIR/.git/refs/heads/somebranch"
 
-cd "$TEST_DIR" && git-restore-repo
+cd "$TEST_DIR" && git-localhost-store
 ```
 
 ### Expected
 
-- `git-restore-repo` exits 1.
+- `git-localhost-store` exits 1.
 - Stderr: `❌ .git has refs but store already exists: $STORE`.
 - `.git` unchanged (still a real directory, not a symlink).
 - `$STORE` unchanged (pre-existing seed commit still there).

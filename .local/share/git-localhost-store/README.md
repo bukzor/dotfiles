@@ -16,7 +16,7 @@ entire working directory, your commits are safe and recoverable.
 ## How It Works
 
 When you `git init` or `git clone` (or `git add` in a fresh repo), hooks
-automatically run `git-restore-repo` which:
+automatically run `git-localhost-store` which:
 
 1. Moves `.git/` into a per-repo store under
    `~/.local/state/git-localhost-store/repos/<encoded-path>/`.
@@ -50,13 +50,13 @@ git checkout -- .  # Restore tracked files
 ```bash
 mkdir ~/projects/myrepo && cd ~/projects/myrepo
 git init
-git-restore-repo  # equivalent to the hook path
+git-localhost-store  # equivalent to the hook path
 git checkout -- .
 ```
 
 ## Commands
 
-### `git-restore-repo`
+### `git-localhost-store`
 
 Converts an existing git repository to use the localhost store, or
 recovers a deleted repository if the store already exists.
@@ -64,7 +64,7 @@ recovers a deleted repository if the store already exists.
 **Usage:**
 ```bash
 cd /path/to/your/repo
-git-restore-repo
+git-localhost-store
 ```
 
 **What it does:**
@@ -78,7 +78,7 @@ git-restore-repo
 **When to use:** Convert an existing repo, recover after `rm -rf`,
 or after changing the global hook config.
 
-**Note:** `git-restore-repo` is automatically called by hooks; manual
+**Note:** `git-localhost-store` is automatically called by hooks; manual
 invocation is rarely needed.
 
 ### `migrate-from-gitfile`
@@ -114,7 +114,7 @@ audit-gitfiles | xargs -rn1 migrate-from-gitfile
 ```
 ~/.local/share/git-localhost-store/   (version controlled in $HOME)
 ├── bin/
-│   ├── git-restore-repo       # the relocator
+│   ├── git-localhost-store       # the relocator
 │   ├── migrate-from-gitfile   # legacy → symlink layout migrator
 │   └── audit-gitfiles         # find unmigrated legacy repos
 ├── template-repo/             # git init template
@@ -204,7 +204,7 @@ ls -la ~/.local/state/git-localhost-store/repos/$ENCODED
 - **Deterministic** — recovery path is predictable from the workdir
   path alone.
 - **Explicit errors** — failures are visible. No `|| true`.
-- **Idempotent** — hooks and `git-restore-repo` are safe to re-run.
+- **Idempotent** — hooks and `git-localhost-store` are safe to re-run.
 
 ## Future Work
 
