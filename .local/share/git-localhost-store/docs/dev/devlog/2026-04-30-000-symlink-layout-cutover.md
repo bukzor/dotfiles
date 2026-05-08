@@ -217,3 +217,17 @@ fi
 Bumped to top priority for next session, ahead of the audit-oddity
 investigation. Cutover is functionally regressed for the recovery path
 until this lands.
+
+## Audit Oddity Resolved (2026-05-05)
+
+The `~/claude/amazon-searches` "audit oddity" flagged in **Open
+Questions / Loose Ends** is not a misconfiguration. The workdir was
+originally at `~/claude/empty`; encoded path was
+`-home-bukzor-claude-empty` and the per-worktree subdir name was
+`empty` (matching the workdir basename). The user later moved the
+directory to `~/claude/amazon-searches` without touching the gitfile
+or the store, so `.git` still points at the original-encoding target.
+Internally consistent — only the workdir basename and the
+gitfile-target basename disagree, by design of the move.
+
+Batch migration of remaining gitfile-layout repos is unblocked.
