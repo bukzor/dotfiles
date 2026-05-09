@@ -2,6 +2,7 @@
 depends:
 - Skill(llm-subtask)
 - Skill(llm-kb)
+- Skill(llm-collab)
 ---
 
 # bukzor's vim/neovim config
@@ -45,6 +46,11 @@ not in this repo's `lua/` tree.
 
 Check `.claude/todo.md` and `.claude/todo.kb/` for active efforts.
 Load `Skill("llm-subtask")` for maintenance.
+
+## Decisions
+
+`docs/dev/adr/` records non-obvious choices (`YYYY-MM-DD-NNN-title.md`).
+Newest wins on conflict.
 
 ## Verification
 

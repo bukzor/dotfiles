@@ -10,7 +10,7 @@ M.mason_install = {
   lspconfig = {
     "rust_analyzer", -- rust
     "lua_ls",        -- lua
-    "pyright",       -- python
+    "basedpyright",  -- python; see docs/dev/adr/2026-05-08-000-replace-pyright-with-basedpyright.md
     "jsonls",        -- json
     "jsonnet_ls",    -- jsonnet
     "tflint",        -- terraform
@@ -23,17 +23,17 @@ M.mason_install = {
   -- Formatters, driven by conform.nvim, installed via mason-tool-installer.
   -- Mason package names; see https://mason-registry.dev/registry/list.
   formatters = {
-    "black",      -- python
-    "isort",      -- python imports
-    "prettierd",  -- js/ts/css/html/json/jsonc/markdown/yaml/...
+    "black",     -- python
+    "isort",     -- python imports
+    "prettierd", -- js/ts/css/html/json/jsonc/markdown/yaml/...
     -- gofmt ships with the go toolchain itself, not a mason package.
   },
   -- Linters, driven by nvim-lint, installed via mason-tool-installer.
   linters = {
-    "shellcheck",     -- sh/bash
-    "dotenv-linter",  -- .env files
-    "gitlint",        -- git commit messages
-    "tfsec",          -- terraform security scan
+    "shellcheck",    -- sh/bash
+    "dotenv-linter", -- .env files
+    "gitlint",       -- git commit messages
+    "tfsec",         -- terraform security scan
     -- fish/zsh use the system shell binaries themselves (`-n` syntax check).
     -- glslc would require shader-stage-aware invocation; deferred.
   },
@@ -74,6 +74,7 @@ M.lint_linters_by_ft = {
 M.au_format = "BukzorLspFormat"
 M.au_loclist = "BukzorLspLocList"
 M.au_lint = "BukzorLint"
+M.au_attach = "BukzorLspAttach"
 M.lsp_attached = nil
 
 function M.log(...)
@@ -84,6 +85,51 @@ function M.init()
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
   vim.api.nvim_create_augroup(M.au_loclist, { clear = true })
   vim.api.nvim_create_augroup(M.au_lint, { clear = true })
+  vim.api.nvim_create_augroup(M.au_attach, { clear = true })
+
+  -- Per-attach setup runs from LspAttach. Pairing the autocmd with its
+  -- augroup here (rather than in setup_mason_lspconfig) keeps the reset
+  -- pair complete: M.unload() clears the augroup, M.init() reinstalls both
+  -- the group and its handler. We can't put on_attach in
+  -- vim.lsp.config("*", ...) because lspconfig ships per-server
+  -- lsp/<name>.lua files (basedpyright, rust_analyzer, ts_ls, clangd) whose
+  -- own on_attach silently overrides the wildcard.
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = M.au_attach,
+    callback = function(args)
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
+      if client then M.on_attach_lspconfig(client, args.buf) end
+    end,
+  })
+
+  --hi link LspInlayHint NonText
+  --vim.cmd([[
+  --  hi link DiagnosticVirtualTextError Comment
+  --  hi link DiagnosticVirtualTextWarn NonText
+  --  hi link DiagnosticVirtualTextInfo NonText
+  --  hi link DiagnosticVirtualTextHint NonText
+  --]])
+  vim.diagnostic.config({
+    virtual_text = {
+      spacing = 4,
+      prefix = "●",
+      severity = { min = vim.diagnostic.severity.HINT },
+      -- basedpyright (and pyright, and several other servers) emit multi-line
+      -- diagnostic messages where line 2+ restates a slimmer version of line
+      -- 1. nvim collapses newlines into the single-line virt_text, so we get
+      -- the whole brick. Keep just the first line; the float still shows the
+      -- full message.
+      format = function(d)
+        return (d.message:match("^(.-)\n") or d.message)
+      end,
+    },
+    signs = true,
+    underline = true,
+    severity_sort = true,
+    update_in_insert = false,
+    float = { border = "rounded", source = true, header = "" },
+    jump = { float = true, wrap = true },
+  })
 
   M.lsp_attached = {}
 end
@@ -92,7 +138,6 @@ function M.setup()
   M.unload()
   M.init()
 
-  vim.cmd("hi link LspInlayHint Comment")
   M.setup_mason()
   M.setup_lspconfig()
   M.setup_mason_lspconfig()
@@ -102,7 +147,7 @@ function M.setup()
 end
 
 function M.unload()
-  for _, group in ipairs({ M.au_format, M.au_loclist, M.au_lint }) do
+  for _, group in ipairs({ M.au_format, M.au_loclist, M.au_lint, M.au_attach }) do
     local ok, err = pcall(vim.api.nvim_del_augroup_by_name, group)
     if not ok and err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
       error(err)
@@ -148,12 +193,6 @@ function M.on_attach_lspconfig(client, bufnr)
 end
 
 function M.setup_mason_lspconfig()
-  -- mason-lspconfig 2.0+ replaced setup_handlers with vim.lsp.config + automatic_enable.
-  -- Default config applied to every server.
-  vim.lsp.config("*", {
-    on_attach = M.on_attach_lspconfig,
-  })
-
   vim.lsp.config("rust_analyzer", {
     settings = {
       ["rust-analyzer"] = { diagnostics = { disabled = { "inactive-code" } } },
@@ -167,7 +206,12 @@ function M.setup_mason_lspconfig()
 
   require("mason-lspconfig").setup({
     ensure_installed = M.mason_install.lspconfig,
-    -- automatic_enable defaults to true: installed servers get vim.lsp.enable()'d.
+    -- Whitelist: only enable servers we asked for. With the default `true`,
+    -- mason-lspconfig enables every *installed* package (see
+    -- features/automatic_enable.lua), so orphans from prior installs (e.g.
+    -- pyright after the basedpyright swap) keep attaching. Passing a list
+    -- gates enable_server() on membership.
+    automatic_enable = M.mason_install.lspconfig,
   })
 end
 

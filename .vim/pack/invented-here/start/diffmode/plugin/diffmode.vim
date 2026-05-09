@@ -29,6 +29,10 @@ function! DiffModeEnter()
   nnoremap <buffer> m ]cz.
   "previous match
   nnoremap <buffer> M [cz.
+  "next diff
+  nnoremap <buffer> ]d ]cz.
+  "previous diff
+  nnoremap <buffer> [d [cz.
   "refresh the diff
   nnoremap <buffer> R :w\|set nodiff\|set diff<cr>
 endfunction
@@ -36,6 +40,8 @@ endfunction
 function! DiffModeExit() abort
   silent nnoremap <buffer> m :cn<cr>
   silent nnoremap <buffer> M :cN<cr>
+  silent! nunmap <buffer> ]d
+  silent! nunmap <buffer> [d
   silent! nunmap <buffer> R
 endfunction
 
@@ -60,10 +66,4 @@ augroup diff_mode_plugin
 
   nnoremap <Leader>df <Cmd>call DiffToggle()<CR>
   nnoremap <Leader>dw <Cmd>call DiffToggleWhitespace()<CR>
-
-  " diff bindings that are fine always-on
-  "next diff
-  nnoremap <buffer> ]d ]cz.
-  "previous diff
-  nnoremap <buffer> [d [cz.
 augroup END
