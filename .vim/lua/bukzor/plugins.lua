@@ -49,7 +49,15 @@ function M.config()
 
       -- advanced LSP for nvim lua:
       { "folke/neoconf.nvim", opts = {} },
-      { "folke/neodev.nvim",  opts = {} },
+      {
+        "folke/lazydev.nvim",
+        ft = "lua",
+        opts = {
+          library = {
+            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+          },
+        },
+      },
       {
         "folke/trouble.nvim",
         opts = { height = 5 },
