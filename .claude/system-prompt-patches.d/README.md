@@ -16,14 +16,19 @@ As of v2.1.76, all patches applied reduces the system prompt by ~60%
 
 Each patch is a directory containing:
 
-| File              | Required | Description                                       |
-|-------------------|----------|---------------------------------------------------|
-| `match.md`        | yes      | Text to find in the system prompt                 |
-| `replace.md`      | yes      | Replacement text (empty file = deletion)          |
-| `conditional.bool`| no       | If `true`, skip warning when match fails          |
-| `README.md`       | no       | Why this patch exists                             |
+| File                   | Required  | Description                                            |
+|------------------------|-----------|--------------------------------------------------------|
+| `match.md`             | one of    | Text to find in the system prompt                      |
+| `match.d/*.md`         | one of    | Multiple alternative templates; first match wins       |
+| `replace.md`           | yes\*     | Replacement text (empty file = deletion)               |
+| `upstream-removed.bool`| no        | If `true`, patch becomes a regression assertion (\*)   |
+| `conditional.bool`     | no        | If `true`, skip warning when match fails               |
+| `README.md`            | no        | Why this patch exists                                  |
 
-### Placeholders in `match.md`
+`match.md` and `match.d/` are mutually exclusive — exactly one must be present.
+`replace.md` is required unless `upstream-removed.bool` is set.
+
+### Placeholders in match templates
 
 `$ALLCAPS` tokens act as placeholders, matching dynamic content:
 
@@ -32,6 +37,31 @@ Each patch is a directory containing:
 
 Placeholders are delimited by the next literal text in the template.
 Same-named placeholders match independently (no backreference).
+
+### Multiple match templates: `match.d/*.md`
+
+A patch can target multiple Claude Code prompt versions by providing
+several alternative templates inside `match.d/`. Filename is arbitrary
+(used only for sort order); each `*.md` file is one alternative. At
+apply time, alternatives are tried in sorted-filename order and the
+first match wins.
+
+Use this when Anthropic reworded a section between versions and you
+want one patch to handle both.
+
+### Upstream-removed: regression assertion
+
+When Anthropic deletes the text a patch was targeting, the patch can
+be sunset rather than deleted by adding `upstream-removed.bool: true`
+and removing `replace.md`. The patch becomes an assertion:
+
+- match found → loud `WARNING: ... marked upstream-removed but matched body`
+  (regression: text returned upstream)
+- no match → silent (good, still removed)
+
+`upstream-removed.bool` is mutually exclusive with `replace.md` (the
+patch no longer replaces anything) and with `conditional.bool` (the
+semantics are inverted).
 
 ## Running
 
@@ -58,17 +88,5 @@ python3 check_patches.py system.md  # test against a specific capture
 
 ## Current patches
 
-- **fix-tone-conciseness** — Replace bare "short and concise" with principled token-cost framing
-- **strip-additional-dirs** — Remove additional working directories list (conditional)
-- **strip-backwards-compat** — Remove backwards-compatibility hack advice
-- **strip-colon-before-tools** — Remove "no colon before tool calls" directive
-- **strip-doing-tasks-bloat** — Remove entire "Doing tasks" section
-- **strip-fast-mode-info** — Remove fast mode info block (conditional)
-- **strip-git-status** — Remove stale git status snapshot (conditional)
-- **strip-help-feedback** — Remove /help and feedback URL
-- **strip-model-family** — Remove model family/ID listing
-- **strip-output-efficiency** — Remove "Output efficiency" section (contradicts CLAUDE.md)
-- **strip-over-engineering** — Remove over-engineering advice
-- **strip-security-bloat** — Remove overwrought security policy
-- **strip-tool-preference** — Remove "use dedicated tools not Bash" section
-- **strip-url-restriction** — Remove URL generation restriction
+See each subdirectory. Per-patch `README.md` is optional; the directory
+name plus `match.md` is usually self-evident.
