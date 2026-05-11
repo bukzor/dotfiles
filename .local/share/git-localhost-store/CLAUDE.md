@@ -202,7 +202,7 @@ Enable verbose tracing by setting `DEBUG=1` in the hook env, or by adding
 - ADRs in `docs/adr/`, date-prefixed. Append-only — historical decisions
   are not edited.
 - Devlogs in `docs/dev/devlog/`, date-prefixed. Append-only.
-- TODOs in `.claude/todo.d/`.
+- TODOs in `.claude/todo.kb/`. Ideas (speculative; may never happen) in `.claude/ideas.md`.
 
 When working on this project, load the `llm-collab-docs` skill for helper
 scripts and pattern details.
