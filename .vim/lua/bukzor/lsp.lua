@@ -35,7 +35,7 @@ M.mason_install = {
     "gitlint",       -- git commit messages
     "tfsec",         -- terraform security scan
     -- fish/zsh use the system shell binaries themselves (`-n` syntax check).
-    -- glslc would require shader-stage-aware invocation; deferred.
+    -- glslc ships via brew `shaderc`, not mason.
   },
 }
 
@@ -69,6 +69,10 @@ M.lint_linters_by_ft = {
   dotenv = { "dotenv_linter" },
   gitcommit = { "gitlint" },
   terraform = { "tfsec" },
+  -- glslc infers shader stage from the on-disk extension
+  -- (.vert/.frag/.comp/.geom/.tesc/.tese). A `.glsl` buffer must declare its
+  -- stage with `#pragma shader_stage(<stage>)` or the lint run errors out.
+  glsl = { "glslc" },
 }
 
 M.au_format = "BukzorLspFormat"
