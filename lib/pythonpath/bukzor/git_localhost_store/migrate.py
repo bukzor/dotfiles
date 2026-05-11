@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -17,13 +18,46 @@ HOOKS_TEMPLATE_DIR = Path(
     os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local/share"))
 ) / "git-localhost-store/template-repo/hooks"
 
-WORKTREE_ALLOWED_NAMES = frozenset({"commondir", "gitdir", "HEAD", "index", "refs"})
+# Per-worktree files we promote up to the store's root. Order matters only for
+# trace readability (HEAD and index first). For "logs", only logs/HEAD is
+# per-worktree — the rest of <store>/logs/ is shared and untouched.
+WORKTREE_PROMOTABLE = (
+    "HEAD", "index", "COMMIT_EDITMSG",
+    "ORIG_HEAD", "FETCH_HEAD", "REBASE_HEAD", "logs",
+)
+# These intentionally overwrite their store counterparts. The bare repo's HEAD
+# is the default "ref: refs/heads/<default>"; the worktree's HEAD is the
+# authoritative one. The bare repo has no index.
+WORKTREE_OVERWRITES_STORE = frozenset({"HEAD", "index"})
+# Per-worktree pointer files; meaningless in the symlink layout.
+WORKTREE_DISCARDABLE = frozenset({"commondir", "gitdir"})
+# Junk files left behind by the pre-commit hook's index swapping.
+INDEX_COMMIT_STAGED_RE = re.compile(r"^index\.commit-staged\.\d+$")
 
+# Active git operations whose state lives in the worktree dir. REBASE_HEAD is
+# NOT here: it is left behind even after a successful rebase. The directory
+# markers are the reliable signal of an in-progress rebase.
 IN_PROGRESS_MARKERS = (
     "MERGE_HEAD", "MERGE_MSG", "CHERRY_PICK_HEAD", "REVERT_HEAD",
-    "REBASE_HEAD", "BISECT_LOG", "BISECT_START",
+    "BISECT_LOG", "BISECT_START",
     "rebase-merge", "rebase-apply",
 )
+
+
+def is_index_commit_staged(name: str) -> bool:
+    return bool(INDEX_COMMIT_STAGED_RE.match(name))
+
+
+def classify_worktree_entry(name: str) -> str:
+    if name in WORKTREE_PROMOTABLE:
+        return "promote"
+    if name in WORKTREE_DISCARDABLE:
+        return "discard"
+    if name == "refs":
+        return "refs"  # emptiness checked separately
+    if is_index_commit_staged(name):
+        return "junk"
+    return "unknown"
 
 
 # --- Types ---------------------------------------------------------------
@@ -134,14 +168,41 @@ def check_empty_per_worktree_refs(layout: GitfileLayout) -> PreconditionFailure 
 
 
 def check_no_unexpected_worktree_files(layout: GitfileLayout) -> PreconditionFailure | None:
-    names = {p.name for p in layout.worktree_dir.iterdir()}
-    extras = sorted(names - WORKTREE_ALLOWED_NAMES)
+    extras = sorted(
+        p.name for p in layout.worktree_dir.iterdir()
+        if classify_worktree_entry(p.name) == "unknown"
+    )
     if extras:
         return PreconditionFailure("unexpected-worktree-files", extras)
     return None
 
 
+def check_no_promote_collisions(layout: GitfileLayout) -> PreconditionFailure | None:
+    """A promotable file the worktree wants to move up must not already exist in the store."""
+    collisions = []
+    for name in WORKTREE_PROMOTABLE:
+        wt_path = layout.worktree_dir / name
+        if not wt_path.exists():
+            continue
+        if name in WORKTREE_OVERWRITES_STORE:
+            continue
+        if name == "logs":
+            # only logs/HEAD is per-worktree; logs/refs/heads/* is shared
+            if (layout.store / "logs" / "HEAD").exists():
+                collisions.append("logs/HEAD")
+            continue
+        if (layout.store / name).exists():
+            collisions.append(name)
+    if collisions:
+        return PreconditionFailure("promote-collisions", collisions)
+    return None
+
+
 def check_target_store_does_not_exist(plan: MigrationPlan) -> PreconditionFailure | None:
+    # In-place migration: source store is already at the encoded target path.
+    # The relocate_store step is skipped in migrate(); collision is benign here.
+    if plan.new_store == plan.layout.store:
+        return None
     if plan.new_store.exists():
         return PreconditionFailure("target-store-already-exists", str(plan.new_store))
     return None
@@ -154,6 +215,7 @@ def all_layout_preconditions(layout: GitfileLayout) -> list[PreconditionFailure]
         check_no_in_progress_ops(layout),
         check_empty_per_worktree_refs(layout),
         check_no_unexpected_worktree_files(layout),
+        check_no_promote_collisions(layout),
     ]
     return [r for r in results if r is not None]
 
@@ -168,9 +230,21 @@ def install_hooks(store: Path, template_hooks: Path) -> None:
 
 def promote_worktree_state(layout: GitfileLayout) -> None:
     wt, store = layout.worktree_dir, layout.store
-    run("mv", "-f", wt / "HEAD", store / "HEAD")
-    run("mv", "-f", wt / "index", store / "index")
-    # commondir, gitdir, empty refs/ remain — discarded by remove_worktree_subdir.
+    for name in WORKTREE_PROMOTABLE:
+        src = wt / name
+        if not src.exists():
+            continue
+        if name == "logs":
+            # only logs/HEAD is per-worktree; mkdir is idempotent (store/logs/refs/* already exists)
+            run("mkdir", "-p", store / "logs")
+            run("mv", "-f", src / "HEAD", store / "logs" / "HEAD")
+            continue
+        run("mv", "-f", src, store / name)
+    # discard junk left behind by the pre-commit hook's index swapping
+    for entry in wt.iterdir():
+        if is_index_commit_staged(entry.name):
+            run("rm", "-f", entry)
+    # commondir, gitdir, empty refs/, empty logs/ remain — discarded by remove_worktree_subdir.
 
 
 def remove_worktree_subdir(layout: GitfileLayout) -> None:
@@ -207,7 +281,8 @@ def migrate(plan: MigrationPlan, template_hooks: Path) -> None:
     promote_worktree_state(plan.layout)
     remove_worktree_subdir(plan.layout)
     rewrite_config(plan.layout.store)
-    relocate_store(plan)
+    if plan.new_store != plan.layout.store:
+        relocate_store(plan)
     swap_gitlink_atomic(plan.layout.workdir, plan.new_store)
 
 
