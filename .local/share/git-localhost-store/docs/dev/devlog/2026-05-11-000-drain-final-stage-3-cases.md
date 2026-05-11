@@ -105,3 +105,61 @@ discarded by the existing regex. In-place branch (no relocate step).
 full pre-migration store snapshots plus the four pre-step removals
 from `agent-skills`. Delete when comfortable. The repo-local
 `trash/` is gitignored.
+
+## Addendum — post-audit cleanup
+
+Ran a wider audit on every `.git` under `~/` and every store under
+`<repos>/`. The audit script is at
+`trash/2026-05-11-migration/audit-classify.sh`. Findings of note:
+
+- **0 legacy gitfiles** confirmed (Pass 1).
+- **932 orphan stores**, of which **922 decode to `/tmp/...`** —
+  working as designed (stores survive `/tmp` cleanup). The remaining
+  10 are decommissioned vim plugins and test fixtures.
+- **955 of 976 stores still reference `git-restore-repo`** in their
+  installed hooks (from before the 2026-05-05 rename). Effective live
+  exposure is **0**: those hooks short-circuit on
+  `[ -L .git ] && exit 0`, and the dead-binary line is only reachable
+  when `.git` is *not* a symlink — which requires either a legacy
+  gitfile (count: 0) or a fresh `git init`, which installs CLEAN
+  hooks from the global template (verified). The deferred sweep TODO
+  is pure hygiene; nothing breaks if it's never done.
+
+### Hidden 4th case: `claude-plugins-official`
+
+`audit-gitfiles` only scans for gitfiles *under the workdir*. The
+workdir at `~/.claude/plugins/marketplaces/claude-plugins-official/`
+had **no `.git` at all** (neither symlink nor file nor directory),
+while its store was sitting in canonical legacy-gitfile layout
+(`core.bare = true`, top-level HEAD/refs, `worktrees/<name>/`
+subdir with HEAD/index/FETCH_HEAD/ORIG_HEAD/logs). `git status` from
+the workdir reported "not a git repository" — fully invisible to the
+auditor.
+
+Recovery: recreate the missing gitfile (`printf 'gitdir: %s\n' "$WT"
+> "$WD/.git"`), then run `migrate-from-gitfile` normally. One pre-step
+needed: the store had its own older `logs/HEAD` (204 B from Mar 4)
+colliding with the worktree's newer (1485 B from Mar 24) — moved the
+older one to trash so the newer one promotes cleanly. Migration
+otherwise standard. Branch is 194 commits ahead of `origin/main` with
+real uncommitted work — preserved.
+
+Follow-up implication: `audit-gitfiles` could be augmented to also
+report stores whose decoded workdir-path exists but has no `.git` —
+that would have caught this case directly.
+
+### Minor cleanups
+
+All into `trash/2026-05-11-audit-cleanup/`:
+
+- `~/.cache/uv/sdists-v9/.git` — empty/malformed gitfile in a uv
+  internal cache. Removed.
+- 28 `.git` gitfile stubs under
+  `~/.local/share/{nvim,lazyvim}/mason/packages/lua-language-server/libexec/meta/3rd/*/`
+  pointing at non-existent parent gitdirs. Vestigial submodule
+  references left by an old clone. Removed.
+- Two redundant orphan stores trashed:
+  `-home-bukzor-.vim-pack-lazy-opt-ansi.nvim` (workdir has its own
+  fresh `.git/` at the same HEAD) and
+  `-home-bukzor-tmp-git--staging--problem` (a debugging fixture
+  in `~/tmp/`).
