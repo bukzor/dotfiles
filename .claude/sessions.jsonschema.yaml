@@ -6,7 +6,7 @@ description: |
   Helps the user keep track of many parallel lines of work.
 
 type: object
-required: [cwd]
+required: [cwd, session]
 additionalProperties: false
 
 properties:
@@ -18,12 +18,12 @@ properties:
       Sessions in different cwds are different lines of work even if the
       topic overlaps.
 
-  session-uuid:
+  color:
     type: string
-    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    enum: [red, blue, green, yellow, purple, orange, pink, cyan, default]
     description: |
-      The claude-code session UUID, when known. Absent for planned or
-      proposed sessions that have not been started yet.
+      Session color label set via /color, matching the available palette.
+      Optional; omit when the session has not been colored.
 
   focus:
     type: array
@@ -34,3 +34,28 @@ properties:
       orient the agent to this session's task. Paths may be absolute
       or relative to `cwd`. Optional: omit when the session needs no
       seed material beyond the entry body itself.
+
+  session:
+    type: object
+    required: [started, ended]
+    additionalProperties: false
+    properties:
+      uuid:
+        type: string
+        pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        description: |
+          The claude-code session UUID
+          ($CLAUDE_CODE_SESSION_ID). Absent for planned or proposed
+          sessions that have not been started yet.
+      started:
+        type: [instant, "null"]
+        description: |
+          When the session became active. Required; null is
+          load-bearing -- means the session is planned but has not
+          yet begun.
+      ended:
+        type: [instant, "null"]
+        description: |
+          When the session terminated. Required; null is load-bearing
+          -- means the session is still in flight or its end was not
+          recorded.
