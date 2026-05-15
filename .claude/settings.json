@@ -38,13 +38,20 @@
       "TodoWrite",
       "ExitPlanMode",
       "EnterPlanMode",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "TaskOutput",
+      "TaskStop",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Bash(dd:*)",
       "Bash(mkfs:*)",
       "Bash(git add -A:*)",
       "Bash(git add --all:*)",
-      "Bash(git add .:*)"
+      "Bash(git add .:*)",
+      "Write(~/.claude/projects/*/memory/**)"
     ],
     "ask": [
       "Bash(git push:*)",
@@ -61,12 +68,6 @@
       "~/.claude"
     ]
   },
-  "enabledPlugins": {
-    "lua-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
-  },
-  "alwaysThinkingEnabled": true,
   "hooks": {
     "PreToolUse": [
       {
@@ -74,12 +75,26 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/bash-preamble.py"
+            "command": "\"$HOME\"/.claude/hooks/bash-preamble.py"
           }
         ]
       }
     ]
   },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "effortLevel": "xhigh",
+  "autoMemoryEnabled": false,
+  "editorMode": "vim",
+  "verbose": true,
+  "preferredNotifChannel": "kitty",
+  "autoCompactEnabled": false,
+  "terminalProgressBarEnabled": false,
+  "skipAutoPermissionPrompt": true,
   "//hooks-disabled": {
     "//PreToolUse": [
       {
