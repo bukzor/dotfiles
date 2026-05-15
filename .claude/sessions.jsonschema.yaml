@@ -24,3 +24,13 @@ properties:
     description: |
       The claude-code session UUID, when known. Absent for planned or
       proposed sessions that have not been started yet.
+
+  focus:
+    type: array
+    items:
+      type: string
+    description: |
+      File(s) used for agent initialization -- the priming reads that
+      orient the agent to this session's task. Paths may be absolute
+      or relative to `cwd`. Optional: omit when the session needs no
+      seed material beyond the entry body itself.
