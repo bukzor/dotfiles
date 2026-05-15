@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Session entry frontmatter
+description: |
+  Frontmatter schema for entries in sessions.kb/. Each entry tracks
+  one claude-code session -- in flight, planned, or recently relevant.
+  Helps the user keep track of many parallel lines of work.
+
+type: object
+required: [cwd]
+additionalProperties: false
+
+properties:
+  cwd:
+    type: string
+    pattern: '^/'
+    description: |
+      Absolute working directory where this session runs (or will run).
+      Sessions in different cwds are different lines of work even if the
+      topic overlaps.
+
+  session-uuid:
+    type: string
+    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    description: |
+      The claude-code session UUID, when known. Absent for planned or
+      proposed sessions that have not been started yet.
