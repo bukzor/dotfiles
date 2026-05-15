@@ -1,7 +1,7 @@
 --- # workaround: anthropics/claude-code#13003
 requires:
-  - ../must-read.d/before/git/ANY-git-command.md
-  - ../must-read.d/before/git/commit.md
+  - ../must-read.kb/before/git/ANY-git-command.md
+  - ../must-read.kb/before/git/commit.md
 ---
 
 # Commit Command

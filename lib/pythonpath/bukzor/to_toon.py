@@ -14,7 +14,7 @@ from typing import NoReturn
 
 type Several[A] = tuple[A, ...]
 
-TOON_SPEC = Path("~/.claude/must-read.d/before/toon-format.md").expanduser()
+TOON_SPEC = Path("~/.claude/must-read.kb/before/toon-format.md").expanduser()
 
 INSTRUCTIONS = """\
 Convert the data in $INPUT to TOON format.
@@ -96,7 +96,7 @@ def main() -> None:
         "claude", "-p",
         "--verbose",
         "--output-format", "stream-json",
-        "--setting-sources", "local",  # suppress user CLAUDE.md (avoids must-read.d overhead)
+        "--setting-sources", "local",  # suppress user CLAUDE.md (avoids must-read.kb overhead)
         "--append-system-prompt", build_system_prompt(),  # invariant (cache-friendly)
         "--allowedTools", format_allowed_tools(ALLOWED_TOOLS),
         "--", build_prompt(scratch, path),

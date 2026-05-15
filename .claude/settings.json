@@ -63,7 +63,7 @@
       "Bash(git reset:*)"
     ],
     "additionalDirectories": [
-      "~/.claude/must-read.d",
+      "~/.claude/must-read.kb",
       "~/",
       "~/.claude"
     ]

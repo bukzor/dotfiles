@@ -22,7 +22,7 @@ After corrections, detours, or completing a task, output a status listing of the
 
 > IMPERATIVE:
 >
-> Your FIRST action in every conversation MUST be: Bash("ls -RF ~/.claude/must-read.d")
+> Your FIRST action in every conversation MUST be: Bash("ls -RF ~/.claude/must-read.kb")
 >
 
 While planning, before taking ANY action:
@@ -99,6 +99,6 @@ Never put scratch in `/tmp` unless the user explicitly says so;
 - `..` -- hesitation
 - `...` -- user is getting frustrated
 - `....` (or more) -- user is frustrated, run Skill("claude-realignment")
-- `Jr?` -- Sycophancy check. Run Advocate/Skeptic/Arbiter protocol (see must-read.d/when/evaluating-a-contested-or-subjective-position.md)
+- `Jr?` -- Sycophancy check. Run Advocate/Skeptic/Arbiter protocol (see must-read.kb/when/evaluating-a-contested-or-subjective-position.md)
 - `^` -- "above" or "(scroll back)"
 - `please to` -- Please [to] action/execute the above.
