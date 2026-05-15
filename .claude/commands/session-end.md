@@ -10,6 +10,10 @@ requires:
 
 # Session End
 
+ARGUMENTS: $ARGUMENTS
+
+Default arguments (if none provided): commit; push
+
 Persist your work.
 
 Key questions:
