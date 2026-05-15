@@ -13,7 +13,7 @@ YAML frontmatter in CLAUDE.md files is parsed and stripped before being shown to
 ```yaml
 --- # workaround: anthropics/claude-code#13003
 depends:
-    - skills/llm-subtask
+    - Skill(llm-subtask)
 ---
 ```
 

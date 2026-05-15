@@ -21,6 +21,16 @@ When completing tasks that involve code changes:
 
 Never skip ahead to the next task before completing all steps for the current task.
 
+## Language-Agnostic Style
+
+### Inline Trivial Wrappers
+
+A function with 1-3 lines and a single call site is indirection, not abstraction. Inline it unless the name reveals non-obvious intent that the body doesn't.
+
+### Comments Target a Cold Reader
+
+Don't reference the session, the task, or the code's history ("exercises X", "now", "was previously", renamed symbols). If a cold reader wouldn't miss it, delete it.
+
 ## Bulk Operations: Cost Optimization
 
 Choose approach based on file count and edit complexity:

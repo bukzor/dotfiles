@@ -10,8 +10,8 @@
 - Break complex logic into smaller, composable functions
 
 ### Pure vs Impure Functions
-- Prefix impure functions (those with side effects) with `proc_`
-- Exception: `main()` can be named `main` instead of `proc_main`
+- Name impure functions with verbs that clearly indicate side effects (`write`, `load`, `save`, `send`, `delete`, etc.)
+  - Fallback: `proc_` prefix when no verb fits naturally
 - Minimize the number of impure functions
 - Strive to keep all logic in pure, testable functions
 - Only `main()` should handle I/O operations (stdin/stdout/stderr, sys.exit, etc.)
@@ -22,8 +22,8 @@ Examples:
 def calculate_total(items):
     return sum(item.price for item in items)
 
-# Impure function - has side effects
-def proc_save_to_file(data, filename):
+# Impure function - verb signals side effects
+def save_to_file(data, filename):
     with open(filename, 'w') as f:
         f.write(data)
 
@@ -106,6 +106,6 @@ New Python projects under `github.com/bukzor/` should be based on or aligned wit
 
 ## Testing
 
-When writing or modifying tests, follow `tdd-workflow.md`. This applies to all
+When writing or modifying tests, follow `writing-tests.md`. This applies to all
 codebases—your own or others'—and is especially valuable in unfamiliar code where
 tests verify your understanding before you change behavior.

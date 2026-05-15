@@ -24,3 +24,21 @@ Always use `set -euo pipefail` at the start of bash scripts.
 Check for unset variables using `[[ "${VAR:-}" ]]` pattern.
 
 Run `shellcheck` to catch common issues.
+
+When continuing long pipelines across multiple lines, put `|` at the
+**end** of a line, not the start of the next one. This lets you
+intersperse `# comment` lines between stages, which `\` continuation
+forbids (anything after `\` ends the continuation).
+
+```bash
+# good — pipe at end; comments work between stages
+find . -name '*.log' |
+    # filter to the slow ones
+    grep -l 'slow' |
+    xargs rm
+
+# bad — pipe at start; can't comment between stages
+find . -name '*.log' \
+    | grep -l 'slow' \
+    | xargs rm
+```

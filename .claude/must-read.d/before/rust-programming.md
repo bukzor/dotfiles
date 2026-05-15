@@ -5,6 +5,15 @@
 See `~/.claude/design-rules.kb/rust.kb/` for Rust-specific API design principles,
 and `~/.claude/design-rules.kb/` for language-agnostic rules.
 
+## Dependencies
+
+Use `cargo add` (not manual Cargo.toml edits) to add dependencies:
+
+```bash
+cargo add serde -p my-crate          # regular dependency
+cargo add --dev tempfile -p my-crate  # dev-dependency
+```
+
 ## Documentation Lookup
 
 For Rust API questions, use `rustdoc-json` to fetch docs.rs JSON:
