@@ -116,11 +116,6 @@ def is_content_list(val: Any) -> TypeGuard[list[Content]]:
     return True
 
 
-def prefix(text: str, p: str) -> str:
-    """Prefix each line of text with p"""
-    return "\n".join(p + line for line in text.split("\n"))
-
-
 def format_boxed_message(
     label: str,
     text: str,
@@ -300,7 +295,7 @@ def format_assistant_message(content: Content, state: State) -> Parts:
         return format_unknown("assistant_content", content, state)
 
 
-def format_result(content: Content) -> tuple[str, str]:
+def format_result(content: Content) -> tuple[Parts, str]:
     """Format session result/end message. Returns (stderr_output, stdout_result)."""
     duration = content["duration_ms"]
     num_turns = content["num_turns"]
@@ -309,24 +304,23 @@ def format_result(content: Content) -> tuple[str, str]:
     permission_denials = content["permission_denials"]
     result_content = content["result"]
 
-    status = (
-        f"{Color.Bright.RED}❌ ERROR{Color.RESET}"
+    status_span = (
+        colorize("❌ ERROR", Color.Bright.RED)
         if is_error
-        else f"{Color.Bright.GREEN}✓ SUCCESS{Color.RESET}"
+        else colorize("✓ SUCCESS", Color.Bright.GREEN)
     )
 
-    lines = [
-        f"{Color.BOLD}## SESSION END{Color.RESET}",
-        f"## Duration: {duration}ms ({num_turns} turns)",
-        f"## Cost: ${cost}",
-        f"## Status: {status}",
+    parts: Parts = [
+        colorize("## SESSION END", Color.BOLD),
+        f"\n## Duration: {duration}ms ({num_turns} turns)"
+        f"\n## Cost: ${cost}"
+        f"\n## Status: ",
+        status_span,
     ]
-
     if len(permission_denials) > 0:
-        lines.append(f"## Permission denials: {len(permission_denials)}")
+        parts.append(f"\n## Permission denials: {len(permission_denials)}")
 
-    stderr_output = "\n".join(lines)
-    return stderr_output, result_content
+    return parts, result_content
 
 
 def format_summary(content: Content) -> Parts:
@@ -342,7 +336,7 @@ _HOOK_MARKER = {
 }
 
 
-def format_hook_attachment(att: Content, state: State, att_type: str) -> str:
+def format_hook_attachment(att: Content, state: State, att_type: str) -> Parts:
     """One-line summary for hook event records."""
     hook_name = att.get("hookName", "?")
     exit_code = att.get("exitCode", "?")
@@ -365,19 +359,21 @@ def format_hook_attachment(att: Content, state: State, att_type: str) -> str:
     marker, color_name = _HOOK_MARKER.get(att_type, ("⊘", "YELLOW"))
     color = getattr(Color, color_name)
 
-    parts = [f"hook {hook_name}"]
+    summary: list[str] = [f"hook {hook_name}"]
     if decision:
-        parts.append(f"→ {decision}")
+        summary.append(f"→ {decision}")
     if rewrote_input:
-        parts.append("(input rewritten)")
-    parts.append(f"[exit={exit_code}, {duration}ms]")
-    line = f"{color}{marker} {state} {' '.join(parts)}{Color.RESET}"
+        summary.append("(input rewritten)")
+    summary.append(f"[exit={exit_code}, {duration}ms]")
+
+    parts: Parts = [colorize(f"{marker} {state} {' '.join(summary)}", color)]
     if stderr:
-        line += "\n" + prefix(stderr, f"{color}│ {Color.RESET}")
-    return line
+        for line in stderr.split("\n"):
+            parts += ["\n", colorize("│ ", color), line]
+    return parts
 
 
-def format_attachment(content: Content, state: State) -> str:
+def format_attachment(content: Content, state: State) -> Parts:
     """Format an attachment record (hook events, etc.)."""
     att = content.get("attachment")
     if not isinstance(att, dict):
