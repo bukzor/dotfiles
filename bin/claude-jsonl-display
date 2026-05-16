@@ -45,7 +45,7 @@ class State:
         return f"[{self.msg_num}{sub_num}]"
 
 
-Formatter = Callable[[Content, State], str]
+Formatter = Callable[[Content, State], "Parts"]
 
 
 # ANSI color codes
@@ -126,12 +126,12 @@ def format_boxed_message(
     text: str,
     state: State | str,
     color: str,
-) -> str:
+) -> Parts:
     """Format a message with a boxed header and colored border"""
-    bright_color = Color.to_bright[color]
-    return f"{bright_color}┌─ {state} {label}{Color.RESET}\n" + prefix(
-        text, f"{color}│ {Color.RESET}"
-    )
+    parts: Parts = [colorize(f"┌─ {state} {label}", Color.to_bright[color])]
+    for line in text.split("\n"):
+        parts += ["\n", colorize("│ ", color), line]
+    return parts
 
 
 def normalize_contents(content: Any) -> list[Content]:
@@ -150,7 +150,7 @@ def format_unknown(
     data: Any,
     state: State,
     color: str = Color.RED,
-) -> str:
+) -> Parts:
     """Format unknown/unexpected data with a clear error indicator"""
     json_str = json.dumps(data, indent=2)
     return format_boxed_message(f"UNKNOWN ({label})", json_str, state, color)
@@ -230,7 +230,7 @@ def format_system(content: Content) -> Parts:
     ]
 
 
-def format_user_message(content: Content, state: State) -> str:
+def format_user_message(content: Content, state: State) -> Parts:
     """Format a single user message content block"""
     content_type = content["type"]
 
@@ -238,20 +238,20 @@ def format_user_message(content: Content, state: State) -> str:
         text = content["text"]
         # Special case for user interruption
         if text.startswith("[Request interrupted by user"):
-            return f"{Color.RED}✗ {state} {text}{Color.RESET}"
+            return [colorize(f"✗ {state} {text}", Color.RED)]
         else:
             return format_boxed_message("USER", text, state, Color.BLUE)
     elif content_type == "tool_result":
         is_error = content.get("is_error", False)
         result_content = content["content"]
         if isinstance(result_content, list):
-            parts: list[str] = []
+            text_parts: list[str] = []
             for item in result_content:
                 if isinstance(item, dict) and 'text' in item:
-                    parts.append(item['text'])
+                    text_parts.append(item['text'])
                 else:
-                    parts.append(json.dumps(item, indent=2))
-            result_content = "\n".join(parts)
+                    text_parts.append(json.dumps(item, indent=2))
+            result_content = "\n".join(text_parts)
         if is_error:
             return format_boxed_message(
                 "Tool Result ❌ ERROR", result_content, state, Color.RED
@@ -264,26 +264,27 @@ def format_user_message(content: Content, state: State) -> str:
         return format_unknown("user_content", content, state)
 
 
-def format_tool_use(content: Content, state: State) -> str:
+def format_tool_use(content: Content, state: State) -> Parts:
     """Format a tool use block"""
     tool_name = content["name"]
     tool_input = content["input"]
 
-    tool_lines = [
-        f"{Color.Bright.MAGENTA}╔═ {state} Tool Call: {tool_name}{Color.RESET}"
+    parts: Parts = [
+        colorize(f"╔═ {state} Tool Call: {tool_name}", Color.Bright.MAGENTA)
     ]
     for key, value in tool_input.items():
-        tool_lines.append(f"{Color.MAGENTA}║ {key}: |{Color.RESET}")
+        parts += ["\n", colorize(f"║ {key}: |", Color.MAGENTA)]
         if isinstance(value, str):
             value_str = value
         else:
             value_str = json.dumps(value, indent=2)
-        tool_lines.append(prefix(value_str, f"{Color.MAGENTA}║   {Color.RESET}"))
+        for line in value_str.split("\n"):
+            parts += ["\n", colorize("║   ", Color.MAGENTA), line]
 
-    return "\n".join(tool_lines)
+    return parts
 
 
-def format_assistant_message(content: Content, state: State) -> str:
+def format_assistant_message(content: Content, state: State) -> Parts:
     """Format a single assistant message content block"""
     content_type = content["type"]
 
