@@ -6,27 +6,35 @@ transcript on stderr. The final `result.result` (if any) is written to stdout
 so a downstream pipeline can capture it independently of the rendered log.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import signal
 import sys
 from dataclasses import dataclass
-from typing import Any, Callable, Generator, NamedTuple, TypeGuard
+from typing import Any, Callable, Generator, Iterable, NamedTuple, TextIO, TypeGuard
 
 
 Content = dict[str, Any]
 
 
 class Output(NamedTuple):
-    # During the colorize/Text migration, `text` may be either a finished
-    # string (legacy) or a Text list (new). `print` resolves both.
-    text: "str | Text"
-    to_stdout: bool = False
+    # `text` should be uniform Text by the time anything calls `print` —
+    # `normalize_outputs` lowers shorthand to Text in the pipeline.
+    text: Text
+    dest: TextIO = sys.stderr
 
-    def print(self) -> None:
-        text = render(self.text) if isinstance(self.text, list) else self.text
-        f = sys.stdout if self.to_stdout else sys.stderr
-        print(text, file=f)
+    def print(self, *, use_color: bool) -> None:
+        print(render(self.text, use_color), file=self.dest)
+
+
+def normalize_outputs(
+    items: Iterable[tuple[Output, State]],
+) -> Generator[tuple[Output, State], None, None]:
+    """Pipeline stage: lower each Output's shorthand spans to uniform Text."""
+    for output, state in items:
+        yield Output(as_text(output.text), output.dest), state
 
 
 @dataclass(frozen=True)
@@ -45,7 +53,7 @@ class State:
         return f"[{self.msg_num}{sub_num}]"
 
 
-Formatter = Callable[[Content, State], "Text"]
+type Formatter = Callable[[Content, State], Text]
 
 
 # ANSI color codes
@@ -79,28 +87,36 @@ class Color:
 
 
 class colorize(NamedTuple):
-    """A run of text intended to be rendered in a particular color.
+    """A run of text, optionally styled with an ANSI code.
 
     Constructor doubles as the tagging operation; lowercase name reads as a
-    verb at call sites (cf. `tuple`, `partial`, `namedtuple`).
+    verb at call sites (cf. `tuple`, `partial`, `namedtuple`). `code=None`
+    means "no styling, render text as-is" — the natural value for spans that
+    formatters produce as bare strings before lowering.
     """
 
     text: str
-    code: str
+    code: str | None = None
 
 
-Text = list[colorize | str]
+Text = list[colorize]
+"""Homogeneous IR. Formatters construct with shorthand (mixing bare strings
+and colorize spans); `normalize_outputs` lowers to this uniform shape before
+any consumer touches it."""
 
 
-def render(text: Text) -> str:
-    """Flatten a Text list into an ANSI-decorated string."""
-    out: list[str] = []
-    for span in text:
-        if isinstance(span, colorize):
-            out.append(f"{span.code}{span.text}{Color.RESET}")
-        else:
-            out.append(span)
-    return "".join(out)
+def as_text(spans: Iterable[colorize | str]) -> Text:
+    """Promote bare strings to `colorize(text)` so consumers see uniform Text."""
+    return [s if isinstance(s, colorize) else colorize(s) for s in spans]
+
+
+def render(text: Text, use_color: bool) -> str:
+    """Flatten Text into a string, applying ANSI codes when `use_color`."""
+    return "".join(
+        f"{span.code}{span.text}{Color.RESET}" if span.code and use_color
+        else span.text
+        for span in text
+    )
 
 
 def is_content_list(val: Any) -> TypeGuard[list[Content]]:
@@ -123,7 +139,7 @@ def format_boxed_message(
     color: str,
 ) -> Text:
     """Format a message with a boxed header and colored border"""
-    parts: Text =[colorize(f"┌─ {state} {label}", Color.to_bright[color])]
+    parts: Text = [colorize(f"┌─ {state} {label}", Color.to_bright[color])]
     for line in text.split("\n"):
         parts += ["\n", colorize("│ ", color), line]
     return parts
@@ -264,7 +280,7 @@ def format_tool_use(content: Content, state: State) -> Text:
     tool_name = content["name"]
     tool_input = content["input"]
 
-    parts: Text =[
+    parts: Text = [
         colorize(f"╔═ {state} Tool Call: {tool_name}", Color.Bright.MAGENTA)
     ]
     for key, value in tool_input.items():
@@ -295,7 +311,7 @@ def format_assistant_message(content: Content, state: State) -> Text:
         return format_unknown("assistant_content", content, state)
 
 
-def format_result(content: Content) -> tuple[Text, str]:
+def format_result(content: Content) -> tuple[Text, Text]:
     """Format session result/end message. Returns (stderr_output, stdout_result)."""
     duration = content["duration_ms"]
     num_turns = content["num_turns"]
@@ -310,7 +326,7 @@ def format_result(content: Content) -> tuple[Text, str]:
         else colorize("✓ SUCCESS", Color.Bright.GREEN)
     )
 
-    parts: Text =[
+    parts: Text = [
         colorize("## SESSION END", Color.BOLD),
         f"\n## Duration: {duration}ms ({num_turns} turns)"
         f"\n## Cost: ${cost}"
@@ -320,7 +336,7 @@ def format_result(content: Content) -> tuple[Text, str]:
     if len(permission_denials) > 0:
         parts.append(f"\n## Permission denials: {len(permission_denials)}")
 
-    return parts, result_content
+    return parts, [colorize(result_content)]
 
 
 def format_summary(content: Content) -> Text:
@@ -366,7 +382,7 @@ def format_hook_attachment(att: Content, state: State, att_type: str) -> Text:
         summary.append("(input rewritten)")
     summary.append(f"[exit={exit_code}, {duration}ms]")
 
-    parts: Text =[colorize(f"{marker} {state} {' '.join(summary)}", color)]
+    parts: Text = [colorize(f"{marker} {state} {' '.join(summary)}", color)]
     if stderr:
         for line in stderr.split("\n"):
             parts += ["\n", colorize("│ ", color), line]
@@ -425,7 +441,7 @@ def format_item(
     elif item_type == "result":
         stderr_output, stdout_result = format_result(content)
         yield Output(stderr_output), state
-        yield Output(stdout_result, to_stdout=True), state
+        yield Output(stdout_result, dest=sys.stdout), state
 
     elif item_type == "file-history-snapshot":
         yield Output(format_snapshot(content)), state
@@ -478,8 +494,8 @@ def main():
         try:
             state = update_state(content, state)
 
-            for output, state in format_item(content, state):
-                output.print()
+            for output, state in normalize_outputs(format_item(content, state)):
+                output.print(use_color=True)
         except Exception:
             sys.stderr.flush()
             print(
