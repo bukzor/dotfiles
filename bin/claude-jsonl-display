@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-"""Make Claude Code transcripts more readable"""
+"""Make Claude Code transcripts more readable.
 
+Reads JSONL records from stdin and renders them as a structured, role-labeled
+transcript on stderr. The final `result.result` (if any) is written to stdout
+so a downstream pipeline can capture it independently of the rendered log.
+"""
+
+import argparse
 import json
 import signal
 import sys
@@ -140,6 +146,10 @@ def update_state(content: Content, state: State) -> State:
             new_role = "assistant"
     elif item_type == "assistant":
         new_role = "assistant"
+    elif item_type == "attachment":
+        # Attachments (e.g. hook events) belong to the surrounding assistant
+        # turn — advance the sub-number so the box header doesn't repeat.
+        return State(state.role, state.msg_num, state.sub_num + 1)
     else:
         # system, stream_event, result don't change role
         return state
@@ -299,6 +309,61 @@ def format_summary(content: Content) -> str:
     return f"{Color.CYAN}▸ Summary: {content['summary']}{Color.RESET}"
 
 
+_HOOK_MARKER = {
+    "hook_success": ("⊕", "GREEN"),
+    "hook_non_blocking_error": ("⊘", "YELLOW"),
+    "hook_blocking_error": ("⊖", "RED"),
+    "hook_failure": ("⊖", "RED"),
+}
+
+
+def format_hook_attachment(att: Content, state: State, att_type: str) -> str:
+    """One-line summary for hook event records."""
+    hook_name = att.get("hookName", "?")
+    exit_code = att.get("exitCode", "?")
+    duration = att.get("durationMs", "?")
+    stderr = (att.get("stderr") or "").strip()
+
+    decision = ""
+    rewrote_input = False
+    stdout = att.get("stdout") or ""
+    if stdout:
+        try:
+            parsed = json.loads(stdout)
+        except (json.JSONDecodeError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            hso = parsed.get("hookSpecificOutput") or {}
+            decision = hso.get("permissionDecision", "") or ""
+            rewrote_input = "updatedInput" in hso
+
+    marker, color_name = _HOOK_MARKER.get(att_type, ("⊘", "YELLOW"))
+    color = getattr(Color, color_name)
+
+    parts = [f"hook {hook_name}"]
+    if decision:
+        parts.append(f"→ {decision}")
+    if rewrote_input:
+        parts.append("(input rewritten)")
+    parts.append(f"[exit={exit_code}, {duration}ms]")
+    line = f"{color}{marker} {state} {' '.join(parts)}{Color.RESET}"
+    if stderr:
+        line += "\n" + prefix(stderr, f"{color}│ {Color.RESET}")
+    return line
+
+
+def format_attachment(content: Content, state: State) -> str:
+    """Format an attachment record (hook events, etc.)."""
+    att = content.get("attachment")
+    if not isinstance(att, dict):
+        return format_unknown("attachment", content, state)
+
+    att_type = att.get("type")
+    if isinstance(att_type, str) and att_type.startswith("hook_"):
+        return format_hook_attachment(att, state, att_type)
+    return format_unknown(f"attachment/{att_type}", content, state)
+
+
 def format_turn(
     formatter: Formatter, content: Content, state: State
 ) -> Generator[tuple[Output, State], None, None]:
@@ -347,6 +412,9 @@ def format_item(
     elif item_type == "summary":
         yield Output(format_summary(content)), state
 
+    elif item_type == "attachment":
+        yield Output(format_attachment(content, state)), state
+
     elif item_type == "progress":
         pass  # hook progress events — no useful display content
 
@@ -354,9 +422,23 @@ def format_item(
         yield Output(format_unknown("item_type", content, state)), state
 
 
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="claude-jsonl-display",
+        description=(
+            "Render Claude Code JSONL transcripts as readable text. "
+            "Reads JSONL from stdin; rendered transcript goes to stderr, "
+            "the final result.result (if any) to stdout."
+        ),
+    )
+    return parser.parse_args(argv)
+
+
 def main():
     # Restore default SIGPIPE handler (terminate on broken pipe, e.g., piping to head)
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
+    parse_args(sys.argv[1:])
 
     state = State("", 0, 0)
 
