@@ -190,46 +190,44 @@ def update_state(content: Content, state: State) -> State:
         return State(new_role, state.msg_num, state.sub_num + 1)
 
 
-def format_stream_event(content: Content) -> str:
+def format_stream_event(content: Content) -> Parts:
     """Format stream event messages"""
     event_type = content["event"]["type"]
     if event_type == "message_start":
-        return f"{Color.YELLOW}⏵ Message starting...{Color.RESET}"
+        return [colorize("⏵ Message starting...", Color.YELLOW)]
     elif event_type == "message_stop":
-        return f"{Color.YELLOW}⏹ Message complete{Color.RESET}"
+        return [colorize("⏹ Message complete", Color.YELLOW)]
     else:
         raise ValueError(f"Unknown stream event type: {event_type}")
 
 
-def format_snapshot(content: Content) -> str:
+def format_snapshot(content: Content) -> Parts:
     """Format file history snapshot message"""
     snapshot = content["snapshot"]
     tracked = snapshot["trackedFileBackups"]
     num_files = len(tracked)
 
     if num_files == 0:
-        return f"{Color.CYAN}▸ Snapshot (no files){Color.RESET}"
+        return [colorize("▸ Snapshot (no files)", Color.CYAN)]
     elif num_files <= 3:
         files = ", ".join(tracked.keys())
-        return f"{Color.CYAN}▸ Snapshot: {files}{Color.RESET}"
+        return [colorize(f"▸ Snapshot: {files}", Color.CYAN)]
     else:
         files = list(tracked.keys())[:3]
         files_str = ", ".join(files)
-        return (
-            f"{Color.CYAN}▸ Snapshot: {files_str}... ({num_files} files){Color.RESET}"
-        )
+        return [colorize(f"▸ Snapshot: {files_str}... ({num_files} files)", Color.CYAN)]
 
 
-def format_system(content: Content) -> str:
+def format_system(content: Content) -> Parts:
     """Format system/session start message"""
     tools = ", ".join(content["tools"])
-    return (
-        f"{Color.BOLD}## SESSION START{Color.RESET}\n"
-        f"## Session: {content['session_id']}\n"
-        f"## Model: {content['model']}\n"
-        f"## CWD: {content['cwd']}\n"
-        f"## Tools: {tools}"
-    )
+    return [
+        colorize("## SESSION START", Color.BOLD),
+        f"\n## Session: {content['session_id']}"
+        f"\n## Model: {content['model']}"
+        f"\n## CWD: {content['cwd']}"
+        f"\n## Tools: {tools}",
+    ]
 
 
 def format_user_message(content: Content, state: State) -> str:
@@ -330,9 +328,9 @@ def format_result(content: Content) -> tuple[str, str]:
     return stderr_output, result_content
 
 
-def format_summary(content: Content) -> str:
+def format_summary(content: Content) -> Parts:
     """Format summary message"""
-    return f"{Color.CYAN}▸ Summary: {content['summary']}{Color.RESET}"
+    return [colorize(f"▸ Summary: {content['summary']}", Color.CYAN)]
 
 
 _HOOK_MARKER = {
