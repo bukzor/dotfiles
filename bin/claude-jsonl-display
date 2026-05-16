@@ -18,14 +18,15 @@ Content = dict[str, Any]
 
 
 class Output(NamedTuple):
-    text: str
+    # During the colorize/Parts migration, `text` may be either a finished
+    # string (legacy) or a Parts list (new). `print` resolves both.
+    text: "str | Parts"
     dest: str = "stderr"
 
     def print(self) -> None:
-        if self.dest == "stdout":
-            print(self.text)
-        else:
-            print(self.text, file=sys.stderr)
+        text = render(self.text) if isinstance(self.text, list) else self.text
+        f = sys.stdout if self.dest == "stdout" else sys.stderr
+        print(text, file=f)
 
 
 @dataclass(frozen=True)
