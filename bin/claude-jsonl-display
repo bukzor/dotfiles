@@ -18,14 +18,14 @@ Content = dict[str, Any]
 
 
 class Output(NamedTuple):
-    # During the colorize/Parts migration, `text` may be either a finished
-    # string (legacy) or a Parts list (new). `print` resolves both.
-    text: "str | Parts"
-    dest: str = "stderr"
+    # During the colorize/Text migration, `text` may be either a finished
+    # string (legacy) or a Text list (new). `print` resolves both.
+    text: "str | Text"
+    to_stdout: bool = False
 
     def print(self) -> None:
         text = render(self.text) if isinstance(self.text, list) else self.text
-        f = sys.stdout if self.dest == "stdout" else sys.stderr
+        f = sys.stdout if self.to_stdout else sys.stderr
         print(text, file=f)
 
 
@@ -45,7 +45,7 @@ class State:
         return f"[{self.msg_num}{sub_num}]"
 
 
-Formatter = Callable[[Content, State], "Parts"]
+Formatter = Callable[[Content, State], "Text"]
 
 
 # ANSI color codes
@@ -89,17 +89,17 @@ class colorize(NamedTuple):
     code: str
 
 
-Parts = list[colorize | str]
+Text = list[colorize | str]
 
 
-def render(parts: Parts) -> str:
-    """Flatten a Parts list into an ANSI-decorated string."""
+def render(text: Text) -> str:
+    """Flatten a Text list into an ANSI-decorated string."""
     out: list[str] = []
-    for part in parts:
-        if isinstance(part, colorize):
-            out.append(f"{part.code}{part.text}{Color.RESET}")
+    for span in text:
+        if isinstance(span, colorize):
+            out.append(f"{span.code}{span.text}{Color.RESET}")
         else:
-            out.append(part)
+            out.append(span)
     return "".join(out)
 
 
@@ -121,16 +121,16 @@ def format_boxed_message(
     text: str,
     state: State | str,
     color: str,
-) -> Parts:
+) -> Text:
     """Format a message with a boxed header and colored border"""
-    parts: Parts = [colorize(f"┌─ {state} {label}", Color.to_bright[color])]
+    parts: Text =[colorize(f"┌─ {state} {label}", Color.to_bright[color])]
     for line in text.split("\n"):
         parts += ["\n", colorize("│ ", color), line]
     return parts
 
 
-def normalize_contents(content: Any) -> list[Content]:
-    """Normalize content to a list (wrap non-lists)"""
+def as_content_list(content: Any) -> list[Content]:
+    """Coerce a single content block (or string) into a list of content blocks."""
     if not is_content_list(content):
         if isinstance(content, str):
             content = [{"type": "text", "text": content}]
@@ -145,7 +145,7 @@ def format_unknown(
     data: Any,
     state: State,
     color: str = Color.RED,
-) -> Parts:
+) -> Text:
     """Format unknown/unexpected data with a clear error indicator"""
     json_str = json.dumps(data, indent=2)
     return format_boxed_message(f"UNKNOWN ({label})", json_str, state, color)
@@ -185,7 +185,7 @@ def update_state(content: Content, state: State) -> State:
         return State(new_role, state.msg_num, state.sub_num + 1)
 
 
-def format_stream_event(content: Content) -> Parts:
+def format_stream_event(content: Content) -> Text:
     """Format stream event messages"""
     event_type = content["event"]["type"]
     if event_type == "message_start":
@@ -196,7 +196,7 @@ def format_stream_event(content: Content) -> Parts:
         raise ValueError(f"Unknown stream event type: {event_type}")
 
 
-def format_snapshot(content: Content) -> Parts:
+def format_snapshot(content: Content) -> Text:
     """Format file history snapshot message"""
     snapshot = content["snapshot"]
     tracked = snapshot["trackedFileBackups"]
@@ -213,7 +213,7 @@ def format_snapshot(content: Content) -> Parts:
         return [colorize(f"▸ Snapshot: {files_str}... ({num_files} files)", Color.CYAN)]
 
 
-def format_system(content: Content) -> Parts:
+def format_system(content: Content) -> Text:
     """Format system/session start message"""
     tools = ", ".join(content["tools"])
     return [
@@ -225,7 +225,7 @@ def format_system(content: Content) -> Parts:
     ]
 
 
-def format_user_message(content: Content, state: State) -> Parts:
+def format_user_message(content: Content, state: State) -> Text:
     """Format a single user message content block"""
     content_type = content["type"]
 
@@ -259,12 +259,12 @@ def format_user_message(content: Content, state: State) -> Parts:
         return format_unknown("user_content", content, state)
 
 
-def format_tool_use(content: Content, state: State) -> Parts:
+def format_tool_use(content: Content, state: State) -> Text:
     """Format a tool use block"""
     tool_name = content["name"]
     tool_input = content["input"]
 
-    parts: Parts = [
+    parts: Text =[
         colorize(f"╔═ {state} Tool Call: {tool_name}", Color.Bright.MAGENTA)
     ]
     for key, value in tool_input.items():
@@ -279,7 +279,7 @@ def format_tool_use(content: Content, state: State) -> Parts:
     return parts
 
 
-def format_assistant_message(content: Content, state: State) -> Parts:
+def format_assistant_message(content: Content, state: State) -> Text:
     """Format a single assistant message content block"""
     content_type = content["type"]
 
@@ -295,7 +295,7 @@ def format_assistant_message(content: Content, state: State) -> Parts:
         return format_unknown("assistant_content", content, state)
 
 
-def format_result(content: Content) -> tuple[Parts, str]:
+def format_result(content: Content) -> tuple[Text, str]:
     """Format session result/end message. Returns (stderr_output, stdout_result)."""
     duration = content["duration_ms"]
     num_turns = content["num_turns"]
@@ -310,7 +310,7 @@ def format_result(content: Content) -> tuple[Parts, str]:
         else colorize("✓ SUCCESS", Color.Bright.GREEN)
     )
 
-    parts: Parts = [
+    parts: Text =[
         colorize("## SESSION END", Color.BOLD),
         f"\n## Duration: {duration}ms ({num_turns} turns)"
         f"\n## Cost: ${cost}"
@@ -323,7 +323,7 @@ def format_result(content: Content) -> tuple[Parts, str]:
     return parts, result_content
 
 
-def format_summary(content: Content) -> Parts:
+def format_summary(content: Content) -> Text:
     """Format summary message"""
     return [colorize(f"▸ Summary: {content['summary']}", Color.CYAN)]
 
@@ -336,7 +336,7 @@ _HOOK_MARKER = {
 }
 
 
-def format_hook_attachment(att: Content, state: State, att_type: str) -> Parts:
+def format_hook_attachment(att: Content, state: State, att_type: str) -> Text:
     """One-line summary for hook event records."""
     hook_name = att.get("hookName", "?")
     exit_code = att.get("exitCode", "?")
@@ -366,14 +366,14 @@ def format_hook_attachment(att: Content, state: State, att_type: str) -> Parts:
         summary.append("(input rewritten)")
     summary.append(f"[exit={exit_code}, {duration}ms]")
 
-    parts: Parts = [colorize(f"{marker} {state} {' '.join(summary)}", color)]
+    parts: Text =[colorize(f"{marker} {state} {' '.join(summary)}", color)]
     if stderr:
         for line in stderr.split("\n"):
             parts += ["\n", colorize("│ ", color), line]
     return parts
 
 
-def format_attachment(content: Content, state: State) -> Parts:
+def format_attachment(content: Content, state: State) -> Text:
     """Format an attachment record (hook events, etc.)."""
     att = content.get("attachment")
     if not isinstance(att, dict):
@@ -389,7 +389,7 @@ def format_turn(
     formatter: Formatter, content: Content, state: State
 ) -> Generator[tuple[Output, State], None, None]:
     """Format a user or assistant turn (may contain multiple content blocks)"""
-    contents = normalize_contents(content["message"]["content"])
+    contents = as_content_list(content["message"]["content"])
     for content in contents:
         try:
             yield Output(formatter(content, state)), state
@@ -425,7 +425,7 @@ def format_item(
     elif item_type == "result":
         stderr_output, stdout_result = format_result(content)
         yield Output(stderr_output), state
-        yield Output(stdout_result, "stdout"), state
+        yield Output(stdout_result, to_stdout=True), state
 
     elif item_type == "file-history-snapshot":
         yield Output(format_snapshot(content)), state
