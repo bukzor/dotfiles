@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import signal
 import sys
 from dataclasses import dataclass
@@ -467,15 +468,43 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
             "Reads JSONL from stdin; rendered transcript goes to stderr, "
             "the final result.result (if any) to stdout."
         ),
+        epilog=(
+            "Color is on by default and disabled automatically when "
+            "$CLAUDECODE or $NO_COLOR is set. Pass --color to force-enable."
+        ),
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--color",
+        action="store_true",
+        help="force ANSI color even if $CLAUDECODE or $NO_COLOR is set",
+    )
+    group.add_argument(
+        "--no-color",
+        action="store_true",
+        help="disable ANSI color",
     )
     return parser.parse_args(argv)
+
+
+def should_use_color(args: argparse.Namespace) -> bool:
+    if args.color:
+        return True
+    if args.no_color:
+        return False
+    if os.environ.get("CLAUDECODE"):
+        return False
+    if os.environ.get("NO_COLOR"):  # https://no-color.org/
+        return False
+    return True
 
 
 def main():
     # Restore default SIGPIPE handler (terminate on broken pipe, e.g., piping to head)
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-    parse_args(sys.argv[1:])
+    args = parse_args(sys.argv[1:])
+    use_color = should_use_color(args)
 
     state = State("", 0, 0)
 
@@ -495,7 +524,7 @@ def main():
             state = update_state(content, state)
 
             for output, state in normalize_outputs(format_item(content, state)):
-                output.print(use_color=True)
+                output.print(use_color=use_color)
         except Exception:
             sys.stderr.flush()
             print(
