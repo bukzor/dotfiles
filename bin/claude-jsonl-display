@@ -77,6 +77,31 @@ class Color:
     }
 
 
+class colorize(NamedTuple):
+    """A run of text intended to be rendered in a particular color.
+
+    Constructor doubles as the tagging operation; lowercase name reads as a
+    verb at call sites (cf. `tuple`, `partial`, `namedtuple`).
+    """
+
+    text: str
+    code: str
+
+
+Parts = list[colorize | str]
+
+
+def render(parts: Parts) -> str:
+    """Flatten a Parts list into an ANSI-decorated string."""
+    out: list[str] = []
+    for part in parts:
+        if isinstance(part, colorize):
+            out.append(f"{part.code}{part.text}{Color.RESET}")
+        else:
+            out.append(part)
+    return "".join(out)
+
+
 def is_content_list(val: Any) -> TypeGuard[list[Content]]:
     """TypeGuard to check if value is a list of dicts with string keys"""
     if not isinstance(val, list):
