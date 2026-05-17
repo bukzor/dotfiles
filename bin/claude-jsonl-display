@@ -482,6 +482,54 @@ def format_agent_listing_delta(att: Content, state: State) -> Text:
     return [colorize(f"▸ {state} Agent listing delta: {' '.join(bits)}", Color.CYAN)]
 
 
+def format_date_change(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Date change → {att.get('newDate', '?')}", Color.CYAN)]
+
+
+def format_auto_mode(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Auto mode ({att.get('reminderType', '?')})", Color.CYAN)]
+
+
+def format_auto_mode_exit(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Auto mode exit", Color.CYAN)]
+
+
+def _plan_mode_suffix(att: Content) -> str:
+    path = att.get("planFilePath", "?")
+    exists = "exists" if att.get("planExists") else "new"
+    return f"{path} ({exists})"
+
+
+def format_plan_mode(att: Content, state: State) -> Text:
+    sub = " [subagent]" if att.get("isSubAgent") else ""
+    return [colorize(f"▸ {state} Plan mode{sub}: {_plan_mode_suffix(att)}", Color.CYAN)]
+
+
+def format_plan_mode_exit(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Plan mode exit: {_plan_mode_suffix(att)}", Color.CYAN)]
+
+
+def format_ultrathink_effort(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Ultrathink effort", Color.CYAN)]
+
+
+def format_file(att: Content, state: State) -> Text:
+    display = att.get("displayPath") or att.get("filename", "?")
+    file_data = (att.get("content") or {}).get("file") or {}
+    total = file_data.get("totalLines")
+    suffix = f" ({total} lines)" if isinstance(total, int) else ""
+    return [colorize(f"▸ {state} File: {display}{suffix}", Color.CYAN)]
+
+
+def format_already_read_file(att: Content, state: State) -> Text:
+    display = att.get("displayPath") or att.get("filename", "?")
+    return [colorize(f"▸ {state} Already read: {display}", Color.CYAN)]
+
+
+def format_task_reminder(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Task reminder ({att.get('itemCount', 0)} items)", Color.CYAN)]
+
+
 _ATTACHMENT_FORMATTERS: dict[str, Callable[[Content, State], Text]] = {
     "command_permissions": format_command_permissions,
     "edited_text_file": format_edited_text_file,
@@ -491,6 +539,15 @@ _ATTACHMENT_FORMATTERS: dict[str, Callable[[Content, State], Text]] = {
     "queued_command": format_queued_command,
     "diagnostics": format_diagnostics,
     "agent_listing_delta": format_agent_listing_delta,
+    "date_change": format_date_change,
+    "auto_mode": format_auto_mode,
+    "auto_mode_exit": format_auto_mode_exit,
+    "plan_mode": format_plan_mode,
+    "plan_mode_exit": format_plan_mode_exit,
+    "ultrathink_effort": format_ultrathink_effort,
+    "file": format_file,
+    "already_read_file": format_already_read_file,
+    "task_reminder": format_task_reminder,
 }
 
 
