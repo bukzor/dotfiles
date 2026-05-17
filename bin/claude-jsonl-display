@@ -390,6 +390,64 @@ def format_hook_attachment(att: Content, state: State, att_type: str) -> Text:
     return parts
 
 
+def format_command_permissions(att: Content, state: State) -> Text:
+    tools = att.get("allowedTools") or []
+    body = ", ".join(tools) if tools else "(none)"
+    return [colorize(f"▸ {state} Command permissions: {body}", Color.CYAN)]
+
+
+def format_edited_text_file(att: Content, state: State) -> Text:
+    filename = att.get("filename", "?")
+    # Snippet lines start with "<lineno>\t<text>"; parse first/last to get range.
+    snippet_lines = [ln for ln in (att.get("snippet") or "").split("\n") if ln]
+    range_str = ""
+    if snippet_lines:
+        first = snippet_lines[0].split("\t", 1)[0]
+        last = snippet_lines[-1].split("\t", 1)[0]
+        if first.isdigit() and last.isdigit():
+            range_str = f" (lines {first}-{last})"
+    return [colorize(f"▸ {state} Edited {filename}{range_str}", Color.CYAN)]
+
+
+def format_skill_listing(att: Content, state: State) -> Text:
+    count = att.get("skillCount", 0)
+    note = "initial" if att.get("isInitial") else "updated"
+    return [colorize(f"▸ {state} Skill listing ({note}): {count} skills", Color.CYAN)]
+
+
+def format_deferred_tools_delta(att: Content, state: State) -> Text:
+    added = len(att.get("addedNames") or [])
+    removed = len(att.get("removedNames") or [])
+    readded = len(att.get("readdedNames") or [])
+    pending = len(att.get("pendingMcpServers") or [])
+    bits: list[str] = []
+    if added:
+        bits.append(f"+{added}")
+    if removed:
+        bits.append(f"-{removed}")
+    if readded:
+        bits.append(f"re-added {readded}")
+    if pending:
+        bits.append(f"pending MCP: {pending}")
+    if not bits:
+        bits.append("(no change)")
+    return [colorize(f"▸ {state} Deferred tools delta: {' '.join(bits)}", Color.CYAN)]
+
+
+def format_nested_memory(att: Content, state: State) -> Text:
+    path = att.get("displayPath") or att.get("path", "?")
+    return [colorize(f"▸ {state} Nested memory: {path}", Color.CYAN)]
+
+
+_ATTACHMENT_FORMATTERS: dict[str, Callable[[Content, State], Text]] = {
+    "command_permissions": format_command_permissions,
+    "edited_text_file": format_edited_text_file,
+    "skill_listing": format_skill_listing,
+    "deferred_tools_delta": format_deferred_tools_delta,
+    "nested_memory": format_nested_memory,
+}
+
+
 def format_attachment(content: Content, state: State) -> Text:
     """Format an attachment record (hook events, etc.)."""
     att = content.get("attachment")
@@ -397,8 +455,12 @@ def format_attachment(content: Content, state: State) -> Text:
         return format_unknown("attachment", content, state)
 
     att_type = att.get("type")
-    if isinstance(att_type, str) and att_type.startswith("hook_"):
+    if not isinstance(att_type, str):
+        return format_unknown(f"attachment/{att_type}", content, state)
+    if att_type.startswith("hook_"):
         return format_hook_attachment(att, state, att_type)
+    if (fn := _ATTACHMENT_FORMATTERS.get(att_type)) is not None:
+        return fn(att, state)
     return format_unknown(f"attachment/{att_type}", content, state)
 
 
