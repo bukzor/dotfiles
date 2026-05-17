@@ -439,12 +439,58 @@ def format_nested_memory(att: Content, state: State) -> Text:
     return [colorize(f"▸ {state} Nested memory: {path}", Color.CYAN)]
 
 
+def format_queued_command(att: Content, state: State) -> Text:
+    prompt = (att.get("prompt") or "").strip()
+    mode = att.get("commandMode", "?")
+    preview = prompt.split("\n", 1)[0]
+    if len(preview) > 80:
+        preview = preview[:77] + "..."
+    return [colorize(f"▸ {state} Queued [{mode}]: {preview}", Color.BLUE)]
+
+
+def format_diagnostics(att: Content, state: State) -> Text:
+    files = att.get("files") or []
+    severities = {
+        d.get("severity", "")
+        for f in files for d in (f.get("diagnostics") or [])
+    }
+    if "Error" in severities:
+        marker, color = "⊖", Color.RED
+    elif "Warning" in severities:
+        marker, color = "⊘", Color.YELLOW
+    else:
+        marker, color = "▸", Color.CYAN
+    total = sum(len(f.get("diagnostics") or []) for f in files)
+    return [colorize(
+        f"{marker} {state} Diagnostics: {total} across {len(files)} file(s)",
+        color,
+    )]
+
+
+def format_agent_listing_delta(att: Content, state: State) -> Text:
+    added = len(att.get("addedTypes") or [])
+    removed = len(att.get("removedTypes") or [])
+    if att.get("isInitial"):
+        return [colorize(f"▸ {state} Agent listing (initial): {added} agents", Color.CYAN)]
+    bits: list[str] = []
+    if added:
+        bits.append(f"+{added}")
+    if removed:
+        bits.append(f"-{removed}")
+    if not bits:
+        bits.append("(no change)")
+    return [colorize(f"▸ {state} Agent listing delta: {' '.join(bits)}", Color.CYAN)]
+
+
 _ATTACHMENT_FORMATTERS: dict[str, Callable[[Content, State], Text]] = {
     "command_permissions": format_command_permissions,
     "edited_text_file": format_edited_text_file,
     "skill_listing": format_skill_listing,
     "deferred_tools_delta": format_deferred_tools_delta,
     "nested_memory": format_nested_memory,
+    "queued_command": format_queued_command,
+    "diagnostics": format_diagnostics,
+    "agent_listing_delta": format_agent_listing_delta,
 }
 
 
