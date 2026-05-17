@@ -398,15 +398,8 @@ def format_command_permissions(att: Content, state: State) -> Text:
 
 def format_edited_text_file(att: Content, state: State) -> Text:
     filename = att.get("filename", "?")
-    # Snippet lines start with "<lineno>\t<text>"; parse first/last to get range.
-    snippet_lines = [ln for ln in (att.get("snippet") or "").split("\n") if ln]
-    range_str = ""
-    if snippet_lines:
-        first = snippet_lines[0].split("\t", 1)[0]
-        last = snippet_lines[-1].split("\t", 1)[0]
-        if first.isdigit() and last.isdigit():
-            range_str = f" (lines {first}-{last})"
-    return [colorize(f"▸ {state} Edited {filename}{range_str}", Color.CYAN)]
+    snippet = att.get("snippet") or ""
+    return format_boxed_message(f"EDITED {filename}", snippet, state, Color.CYAN)
 
 
 def format_skill_listing(att: Content, state: State) -> Text:
@@ -436,16 +429,25 @@ def format_deferred_tools_delta(att: Content, state: State) -> Text:
 
 def format_nested_memory(att: Content, state: State) -> Text:
     path = att.get("displayPath") or att.get("path", "?")
-    return [colorize(f"▸ {state} Nested memory: {path}", Color.CYAN)]
+    # `content` is a {path, type, content, ...} envelope; the file text is one level in.
+    inner = att.get("content")
+    body = inner.get("content", "") if isinstance(inner, dict) else ""
+    return format_boxed_message(f"NESTED MEMORY {path}", body, state, Color.CYAN)
 
 
 def format_queued_command(att: Content, state: State) -> Text:
     prompt = (att.get("prompt") or "").strip()
     mode = att.get("commandMode", "?")
-    preview = prompt.split("\n", 1)[0]
-    if len(preview) > 80:
-        preview = preview[:77] + "..."
-    return [colorize(f"▸ {state} Queued [{mode}]: {preview}", Color.BLUE)]
+    return format_boxed_message(f"QUEUED [{mode}]", prompt, state, Color.BLUE)
+
+
+def _diagnostic_line(uri: str, d: Content) -> str:
+    sev = d.get("severity", "?")
+    start = (d.get("range") or {}).get("start") or {}
+    line, char = start.get("line", "?"), start.get("character", "?")
+    tag_bits = [b for b in (d.get("source"), d.get("code")) if b]
+    tag = f" [{' '.join(str(b) for b in tag_bits)}]" if tag_bits else ""
+    return f"{sev} {uri}:{line}:{char}{tag} {d.get('message', '')}"
 
 
 def format_diagnostics(att: Content, state: State) -> Text:
@@ -461,10 +463,15 @@ def format_diagnostics(att: Content, state: State) -> Text:
     else:
         marker, color = "▸", Color.CYAN
     total = sum(len(f.get("diagnostics") or []) for f in files)
-    return [colorize(
+    parts: Text = [colorize(
         f"{marker} {state} Diagnostics: {total} across {len(files)} file(s)",
         color,
     )]
+    for f in files:
+        uri = f.get("uri", "?")
+        for d in (f.get("diagnostics") or []):
+            parts += ["\n", colorize("│ ", color), _diagnostic_line(uri, d)]
+    return parts
 
 
 def format_agent_listing_delta(att: Content, state: State) -> Text:
@@ -516,9 +523,9 @@ def format_ultrathink_effort(att: Content, state: State) -> Text:
 def format_file(att: Content, state: State) -> Text:
     display = att.get("displayPath") or att.get("filename", "?")
     file_data = (att.get("content") or {}).get("file") or {}
-    total = file_data.get("totalLines")
-    suffix = f" ({total} lines)" if isinstance(total, int) else ""
-    return [colorize(f"▸ {state} File: {display}{suffix}", Color.CYAN)]
+    return format_boxed_message(
+        f"FILE {display}", file_data.get("content", ""), state, Color.BLUE,
+    )
 
 
 def format_already_read_file(att: Content, state: State) -> Text:
