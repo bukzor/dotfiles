@@ -1,6 +1,21 @@
 --- # workaround: anthropics/claude-code#13003
 requires:
   - ./must-read.kb/before/git/commit.md
+cost-benefit-sweh:
+  timebox:
+    "@value": 2.5
+    rationale: |
+      Phase A (SKILL.md integration) ~1h. Phase B (test skill-bundled
+      command resolution) ~30min. Phase C conditional 30-60min. Beyond
+      2.5h, the Part 2 question has surfaced edge cases worth a separate
+      ADR and skill-command relocation belongs in its own task.
+  benefit-2w:
+    "@value": 1.5
+    rationale: |
+      SKILL.md changes are once-and-done discoverability — future sessions
+      find sessions.kb via the skill rather than via prose archeology.
+      Commands relocation (if pursued) saves cross-skill-dep friction at
+      session boundaries. Modest 2-week payoff; main benefit is durable.
 ---
 
 # Task: Integrate `~/.claude/sessions.kb/` into Skill(llm-subtask) (and consider relocating `/session-start` and `/session-end` into it)
@@ -28,6 +43,13 @@ Two adjacent concerns to settle in this task:
    `Skill(llm-subtask)`-bundled commands or scripts directory),
    following the trajectory set by the
    `CLAUDE.promote-mutation-testing-skill.task.md` precedent.
+
+Steps:
+
+- [ ] Phase A: integrate sessions.kb into `llm-subtask/SKILL.md` (5 edits per Part 1)
+- [ ] Phase B: test whether `~/.claude/skills/<skill>/commands/<name>.md` resolves as `/<name>` at top level
+- [ ] Phase C: act on Phase B finding — either `git mv` `/session-{start,end}` into the skill, or add a SKILL.md cross-link explaining why they stay at top level
+- [ ] Phase D (optional): add `bin/llm-subtask-session` script mirroring `llm-subtask-{idea,todo}`
 
 ## Constraints
 
