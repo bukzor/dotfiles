@@ -1,4 +1,6 @@
-<anthropic-skill-ownership subtask />
+---
+managed-by: Skill(llm-subtask)
+---
 
 - [ ] .claude/todo.d/2025-12-05-000-investigate-non-substitutability-of-reads-pdfimage-capabilities.md
 

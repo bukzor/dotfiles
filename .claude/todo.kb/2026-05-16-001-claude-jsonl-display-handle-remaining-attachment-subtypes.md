@@ -1,5 +1,19 @@
 ---
-anthropic-skill-ownership: llm-subtask
+managed-by: Skill(llm-subtask)
+cost-benefit-sweh:
+  timebox:
+    "@value": 2.0
+    rationale: |
+      ~17 attachment subtypes; per-subtype work is small but schema
+      discovery varies. Beyond 2h, high-frequency subtypes (hook results,
+      edited files, skill listings) are covered; remaining rare subtypes
+      can stay raw JSON.
+  benefit-2w:
+    "@value": 1.5
+    rationale: |
+      JSONL skim is daily flow (~2-3x/day). Estimate ~5 min saved per
+      skim once formatters land × ~30 skims over 2 weeks = ~1.5h direct.
+      Plus reduced cognitive noise reading transcripts.
 ---
 
 # claude-jsonl-display: handle remaining attachment subtypes
