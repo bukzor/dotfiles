@@ -12,6 +12,7 @@ cost-benefit-sweh:
       Unblocks both Task.extract-sessions-kb-to-private-repo (~3h)
       and Task.move-skill-triggers-to-must-read-kb (~2h) by clearing
       the git-commit prerequisite. Highest ROI item in the backlog.
+status: done
 ---
 
 # Task: Rename must-read-before.d to must-read.d/before
