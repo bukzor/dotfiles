@@ -14,6 +14,7 @@ cost-benefit-sweh:
       JSONL skim is daily flow (~2-3x/day). Estimate ~5 min saved per
       skim once formatters land × ~30 skims over 2 weeks = ~1.5h direct.
       Plus reduced cognitive noise reading transcripts.
+status: done
 ---
 
 # claude-jsonl-display: handle remaining attachment subtypes
