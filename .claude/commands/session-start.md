@@ -32,8 +32,8 @@ Default (no arguments): orient by heuristic matching only.
 
    Otherwise (no argument, or argument is not a file path):
    - Look for an existing sessions.kb entry. Search recipes:
-     - `grep -rl "uuid: $CLAUDE_CODE_SESSION_ID" ~/.claude/sessions.kb/`
-     - `grep -rl "^cwd: $PWD" ~/.claude/sessions.kb/`
+     - `grep -Rl "uuid: $CLAUDE_CODE_SESSION_ID" ~/.claude/sessions.kb/`
+     - `grep -Rl "^cwd: $PWD" ~/.claude/sessions.kb/`
      - Or scan filenames for topic match.
      If found, read it and any files listed under `focus:`.
    - Consider creating a new entry (same template) when any apply:
