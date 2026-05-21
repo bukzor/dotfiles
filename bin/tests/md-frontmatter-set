@@ -1,0 +1,158 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+BIN_DIR=$(cd -- "$SCRIPT_DIR/.." && pwd)
+UNDER_TEST="$BIN_DIR/md-frontmatter-set"
+EXTRACT="$BIN_DIR/md-frontmatter"
+
+TESTDIR=$(mktemp -d)
+trap 'rm -rf "$TESTDIR"' EXIT
+
+pass=0
+fail=0
+check() {
+  local name=$1 expected=$2 actual=$3
+  if [[ "$expected" == "$actual" ]]; then
+    echo "PASS: $name"
+    pass=$((pass+1))
+  else
+    echo "FAIL: $name"
+    diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") || true
+    fail=$((fail+1))
+  fi
+}
+
+# Sample with: top comment, inline comment on array element, trailing comment,
+# blank line inside FM, and an unquoted YAML date.
+mk_sample() {
+  cat > "$1" <<'EOF'
+---
+# top comment
+title: Old Title
+tags:
+  - a    # inline comment on a
+  - b
+# trailing comment
+
+date: 2026-01-01
+---
+
+# Body
+
+Content.
+EOF
+}
+
+# === identity round-trip is byte-identical ===
+mk_sample "$TESTDIR/t.md"
+cp "$TESTDIR/t.md" "$TESTDIR/t.orig.md"
+"$EXTRACT" "$TESTDIR/t.md" | "$UNDER_TEST"
+diff_out=$(diff -u "$TESTDIR/t.orig.md" "$TESTDIR/t.md" || true)
+check "identity round-trip is byte-identical" "" "$diff_out"
+
+# === update title only: date stays unquoted (untouched) ===
+mk_sample "$TESTDIR/t.md"
+printf '%s\n' '{"path":"'"$TESTDIR"'/t.md","@value":{"title":"New Title","tags":["a","b"],"date":"2026-01-01"}}' \
+  | "$UNDER_TEST"
+got_title=$(yq -f extract '.title' "$TESTDIR/t.md")
+got_date_line=$(grep '^date:' "$TESTDIR/t.md")
+check "set: title updated" "New Title" "$got_title"
+check "set: untouched date stays unquoted" "date: 2026-01-01" "$got_date_line"
+
+# === append to array preserves leading element's inline comment text ===
+mk_sample "$TESTDIR/t.md"
+printf '%s\n' '{"path":"'"$TESTDIR"'/t.md","@value":{"title":"Old Title","tags":["a","b","c"],"date":"2026-01-01"}}' \
+  | "$UNDER_TEST"
+grep -q 'inline comment on a' "$TESTDIR/t.md" && r=yes || r=no
+check "set: inline comment on 'a' survives append" "yes" "$r"
+grep -q '^  - c$' "$TESTDIR/t.md" && r=yes || r=no
+check "set: 'c' appended to tags" "yes" "$r"
+
+# === delete a key removes it ===
+mk_sample "$TESTDIR/t.md"
+printf '%s\n' '{"path":"'"$TESTDIR"'/t.md","@value":{"title":"Old Title","tags":["a","b"]}}' \
+  | "$UNDER_TEST"
+grep -q '^date:' "$TESTDIR/t.md" && r="still present" || r="removed"
+check "set: deleted key removed" "removed" "$r"
+
+# === add frontmatter to a bare file ===
+echo "no frontmatter here" > "$TESTDIR/bare.md"
+printf '%s\n' '{"path":"'"$TESTDIR"'/bare.md","@value":{"hello":"world"}}' | "$UNDER_TEST"
+got=$("$EXTRACT" "$TESTDIR/bare.md" | jq -c '.["@value"]')
+check "set: frontmatter created on bare file" '{"hello":"world"}' "$got"
+
+# === @value: null on bare file is a no-op ===
+echo "no frontmatter" > "$TESTDIR/bare2.md"
+cp "$TESTDIR/bare2.md" "$TESTDIR/bare2.orig.md"
+printf '%s\n' '{"path":"'"$TESTDIR"'/bare2.md","@value":null}' | "$UNDER_TEST"
+diff_out=$(diff -u "$TESTDIR/bare2.orig.md" "$TESTDIR/bare2.md" || true)
+check "set: null @value on bare file is no-op" "" "$diff_out"
+
+# === @value: null on file WITH frontmatter is refused (file unchanged) ===
+mk_sample "$TESTDIR/t.md"
+cp "$TESTDIR/t.md" "$TESTDIR/t.orig.md"
+err=$(printf '%s\n' '{"path":"'"$TESTDIR"'/t.md","@value":null}' | "$UNDER_TEST" 2>&1; true)
+echo "$err" | grep -q "refusing to remove frontmatter" && r=refused || r="not-refused"
+check "set: null @value on FM file refused" "refused" "$r"
+diff_out=$(diff -u "$TESTDIR/t.orig.md" "$TESTDIR/t.md" || true)
+check "set: refused write leaves file unchanged" "" "$diff_out"
+
+# === nested object: change one inner key, sibling untouched ===
+cat > "$TESTDIR/nested.md" <<'EOF'
+---
+meta:
+  author: Alice  # comment on author
+  version: 1
+title: Hi
+---
+body
+EOF
+printf '%s\n' '{"path":"'"$TESTDIR"'/nested.md","@value":{"meta":{"author":"Bob","version":1},"title":"Hi"}}' \
+  | "$UNDER_TEST"
+got_author=$(yq -f extract '.meta.author' "$TESTDIR/nested.md")
+got_version=$(yq -f extract '.meta.version' "$TESTDIR/nested.md")
+check "set: nested key updated" "Bob" "$got_author"
+check "set: nested sibling untouched" "1" "$got_version"
+
+# === array shrink: remove last element ===
+cat > "$TESTDIR/shrink.md" <<'EOF'
+---
+tags:
+  - a
+  - b
+  - c
+---
+body
+EOF
+printf '%s\n' '{"path":"'"$TESTDIR"'/shrink.md","@value":{"tags":["a","b"]}}' | "$UNDER_TEST"
+got_tags=$(yq -f extract -o=json -I=0 '.tags' "$TESTDIR/shrink.md")
+check "set: array shrink works" '["a","b"]' "$got_tags"
+
+# === multiple records on stdin ===
+mk_sample "$TESTDIR/m1.md"
+mk_sample "$TESTDIR/m2.md"
+{
+  printf '%s\n' '{"path":"'"$TESTDIR"'/m1.md","@value":{"title":"M1","tags":["a","b"],"date":"2026-01-01"}}'
+  printf '%s\n' '{"path":"'"$TESTDIR"'/m2.md","@value":{"title":"M2","tags":["a","b"],"date":"2026-01-01"}}'
+} | "$UNDER_TEST"
+got1=$(yq -f extract '.title' "$TESTDIR/m1.md")
+got2=$(yq -f extract '.title' "$TESTDIR/m2.md")
+check "set: multiple records (file 1)" "M1" "$got1"
+check "set: multiple records (file 2)" "M2" "$got2"
+
+echo
+echo "=== md-frontmatter-set: $pass passed, $fail failed ==="
+exit $(( fail > 0 ))

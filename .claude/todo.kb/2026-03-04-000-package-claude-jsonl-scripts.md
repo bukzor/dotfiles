@@ -1,5 +1,26 @@
 ---
 managed-by: Skill(llm-subtask)
+cost-benefit-sweh:
+  timebox:
+    "@value": 2.0
+    rationale: |
+      ~0.5h decision on packaging shape, ~1h README + repo structure,
+      ~0.5h migrate scripts + smoke-test. Low complexity per the file's
+      own assessment.
+    confidence: tentative
+  benefit-2w:
+    "@value": 0.5
+    rationale: |
+      Minor cleanup win: scripts become discoverable + versioned. No
+      blocking downstream. ~$50 worth of "less embarrassing if shared"
+      and "easier to maintain."
+    confidence: tentative
+  cost-of-delay-2w:
+    "@value": 0.1
+    rationale: |
+      Scripts work fine in ~/bin/ today. Only cost: each 2w delay
+      leaves more callers/usage to migrate later. Trivial.
+    confidence: tentative
 ---
 
 # Package claude-jsonl scripts

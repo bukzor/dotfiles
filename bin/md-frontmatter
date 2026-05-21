@@ -1,0 +1,38 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+usage() {
+  cat >&2 <<EOF
+usage: md-frontmatter FILE [FILE...]
+
+Extract YAML frontmatter from markdown file(s) and emit JSONL:
+  {"path": "<file>", "@value": <frontmatter>}
+EOF
+  exit 2
+}
+
+if (( $# == 0 )); then
+  usage
+fi
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+for f in "$@"; do
+  if grep -zq '^\s*---' "$f"; then
+    path="$f" yq -f extract -o=json -I=0 \
+      '{"path": strenv(path), "@value": .}' "$f"
+  else
+    path="$f" yq -n -o=json -I=0 \
+      '{"path": strenv(path), "@value": null}'
+  fi
+done

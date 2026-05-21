@@ -1,0 +1,100 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+usage() {
+  cat >&2 <<EOF
+usage: md-frontmatter-set < records.jsonl
+
+Reads JSONL on stdin, one record per line:
+  {"path": "<file>", "@value": <frontmatter>}
+
+For each record, writes <frontmatter> as the YAML frontmatter of <file>.
+Uses recursive leaf-level diff: only paths whose scalar values actually
+differ are rewritten. Unchanged subtrees are not touched (yq is not run
+at all when there are no changes — byte-identical no-op).
+@value=null is a no-op when the file has no frontmatter; otherwise refused.
+EOF
+  exit 2
+}
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+DIFF_JQ_FILE="$SCRIPT_DIR/md-frontmatter-diff.jq"
+
+if [[ ! -f "$DIFF_JQ_FILE" ]]; then
+  echo >&2 "md-frontmatter-set: missing $DIFF_JQ_FILE"
+  exit 1
+fi
+
+if [[ -t 0 ]]; then
+  usage
+fi
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+process_record() {
+  local line=$1
+  local path new_value
+  path=$(jq -r '.path' <<<"$line")
+  new_value=$(jq -c '.["@value"]' <<<"$line")
+
+  if [[ ! -f "$path" ]]; then
+    echo >&2 "md-frontmatter-set: file not found: $path"
+    return 1
+  fi
+
+  local has_fm=0
+  if grep -zq '^\s*---' "$path"; then
+    has_fm=1
+  fi
+
+  if [[ "$new_value" == "null" ]]; then
+    if (( has_fm )); then
+      echo >&2 "md-frontmatter-set: refusing to remove frontmatter from $path (@value=null)"
+      return 1
+    fi
+    return 0
+  fi
+
+  local current='{}'
+  if (( has_fm )); then
+    current=$(yq -f extract -o=json -I=0 '.' "$path")
+  fi
+
+  local full_expr
+  full_expr=$(jq -r -n --argjson cur "$current" --argjson new "$new_value" \
+    -f "$DIFF_JQ_FILE")
+
+  if [[ -z "$full_expr" ]]; then
+    return 0
+  fi
+
+  if (( has_fm )); then
+    yq -i -f process "$full_expr" "$path"
+  else
+    local fm_yaml tmp
+    fm_yaml=$(yq -P -o=yaml <<<"$new_value")
+    tmp="$path.tmp.$$"
+    {
+      printf -- '---\n'
+      printf '%s\n' "$fm_yaml"
+      printf -- '---\n'
+      cat "$path"
+    } > "$tmp"
+    mv "$tmp" "$path"
+  fi
+}
+
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  process_record "$line"
+done
