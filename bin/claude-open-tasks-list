@@ -2,10 +2,10 @@
 """List open tasks across conventional locations under ~/repo and ~/.claude.
 
 Pending tasks across conventional locations:
-- `todo.md` / `todo.kb/*.md` / `sessions.kb/*.md` files: list open `- [ ]` lines
-- `CLAUDE.*Task*.md` files: prose procedures — their existence IS the signal,
-  so emit the path unconditionally. If a `- [ ]` list happens to be present,
-  list those too.
+- `todo.md` / `sessions.kb/*.md` files: list open `- [ ]` lines
+- `todo.kb/*.md` / `todo.d/*.md` / `CLAUDE.*Task*.md` files: prose procedures
+  — their existence IS the signal, so emit the path unconditionally. If a
+  `- [ ]` list happens to be present, list those too.
 
 Dedup across git worktrees: group by (repo, path-within-repo) and keep the
 member with the largest effective mtime. Effective mtime is the file's
@@ -26,7 +26,7 @@ import sys
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
-ROOTS = (Path.home() / "repo", Path.home() / ".claude")
+ROOTS = (Path.home() / "repo", Path.home() / ".claude", Path.home() / "claude")
 
 # Status values that take a file out of the open-task list.
 #   - done: terminal state, work complete
@@ -37,14 +37,25 @@ STATUS = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
 OPEN_TASK = re.compile(r"^ *- \[ \].*$", re.MULTILINE)
 CLAUDE_TASK_NAME = re.compile(r"^CLAUDE\..*task.*\.md$", re.IGNORECASE)
 
+# Parent-directory names whose direct children follow "one file = one task":
+# the file's existence in this location is the open-task signal, regardless
+# of whether the body contains `- [ ]` bullets. Parallels CLAUDE.*Task*.md
+# semantics but keyed on location rather than filename.
+EXISTENCE_IS_SIGNAL_PARENTS = ("todo.kb", "todo.d")
+
 
 def list_candidates(roots: Sequence[Path]) -> list[Path]:
     cmd = [
         "find", *(str(r) for r in roots),
+        # Prune `trash/` subtrees: convention is staging area for material
+        # slated for deletion, not active backlog.
+        "(", "-type", "d", "-name", "trash", "-prune", ")",
+        "-or",
         "(",
         "-false",
         "-or", "-path", "*/.claude/todo.md",
         "-or", "-path", "*/.claude/todo.kb/*.md",
+        "-or", "-path", "*/.claude/todo.d/*.md",
         "-or", "-path", "*/.claude/sessions.kb/*.md",
         "-or", "-iname", "CLAUDE.*Task*.md",
         ")",
@@ -145,11 +156,20 @@ def is_status_skip(body: str) -> bool:
     return m is not None and m.group(1) in SKIP_STATUSES
 
 
+def existence_is_signal(path: Path) -> bool:
+    """True if the path's location/name marks it as a one-file-one-task
+    entry whose existence is the open-task signal (regardless of body)."""
+    return (
+        path.parent.name in EXISTENCE_IS_SIGNAL_PARENTS
+        or CLAUDE_TASK_NAME.match(path.name) is not None
+    )
+
+
 def format_section(path: Path, body: str) -> str | None:
     if is_status_skip(body):
         return None
     open_tasks = OPEN_TASK.findall(body)
-    if not open_tasks and not CLAUDE_TASK_NAME.match(path.name):
+    if not open_tasks and not existence_is_signal(path):
         return None
     return "\n".join([f"## {path}", *open_tasks])
 
