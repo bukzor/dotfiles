@@ -1,0 +1,6 @@
+# llm-vitals configuration (read by the llm-vitals skill).
+# Data location is decoupled from the skill per
+# design.kb/030-requirements.kb/decoupled-data-location.md.
+vitals_root: /home/bukzor/repo/github.com/bukzor/private.evan-family/vitals
+cadence_days: 7
+vitals: [body, relationships, restoration, meaning]
