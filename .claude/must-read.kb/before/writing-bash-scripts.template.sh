@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+shopt -s failglob
 export DEBUG="${DEBUG:-0}"
 
 onerror() {
