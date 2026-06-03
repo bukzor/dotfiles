@@ -1,7 +1,7 @@
 ---
 requires:
   - ~/.claude/reference.kb/git/commit.md
-  - ./ANY-git-command.md
+  - ./running-ANY-git-command.md
 ---
 
 # Before committing

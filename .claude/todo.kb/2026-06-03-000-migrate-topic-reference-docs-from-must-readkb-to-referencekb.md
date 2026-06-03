@@ -87,6 +87,8 @@ stay where they fire.
 
 - [x] `before/using-claude-code-tool/Bash.md`: subshell/`parallel` notes are
   tool-usage at-the-moment guidance, not a portable bash corpus — leave.
+  (Superseded 2026-06-03: folded into `before/running-ANY-Bash-commands.md` —
+  two triggers were splitting the match for the same moment.)
 - [x] `before/using-claude-code-tool/Edit.md` (24w): tiny quirk — leave.
 - [x] `before/lazy-loading/{commands,mcp,skills}.md`: catalog tables are bound to
   harness loading flow; not standalone topic references — leave.

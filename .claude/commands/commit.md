@@ -1,6 +1,6 @@
 --- # workaround: anthropics/claude-code#13003
 requires:
-  - ../must-read.kb/before/git/ANY-git-command.md
+  - ../must-read.kb/before/git/running-ANY-git-command.md
   - ../must-read.kb/before/git/commit.md
 ---
 
