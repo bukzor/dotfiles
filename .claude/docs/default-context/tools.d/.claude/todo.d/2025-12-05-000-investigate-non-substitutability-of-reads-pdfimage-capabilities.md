@@ -1,3 +1,16 @@
+---
+cost-benefit-sweh:
+  timebox:
+    '@value': 1
+    confidence: tentative
+    rationale: |
+      Four investigative questions (image base64 path, pdftotext coverage, MCP substitutes, usage ratio). Read tool source/behavior + documentation + writeup. ~1 SWEh research.
+  benefit-2w:
+    '@value': 0.3
+    confidence: tentative
+    rationale: |
+      Tool-value scoring system input; informs future Read tool scope (keep / trim / split). Modest signal value.
+---
 <anthropic-skill-ownership subtask />
 
 # Investigate Non-Substitutability of Read's PDF/Image Capabilities
