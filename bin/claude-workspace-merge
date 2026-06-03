@@ -20,16 +20,58 @@ abspath() {
   realpath -Lm "$1"
 }
 
+# Merge and symlink: make src -> dst symlink, handling all cases
+# Args: src dst [description]
+merge_and_symlink() {
+  local src="$1"
+  local dst="$2"
+  local desc="${3:-}"
+  set -x
+
+  # Already linked - nothing to do
+  if [[ -L "$src" ]] && [[ "$(readlink "$src")" == "$dst" ]]; then
+    echo "✓ Symlink already exists${desc:+ ($desc)}"
+    return
+  fi
+
+  # Handle src if it exists (move or merge into dst)
+  if [[ -e "$src" ]]; then
+    if [[ -e "$dst" ]]; then
+      # Both exist - merge src into dst
+      [[ -n "$desc" ]] && echo "⚠ Both exist, merging $desc..."
+      if [[ -n "$(ls -A "$src")" ]]; then
+        find "$src" -mindepth 1 -maxdepth 1 -print0 |
+          xargs -r0 mv -i -t "$dst"
+      fi
+      rmdir "$src"
+      [[ -n "$desc" ]] && echo "✓ Merged $desc"
+    else
+      # Only src exists - move to dst
+      mv "$src" "$dst"
+      [[ -n "$desc" ]] && echo "✓ Moved $desc"
+    fi
+  fi
+
+  # Ensure dst exists (for "neither exists" case)
+  if [[ ! -e "$dst" ]]; then
+    mkdir -p "$dst"
+  fi
+  # At this point, dst exists and src doesn't (or has been removed/merged)
+
+  ln -s "$dst" "$src"
+  echo "✓ Created symlink${desc:+ ($desc)}"
+}
+
 # Usage/help text
 usage() {
   cat <<EOF
-Usage: claude-ln <source-dir> <dest-dir>
+Usage: claude-workspace-merge <source-dir> <dest-dir>
 
 Create symlinks to share Claude Code conversation history between directories.
 
 Arguments:
   source-dir  Directory that will become a symlink
-  dest-dir    Real directory (will be created if needed, must not exist if source has content)
+  dest-dir    Real directory (will be created if needed; merged if both exist)
 
 This tool creates:
 1. Filesystem symlink: source-dir -> dest-dir
@@ -65,68 +107,12 @@ if [[ -L "$1" ]]; then
 fi
 
 # Step 2: Filesystem Directory Symlink
-# Goal: src becomes a symlink pointing to dst
-if [[ ! -e "$src" ]] && [[ ! -e "$dst" ]]; then
-  # Neither exists, create dst and link src to it
-  mkdir -p "$dst"
-  ln -s "$dst" "$src"
-  echo "✓ Created destination directory and symlink: $src -> $dst"
-elif [[ ! -e "$dst" ]] && [[ -e "$src" ]]; then
-  # src exists, dst doesn't - move src to dst, then link
-  mv "$src" "$dst"
-  ln -s "$dst" "$src"
-  echo "✓ Moved source to destination and created symlink: $src -> $dst"
-elif [[ -L "$src" ]] && [[ "$(readlink "$src")" == "$dst" ]]; then
-  echo "✓ Filesystem symlink already exists: $src -> $dst"
-elif [[ -e "$src" ]] && [[ -e "$dst" ]]; then
-  echo "⚠ Both source and destination exist as real directories"
-  echo "  Skipping filesystem symlink, continuing with Claude history..."
-elif [[ ! -e "$src" ]] && [[ -e "$dst" ]]; then
-  # dst exists, src doesn't - just create the symlink
-  ln -s "$dst" "$src"
-  echo "✓ Created filesystem symlink: $src -> $dst"
-fi
+merge_and_symlink "$src" "$dst"
 
 # Step 3: Claude Project Directory Symlink
-# Goal: src_claude becomes a symlink pointing to dst_claude
 src_claude="$HOME/.claude/projects/$(claudepath "$src")"
 dst_claude="$HOME/.claude/projects/$(claudepath "$dst")"
-
-# If neither exists, nothing to do
-if [[ ! -e "$src_claude" ]] && [[ ! -e "$dst_claude" ]]; then
-  echo "✓ No Claude history exists yet for either directory"
-  exit 0
-fi
-
-# If src_claude doesn't exist but dst_claude does, just create symlink
-if [[ ! -e "$src_claude" ]] && [[ -e "$dst_claude" ]]; then
-  ln -s "$dst_claude" "$src_claude"
-  echo "✓ Created Claude history symlink: $src_claude -> $dst_claude"
-# If src_claude is already a symlink to dst_claude, we're done
-elif [[ -L "$src_claude" ]] && [[ "$(readlink "$src_claude")" == "$dst_claude" ]]; then
-  echo "✓ Claude history symlink already exists: $src_claude -> $dst_claude"
-# If src_claude exists but dst_claude doesn't, move and link
-elif [[ -e "$src_claude" ]] && [[ ! -e "$dst_claude" ]]; then
-  mv "$src_claude" "$dst_claude"
-  ln -s "$dst_claude" "$src_claude"
-  echo "✓ Moved and created Claude history symlink: $src_claude -> $dst_claude"
-# If both exist and are real directories, merge
-elif [[ -d "$src_claude" ]] && [[ ! -L "$src_claude" ]] && [[ -d "$dst_claude" ]] && [[ ! -L "$dst_claude" ]]; then
-  echo "⚠ Both Claude histories exist, merging files..."
-  # Move all files from src into dst with interactive prompts
-  if [[ -n "$(ls -A "$src_claude")" ]]; then
-    find "$src_claude" -mindepth 1 -maxdepth 1 -print0 |
-      xargs -r0 mv -i -t "$dst_claude"
-  fi
-  # Remove the now-empty directory
-  rmdir "$src_claude"
-  # Create the symlink
-  ln -s "$dst_claude" "$src_claude"
-  echo "✓ Merged and created Claude history symlink: $src_claude -> $dst_claude"
-else
-  echo "⚠ Unexpected state for Claude history directories"
-  exit 1
-fi
+merge_and_symlink "$src_claude" "$dst_claude" "Claude history"
 
 echo ""
 echo "✓ Success! Both paths now share the same Claude conversation history:"

@@ -1,2 +1,2 @@
 #!/bin/sh
-brew search "$@" | xargs brew desc --eval-all
+brew search "$@" | xargs -r brew desc --eval-all

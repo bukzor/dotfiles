@@ -14,22 +14,26 @@ claude-workspace-merge <source> <dest>
 ### Step 1: Path Resolution
 - Resolve both arguments to absolute paths using `realpath -Lm`
 - If source == dest, exit successfully (nothing to do)
+- If source is already a symlink, error with suggestion
 
 ### Step 2: Filesystem Directory
-Make `src` → `dst` (symlink):
-- Neither exist: create dst, symlink src to it
-- Src only: move src to dst, symlink src to dst
-- Dst only: symlink src to dst
-- Already linked: skip
-- Both exist: merge src into dst with `mv -i`, remove src, symlink
+Apply `merge_and_symlink(src, dst)`
 
 ### Step 3: Claude History
-Same pattern for `~/.claude/projects/$(claudepath PATH)`:
-- Neither: done (no history yet)
-- Src only: move to dst location, symlink
-- Dst only: symlink src to dst
-- Already linked: skip
-- Both exist: merge src into dst with `mv -i`, remove src, symlink
+Apply `merge_and_symlink(src_claude, dst_claude)` where:
+- `src_claude = ~/.claude/projects/$(claudepath src)`
+- `dst_claude = ~/.claude/projects/$(claudepath dst)`
+
+## Algorithm: merge_and_symlink
+
+Goal: Make `src → dst` symlink, handling all src/dst existence combinations
+
+1. **Already linked?** If src is symlink to dst, report and return
+2. **Handle src:** If src exists:
+   - If dst exists: merge src contents into dst, remove src
+   - Else: move src to dst
+3. **Ensure dst exists:** If neither existed, create dst
+4. **Create symlink:** `ln -s dst src`
 
 ## Helpers
 
@@ -41,7 +45,13 @@ abspath() {
 
 claudepath() {
   # /home/user/path -> -home-user-path
-  sed 's|[^A-Za-z0-9]|-|g' <<< "$1"
+  # Implementation: replace non-alphanumeric with dash
+}
+
+merge_and_symlink() {
+  # Args: src dst
+  # Makes src -> dst symlink, handling all existence cases
+  # See algorithm above
 }
 ```
 
@@ -53,10 +63,10 @@ claudepath() {
 - Only catch errors you can make into success
 
 **Edge Cases:**
-- If source doesn't exist: error and exit
-- If source is already a symlink: error with suggestion like `claude-workspace-merge $(readlink -f "$src") "$dst"`
-- If dest is a symlink: don't care, let it work naturally
+- Source is already a symlink: error with suggestion like `claude-workspace-merge $(readlink -f "$src") "$dst"`
+- Dest is a symlink: works naturally (realpath resolves it)
 - Circular symlinks: `realpath` will fail appropriately
+- Source doesn't exist: handled naturally by merge_and_symlink (creates symlink to dst)
 
 **Quality:**
 - Idempotent (safe to run multiple times)

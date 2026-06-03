@@ -1,4 +1,4 @@
-#!/usr/bin/env sed -uf
+#!/usr/bin/env -S sed -uf
 
 # NOTE: \x1b is the ANSI escape code
 # Remove ANSI escapes.

@@ -21,9 +21,13 @@ tmux=(
 )
 
 window_number=$(tmux display-message -p '#I')
+i=$((window_number - 2))
+if (( i < 0 )); then
+  i=0
+fi
 
 set -x
-tmux set-option base-index $((window_number - 2))
+tmux set-option base-index "$i"
 
 # </dev/null prevents "sessions should be nested with care" error
 "${tmux[@]}" </dev/null >/dev/null
