@@ -23,7 +23,7 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # `nproc` and `path`
-. ~/.config/sh/functions.sh
+. "$HOME/.config/sh/functions.sh"
 
 # set some defaults
 export CLICOLOR=truecolor
@@ -38,9 +38,11 @@ export HOMEBREW_CC=clang
 export MAX_THINKING_TOKENS=63999
 
 export PREFIX=$HOME/prefix
-export GOPATH="$PREFIX/golang"
+export GOPREFIX="$PREFIX/golang"
+export GOPATH="$GOPREFIX"
 
 export VOLTA_HOME="$HOME/.volta"
+export PYTHONPATH="$HOME/lib/pythonpath${PYTHONPATH:+:$PYTHONPATH}"
 
 # NOTE: in path_prepend, last wins
 # enabling meta-tools: rustup, volta, etc.
@@ -52,7 +54,7 @@ path prepend PATH <<EOF
   /usr/sbin
   /sbin
 
-  $GOROOT/bin
+  $GOPREFIX/bin
 
   $HOME/.bun/bin
   $VOLTA_HOME/bin
@@ -67,3 +69,5 @@ path prepend PATH <<EOF
 EOF
 
 alias login="source ~/.profile"
+
+env > ~/profile.env
