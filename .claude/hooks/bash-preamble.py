@@ -109,8 +109,9 @@ def wrap_command(cmd):
     """
     return f"""\
 bash <<'{MARKER}'
-export PS4='+$ '
+export PS4='+ $ '
 set -euo pipefail
+shopt -s failglob
 set -x
 {cmd}
 {{ set +x; }} 2>/dev/null
