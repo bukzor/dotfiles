@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Print an 80×160 grid of Unicode glyphs for font testing."""
+
+import random
+from os import environ
+
+SEED = environ.get('SEED', '')
+if not SEED:
+    SEED = format(random.randint(0, 0x100000000), 'x')
+print("SEED:", SEED)
+random.seed(SEED)
+
+
+# prolematic seeds?
+#    b39993a5
+ROWS = 51
+COLUMNS = 160
+ORDERED = True
+
+
+UNICODE_BLOCKS = {
+    'egyptian_hieroglyphs': (0x13000, 0x13100, True),
+    'cuneiform': (0x12000, 0x12100, True),
+    'miscellaneous_symbols': (0x2600, 0x26FF, False),
+    'dingbats': (0x270C, 0x27BF, True),
+    'emoticons': (0x1F600, 0x1F650, True),
+    'supplemental_symbols_pictographs': (0x1F900, 0x1F9FF, True),
+    'powerline': (0xE0A0, 0xE0D4, False),
+    'devicons': (0xE700, 0xE7C5, False),
+    'font_awesome': (0xF000, 0xF2E0, False),
+    'material_design': (0xF500, 0xFD46, False),
+    'latin_extended': (0x0100, 0x024F, False),
+    'greek_coptic': (0x0370, 0x03FF, False),
+    'cyrillic': (0x0400, 0x04FF, False),
+    'cjk_unified': (0x4E00, 0x5000, True),
+    'box_drawing': (0x2500, 0x257F, False),
+    'math_operators': (0x2200, 0x22FF, False),
+    'bmp_lo': (0x0000, 0xD7FF, True),
+    'bmp_hi': (0xE000, 0xFFFF, False),
+    'astral': (0x10000, 0x10FFFF, True),
+}
+
+
+_extra_row_count = (ROWS - 46) // 2
+GLYPH_SECTIONS = [
+    # (rows, block_name)
+    (2, 'latin_extended'),  # 1,2
+    (2, 'egyptian_hieroglyphs'), #3,4
+    (2, 'cuneiform'), # 5,6
+    (2, 'miscellaneous_symbols'), # 7,8
+    (2, 'dingbats'), # 9,10
+    (2, 'emoticons'), # 11,12
+    (2, 'supplemental_symbols_pictographs'), # 13,14
+    (2, 'powerline'), # 15,16
+    (2, 'devicons'), # 17,18
+    (2, 'font_awesome'), # 19,20
+    (2, 'material_design'), # 21,22
+    (2, 'bmp_lo'), # 23,24
+    (2, 'bmp_hi'), # 25,26
+    (4, 'astral'), # 27-30
+    (2, 'greek_coptic'), # 31,32
+    (2, 'cyrillic'), # 33,34
+    (8, 'cjk_unified'), # 35-42
+    (2, 'box_drawing'), # 43,44
+    (2, 'math_operators'), # 45, 46
+    (_extra_row_count, 'bmp_lo'),
+    (_extra_row_count, 'bmp_hi'),
+]
+
+_total_rows = sum(rows for rows, _ in GLYPH_SECTIONS)
+assert ROWS-1 <= _total_rows <= ROWS, _total_rows
+del _total_rows
+
+
+def generate_section_rows(rows, block_name):
+    """Generate formatted rows for a section."""
+    start, end, double_wide = UNICODE_BLOCKS[block_name]
+    chars_per_row = COLUMNS // (2 if double_wide else 1)
+
+    total_chars = rows * chars_per_row
+    block_size = end - start
+
+    # Cycle if we need more chars than available, otherwise sample
+    if total_chars > block_size:
+        chars = [chr(start + (i % block_size)) for i in range(total_chars)]
+        if not ORDERED:
+            random.shuffle(chars)
+    else:
+        if ORDERED:
+            stride = block_size // total_chars
+            offset = random.randint(0, stride - 1)
+            end_adjusted = start + offset + stride * total_chars
+            chars = [chr(c) for c in range(start + offset, end_adjusted, stride)]
+        else:
+            chars = [chr(c) for c in random.sample(range(start, end), total_chars)]
+
+    assert len(chars) == total_chars, (len(chars), total_chars)
+
+    # Format into rows
+    lines = []
+    for i in range(rows):
+        row_start = i * chars_per_row
+        row_end = row_start + chars_per_row
+        lines.append(''.join(chars[row_start:row_end]))
+
+    return lines
+
+
+def generate_grid():
+    """Generate the complete 80×160 character grid."""
+    lines = []
+    for rows, block_name in GLYPH_SECTIONS:
+        lines.extend(generate_section_rows(rows, block_name))
+    return '\n'.join(lines)
+
+
+def main():
+    """Generate and print the glyph grid."""
+    grid = generate_grid()
+    print(grid)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,36 @@
+#!/bin/bash
+# logrotate-cron <command> [args...]
+# Runs command, logging to auto-generated log file with rotation
+
+set -euo pipefail
+
+# Generate filename from command
+logfile=$(echo "$*" | tr -cs '[:alnum:]-._' '-' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
+if [[ ${#logfile} -gt 80 ]]; then
+    # shorten, with hashing
+    logfile="${logfile:0:20}.$(echo "$*" | md5sum | cut -d' ' -f1).${logfile: -20}"
+fi
+
+logfile="$HOME/.local/state/cron/${logfile}.log"
+mkdir -p "$(dirname "$logfile")"
+
+# Rotate if > 10KB, keep 10 rotations
+mkdir -p ~/.local/state/logrotate
+logrotate -s ~/.local/state/logrotate/status <(cat <<EOF
+$logfile {
+    size 10k
+    rotate 10
+    compress
+    dateext
+    dateformat -%FT%T%:z
+    missingok
+    notifempty
+}
+EOF
+)
+
+# Run command with logging
+exec >> "$logfile" 2>&1
+echo --
+date -Ins
+exec "$@"

@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+repo_dir="$1"
+repo_url="$(git -C "$repo_dir" config remote.origin.url)"
+
+set -x
+git reset "$repo_dir"
+git submodule add -f "$repo_url" "$repo_dir"

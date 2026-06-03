@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+PS4=$'\n$ '
+DEBUG=${DEBUG:-0}
+
+if (( DEBUG >= 5 )); then set -x; fi
+if (( DEBUG >= 2 )); then debug+=(--verbose); fi
+if (( DEBUG >= 4 )); then debug+=(--debug); fi
+
+if (( DEBUG >= 1 )); then set -x; fi
+
+claude \
+  "${debug[@]}" \
+  --print \
+  --input-format=stream-json \
+  --output-format=stream-json \
+  --include-partial-messages \
+  --replay-user-messages \
+  "$@" \
+;
