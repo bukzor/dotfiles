@@ -1,2 +1,4 @@
 [GLOBAL]
 pants_version = "2.25.0"
+
+pythonpath = ["%(buildroot)s/lib/pants-plugins"]

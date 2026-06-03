@@ -9,7 +9,7 @@ from typing import Any
 
 # Type aliases for clarity
 type Json = dict[str, Any]
-type Ast = list[Ast]  # nested lists of strings
+type Ast = list[str | Ast]
 
 
 def format_type(ty: Json) -> Ast:

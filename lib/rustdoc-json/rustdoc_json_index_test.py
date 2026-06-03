@@ -58,6 +58,17 @@ class TestFormatType:
         }
         assert format_type(ty) == ["&", "'a", "mut", ["str"]]
 
+    def test_borrowed_ref_no_lifetime(self):
+        """Lifetime can be null - fixed in 77209f0."""
+        ty = {
+            "borrowed_ref": {
+                "lifetime": None,
+                "is_mutable": False,
+                "type": {"primitive": "str"},
+            }
+        }
+        assert format_type(ty) == ["&", ["str"]]
+
     def test_slice(self):
         """This was missing in early jq version."""
         ty = {"slice": {"primitive": "u8"}}
@@ -72,6 +83,42 @@ class TestFormatType:
         """This was missing in jq version."""
         ty = {"tuple": [{"primitive": "u8"}, {"primitive": "u16"}]}
         assert format_type(ty) == ["tuple", ["u8"], ["u16"]]
+
+    def test_qualified_path_simple(self):
+        """<SelfType as Trait>::Name"""
+        ty = {
+            "qualified_path": {
+                "name": "Item",
+                "self_type": {"generic": "I"},
+                "trait": {"path": "Iterator", "id": 1, "args": None},
+            }
+        }
+        assert format_type(ty) == ["qualified", ["I"], ["Iterator"], "Item"]
+
+    def test_qualified_path_with_trait_args(self):
+        """<SelfType as Trait<Args>>::Name"""
+        ty = {
+            "qualified_path": {
+                "name": "Output",
+                "self_type": {"generic": "F"},
+                "trait": {
+                    "path": "FnOnce",
+                    "id": 1,
+                    "args": {
+                        "angle_bracketed": {
+                            "args": [{"type": {"tuple": [{"primitive": "u8"}]}}],
+                            "constraints": [],
+                        }
+                    },
+                },
+            }
+        }
+        assert format_type(ty) == [
+            "qualified",
+            ["F"],
+            ["FnOnce", ["args", ["tuple", ["u8"]]]],
+            "Output",
+        ]
 
     def test_unknown_variant_raises(self):
         """Unknown variants should raise with their keys for debugging."""
@@ -253,3 +300,7 @@ class TestAstToString:
     def test_tuple(self):
         ast = ["impl", ["for", "tuple", ["u8"], ["u16"]], ["item", "foo"]]
         assert ast_to_string(ast) == "impl (u8, u16)::foo"
+
+    def test_qualified_path(self):
+        ast = ["impl", ["for", "qualified", ["I"], ["Iterator"], "Item"], ["item", "foo"]]
+        assert ast_to_string(ast) == "impl <I as Iterator>::Item::foo"

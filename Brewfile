@@ -12,6 +12,8 @@ brew 'gnu-sed'
 brew 'diffutils'
 
 # common build deps
+brew 'llvm'  # provides clang/clang++ compiler for ~/bin/alternatives/g++ wrapper
+brew 'lld'   # LLVM linker, required by g++ wrapper (~/bin/alternatives/ld -> lld)
 
 
 # unix basics
@@ -38,43 +40,41 @@ brew 'proctools'
 brew 'direnv'
 brew 'dotenv-linter'
 brew 'jq'
-brew 'yq'
-brew 'graphviz'
-brew 'rlwrap'
+# tier 2: brew 'yq'
+# tier 2: brew 'graphviz'
+# tier 2: brew 'rlwrap'
 
 # unix quality of life
 brew 'neovim'
-brew 'fish'
 brew 'gh'
-brew 'bash-completion@2'
 brew 'zsh-completions'
-brew 'toilet'
-brew 'shellcheck'
-brew 'markdownlint-cli'
-brew 'fzf'
+# tier 2: brew 'toilet'
+# tier 2: brew 'bash-completion@2'
+# tier 2: brew 'shellcheck'
+# tier 2: brew 'markdownlint-cli'
+# tier 3: brew 'fzf'
+# tier 4: brew 'fish'
 
 # opensource prerequisites
 brew 'go'
-brew 'gradle'
-brew 'opam'
-brew 'openjdk'
-brew 'pyenv'
-brew 'pyenv-virtualenv'
 brew 'rbenv'
-brew 'helm'
-brew 'luarocks'
+brew 'luarocks'  # required by several nvim plugins
 brew 'virtualenv'
 brew 'typescript'
 brew 'rustup-init'
-brew 'pnpm'
+# tier 3: brew 'pnpm'
+# tier 4: brew 'gradle'
+# tier 4: brew 'opam'
+# tier 4: brew 'openjdk'
+# tier 5: brew 'helm'
 
 # terraform stuffs
 brew 'tfenv'   # provides `terraform`
 brew 'terraform-docs'
-brew 'terrascan'
 brew 'tflint'
 brew 'tfsec'
-brew 'tfupdate'
+# tier 2: brew 'tfupdate'
+# tier 2: brew 'terrascan'
 
 ## not 100% sure:
 #brew tldr

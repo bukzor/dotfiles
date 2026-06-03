@@ -1,5 +1,7 @@
 # Development Notes
 
+See [TESTING.md](TESTING.md) for test commands.
+
 ## Design Principles
 
 - **No failsoft code**: Unknown variants raise `ValueError`, missing keys raise `KeyError`. This ensures we discover new rustdoc format changes immediately rather than silently producing bad output.
