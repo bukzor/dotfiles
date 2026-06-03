@@ -31,5 +31,6 @@ Open terminal: [chrome-untrusted://terminal/?emulator=hterm](chrome-untrusted://
 
 ## Files
 
-- `terminal.css` - Font configuration with Nerd Fonts support
-- `keybindings.json` - Keyboard shortcuts
+- `custom-css-inline-text.css` - Font configuration with Nerd Fonts support (paste into "Custom CSS (inline text)" field)
+- `custom-css-inline-text-reference.css` - Reference fonts for comparison/testing
+- `keybindings.json` - Keyboard shortcuts (paste into "Keyboard Bindings" field)

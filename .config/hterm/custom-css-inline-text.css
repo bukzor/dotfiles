@@ -1,11 +1,13 @@
 /* Usage:
 
-  font-family: 'Nerd Source Code Pro', 'Julia Mono', 'Unifont', monospace;
+  font-family: 'Nerd Source Code Pro', 'Julia Mono', 'Unifont', 'Unifont Upper', 'Last Resort', monospace;
 
 Explanation:
   - Nerd Source Code Pro: Source Code Pro + Nerd Font icons (properly monospaced)
   - Julia Mono: Nice-looking, designed for Unicode (11,000+ glyphs)
-  - Unifont: Ugly bitmap font but comprehensive fallback for rare symbols
+  - Unifont: Ugly bitmap font for Basic Multilingual Plane (U+0000-FFFF)
+  - Unifont Upper: Upper planes (U+10000+) including emoji like 🤻
+  - Last Resort: Shows placeholder glyphs for truly missing characters
   - monospace: System fallback
 
 Note: The "Symbols Only" Nerd Font is broken (renders double-width).
@@ -25,7 +27,32 @@ Note: The "Symbols Only" Nerd Font is broken (renders double-width).
 }
 
 /* GNU Unifont - bitmap font, everything is exactly same width (ugly but comprehensive) */
+/* Basic Multilingual Plane (U+0000 to U+FFFF) */
 @font-face {
   font-family: 'Unifont';
-  src: url(https://cdn.jsdelivr.net/npm/@fontsource/unifont@latest/files/unifont-latin-400-normal.woff2) format('woff2');
+  src: url(https://ftp.gnu.org/gnu/unifont/unifont-16.0.02/unifont-16.0.02.otf) format('opentype');
+}
+
+/* Unifont Upper - Supplementary planes (U+10000+) including emoji */
+@font-face {
+  font-family: 'Unifont Upper';
+  src: url(https://ftp.gnu.org/gnu/unifont/unifont-16.0.02/unifont_upper-16.0.02.otf) format('opentype');
+}
+
+/* Last Resort - Shows placeholder glyphs for missing characters */
+@font-face {
+  font-family: 'Last Resort';
+  /* GitHub releases URL (302 redirect) */
+  src: url(https://github.com/unicode-org/last-resort-font/releases/download/17.000/LastResort-Regular.ttf) format('truetype');
+  /* Direct URL (no redirect) - swap if Chrome OS blocks redirects */
+  /* src: url(https://release-assets.githubusercontent.com/github-production-release-asset/302411857/0b6a3a9e-031e-40b8-b6f1-6565bee5a45f) format('truetype'); */
+}
+
+/* Last Resort HE - High Efficiency variant */
+@font-face {
+  font-family: 'Last Resort HE';
+  /* GitHub releases URL (302 redirect) */
+  src: url(https://github.com/unicode-org/last-resort-font/releases/download/17.000/LastResortHE-Regular.ttf) format('truetype');
+  /* Direct URL (no redirect) - swap if Chrome OS blocks redirects */
+  /* src: url(https://release-assets.githubusercontent.com/github-production-release-asset/302411857/f3573287-f599-4d29-b352-985ae8a1b50c) format('truetype'); */
 }

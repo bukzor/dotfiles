@@ -1,11 +1,22 @@
 [init]
-	defaultBranch = main
+  defaultBranch = main
+	templateDir = /home/bukzor/.local/share/git-localhost-store/template-repo
 [alias]
-	l = log --oneline --graph --decorate
-	xl = l --all
+  l = log --graph --format='%C(auto)%h %aI (%ar)%d %s'
+  xl = l --all
+  top = rev-parse --show-toplevel
+  amend = commit --amend --no-edit
+  commit-empty = commit --allow-empty -m '(empty)'
 [user]
-	email = workitharder@gmail.com
-	name = Buck Evan
+  email = workitharder@gmail.com
+  name = Buck Evan
 
 [include]
   path = ~/.gitconfig.d/vimdiff.conf
+[push]
+  default = current
+[sendemail]
+  smtpEncryption = tls
+  smtpServer = smtp.gmail.com
+  smtpUser = workitharder@gmail.com
+  smtpServerPort = 587

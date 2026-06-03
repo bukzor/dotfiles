@@ -1,0 +1,36 @@
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane
+}
+layout {
+    pane
+    pane size=1 borderless=true {
+        plugin location="zellij:compact-bar"
+    }
+}
+// default:
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
+layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+    pane split_direction="Vertical" {
+        pane size="20%" {
+            plugin location="zellij:strider"
+        }
+        pane
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
