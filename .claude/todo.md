@@ -14,6 +14,7 @@ cost-benefit-sweh:
       mostly preventing future-me from re-deriving the build.
 ---
 
+- [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md)
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
   - [ ] Pin `tmux.tinfo` from upstream `tmux/tmux` at the tag matching brewed tmux (currently 3.5a)
