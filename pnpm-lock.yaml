@@ -1,0 +1,30 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      pi:
+        specifier: ^2.0.5
+        version: 2.0.5
+
+packages:
+
+  pi-decimals@2.0.4:
+    resolution: {integrity: sha512-30tvrHizmUuNgdi94b1p5vhyzuYBmd98odjTGR/VqksneWv3JW7clTIFISO/zFcohM3xPIHunMajfRpsrM/VUg==}
+
+  pi@2.0.5:
+    resolution: {integrity: sha512-X06gf4Jgq60P9IxB/g5jX6DPMf07cKstkzENMos19XbZdiOg1vUcCwkONChuCjmGjuzEUUFK0ZLzRNIFvkGs6w==}
+    hasBin: true
+
+snapshots:
+
+  pi-decimals@2.0.4: {}
+
+  pi@2.0.5:
+    dependencies:
+      pi-decimals: 2.0.4
