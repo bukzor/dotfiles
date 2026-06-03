@@ -1,3 +1,5 @@
+" VSCode owns popup menus; aunmenu/noremenu will error
+if exists('g:vscode') | finish | endif
 
 """ vim_diff.txt
 " Nvim creates the following default mappings at |startup|. You can disable any

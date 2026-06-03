@@ -2,8 +2,8 @@
 
 "quick buffer switching with TAB, even with edited files
 set hidden
-nmap <TAB> :bn<CR>
-nmap <S-TAB> :bp<CR>
+nmap <TAB> <Cmd>bn<CR>
+nmap <S-TAB> <Cmd>bp<CR>
 set autoread            "auto-reload files, if there's no conflict
 set shortmess+=IA       "no intro message, no swap-file message
 set shortmess-=F        "allow for debugging echo
@@ -33,5 +33,5 @@ if has('nvim')
 endif
 
 "tab switching: ctrl+pageup/pagedown
-nnoremap <C-PageUp> :tabp<CR>
-nnoremap <C-PageDown> :tabN<CR>
+nnoremap <C-PageUp> <Cmd>tabp<CR>
+nnoremap <C-PageDown> <Cmd>tabN<CR>

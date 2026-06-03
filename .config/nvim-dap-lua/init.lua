@@ -5,7 +5,7 @@ function just_load(modname)
   local module = vim.loader.find(modname)
   if table.getn(module) < 1 then
     error("module not found: " .. modname)
-  elseif table.getn(module) < 1 then
+  elseif table.getn(module) > 1 then
     error(string.format(
       "multiple modules found!? (for module %s): %s",
       modname,

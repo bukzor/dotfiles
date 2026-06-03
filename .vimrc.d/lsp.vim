@@ -1,3 +1,6 @@
+" VSCode owns LSP and completion
+if exists('g:vscode') | finish | endif
+
 let g:ale_completion_enabled = 1
 let g:ale_completion_delay = 500
 let g:ale_completion_autoimport = 1
