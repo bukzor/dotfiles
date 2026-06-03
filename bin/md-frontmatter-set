@@ -16,11 +16,19 @@ usage: md-frontmatter-set < records.jsonl
 Reads JSONL on stdin, one record per line:
   {"path": "<file>", "@value": <frontmatter>}
 
-For each record, writes <frontmatter> as the YAML frontmatter of <file>.
-Uses recursive leaf-level diff: only paths whose scalar values actually
-differ are rewritten. Unchanged subtrees are not touched (yq is not run
-at all when there are no changes — byte-identical no-op).
+For each record, REPLACES the YAML frontmatter of <file> with <frontmatter>:
+keys present on disk but absent from @value are DELETED, so @value must be the
+FULL desired frontmatter, not a partial patch. The recursive leaf-level diff
+only minimizes churn — unchanged subtrees keep their byte-exact formatting and
+yq is not run at all when nothing differs (byte-identical no-op).
 @value=null is a no-op when the file has no frontmatter; otherwise refused.
+
+Intended use — pair with md-frontmatter (its inverse) to read-modify-write,
+splicing the edit into each file's current frontmatter so the rest survives:
+
+  md-frontmatter FILE... \\
+    | jq -c '.["@value"].verdict = (.path | split("/")[-2])' \\
+    | md-frontmatter-set
 EOF
   exit 2
 }
