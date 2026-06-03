@@ -37,66 +37,85 @@ triage untracked into commit/gitignore/trash.
 
 ### A. April-29 cluster (single mtime event, split topically)
 
-- [ ] A1 Vim/Neovim cleanup (part 2)
+- [x] A1 Vim/Neovim cleanup (part 2) — `9d951e3`; nvim-lazy inner `.git`
+      (upstream LazyVim/starter clone, no local commits) → `trash/untracked-triage-2026-06-03/nvim-lazy.git`;
+      `lazy-lock.json` stays untracked per `.config/.gitignore:20`
     - mods: `.vimrc.d/{copy-paste,default-mappings,finger-savers,linting,lsp,multiple-files}.vim`, `.config/nvim-dap-lua/init.lua`, `lvim/config`
     - deletions: `.vimrc.d/{basics,plugins}.vim`, `bin/vim`, `.config/.luarc.json`
     - new: `bin/{vim-lazy,nvim-lazy,nvim-dap-lua}`, `.config/nvim-lazy/`, `.config/{lvim,nvim-dap-lua}/.luarc.json`, `bin/alternatives/alternatives/vim/`
-- [ ] A2 Terminal & git config
+- [x] A2 Terminal & git config — `79ed8fb`; stray `layouts/vim.log` → trash
     - `.tmux.conf`, `.inputrc`, `.config/hterm/{README.md,custom-css-inline-text.css}`, `.config/zellij/config.kdl`
     - new: `.config/zellij/{config.tmux-ish.kdl,layouts/}`
     - `.gitconfig`, `.gitconfig.d/vimdiff.conf`, `.config/git/ignore`
-- [ ] A3 bin maintenance
-    - mods: `autoreconf brew-desc brew-handle-gnubin claude-workspace-merge CLAUDE.claude-workspace-merge.md colortest17x17 osc52 re-escape terminal tmux-cd tmux-pwd uncolor`
-    - deletions: `bin/CLAUDE.md`, `bin/alternatives/ar`, `bin/toolchains/homebrew-clang-16/dropbox`
-- [ ] A4 bin: new scripts
-    - `claude-branch-extract claude-branch-list claude-open-tasks claude-plan claude-s claude-uncolor uncolor-jsonl git-submodule-add glyphs logrotate-cron regex-escape rustdoc-json sample systemd-user-enable`
-- [ ] A5 .claude knowledge (April vintage)
+- [x] A3 bin maintenance — `2f4e887`; colortest drafts `.new/.new2/.sh` → trash;
+      **`bin/CLAUDE.md` deletion HELD** → moved to D6: doc was created 05-21 with the
+      md-frontmatter tools (98a7945, not April vintage); tools+tests all tracked and
+      alive; no relocated copy found — deletion looks accidental or an unfinished
+      rename to `CLAUDE.md-frontmatter.md`
+- [x] A4 bin: new scripts — `c8350a1`; pulled `lib/pythonpath/bukzor/claude/` +
+      `pyrightconfig.json` out of D6 into this commit (launchers exec those modules;
+      skimmed clean, no secrets)
+- [x] A5 .claude knowledge (April vintage) — `edf8512`
     - mods: `design-rules.kb/rust.kb/*` (5), `commands/founder-coach.md`, `skills/CLAUDE.md`
     - new: `design-rules.kb/rust.kb/{expect-not-allow-for-lint-suppression,return-result-from-tests}.md`, skill symlinks `llm-discourse-graph`, `llm-vitals` (→ bukzor-agent-skills repo)
-- [ ] A6 Toolchain misc
-    - `Brewfile`, `pants.toml`, `lib/rustdoc-json/{CLAUDE.md,rustdoc_json_index.py,rustdoc_json_index_test.py}`
-- [ ] A7 systemd user units (new): `.config/systemd/user/{default.target.wants/,homebrew.podman.service}`
+- [x] A6 Toolchain misc — `3c6af89`; rustdoc-json tests verified (33 pass)
+- [x] A7 systemd user units — `3c0835f`
 
 ### B. May singles
 
-- [ ] B1 pnpm: `package.json`, `.config/pnpm/5/package.json`, `pnpm-lock.yaml` (05-08)
-- [ ] B2 Python: `pyproject.toml`, `uv.lock`, `.python-version` (05-12)
-- [ ] B3 Shell env: `.profile` (05-13) — review alongside untracked `.envrc`, `.zsh_profile` (ask)
+- [x] B1 pnpm — `15e1ea2`
+- [x] B2 Python — `6a55101`
+- [x] B3 Shell env: `.profile` — `c475f7c`; `.envrc`/`.zsh_profile`/`profile.env` stay held in D6
+      (findings: `profile.env` is login-regenerated output → rec gitignore; `.zsh_profile` is
+      1-line `env > ~/zsh_profile.env` instrumentation; `.envrc` looks legit, litellm+path config)
 - [x] B4 `.gitignore` — committed with D1 (`7b452ea`)
 
 ### C. Late-May .claude
 
-- [ ] C1 mutation-testing: `skills/mutation-testing/SKILL.md` + root task file `CLAUDE.promote-mutation-testing-skill.task.md` (05-21)
-- [ ] C2 default-context doc: `docs/default-context/tools.d/...investigate-non-substitutability...md` (05-22)
-- [ ] C3 sessions.kb sweep (05-27): mods `CLAUDE.md`, `personal-attention-system.md`, `samsung-mom-phone-forensics-and-debloat.md`; deletion `document-managed-by-in-skill-md.md`; new `apply-migrations-kb-backlog.md`, `har-browse-rust-port-pre-port-infrastructure.md`, `reconcile-sessions-kb-schema-drift.md`, `review-global-claude-md-restructure.md`, `rust-port-kb-scope-refactor.md`
-- [ ] C4 `bin/md-frontmatter-set` (05-27)
-- [ ] C5 hook: `.claude/hooks/bash-preamble.py` (05-28)
-- [ ] C6 `.claude/ideas.kb/`, `.claude/llm-hash.md`, `.claude/llm-vitals/` — review contents, likely commit
-- [ ] C7 `trash/sessions-finish-skill-kb-refactor.md` mod — review; trash/ tracked?
+- [x] C1 mutation-testing: SKILL.md — `40cac64`; the root task file
+      `CLAUDE.promote-mutation-testing-skill.task.md` no longer exists (resolved since planning)
+- [x] C2 default-context doc — `02681f2`
+- [x] C3 sessions.kb sweep — `024fd03`
+- [x] C4 `bin/md-frontmatter-set` — `cd0cf24`
+- [x] C5 hook: `.claude/hooks/bash-preamble.py` — `278a320`
+- [x] C6 ideas.kb, llm-hash.md, llm-vitals — `ca3bfa6`
+- [x] C7 — `8c77f65`: file was accidentally tracked (swept into 98a7945); untracked via
+      `git rm --cached`, stays on disk; trash/ confirmed otherwise ignored
 
 ### D. Untracked triage
 
 - [x] D1 gitignore housekeeping — `7b452ea`: claude-code runtime → `.claude/.gitignore`; `.agents/`, `**/.claude/settings.local.json`, `.copilot/`, `.mitmproxy/`, chrome-for-testing, pulse, `node_modules/` → root; `bin/trash/` re-ignored (negation bug); `claude/.gitignore` (`*/`, mirrors `repo/`)
 - [x] D1b settings.local.json delocalized → settings.json — `1f4e474`
 - [x] D2 trashed → `trash/untracked-triage-2026-06-03/`: `claude-md.list skill-md.list date-Is.txt empty.bin empty.txt config.default.2.lua .claude/tools/`
-- [ ] D3 root docs — commit after skim: `README.md`, `CLAUDE.stow.md`, `CLAUDE.rust-llvm-toolchain.md`, `CLAUDE.Task.retrofit-devlog-naming.md`, `.claude/CLAUDE.rename-must-read-d-to-must-read-kb.Task.md` (staleness check)
-- [ ] D4 keys/identity: `.ssh/id_ed25519.pub` (pubkey, safe), `.config/mimeapps.list`, `.config/litellm/config.yaml`
-- [ ] D5 commit `repo/anthropic-skills` gitlink — `.gitmodules` entry already committed (path `repo/anthropic-skills`)
+- [x] D3 root docs — `b4089f5` (stow + rust-llvm design docs); trashed: empty `README.md`,
+      `CLAUDE.Task.retrofit-devlog-naming.md` (verified done: no old-pattern devlogs remain),
+      `.claude/CLAUDE.rename-must-read-d-to-must-read-kb.Task.md` (status: done, must-read.d gone)
+- [x] D4 keys/identity — `81f5e75`; litellm config verified secret-free (env-refs only)
+- [x] D5 — already done: gitlink committed at `c74d647` (= inner HEAD), `.gitmodules` entry
+      present (submodule name `.claude/skills/anthropic-skills`); status `?` is just inner
+      untracked `__pycache__`
 - [ ] D6 USER REVIEW (held):
+    - `bin/CLAUDE.md` deletion (see A3 note) — restore, or finish rename per
+      `CLAUDE.<tool>.md` convention?
     - `claudesh` — wrapper pinning claude-code 2.0.1 with SSLKEYLOGFILE (mitmproxy-debugging relic; rec: trash)
     - `finder.sh` — one-off depth-glob `*fs*` search (rec: trash)
     - `scratch/python/`, `empty/` (read-only dir containing only `.git` — deliberate fixture?), `bin/colortest17x17.{new,new2,sh}` (review during A3)
     - `.envrc`, `.zsh_profile`, `profile.env` (review with B3)
-    - `lib/pythonpath/{bukzor/claude/,pyrightconfig.json}`
+    - ~~`lib/pythonpath/{bukzor/claude/,pyrightconfig.json}`~~ — committed with A4 (`c8350a1`)
     - `.claude/claude-alignment-2026-04-29.{jsonschema.yaml,kb/}` — commit or trash?
 - [ ] D7 `claude/` holder follow-through (new task): promote active projects to their own repos/gitlinks symmetric to `repo/`; triage loose files (`standing-desk-research.md`, dir symlinks)
 
 ## Open Questions
 
-- April-29 16:54 identical mtimes across ~50 files — single bulk event
-  (restore/stow/alignment session?). Diffs may predate that date; review
-  confirms grouping.
-- `repo/scratch` submodule: dirty content only, or ref change to commit?
+- ~~April-29 16:54 identical mtimes~~ — groupings confirmed by diff review; all committed
+- ~~`repo/scratch`~~ — same ref (`b45a792`), `-dirty` content only; nothing to commit here
+
+## Strays found after planning (2026-06-03 session)
+
+- [x] `.claude/commands/session-end.md` loose-end-sweep procedure — `71ecdb9`
+- [x] dead files: empty `env.sh`, defunct `git/.gitignore`, 2023 RSA pubkey — `cee35cd`
+- [x] `.claude/CLAUDE.promote-mutation-testing-skill.task.md` — status: done, verified
+  (mutation-testing lists as skill); → trash (C1's "root task file", found at `.claude/`)
 
 ## Success Criteria
 
@@ -107,3 +126,7 @@ triage untracked into commit/gitignore/trash.
 ## Follow-on Cleanup (carried from prior doc)
 
 - [ ] `.config/env/env.d/300-homebrew.sh` — duplicate HOMEBREW_* declarations; consolidate
+- [ ] `.config/git/ignore:1` — stale broken pattern `**/.claude\settings.local.json` (backslash typo); delete, superseded by corrected line
+- [ ] `.config/zellij/config.kdl` — `bind "4" { GoToTab 5; }` typo (should be `GoToTab 4`)
+- [ ] `bin/claude-plan` — no shebang, not executable; inert as a PATH command (add `#!/bin/sh` + `chmod +x`, with `"$@"` passthrough)
+- [ ] `pants.toml` — pythonpath references `lib/pants-plugins`, which doesn't exist; create or drop
