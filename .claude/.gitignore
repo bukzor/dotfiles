@@ -13,3 +13,12 @@ plugins/
 cache/
 paste-cache/
 sessions/
+.last-cleanup
+.last-update-result.json
+daemon-auth-cooldown
+daemon-auth-status.json
+daemon/
+jobs/
+tasks/
+telemetry/
+mcp-needs-auth-cache.json

@@ -6,3 +6,6 @@ __pycache__/
 
 # this is a symlink to one of my alert- scripts, depending on working environment
 alert
+
+# but re-ignore scratch (cf. **/trash/ in ~/.gitignore)
+trash/

@@ -75,11 +75,15 @@ package/
 # Claude state files
 .claude.json
 .claude.json.*
+/.agents/
+**/.claude/settings.local.json
 
 # Tool/runtime directories
 .android/
 .bun/
+.copilot/
 .gnupg/
+.mitmproxy/
 .obsidian/
 .opam/
 .parallel/
@@ -88,6 +92,9 @@ package/
 .solargraph/
 .terraform.d/
 .vscode/
+/.config/google-chrome-for-testing/
+/.config/pulse/
+/node_modules/
 
 # Misc transient
 .sqlite_history
@@ -169,3 +176,4 @@ _viminfo
 /AndroidStudioProjects/
 /PycharmProjects/
 /source/
+/trash/
