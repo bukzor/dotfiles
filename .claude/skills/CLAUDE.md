@@ -1,6 +1,6 @@
 --- # workaround: anthropics/claude-code#13003
 depends:
-    - skills/llm-subtask
+    - Skill(llm-subtask)
 ---
 
 # Skills Directory
