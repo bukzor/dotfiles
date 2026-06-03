@@ -1,11 +1,11 @@
 ---
 requires:
-  - writing-bash-scripts.md
+  - ~/.claude/reference.kb/bash-conventions.md
 ---
 
-# Writing redo (`.do`) scripts
+# redo (`.do`) scripts
 
-**Trigger:** before creating or modifying any `*.do` file.
+Authoritative on authoring redo `*.do` build scripts.
 
 ## Contract
 

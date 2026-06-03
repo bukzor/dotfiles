@@ -23,4 +23,4 @@ Then tell the user: "I've enabled [server-name] MCP tools for this project. Plea
 
 ## Per-Server Configuration
 
-See specific must-read.kb/before files for server-specific configuration details (e.g., rust-programming.md for rust-analyzer).
+See the relevant reference for server-specific configuration details (e.g., `~/.claude/reference.kb/rust/tooling.md` for rust-analyzer).

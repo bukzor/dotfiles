@@ -14,7 +14,7 @@ from typing import NoReturn
 
 type Several[A] = tuple[A, ...]
 
-TOON_SPEC = Path("~/.claude/must-read.kb/before/toon-format.md").expanduser()
+TOON_SPEC = Path("~/.claude/reference.kb/toon-format.md").expanduser()
 
 INSTRUCTIONS = """\
 Convert the data in $INPUT to TOON format.

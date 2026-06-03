@@ -1,6 +1,6 @@
 # TDD Workflow
 
-For Python in `github.com/bukzor/` repos, also read `bukzor-python-tdd.md`.
+For Python in `github.com/bukzor/` repos, also read `~/.claude/reference.kb/python/tdd.md`.
 
 When changing tests or tested code:
 
