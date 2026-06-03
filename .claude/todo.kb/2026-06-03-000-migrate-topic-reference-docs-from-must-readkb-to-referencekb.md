@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: planned
+status: done
 ---
 
 # Migrate topic-reference docs from must-read.kb to reference.kb
@@ -42,7 +42,8 @@ stays. Body is a corpus of facts about a tool/format/language → knowledge move
 
 ### Tier A — clear movers (bash-precedent shape, high confidence) — DONE 2026-06-03
 
-Staged (working tree; not committed — awaiting user). All `requires:` verified resolving.
+Committed `d24a3b1`. The seeding bash-conventions split (the model — see Stays)
+committed separately in `f3939d9`. All `requires:` verified resolving.
 
 Wholesale (no stub left):
 
@@ -65,21 +66,30 @@ Split (thin stub stays, `requires:` the reference):
     - [x] Stub keeps pre-commit checklist + untracked-file disposition; reference
       `requires:` `git/conventions.md` (was the backwards `./ANY-git-command.md`)
 
-### Tier B — partial extraction (core stays a trigger; medium confidence)
+### Tier B — partial extraction (core stays a trigger; medium confidence) — DONE 2026-06-03
 
-- [ ] `before/making-code-changes.md`: keep workflow steps 1–6 as trigger;
-  extract "Language-Agnostic Style" → `design-rules.kb`, "Bulk Operations cost
-  optimization" → `reference.kb`
-- [ ] `before/claude-code-development.md`: extract CLAUDE.md frontmatter-stripping
-  bug (anthropics/claude-code#13003) → `reference.kb`; skill-loading pointer stays
+- [x] `before/making-code-changes.md`: workflow steps 1–6 stay as the trigger;
+  "Inline Trivial Wrappers" + "Comments Target a Cold Reader" →
+  `design-rules.kb/{inline-trivial-wrappers,comments-target-a-cold-reader}.md`
+  (one principle per file); "Bulk Operations" → `reference.kb/bulk-edits.md`.
+  Trigger `requires:` all three — `design-rules.kb` has no auto-load path, so the
+  explicit requires preserves the at-the-moment guarantee. Broadened
+  `design-rules.kb/CLAUDE.md` scope line to cover code-craft, not only API/type.
+- [x] `before/claude-code-development.md`: `#13003` frontmatter-stripping bug →
+  `reference.kb/claude-md-frontmatter.md`; skill-loading pointer stays as the
+  thin trigger, `requires:` the reference.
 
-### Tier C — borderline / low confidence (decide, may leave as-is)
+### Tier C — borderline / low confidence — RESOLVED: leave as-is 2026-06-03
 
-- [ ] `before/using-claude-code-tool/Bash.md`: tool conventions (subshells,
-  `parallel`) → fold into bash reference vs. leave
-- [ ] `before/using-claude-code-tool/Edit.md` (24w): tiny quirk — likely leave
-- [ ] `before/lazy-loading/{commands,mcp,skills}.md`: catalog tables are
-  reference-ish but harness-flow-bound — lean leave
+Decision (user's "your call"): none clear the bar of a clean recurring trigger
+whose body is a portable topic corpus. All three are harness-flow-bound, so they
+stay where they fire.
+
+- [x] `before/using-claude-code-tool/Bash.md`: subshell/`parallel` notes are
+  tool-usage at-the-moment guidance, not a portable bash corpus — leave.
+- [x] `before/using-claude-code-tool/Edit.md` (24w): tiny quirk — leave.
+- [x] `before/lazy-loading/{commands,mcp,skills}.md`: catalog tables are bound to
+  harness loading flow; not standalone topic references — leave.
 
 ## Stays (genuine triggers — firing IS the value; no action)
 
@@ -96,9 +106,9 @@ Split (thin stub stays, `requires:` the reference):
 
 ## Success Criteria
 
-- [ ] Every moved topic body is the single authority in `reference.kb`; name = scope
-- [ ] Every remaining `before/` trigger is thin and `requires:` its reference
-- [ ] No broken `requires:`/"see"/frontmatter pointers (grep clean across
+- [x] Every moved topic body is the single authority in `reference.kb`; name = scope
+- [x] Every remaining `before/` trigger is thin and `requires:` its reference
+- [x] No broken `requires:`/"see"/frontmatter pointers (grep clean across
   `must-read.kb`, `reference.kb`, `commands/`, `skills/`)
 
 ## Notes
