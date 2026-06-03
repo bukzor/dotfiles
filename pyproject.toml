@@ -11,13 +11,13 @@ dev = [
     # "pix2tex>=0.1.4",  # pulls in torch/nvidia
     "pyyaml>=6.0.3",
     "ruamel-yaml>=0.18.15",
-    "litellm[proxy]>=1.83.4",
+    "pudb>=2025.1.5",
+    "pynvim>=0.6.0",
 ]
 
 [tool.uv.workspace]
 members = [
     "repo/github.com/bukzor/bukzor.rust-practice/claude-jsonl-display/python",
-    ".",
     ".",
 ]
 
