@@ -1,6 +1,6 @@
 ---
 requires:
-  - ../ANY-shell-commands.md
+  - ../running-ANY-shell-commands.md
 ---
 
 ## Bash Tool Guidelines

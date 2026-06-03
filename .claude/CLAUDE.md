@@ -23,7 +23,9 @@ How to work -- on everything, not just these instructions:
 
 While planning, before taking ANY action:
 
-1. mentally review the must-read paths -- they specify when to read each file
+1. mentally review the must-read paths -- the path names its own trigger. For
+   example, `must-read.kb/before/running-ANY-shell-commands.md` is a file that all
+   agents **must read before running ANY shell commands**.
 2. evaluate whether any of the triggers match your situation
 3. when a trigger condition matches, you MUST read that file
    - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent -- they MUST be executed sequentially.
