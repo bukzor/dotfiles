@@ -1,0 +1,8 @@
+BashOutput:
+  enablement: 0.045
+  turn_efficiency: 5.0
+  accuracy_boost: 1.63
+  penalty: 0.543
+  benefit: 0.168
+  cost: 0.583
+  value: 0.288

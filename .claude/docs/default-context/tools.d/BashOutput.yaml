@@ -1,0 +1,12 @@
+# Tool cost/benefit estimates
+# See: benefit = enablement × turn_efficiency × accuracy_boost × (1 - penalty)
+# Cost in kB (.md file size + call_kb × frequency)
+
+essentiality: 0.9       # When monitoring background shells, essential
+frequency: 0.05         # Rare - only with background tasks
+turns_with: 1           # Direct output retrieval
+turns_without: 5        # Would have to wait for completion
+error_with: 0.02        # Rarely fails
+error_without: 0.4      # Hard to monitor background tasks otherwise
+substitutability: 0.15  # No real substitute
+call_kb: 3              # Output content

@@ -1,0 +1,121 @@
+{
+  "model": "opus[1m]",
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:*)",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(find:*)",
+      "Bash(which:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(less:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(uname:*)",
+      "Bash(mkdir -p:*)",
+      "Bash(ps:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git config --get:*)",
+      "Bash(git add:*)",
+      "Bash(chmod:*)",
+      "Bash(pnpm list:*)",
+      "Bash(npm list:*)",
+      "Bash(uv pip list:*)",
+      "Bash(pip list:*)",
+      "Bash(cargo --version:*)",
+      "Bash(rustc --version:*)",
+      "Bash(python --version:*)",
+      "Bash(node --version:*)"
+    ],
+    "deny": [
+      "TodoWrite",
+      "ExitPlanMode",
+      "EnterPlanMode",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "TaskOutput",
+      "TaskStop",
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(git add -A:*)",
+      "Bash(git add --all:*)",
+      "Bash(git add .:*)",
+      "Write(~/.claude/projects/*/memory/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm install:*)",
+      "Bash(uv pip install:*)",
+      "Bash(pip install:*)",
+      "Bash(cargo install:*)",
+      "Bash(git reset:*)"
+    ],
+    "additionalDirectories": [
+      "~/.claude/must-read.kb",
+      "~/",
+      "~/.claude"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/.claude/hooks/bash-preamble.py"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "effortLevel": "xhigh",
+  "autoMemoryEnabled": false,
+  "editorMode": "vim",
+  "verbose": true,
+  "preferredNotifChannel": "kitty",
+  "autoCompactEnabled": false,
+  "terminalProgressBarEnabled": false,
+  "skipAutoPermissionPrompt": true,
+  "//hooks-disabled": {
+    "//PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/git_commit_validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/python_style_reminder.py"
+          }
+        ]
+      }
+    ]
+  }
+}
