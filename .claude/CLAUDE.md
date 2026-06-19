@@ -30,6 +30,15 @@ While planning, before taking ANY action:
 3. when a trigger condition matches, you MUST read that file
    - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent -- they MUST be executed sequentially.
 
+### Frontmatter Directives
+
+CLAUDE.md and other agent-context markdown files -- the must-read entries among them -- carry frontmatter that is an action trigger, not passive metadata:
+
+- `requires:` -- all agents MUST read the listed files before acting on this file's content; failure to do so WILL result in task failure.
+- `depends:` -- informational; read when relevant.
+
+A skipped `requires:` is a documented failure mode: you read the file, saw the directive, and acted anyway.
+
 > WARNING:
 >
 > You WILL FAIL your tasks if you do not properly make use of these files.
