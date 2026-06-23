@@ -9,8 +9,10 @@ Claude Code injects a hardcoded system prompt that the user cannot configure.
 Some directives contradict user CLAUDE.md instructions, add bloat, or cause
 overfit behavior. These patches surgically modify the prompt in transit.
 
-As of v2.1.76, all patches applied reduces the system prompt by ~60%
-(14.3k → 5.7k chars).
+As of v2.1.186, all patches applied reduce the system prompt by ~34%
+(6.8k → 4.5k chars). The percentage is lower than the ~60% of v2.1.76
+because Anthropic's prompt is itself far leaner now (14.3k → 6.8k), so
+the patches have less bloat left to strip.
 
 ## Patch format
 
