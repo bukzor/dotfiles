@@ -17,7 +17,7 @@ chmod 700 "$REPOS_ROOT"
 cd "$WORK_DIR"
 
 if [ -L .git ]; then
-    echo "✓ Already a symlink: $(readlink .git)" >&2
+    echo "git-localhost-store: ✓ Already a symlink: $(readlink .git)" >&2
     exit 0
 fi
 
@@ -32,7 +32,7 @@ if [ -e "$STORE" ]; then
     # picked up commits (refs in heads or remotes) that would conflict.
     if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
        || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
-        echo "❌ .git has refs but store already exists: $STORE" >&2
+        echo "git-localhost-store: ❌ .git has refs but store already exists: $STORE" >&2
         echo "   Refusing to merge. Resolve manually." >&2
         exit 1
     fi
@@ -41,7 +41,7 @@ if [ -e "$STORE" ]; then
         ln -s "$STORE" .git
     )
     git ls-files --deleted -z | xargs -0r git restore --
-    echo "✓ Recovered: .git -> $STORE" >&2
+    echo "git-localhost-store: ✓ Recovered: .git -> $STORE" >&2
     exit 0
 fi
 
@@ -50,4 +50,4 @@ fi
     ln -s "$STORE" .git
 )
 
-echo "✓ Relocated .git -> $STORE" >&2
+echo "git-localhost-store: ✓ Relocated .git -> $STORE" >&2
