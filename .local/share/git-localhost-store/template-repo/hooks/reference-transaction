@@ -14,8 +14,8 @@ if [[ "${1:-}" != "committed" ]]; then
   exit 0
 fi
 
-# Already converted: .git is a symlink, not a real directory.
-if [ -L .git ]; then
+if [ -L .git ] || [ -f .git ]; then
+  : Nothing to convert.
   exit 0
 fi
 

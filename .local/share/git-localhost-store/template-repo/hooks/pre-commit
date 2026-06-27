@@ -9,7 +9,8 @@ if (( DEBUG > 0 )); then
   : pre-commit "$@"
 fi
 
-if [ -L .git ]; then
+if [ -L .git ] || [ -f .git ]; then
+  : Nothing to convert.
   exit 0
 fi
 

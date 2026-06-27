@@ -21,8 +21,14 @@ if [ -L .git ]; then
     exit 0
 fi
 
+if [ -f .git ]; then
+    gitfile="$(cat .git)"
+    echo "git-localhost-store: ✓ Gitfile (worktree/submodule), out of scope: $gitfile" >&2
+    exit 0
+fi
+
 if [ ! -d .git ]; then
-    echo "❌ .git is not a directory (got: $(ls -ld .git 2>&1))" >&2
+    echo "git-localhost-store: ❌ .git is not a directory, symlink, or gitfile (got: $(ls -ld .git 2>&1))" >&2
     exit 1
 fi
 
