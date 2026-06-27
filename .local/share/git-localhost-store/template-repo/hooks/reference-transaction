@@ -6,8 +6,8 @@ set -euo pipefail
 export DEBUG="${DEBUG:-0}"
 
 if (( DEBUG > 0 )); then
-  echo >&2 "reference-transaction: state='${1:-}'"
   set -x
+  : reference-transaction "$@"
 fi
 
 if [[ "${1:-}" != "committed" ]]; then

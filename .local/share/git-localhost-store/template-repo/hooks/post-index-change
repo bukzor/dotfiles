@@ -3,6 +3,12 @@
 
 set -euo pipefail
 
+export DEBUG="${DEBUG:-0}"
+if (( DEBUG > 0 )); then
+  set -x
+  : post-index-change "$@"
+fi
+
 if [ -L .git ]; then
   exit 0
 fi
