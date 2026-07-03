@@ -9,10 +9,11 @@ Claude Code injects a hardcoded system prompt that the user cannot configure.
 Some directives contradict user CLAUDE.md instructions, add bloat, or cause
 overfit behavior. These patches surgically modify the prompt in transit.
 
-As of v2.1.186, all patches applied reduce the system prompt by ~34%
-(6.8k → 4.5k chars). The percentage is lower than the ~60% of v2.1.76
-because Anthropic's prompt is itself far leaner now (14.3k → 6.8k), so
-the patches have less bloat left to strip.
+As of v2.1.199, the patches strip ~32% of the long-form prompt
+(15.0k → 10.2k chars) and ~12% of the shorter `# Harness` variant served
+to Fable-class models (9.5k → 8.3k). These numbers drift as Anthropic
+reworks the prompt (v2.1.186 was down to 6.8k before growing back);
+`check_patches.py` prints current stats.
 
 ## Patch format
 
