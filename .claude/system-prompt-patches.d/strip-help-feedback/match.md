@@ -1,3 +1,1 @@
- - If the user asks for help or wants to give feedback inform them of the following:
-  - /help: Get help with using Claude Code
-  - To give feedback, users should report the issue at https://github.com/anthropics/claude-code/issues
+# Doing tasks

@@ -20,17 +20,50 @@ Each patch is a directory containing:
 
 | File                   | Required  | Description                                            |
 |------------------------|-----------|--------------------------------------------------------|
-| `match.md`             | one of    | Text to find in the system prompt                      |
-| `match.d/*.md`         | one of    | Multiple alternative templates; first match wins       |
+| `match.md`             | one of    | Detects whether this patch applies here at all         |
+| `match.d/*.md`         | one of    | Multiple alternative detection templates; first wins   |
+| `search.md`            | no        | The exact text to replace (default: same as the hit `match` template) |
+| `search.d/*.md`        | no        | Multiple alternative replace-target templates; first wins |
 | `replace.md`           | yes\*     | Replacement text (empty file = deletion)               |
 | `upstream-removed.bool`| no        | If `true`, patch becomes a regression assertion (\*)   |
-| `conditional.bool`     | no        | If `true`, skip warning when match fails               |
 | `README.md`            | no        | Why this patch exists                                  |
 
-`match.md` and `match.d/` are mutually exclusive — exactly one must be present.
+`match.md` and `match.d/` are mutually exclusive — exactly one must be
+present. Likewise `search.md` and `search.d/` (both optional; at most one).
 `replace.md` is required unless `upstream-removed.bool` is set.
 
-### Placeholders in match templates
+### `match` vs `search`
+
+`match` (`match.md` or `match.d/`) answers "does this patch apply here at
+all?" A miss is always silent — no warning, no incident. Not matching just
+means this prompt doesn't have what the patch is looking for (wrong prompt
+shape, session-optional content that's absent this time, whatever); that's
+expected, not an error.
+
+`search` (`search.md` or `search.d/`) answers "where's the exact text to
+replace?" — tried only after `match` already hit. Omit it and the patch
+searches-and-replaces in one step, using whichever `match` template hit as
+the target too (the common case). A `search` miss is always **loud**
+(`WARNING: patch 'name' failed-to-match`) — there's no flag to silence it,
+because `match` already proved the patch is in scope; the precise target
+vanishing on top of that is a real regression.
+
+Split the two when you want a patch scoped to specific prompt content (e.g.
+only present under a given section heading, or only in one of several
+concurrently-served prompt shapes — see `system-prompts.kb/CLAUDE.md`) while
+still catching drift within that scope: write `match.md` broad and stable
+(e.g. the enclosing section heading) and `search.md`/`search.d/` narrow and
+precise (the literal text to strip).
+
+Use `search.d/` (mirroring `match.d/`) when the precise target itself has
+worn multiple wordings across cc_versions you still want one patch to
+recognize — e.g. `strip-doing-tasks-bloat` anchors on the stable `# Doing
+tasks` heading via `match.md`, then tries two known whole-section wordings
+via `search.d/{v2.1.76,v2.1.128}.md`. A wording search.d doesn't recognize is
+a loud failure, not a silent no-op — that's the point of separating "are we
+in scope" from "does the known text still match."
+
+### Placeholders in match/search templates
 
 `$ALLCAPS` tokens act as placeholders, matching dynamic content:
 
@@ -61,9 +94,9 @@ and removing `replace.md`. The patch becomes an assertion:
   (regression: text returned upstream)
 - no match → silent (good, still removed)
 
-`upstream-removed.bool` is mutually exclusive with `replace.md` (the
-patch no longer replaces anything) and with `conditional.bool` (the
-semantics are inverted).
+`upstream-removed.bool` is mutually exclusive with `replace.md` and
+`search.md` — the patch no longer replaces anything, so there's nothing
+for a separate search target to narrow down.
 
 ## Running
 

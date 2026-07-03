@@ -1,1 +1,1 @@
- - Your responses should be short and concise.
+# Tone and style
