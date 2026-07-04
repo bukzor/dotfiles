@@ -28,10 +28,22 @@ from pathlib import Path
 
 ROOTS = (Path.home() / "repo", Path.home() / ".claude", Path.home() / "claude")
 
-# Status values that take a file out of the open-task list.
-#   - done: terminal state, work complete
+# Status vocabulary — closed on both tiers; registering a word is a tuple
+# edit. Terminal/non-task values hide the file from the open-task list:
+#   - done: work complete
+#   - abandoned: deliberately not doing (WONTFIX)
+#   - duplicate: tracked elsewhere (body should point to the survivor)
 #   - template: not a task instance; a skeleton/example of the task shape
-SKIP_STATUSES = ("done", "template")
+SKIP_STATUSES = ("done", "abandoned", "duplicate", "template")
+
+# Non-terminal values: "open, with detail". Registered so that typos and
+# vocabulary drift fail loud — an unknown status still shows (a task
+# wrongly shown beats one wrongly hidden) but warns on stderr.
+# `in-progress` is deliberately absent: nothing forces it back to open
+# when a session dies, so it rots fastest; use sessions.kb for liveness.
+OPEN_STATUSES = ("open", "deferred", "blocked", "not-started")
+
+KNOWN_STATUSES = SKIP_STATUSES + OPEN_STATUSES
 
 STATUS = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
 OPEN_TASK = re.compile(r"^ *- \[ \].*$", re.MULTILINE)
@@ -148,12 +160,25 @@ def select_freshest(paths: Iterable[Path]) -> list[Path]:
     return list(by_key.values())
 
 
-def is_status_skip(body: str) -> bool:
-    """True if frontmatter declares a status that excludes this file
-    from the open-task list (see SKIP_STATUSES)."""
+def frontmatter_status(body: str) -> str | None:
     head = "\n".join(body.splitlines()[:30])
     m = STATUS.search(head)
-    return m is not None and m.group(1) in SKIP_STATUSES
+    return m.group(1) if m else None
+
+
+def is_status_skip(path: Path, body: str) -> bool:
+    """True if frontmatter declares a status that excludes this file
+    from the open-task list (see SKIP_STATUSES). Unknown statuses warn
+    on stderr and are treated as open."""
+    status = frontmatter_status(body)
+    if status is None:
+        return False
+    if status not in KNOWN_STATUSES:
+        print(
+            f"warning: {path}: unknown status {status!r}; treating as open",
+            file=sys.stderr,
+        )
+    return status in SKIP_STATUSES
 
 
 def existence_is_signal(path: Path) -> bool:
@@ -166,7 +191,7 @@ def existence_is_signal(path: Path) -> bool:
 
 
 def format_section(path: Path, body: str) -> str | None:
-    if is_status_skip(body):
+    if is_status_skip(path, body):
         return None
     open_tasks = OPEN_TASK.findall(body)
     if not open_tasks and not existence_is_signal(path):
