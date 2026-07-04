@@ -2,6 +2,7 @@
 requires:
   - ~/.claude/design-rules.kb/inline-trivial-wrappers.md
   - ~/.claude/design-rules.kb/comments-target-a-cold-reader.md
+  - ~/.claude/design-rules.kb/double-dash-not-emdash.md
   - ~/.claude/reference.kb/bulk-edits.md
 ---
 
