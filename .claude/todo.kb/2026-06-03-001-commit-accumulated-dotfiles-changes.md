@@ -1,6 +1,5 @@
 ---
 managed-by: Skill(llm-subtask)
-status: active
 cost-benefit-sweh:
   timebox:
     '@value': 3
