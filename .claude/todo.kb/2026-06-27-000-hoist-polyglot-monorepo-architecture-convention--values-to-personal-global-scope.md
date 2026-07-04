@@ -1,6 +1,19 @@
 ---
 managed-by: Skill(llm-subtask)
 status: open
+cost-benefit-sweh:
+  timebox:
+    '@value': 3
+    rationale: home decision first, then extract convention + hoist 6 policies / 3 goals preserving force/why chains
+    confidence: tentative
+  benefit-2w:
+    '@value': 0.3
+    rationale: no second language template exists yet to consume the hoisted convention within 2w
+    confidence: tentative
+  cost-of-delay-2w:
+    '@value': 0.1
+    rationale: source artifacts are stable and validated; low decay
+    confidence: unsure
 ---
 
 # Hoist polyglot-monorepo architecture (convention + values) to personal-global scope

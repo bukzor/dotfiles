@@ -1,6 +1,19 @@
 ---
 managed-by: Skill(llm-subtask)
 status: active
+cost-benefit-sweh:
+  timebox:
+    '@value': 3
+    rationale: remaining clusters after A1–A3 landed; triage is the work, each commit mechanical
+    confidence: unsure
+  benefit-2w:
+    '@value': 0.5
+    rationale: clean git status restores signal; until then every session skims past the noise
+    confidence: unsure
+  cost-of-delay-2w:
+    '@value': 0.5
+    rationale: uncommitted work is at-risk, and this is the exact silently-stale pattern that has bitten before
+    confidence: tentative
 ---
 
 # Commit accumulated dotfiles changes
