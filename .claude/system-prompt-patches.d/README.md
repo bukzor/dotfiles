@@ -72,7 +72,10 @@ in scope" from "does the known text still match."
 - `$LINES` — matches one or more non-empty lines
 
 Placeholders are delimited by the next literal text in the template.
-Same-named placeholders match independently (no backreference).
+Same-named placeholders must match the same text (backreference); use a
+unique name when you don't care. Trailing digits vary the name without
+changing its type — `$LINES1` and `$LINES2` are two independent
+LINES-type placeholders.
 
 ### Multiple match templates: `match.d/*.md`
 
