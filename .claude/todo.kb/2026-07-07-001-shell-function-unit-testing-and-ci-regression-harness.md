@@ -141,6 +141,12 @@ researched/decided when this is picked up, not prescribed here.
 
 ## Notes
 
+Sibling effort: `reunify-dotfiles/2026-07-07-000-CI-and-testing-foundations.md`
+plans the harness/CI system for the branch-reunification work — one harness
+decision should serve both files (its survey table includes this file's needs).
+Two of this file's open questions are answered there: the repo's origin is
+`github.com/bukzor/dotfiles` and it is PUBLIC, so GitHub Actions is available.
+
 The design work these tests cover: `~/.config/sh/functions.d/config2lines.sh`,
 `hardquote.sh`, `each_config_line.sh`, `path.sh`, and the call site in
 `~/.profile`. The heredoc-not-pipe subshell-safety property was verified by
