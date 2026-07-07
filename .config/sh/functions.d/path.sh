@@ -1,58 +1,34 @@
 #!/bin/sh
 # compatibility: dash, busybox sh, zsh, bash
-sep="" # "Unit Separator" -- the first separator higher than space
 
-dehumanize() {
-  sed -r '
-    # delete all:
-    s/^ +//             # leading whitespace
-    s/(^|[^\\])#.*/\1/  # comments
-    s/\\#/#/g           # comment-escapes
-    s/ +$//             # trailing whitespace
-    /^$/ d              # empty lines
-  '
-}
-
-hardquote() {
-  sed -r "
-    s/'/'\\''/g  # escape any literal hardquotes
-    s/(^|$)/'/g  # hardquote
-  "
-}
-
-stdin_to_argv() {
-  # Convert a configuration on stdin to arguments (whitespace, comments stripped).
-  local func="$1"
-  shift 1
-
-  if tty -s; then # stdin unset
-    "$func" "$@"
-  else
-    args=$(
-      dehumanize |
-        hardquote |
-        tr '\n' ' '
-    )
-    eval "$func" "$@" "$args"
-  fi
-}
-
+# path MODE VARNAME [ENTRY...]
+# Apply MODE (prepend/append) to each ENTRY against $VARNAME. With no
+# ENTRY args, reads entries from stdin instead (one per line, via
+# each_config_line) -- so a call site can pass either a heredoc or an
+# explicit argument list.
 path() {
-  stdin_to_argv _path "$@"
-}
-
-_path() {
-  local func="__sh_functions_d_path__$1"
-  local varname="$2"
+  local mode="$1" varname="$2"
   shift 2
+  local path_func="__sh_functions_d_path__$mode"
 
-  eval 'local val="$'"$varname"'"'
-  val="$(printf "%s" "$val" | __sh_functions_d_path__prepare)"
-  for newpath in "$@"; do
-    val="$(printf "%s" "$val" | "$func" "$newpath")"
-  done
-  val="$(printf "%s" "$val" | __sh_functions_d_path__cleanup)"
-  eval "$varname"'="$val"'
+  eval "local path_val=\"\$$varname\""
+  path_val="$(printf '%s' "$path_val" | __sh_functions_d_path__prepare)"
+
+  __sh_functions_d_path__apply_one() {
+    path_val="$(printf '%s' "$path_val" | "$path_func" "$1")"
+  }
+
+  if [ "$#" -eq 0 ]; then # no explicit entries: read from stdin
+    each_config_line __sh_functions_d_path__apply_one
+  else
+    local newpath
+    for newpath in "$@"; do
+      __sh_functions_d_path__apply_one "$newpath"
+    done
+  fi
+
+  path_val="$(printf '%s' "$path_val" | __sh_functions_d_path__cleanup)"
+  eval "$varname=\"\$path_val\""
 }
 
 __sh_functions_d_path__prepare() { # NOTE: result will need cleanup
@@ -60,13 +36,13 @@ __sh_functions_d_path__prepare() { # NOTE: result will need cleanup
 }
 
 __sh_functions_d_path__prepend() { # NOTE: removed if present, last wins, idempotent
-  printf "%s\n" "$1"
+  printf '%s\n' "$1"
   __sh_functions_d_path__remove "$1"
 }
 
 __sh_functions_d_path__append() { # NOTE: removed if present, first wins, idempotent
   __sh_functions_d_path__remove "$1"
-  printf "\n%s" "$1"
+  printf '\n%s' "$1"
 }
 
 __sh_functions_d_path__remove() { # remove any/all matching entries

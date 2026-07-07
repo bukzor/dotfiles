@@ -14,6 +14,8 @@ cost-benefit-sweh:
       mostly preventing future-me from re-deriving the build.
 ---
 
+Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
+
 - [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md)
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
@@ -29,7 +31,7 @@ cost-benefit-sweh:
 We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
+- [ ] [todo.kb/2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md](todo.kb/2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md)
 - [ ] [todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md](todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md) — may belong under `private.bukzor-llc`
 - [ ] [todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md](todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md)
-- [x] [todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md](todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md)
 - [x] [todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md](todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md)
