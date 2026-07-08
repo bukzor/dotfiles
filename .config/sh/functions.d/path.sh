@@ -40,9 +40,12 @@ __sh_functions_d_path__prepend() { # NOTE: removed if present, last wins, idempo
   __sh_functions_d_path__remove "$1"
 }
 
-__sh_functions_d_path__append() { # NOTE: removed if present, first wins, idempotent
-  __sh_functions_d_path__remove "$1"
-  printf '\n%s' "$1"
+__sh_functions_d_path__append() { # NOTE: kept in place if present, first wins, idempotent
+  awk -v entry="$1" '
+    { print }
+    $0 == entry { found = 1 }
+    END { if (!found) print entry }
+  '
 }
 
 __sh_functions_d_path__remove() { # remove any/all matching entries
