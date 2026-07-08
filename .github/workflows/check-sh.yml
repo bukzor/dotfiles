@@ -1,0 +1,16 @@
+name: Check sh
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: shell test matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shells and redo
+        run: sudo apt-get update && sudo apt-get install -y dash busybox zsh redo
+
+      - name: Run shell test matrix
+        run: redo -j"$(nproc)" test
