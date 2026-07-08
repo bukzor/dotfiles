@@ -18,4 +18,5 @@ esac
 
 TEST_SH="$*" "$@" "${name}_test.sh" >&2
 
-date -Ins # stdout is the target: a gitignored pass certificate
+# stdout is the target: a gitignored pass certificate
+date -Iseconds # not -Ins: BSD/macOS date has no ns timespec

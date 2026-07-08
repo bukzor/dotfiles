@@ -96,7 +96,9 @@ checkouts, not a local substitute.
 
 ### `.tested` targets are timestamp certificates
 
-`default.tested.do` now emits `date -Ins` to stdout, so both real redo and
+`default.tested.do` now emits `date -Iseconds` to stdout (not `-Ins`:
+BSD/macOS date has no ns timespec, and macOS is in the harness's stated
+environment set), so both real redo and
 minimal/do materialize the target identically (eliminating a behavioral
 divergence: minimal/do would have created empty files from captured
 stdout anyway) and `cat X.dash.tested` answers "when did this last pass".

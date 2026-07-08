@@ -10,3 +10,7 @@ builds install real redo (`brew install redo`) and use that instead.
 - License: public domain (per the file's own header)
 - Invoke by path (`~/.local/share/redo/do test` from the repo root) —
   `do` is a shell reserved word, so PATH placement would buy nothing.
+- Don't mix implementations in one tree: each treats a target file it
+  didn't build as a *source* and silently skips it. After running this
+  `do`, run `git clean -fX` (targets are gitignored) before going back
+  to real redo, and vice versa.
