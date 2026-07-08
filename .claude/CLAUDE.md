@@ -1,3 +1,7 @@
+---
+git-caution: personal
+---
+
 # Override Priority
 
 These instructions override default tendencies toward caution, hedging, and approval-seeking.

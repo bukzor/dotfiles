@@ -44,6 +44,18 @@
       "TaskGet",
       "TaskOutput",
       "TaskStop",
+      "Workflow",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "ScheduleWakeup",
+      "RemoteTrigger",
+      "Artifact",
+      "DesignSync",
+      "NotebookEdit",
+      "PushNotification",
+      "EnterWorktree",
+      "ExitWorktree",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Bash(dd:*)",
@@ -68,6 +80,27 @@
       "~/.claude"
     ]
   },
+  "disableClaudeAiConnectors": true,
+  "skillOverrides": {
+    "update-config": "user-invocable-only",
+    "verify": "user-invocable-only",
+    "code-review": "user-invocable-only",
+    "run": "user-invocable-only",
+    "keybindings-help": "user-invocable-only",
+    "fewer-permission-prompts": "user-invocable-only",
+    "simplify": "user-invocable-only",
+    "security-review": "user-invocable-only",
+    "review": "user-invocable-only",
+    "init": "user-invocable-only",
+    "claude-api": "user-invocable-only",
+    "dataviz": "user-invocable-only",
+    "artifact-design": "user-invocable-only",
+    "deep-research": "user-invocable-only",
+    "loop": "user-invocable-only",
+    "schedule": "user-invocable-only",
+    "batch": "user-invocable-only",
+    "debug": "user-invocable-only"
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -82,10 +115,10 @@
     ]
   },
   "enabledPlugins": {
-    "lua-lsp@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "lua-lsp@claude-plugins-official": false,
+    "pyright-lsp@claude-plugins-official": false,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": false
   },
   "effortLevel": "xhigh",
   "autoMemoryEnabled": false,
