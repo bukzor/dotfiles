@@ -17,3 +17,5 @@ case $shell in
 esac
 
 TEST_SH="$*" "$@" "${name}_test.sh" >&2
+
+date -Ins # stdout is the target: a gitignored pass certificate

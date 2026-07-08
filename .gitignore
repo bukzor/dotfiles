@@ -180,3 +180,10 @@ _viminfo
 
 # redo build system
 .redo/
+*.tested
+# bookkeeping litter from vendored minimal/do (.local/share/redo/do)
+.do_built
+.do_built.dir/
+*.did
+*.did.tmp
+*.redo.tmp

@@ -12,11 +12,7 @@ jobs:
       - name: Install shells
         run: sudo apt-get update && sudo apt-get install -y dash busybox zsh
 
-      - name: Install redo
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew install redo
-          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
-
       - name: Run shell test matrix
-        run: redo -j"$(nproc)" test
+        # vendored minimal/do: no redo install needed (serial, but the
+        # matrix is ~2s; installing real redo cost 30s)
+        run: ./.local/share/redo/do test

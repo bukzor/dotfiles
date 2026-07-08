@@ -81,6 +81,27 @@ Names the attestation, not the verdict-of-the-moment. (Also: apenwarr redo
 never materializes the file when the .do writes nothing, so the targets are
 pure bookkeeping in `.redo/` — gitignored.)
 
+### Vendored apenwarr minimal/do; CI needs no redo install
+
+`.local/share/redo/do` (pinned upstream b08b5ef, public domain) runs the
+whole harness from a bare checkout — it does the `default.*.do` parent
+search and stubs `redo-ifchange`. CI's 30s brew-install step (70% of the
+43s job) is deleted; the serial matrix costs ~2s. Local use keeps real
+redo for incrementality and `-j`. Placement note: `do` is a shell reserved
+word, so PATH placement buys nothing — it's invoked by path, and
+`share/<pkg>/` has distro precedent for arch-independent internal
+executables. Caveat: minimal/do never rebuilds an existing target
+(`.did`-stamp bookkeeping, no dependency checks) — correct for CI's fresh
+checkouts, not a local substitute.
+
+### `.tested` targets are timestamp certificates
+
+`default.tested.do` now emits `date -Ins` to stdout, so both real redo and
+minimal/do materialize the target identically (eliminating a behavioral
+divergence: minimal/do would have created empty files from captured
+stdout anyway) and `cat X.dash.tested` answers "when did this last pass".
+Gitignored, along with minimal/do's `.do_built*`/`*.did*` litter.
+
 ## Conventions Established
 
 - **`X_test.sh` beside `X.sh`** is the shape of a shell test; POSIX body,
