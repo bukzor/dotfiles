@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done  # pending: first CI run observed green
 cost-benefit-sweh:
   timebox:
     "@value": 0.5
@@ -75,68 +75,70 @@ researched/decided when this is picked up, not prescribed here.
 
 ## Requirements
 
-- [ ] A test runner exists that can execute the same test body under
+- [x] A test runner exists that can execute the same test body under
       multiple `sh` implementations (at minimum `dash` and `busybox ash`;
       `bash` and `zsh` too if reasonably available) and report per-shell
       pass/fail — cross-shell parity must be a first-class harness
       capability, not something each test re-implements by hand.
-- [ ] The harness/tests are wired into some form of regression gate that
+- [x] The harness/tests are wired into some form of regression gate that
       runs automatically on change to `~/.config/sh/functions.d/*.sh` or
       `~/.profile` (CI, pre-commit hook, pre-push hook — whichever fits;
       see Open Questions on whether this repo has anywhere for "CI" to
       run).
-- [ ] Reintroducing either of the two concrete regressions described above
+- [x] Reintroducing either of the two concrete regressions described above
       (the `path_stdin` typo; the `${args[@]}`-vs-`${oldargs[@]}` typo)
       causes a test to fail. (Write these as literal regression tests, not
       just generic coverage — the whole point is these exact mistakes.)
-- [ ] Test coverage exists for the current, live implementations of:
-  - [ ] `config2lines` — comment stripping (incl. the `\#` escape),
+- [x] Test coverage exists for the current, live implementations of:
+  - [x] `config2lines` — comment stripping (incl. the `\#` escape),
         leading/trailing whitespace stripping, blank-line dropping.
-  - [ ] `hardquote` — round-trips a string containing an embedded `'`
+  - [x] `hardquote` — round-trips a string containing an embedded `'`
         back through `eval` unchanged.
-  - [ ] `each_config_line` — calls its callback once per (decluttered)
+  - [x] `each_config_line` — calls its callback once per (decluttered)
         line, preserves embedded spaces without splitting, and — the
         load-bearing property — a mutation the callback makes to a
         caller-scope variable is visible *after* `each_config_line`
         returns (this is the heredoc-vs-pipe subshell distinction; assert
         it directly, don't just assume the heredoc form stays heredoc-fed).
-  - [ ] `path` — `prepend`/`append` dedup semantics ("last wins" ordering
-        on repeated entries), both call forms (heredoc/stdin vs. explicit
+  - [x] `path` — `prepend`/`append` dedup semantics (prepend: last wins;
+        append: first wins — the original `_path_append` comment is the
+        acceptance criteria; the drifted move-to-end implementation was
+        fixed 2026-07-08), both call forms (heredoc/stdin vs. explicit
         argv args dispatched via `$#`), and cross-shell parity.
-  - [ ] An end-to-end smoke test: sourcing the real `~/.profile` in an
+  - [x] An end-to-end smoke test: sourcing the real `~/.profile` in an
         isolated environment (`env -i`) produces a `PATH` containing the
         expected prepended entries in the expected order.
-- [ ] Out of scope: the exploratory demo scripts under `~/tmp/`
+- [x] Out of scope: the exploratory demo scripts under `~/tmp/`
       (`stdin-to-argv*.sh`, `argv-slice*.sh`, `path-each-line-demo.sh`,
       `stdin-foreach-demo.sh`) were throwaway teaching artifacts, not
       shipped config — no requirement to cover them.
 
 ## Open Questions
 
-- [ ] Framework: hand-rolled assertion script, `bats-core`, `shunit2`, or
+- [x] Framework: hand-rolled assertion script, `bats-core`, `shunit2`, or
       something else? Must run cleanly under all target shells (a
       bash-only framework like bats-core running the *tests* in bash is
       fine even if the *code under test* must also pass under
       dash/busybox — worth confirming which layer needs which shell).
-- [ ] Where do tests live — beside the functions
+- [x] Where do tests live — beside the functions
       (`functions.d/path.test.sh`), or a parallel test tree? Precedent
       elsewhere in this repo, if any, should win.
-- [ ] Does this repo have a GitHub remote / existing CI config to hook
+- [x] Does this repo have a GitHub remote / existing CI config to hook
       real CI into, or is "CI" here better read as a local git hook
       (pre-commit/pre-push), given this is a personal dotfiles repo that
       may not push anywhere that runs Actions?
-- [ ] Should this harness generalize beyond `functions.d/` (i.e. become the
+- [x] Should this harness generalize beyond `functions.d/` (i.e. become the
       standard way *any* shell script in this repo gets regression-tested),
       or stay scoped to `functions.d/*.sh` + `.profile` for now?
 
 ## Success Criteria
 
-- [ ] Running the test suite locally catches both of today's regressions
+- [x] Running the test suite locally catches both of today's regressions
       if deliberately reintroduced (verify by temporarily reverting each
       fix and confirming red, then restoring).
-- [ ] The suite runs across the full shell matrix decided above with a
+- [x] The suite runs across the full shell matrix decided above with a
       single invocation, not one manual command per shell.
-- [ ] Some automatic trigger (CI or local hook — per Open Questions) runs
+- [x] Some automatic trigger (CI or local hook — per Open Questions) runs
       the suite on relevant changes without a human remembering to.
 
 ## Notes

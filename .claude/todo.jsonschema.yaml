@@ -32,6 +32,9 @@ definitions:
           rationale:
             type: string
             description: "Why this estimate? What assumptions or constraints apply?"
+          confidence:
+            type: string
+            description: "How firm the estimate is (e.g. tentative, firm)"
         required: ["@value"]
         additionalProperties: false
 
