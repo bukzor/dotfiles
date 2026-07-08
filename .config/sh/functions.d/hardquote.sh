@@ -6,7 +6,7 @@
 # (e.g. `eval "set -- $(hardquote <<<"$str")"`).
 hardquote() {
   sed -r "
-    s/'/'\\''/g  # escape any literal hardquotes
+    s/'/'\\\\''/g  # escape any literal hardquotes
     s/(^|\$)/'/g  # hardquote
   "
 }
