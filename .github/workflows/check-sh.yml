@@ -9,8 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install shells and redo
-        run: sudo apt-get update && sudo apt-get install -y dash busybox zsh redo
+      - name: Install shells
+        run: sudo apt-get update && sudo apt-get install -y dash busybox zsh
+
+      - name: Install redo
+        run: brew install redo
 
       - name: Run shell test matrix
         run: redo -j"$(nproc)" test
