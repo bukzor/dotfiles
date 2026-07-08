@@ -27,7 +27,7 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
   - [ ] [todo.kb/reunify-dotfiles/2026-07-06-005-Port-zsh-config-into-config-sh-structure.md](todo.kb/reunify-dotfiles/2026-07-06-005-Port-zsh-config-into-config-sh-structure.md) — needs 000 landed
   - [ ] [todo.kb/reunify-dotfiles/2026-07-06-004-Hand-merge-true-divergences.md](todo.kb/reunify-dotfiles/2026-07-06-004-Hand-merge-true-divergences.md)
   - [ ] [todo.kb/reunify-dotfiles/2026-07-06-006-Final-merge-and-home-switchover.md](todo.kb/reunify-dotfiles/2026-07-06-006-Final-merge-and-home-switchover.md) — strictly last
-- [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md)
+- [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md) — overlaps reunify 006's "commit/park uncommitted state" step; fold in or close when 006 runs
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
   - [ ] Pin `tmux.tinfo` from upstream `tmux/tmux` at the tag matching brewed tmux (currently 3.5a)
