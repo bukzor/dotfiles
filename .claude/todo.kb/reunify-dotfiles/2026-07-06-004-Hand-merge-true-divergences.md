@@ -24,6 +24,7 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
       are the testable surface (brew-desc, colortest17x17, osc52) — a smoke
       invocation each; for configs, a parse/load check (git config -l, vim headless
       startup, tmux -f … validity) beats nothing
+      (shape: run-once `X_check.sh`, skip-if-absent — see ../2026-07-07-000)
 - [ ] claude config: .claude/CLAUDE.md, .claude/settings.json,
       .claude/commands/curl.md, .claude/.gitignore
     - [ ] authored / [ ] svelte / [ ] main

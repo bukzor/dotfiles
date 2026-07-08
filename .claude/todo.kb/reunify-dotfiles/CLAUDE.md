@@ -37,10 +37,11 @@ content, then `git merge --allow-unrelated-histories` and live on main.
   so (001's two directions; 003's per-directory sweeps after keep/delete
   decisions are made). Decisions themselves stay with the user.
 - Every convergence commit names its counterpart branch in the message.
-- Tests before work: each task file opens with a "unit tests" item; the
-  harness comes from 2026-07-07-000 (shared with
+- Tests before work: each task file opens with a "unit tests" item. The
+  harness is live (redo; `X_test.sh` shell-matrix + run-once `X_check.sh`):
+  conventions and remaining foundations work in 2026-07-07-000; built by
   `../2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md`
-  — one harness decision serves both).
+  (done).
 
 ## Execution order
 

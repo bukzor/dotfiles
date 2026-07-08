@@ -23,6 +23,7 @@ to confirm the svelte seed holds nothing unique before taking main's side.
 - [ ] unit tests first, where appropriate (vague reminder): the adjudicated files are
       mostly config — for any with observable behavior (kitty, pnpm, gh) note a
       one-liner check that the tool still starts/answers after taking main's side
+      (shape: run-once `X_check.sh`, skip-if-absent — see ../2026-07-07-000)
 - [ ] eyeball diff and adjudicate each (commit on svelte in live `~` if main wins;
       escalate to todo 004 if genuinely mixed):
     - [ ] .config/kitty/kitty.conf (svelte = 2250-line default dump? main trimmed)

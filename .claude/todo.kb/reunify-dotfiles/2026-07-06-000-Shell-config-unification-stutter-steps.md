@@ -46,6 +46,9 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
       login/interactive matrix (bash -l, bash -i, bash -lc) asserting COLUMNS, PATH
       correctness, PATH idempotent on re-source, prompt present when interactive,
       and zero references to dead paths; keep it cheap enough to run per commit
+      (harness live, see ../2026-07-07-000: -l/-lc fit the hermetic-HOME
+      `X_test.sh` pattern as-is; -i cells need the pty allowance; the
+      dead-path grep is a run-once `X_check.sh`)
 - [ ] svelte-crostini (work in live `~`, smoke-test each commit)
     - [ ] commit the two in-flight fixes (symlink repair + columns.sh)
     - [ ] move env.d under sh/ as real dir; delete `~/.config/env/`

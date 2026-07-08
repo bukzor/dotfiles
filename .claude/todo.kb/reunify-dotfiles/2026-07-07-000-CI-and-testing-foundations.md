@@ -7,75 +7,93 @@ status: active
 
 **Priority:** High — runs FIRST, before all 2026-07-06-* groups; they each open with
 a "unit tests" task that assumes this system exists
-**Complexity:** Medium
+**Complexity:** Low (was Medium — the harness decision and skeleton landed 2026-07-08)
 **Branch:** author once, land on both (it's also convergence content)
 **Context:** parent goal in `.claude/todo.md`; per-group test needs below
 
-## Problem Statement
+## Decided and live (2026-07-08)
 
-Every convergence group needs tests, and each would otherwise invent its own harness.
-One session to survey the needs, pick a system, and stand up the skeleton — so group
-work starts with `dotfiles-test` (or equivalent) already answering pass/fail.
+Built by `../2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md`
+(done); full rationale in
+`~/docs/dev/devlog/2026-07-08-000-cross-shell-test-harness--redo-as-the-test-runner.md`:
+
+- **Runner: apenwarr redo.** Each (test, shell) pair is a target
+  (`default.tested.do` at repo root); `redo test` fans out the matrix.
+  bats-core and a TAP-runner prototype were both rejected.
+- **Layout: co-located.** `X_test.sh` beside `X.sh` (`.profile_test.sh`
+  included); shared POSIX asserts in `lib/sh/assert.sh`; both sourcing paths
+  skip `*_test.sh`. No `tests/` tree; `bin/dotfiles-test` rejected
+  (`redo test` is already one command).
+- **CI live:** `.github/workflows/check-sh.yml` — dash / busybox ash / bash /
+  zsh(sh-emulation) matrix, ~14s per push, green.
+- **Zero-dependency checkouts: vendored minimal/do**
+  (`.local/share/redo/do`, see its README) runs the whole suite on a bare
+  tree — this is how CI, the main clone, and a scratch merge checkout get
+  tested without installing anything.
+- **`.tested` targets materialize as timestamp certificates** (gitignored),
+  identical under both redo implementations.
 
 ## Survey of test needs (from the 2026-07-06-* files)
 
-| Group | Need | CI-able? |
+| Group | Need | Shape |
 |---|---|---|
-| 000 unification | shell-startup matrix: bash -l / -i / -lc; COLUMNS, PATH correct + idempotent re-source, prompt, no dead-path refs | yes |
-| 001 fast-forwards | cross-branch byte-identity over a path list | yes (needs both refs) |
-| 002 stale-seed | tool-still-starts checks (kitty, gh, pnpm) | partial — skip-if-absent |
-| 003 triage | dangling-reference sweep after deletes | yes |
-| 004 hand-merges | bin/ script smoke runs; config parse/load (git config -l, headless vim, tmux -f) | mostly |
-| 005 zsh port | same startup matrix, zsh columns | yes |
-| 006 merge | merge-tree conflict count == 0; all suites green on merged tree | yes |
-| ../2026-07-07-001 (independent) | functions.d unit tests with **cross-shell parity: dash, busybox ash, bash, zsh**; literal regression tests for two shipped bugs; `env -i` .profile smoke test | yes |
+| 000 unification | shell-startup matrix: bash -l / -i / -lc; COLUMNS, PATH correct + idempotent re-source, prompt, no dead-path refs | `X_test.sh` (hermetic HOME); `-i` needs pty allowance; dead-path grep is a `X_check.sh` |
+| 001 fast-forwards | cross-branch byte-identity over a path list | `X_check.sh` + redo-always; CI full-fetch |
+| 002 stale-seed | tool-still-starts checks (kitty, gh, pnpm) | `X_check.sh`, skip-if-absent |
+| 003 triage | dangling-reference sweep after deletes | `X_check.sh` |
+| 004 hand-merges | bin/ script smoke runs; config parse/load (git config -l, headless vim, tmux -f) | `X_check.sh`, skip-if-absent |
+| 005 zsh port | startup matrix, native zsh (not sh-emulation) | `X_check.sh` invoking zsh directly; pty allowance |
+| 006 merge | merge-tree conflict count == 0; all suites green on merged tree | `X_check.sh` + vendored do in a scratch checkout |
+| ../2026-07-07-001 | functions.d unit tests, cross-shell parity, regression drills, `env -i` .profile smoke | DONE — `X_test.sh` matrix |
 
-Derived requirements:
+Derived requirements, status:
 
-1. **One command**, seconds not minutes, runnable per commit locally.
-2. **Hermetic HOME**: must test *any checkout* (the main clone, a merged tree), not
-   just live `~` — key trick: `env HOME=<checkout> bash -lc ...` makes startup tests
-   tree-relative. Without this, main-side changes can't be tested before switchover.
-3. **Skip-if-absent** for optional tools (zsh, kitty, tmux) — degrade to skip, never
-   fail, so the same suite runs on crostini, CI, and (someday) macOS.
-4. **Cross-ref tests** (001, 006) need two refs — run from either checkout,
-   full-history fetch in CI.
-5. Shell-agnostic assertions where possible; per-shell only for startup matrices.
-6. **Cross-shell parity matrix** (from ../2026-07-07-001, a hard requirement there):
-   run the same test body under dash, busybox ash, bash, zsh with per-shell
-   pass/fail. The harness decision here must satisfy that file too — decide once.
+1. one command, seconds, per commit — **DONE** (`redo test`, ~2s incremental)
+2. hermetic HOME / test any checkout — **DONE** (`.profile_test.sh`'s
+   symlink-HOME under `env -i` is checkout-relative; vendored do removes the
+   install dependency)
+3. skip-if-absent — **DONE** for shells (test.do); tool-level helper still to add
+4. cross-ref tests need two refs — **TODO** (run-once class + full fetch)
+5. shell-agnostic assertions — **DONE** (`lib/sh/assert.sh` is POSIX)
+6. cross-shell parity matrix — **DONE**
 
-## Implementation Steps
+## Remaining work
 
-- [ ] decide harness: bats-core vs plain-bash TAP runner (house bash conventions
-      apply either way; bats is apt/brew-installable and gives per-test reporting —
-      likely winner, but confirm it tolerates the hermetic-HOME trick cleanly)
-- [ ] decide layout: `tests/` at repo root + `bin/dotfiles-test` entry point
-- [ ] skeleton: hermetic-HOME helper, skip-if-absent helper, one real test per
-      category (startup matrix, byte-identity, dangling-ref sweep) as proof
-- [ ] CI: GitHub Actions workflow — push to main + svelte-crostini, ubuntu runner,
-      matrix {bash, zsh}, full-fetch for cross-ref tests
-- [ ] document invocation in the repo (README or CLAUDE.md): local per-commit usage,
-      how groups add tests
-- [ ] land identically on both branches (this file's content is itself convergence
-      material — same tree both sides)
+- [ ] run-once check class: `X_check.sh` → `X.checked` target, no shell
+      fan-out (a `default.checked.do` sibling; test.do enumerates both
+      classes). Serves the git cross-ref checks (001, 006), grep sweeps
+      (000, 003), tool smoke/parse checks (002, 004), and native-zsh
+      startup (005). Ref-dependent checks need `redo-always` under real
+      redo (branch tips aren't file deps); vendored do always builds fresh,
+      so CI is covered without it.
+- [ ] skip-if-absent helper in `lib/sh/assert.sh` (kitty, tmux, vim, brew —
+      degrade to skip, never fail; shells already handled in test.do)
+- [ ] pty allowance for interactive (`-i`) startup tests: without a tty,
+      bash/zsh/busybox-ash emit job-control noise on stderr, colliding with
+      the empty-stderr assertion style — wrap those cells in `script -qc`
+      (or grant per-mode expected-stderr patterns)
+- [ ] CI: `fetch-depth: 0` + fetch both branches once cross-ref checks land
+- [ ] document invocation in-repo (how a group adds `X_test.sh` /
+      `X_check.sh`; local per-commit usage)
+- [ ] land the harness identically on main (this is itself convergence
+      content — same tree both sides)
 
 ## Open Questions
 
 - Does crostini's environment differ enough from GitHub's ubuntu runner that startup
   tests need a container image, or is plain ubuntu-latest close enough? (Start plain;
   containerize only when a real discrepancy bites.)
-- Are there existing tests/CI on either branch to absorb? (Check `.github/`,
-  `setup/`, Makefiles on both — survey during the session, don't assume greenfield.)
-- ANSWERED (was open in ../2026-07-07-001): the repo has a GitHub remote,
-  `github.com/bukzor/dotfiles`, and it is PUBLIC — GitHub Actions is available
-  and free. Real CI is on the table, not just local hooks. (Public also means:
-  the .ssh/ audit in 003 matters for anything not yet pushed.)
+- What of main's existing `.github/` should be absorbed or retired? (svelte
+  carries check-sh.yml, Check Vim, Check Neovim, and a broken lint-lua —
+  survey both sides when landing the harness on main.)
 
 ## Success Criteria
 
-- [ ] `dotfiles-test` green on both branches locally and in CI
-- [ ] a group agent can add a test by dropping a file in `tests/` with zero harness work
+- [ ] `redo test` (or `./.local/share/redo/do test`) green on both branches,
+      locally and in CI
+- [x] a group agent adds a matrix test by dropping `X_test.sh` beside the
+      code — zero harness work
+- [ ] same for a run-once `X_check.sh`
 - [ ] main's tree is testable from the clone without touching live `~`
 
 ## Notes

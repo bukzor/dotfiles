@@ -29,6 +29,7 @@ setup/ 2 (+ a few singletons).
 - [ ] unit tests first (vague reminder): a dangling-reference sweep — after each
       delete-commit, grep the surviving tree for mentions of deleted paths
       (bin names, sourced files); zero hits expected
+      (shape: run-once `X_check.sh` — see ../2026-07-07-000)
 - [ ] audit .ssh/ (15 files) first — already public on origin, but confirm nothing
       sensitive; document findings
 - [ ] KEEP (feeds other groups — do not delete): .zsh_completion/, .zkbd/,

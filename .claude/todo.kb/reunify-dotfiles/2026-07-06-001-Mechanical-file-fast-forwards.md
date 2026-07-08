@@ -26,6 +26,8 @@ svelte's 2025-10-22 import was seeded from an older snapshot, so main leads 19:7
 - [ ] unit tests first (vague, mostly a reminder): a cross-branch identity check —
       given the 26 paths, assert `git diff main svelte-crostini -- <paths>` is empty;
       becomes the regression guard as other groups land
+      (shape: run-once `X_check.sh` with redo-always; CI needs
+      fetch-depth: 0 — see ../2026-07-07-000)
 - [ ] svelte-crostini takes main's version (19 files) — commit in live `~`,
       thematic commits (bin tools / gcloud tools / misc):
       bin/alert-slack, bin/deinterlace, bin/gcloud-dump-roles, bin/gcloud-logging-cat,

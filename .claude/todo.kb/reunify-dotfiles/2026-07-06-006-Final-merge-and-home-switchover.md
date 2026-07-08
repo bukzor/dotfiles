@@ -20,6 +20,9 @@ this machine, retire svelte-crostini.
 - [ ] unit tests first (vague reminder): codify the preflight as a runnable check —
       merge-tree conflict count == 0, plus the accumulated invariant suites from
       000/001/005 all green on the merged tree before switchover
+      (shape: run-once `X_check.sh` for merge-tree; the merged-tree suite
+      run is `./.local/share/redo/do test` in a scratch checkout — zero
+      installs — see ../2026-07-07-000)
 - [ ] preflight: `git merge-tree main svelte-crostini` (or a scratch worktree merge)
       shows zero conflicts; `git diff main svelte-crostini --stat` shows only
       expected one-sided paths

@@ -22,6 +22,9 @@ structure (todo 000) instead of resurrecting .sh_rc.
 - [ ] unit tests first: extend the todo-000 startup-invariant matrix with zsh
       columns (zsh -i, zsh -lc): clean startup (no error output), prompt set,
       completions initialized, env.d exports present; run per commit
+      (shape: these need *native* zsh, not the harness's `zsh --emulate sh`
+      matrix cell — run-once `X_check.sh` invoking zsh directly; -i needs
+      the pty allowance — see ../2026-07-07-000)
 - [ ] prerequisite: todo 000 structure landed on svelte
 - [ ] new ~/.config/sh/zshrc.d/ (sibling of bashrc.d): setopts, history, vi-mode +
       bindkeys, zkbd handling, completion init (fpath includes .zsh_completion)
