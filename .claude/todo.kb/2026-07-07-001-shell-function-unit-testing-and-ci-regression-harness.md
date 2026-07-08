@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: done  # pending: first CI run observed green
+status: done
 cost-benefit-sweh:
   timebox:
     "@value": 0.5

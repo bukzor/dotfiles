@@ -96,7 +96,14 @@ pure bookkeeping in `.redo/` — gitignored.)
 
 ## Open Questions
 
-- [ ] CI first run unverified until this push lands — check Actions.
+- [x] CI green (run 4). Getting there took three fixes: apt has no redo on
+  noble (install via linuxbrew), linuxbrew isn't on the runner's PATH, and —
+  the first real catch — `bashrc.d/ulimit.sh` errored at every login where
+  the hard limit is capped below 2^18 (GitHub's containers), tripping the
+  `.profile` empty-stderr assertion in the bash cell. Fixed by clamping the
+  ask to the hard limit (no suppression needed), and added
+  `.bashrc`/`bashrc.d/*.sh` to `default.tested.do`'s dependency list, which
+  had been missing them.
 - Landing this on `main` is reunification work
   (`.claude/todo.kb/reunify-dotfiles/2026-07-07-000-CI-and-testing-foundations.md`);
   authored here on svelte-crostini, same-tree convergence applies.
