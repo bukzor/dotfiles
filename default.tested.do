@@ -8,7 +8,7 @@ shell=${2##*.}
 
 redo-ifchange lib/sh/assert.sh "${name}_test.sh" \
   .config/sh/functions.sh .config/sh/functions.d/*.sh \
-  .profile
+  .profile .bashrc .config/sh/bashrc.d/*.sh
 
 case $shell in
   ash) set -- busybox ash ;;
