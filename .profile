@@ -44,7 +44,7 @@ export GOPATH="$GOPREFIX"
 export VOLTA_HOME="$HOME/.volta"
 export PYTHONPATH="$HOME/lib/pythonpath${PYTHONPATH:+:$PYTHONPATH}"
 
-# NOTE: in path_prepend, last wins
+# NOTE: in `path prepend`, last wins
 # enabling meta-tools: rustup, volta, etc.
 path prepend PATH <<EOF
   $HOME/.local/share/nvim/mason/bin

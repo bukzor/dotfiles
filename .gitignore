@@ -177,3 +177,6 @@ _viminfo
 /PycharmProjects/
 /source/
 /trash/
+
+# redo build system
+.redo/
