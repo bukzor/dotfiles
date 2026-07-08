@@ -1,1 +1,1 @@
-../.config/env/env.d
+../env/env.d
