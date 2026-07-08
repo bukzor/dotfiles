@@ -7,3 +7,7 @@
 # Opt-in git-localhost-store to dotfiles (directory and contents)
 !git-localhost-store/
 !git-localhost-store/**
+
+# Opt-in vendored apenwarr minimal/do (public domain; see redo/README.md)
+!redo/
+!redo/**
