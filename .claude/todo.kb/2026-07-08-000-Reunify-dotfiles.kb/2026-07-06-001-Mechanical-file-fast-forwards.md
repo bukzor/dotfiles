@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: active
+status: open
 ---
 
 # Mechanical file fast-forwards

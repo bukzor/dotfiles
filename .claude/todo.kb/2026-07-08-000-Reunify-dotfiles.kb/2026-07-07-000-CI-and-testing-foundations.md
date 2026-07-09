@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: active
+status: open
 ---
 
 # CI and testing foundations
@@ -59,13 +59,17 @@ Derived requirements, status:
 
 ## Remaining work
 
-- [ ] run-once check class: `X_check.sh` → `X.checked` target, no shell
-      fan-out (a `default.checked.do` sibling; test.do enumerates both
-      classes). Serves the git cross-ref checks (001, 006), grep sweeps
-      (000, 003), tool smoke/parse checks (002, 004), and native-zsh
-      startup (005). Ref-dependent checks need `redo-always` under real
-      redo (branch tips aren't file deps); vendored do always builds fresh,
-      so CI is covered without it.
+- [x] run-once check class: `X_check.sh` → `X.checked` target, no shell
+      fan-out (`default.checked.do`; `test.do` enumerates both classes via
+      `git ls-files --cached --others --exclude-standard -- '*_check.sh'`
+      — repo-scoped and gitignore-aware; a plain `find .` was tried first
+      and rejected: it walks all of `~`, permission-denied under
+      `.solargraph`, and false-positives on vendored `trash/` content).
+      Serves the git cross-ref checks (001, 006), grep sweeps (000, 003),
+      tool smoke/parse checks (002, 004), and native-zsh startup (005).
+      Ref-dependent checks still need `redo-always` under real redo
+      (branch tips aren't file deps); vendored do always builds fresh, so
+      CI is covered without it.
 - [ ] skip-if-absent helper in `lib/sh/assert.sh` (kitty, tmux, vim, brew —
       degrade to skip, never fail; shells already handled in test.do)
 - [ ] pty allowance for interactive (`-i`) startup tests: without a tty,
@@ -93,7 +97,7 @@ Derived requirements, status:
       locally and in CI
 - [x] a group agent adds a matrix test by dropping `X_test.sh` beside the
       code — zero harness work
-- [ ] same for a run-once `X_check.sh`
+- [x] same for a run-once `X_check.sh`
 - [ ] main's tree is testable from the clone without touching live `~`
 
 ## Notes

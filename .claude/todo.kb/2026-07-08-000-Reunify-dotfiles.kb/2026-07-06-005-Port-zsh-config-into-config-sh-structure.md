@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: active
+status: open
 ---
 
 # Port zsh config into config-sh structure

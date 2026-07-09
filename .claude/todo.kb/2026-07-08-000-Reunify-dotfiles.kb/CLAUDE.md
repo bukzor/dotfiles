@@ -45,5 +45,6 @@ content, then `git merge --allow-unrelated-histories` and live on main.
 
 ## Execution order
 
-Defined by `~/.claude/todo.md` (not by filename sort): CI foundations first,
-then 000 → (001, 002, 003 parallelizable) → 005 → 004 → 006 strictly last.
+Defined by [../2026-07-08-000-Reunify-dotfiles.md](../2026-07-08-000-Reunify-dotfiles.md)
+(not by filename sort): CI foundations first, then 000 → (001, 002, 003
+parallelizable) → 005 → 004 → 006 strictly last.

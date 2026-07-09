@@ -16,17 +16,7 @@ cost-benefit-sweh:
 
 Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 
-- [ ] Reunify dotfiles lineages: converge svelte-crostini ↔ main to identical content, merge, live on main.
-  Working agreements (topology, single-writer, file ownership): [todo.kb/reunify-dotfiles/CLAUDE.md](todo.kb/reunify-dotfiles/CLAUDE.md)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-07-000-CI-and-testing-foundations.md](todo.kb/reunify-dotfiles/2026-07-07-000-CI-and-testing-foundations.md) — FIRST; harness decided+live (redo); remainder: `X_check.sh` run-once class, pty allowance, land on main
-  - [x] [todo.kb/2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md](todo.kb/2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md) — done 2026-07-08; CI green (check-sh.yml)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-000-Shell-config-unification-stutter-steps.md](todo.kb/reunify-dotfiles/2026-07-06-000-Shell-config-unification-stutter-steps.md)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-001-Mechanical-file-fast-forwards.md](todo.kb/reunify-dotfiles/2026-07-06-001-Mechanical-file-fast-forwards.md) — 001/002/003 are mutually independent
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-002-Stale-seed-adjudication.md](todo.kb/reunify-dotfiles/2026-07-06-002-Stale-seed-adjudication.md)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-003-Main-only-path-triage.md](todo.kb/reunify-dotfiles/2026-07-06-003-Main-only-path-triage.md)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-005-Port-zsh-config-into-config-sh-structure.md](todo.kb/reunify-dotfiles/2026-07-06-005-Port-zsh-config-into-config-sh-structure.md) — needs 000 landed
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-004-Hand-merge-true-divergences.md](todo.kb/reunify-dotfiles/2026-07-06-004-Hand-merge-true-divergences.md)
-  - [ ] [todo.kb/reunify-dotfiles/2026-07-06-006-Final-merge-and-home-switchover.md](todo.kb/reunify-dotfiles/2026-07-06-006-Final-merge-and-home-switchover.md) — strictly last
+- [ ] [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md) — converge svelte-crostini ↔ main to identical content, merge, live on main
 - [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md) — overlaps reunify 006's "commit/park uncommitted state" step; fold in or close when 006 runs
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
