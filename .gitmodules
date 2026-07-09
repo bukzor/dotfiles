@@ -19,3 +19,7 @@
 [submodule ".claude/skills/anthropic-skills"]
 	path = repo/anthropic-skills
 	url = https://github.com/anthropics/skills.git
+[submodule ".claude/sessions.kb"]
+	path = .claude/sessions.kb
+	url = git@github.com:bukzor/bukzor.claude-sessions.git
+	branch = main
