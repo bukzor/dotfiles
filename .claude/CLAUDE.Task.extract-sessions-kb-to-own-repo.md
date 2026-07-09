@@ -35,9 +35,9 @@ commit.
 Steps:
 
 - [x] Confirm with user: repo name, history preservation, per-host subdir layout, submodule vs plain clone
-- [ ] Create `bukzor/bukzor.claude-sessions` repo (public) via `gh repo create`
-- [ ] Extract history with `git filter-repo` in the `~/repo/github.com/bukzor/dotfiles` working copy
-- [ ] Push the extracted repo to GitHub
+- [x] Create `bukzor/bukzor.claude-sessions` repo (public) via `gh repo create`
+- [x] Extract history with `git filter-repo` in the `~/repo/github.com/bukzor/dotfiles` working copy
+- [x] Push the extracted repo to GitHub — https://github.com/bukzor/bukzor.claude-sessions, `main`, 77 commits, `gitleaks detect` clean
 - [ ] **Go/no-go checkpoint**: strip sessions.kb from dotfiles history (force-push, rewrites shared `svelte-crostini`)
 - [ ] Switch the working host: `git rm`, `git submodule add` at `~/.claude/sessions.kb`, `mkdir penguin/`
 - [ ] Add CLAUDE.md inside new repo (per-host subdir convention, push/pointer-bump cadence, `cwd:` portability stance)
