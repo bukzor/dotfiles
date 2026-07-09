@@ -71,15 +71,61 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
     - [x] verify: `bash -lc 'echo $COLUMNS'` = 132; `bash -i` prompt/aliases
           intact — both confirmed live, post-commit
 - [ ] main (mirror in the clone: ~/repo/github.com/bukzor/dotfiles--main-reunify)
-    - [ ] apply identical `~/.config/sh` tree + `.profile`/`.bashrc`
-    - [ ] fold in main-only `.sh_env` content not yet captured (TERM fix, TMPDIR,
-          `__orig_PATH`, private-dotfiles hooks) — with OSTYPE guards
+    - [ ] apply identical `~/.config/sh` tree + `.profile`/`.bashrc` — not yet
+          started; main's `.config/sh` doesn't exist at all yet (confirmed
+          empty this session)
+    - [ ] fold in main-only `.sh_env` content not yet captured — analysis
+          done 2026-07-09, not yet implemented. Plan for next session:
+        - port, with OSTYPE/existence guards (new env.d files, applied
+          identically to both branches once authored — these become new
+          convergence content, not main-only): `CPUTYPE`/`OSTYPE` exports;
+          macOS `/usr/libexec/path_helper` invocation; TMPDIR selection
+          (candidate-list + mkdir/chmod/writable-check loop, easily
+          testable); private-dotfiles hook (`has private-dotfiles-check &&
+          ...`, `trysource .../.sh_env` — safe no-op today: confirmed
+          neither the commands nor `~/private-dotfiles` exist on this
+          machine yet, so this ports as inert/future-proofing); TERM-fixing
+          (psget/process-tree TERM detection) -- valuable per this task's
+          own "Adopt from main's .sh_env" bullet but the most complex/
+          fragile piece, test carefully or scope down
+        - **deliberately skip** `__orig_PATH` save/restore: redundant with
+          svelte's `path` function (functions.d/path.sh), which is already
+          idempotent via remove-then-reinsert on every `prepend`/`append`
+          call -- svelte doesn't have the "PATH grows on re-source" problem
+          `__orig_PATH` exists to solve. Porting both mechanisms together
+          would just be two competing idempotency strategies.
+        - **flag for user, don't decide silently:** main's `.sh_env`
+          appends homebrew to PATH on Linux instead of prepending
+          ("prepending caused too many issues" per its own comment), but
+          svelte's current `300-homebrew.sh` always prepends (unconditionally,
+          regardless of OS) -- svelte's live behavior today actually matches
+          main's *Darwin* branch, not its Linux one. Adopting main's Linux
+          behavior would reorder PATH precedence on this actual live
+          crostini machine, not just add new content -- real user-visible
+          risk, worth asking rather than silently changing.
+        - cross-shell PS1, `precmd_functions`/`preexec_functions`/
+          `chpwd_functions` (main vendors `rcaloras/bash-preexec`): already
+          correctly out of scope here, tracked in ../2026-07-06-005 instead.
+        - travis completions, VCS-prompt detection (disabled by its own
+          author, `return 0 # too slow!`): dead weight, skip, not worth a
+          question.
     - [ ] delete superseded `.sh_env`/`.sh_rc`/`.sh_advanced_rc`/`.sh_lib`/`.sh_plugins.d`
           only after zsh port (todo 005) consumes them
 
 ## Open Questions
 
-- Does main's `.sh_advanced_rc` contain anything not already re-invented on svelte?
+- ~~Does main's `.sh_advanced_rc` contain anything not already re-invented on
+  svelte?~~ **Answered 2026-07-09:** yes, one real thing, but it's out of
+  scope for 000. Travis completions (dead tool) and VCS-prompt detection
+  (disabled by its own author, `return 0 # too slow!`) are dead weight, skip.
+  The direnv hook and private-dotfiles hook are already reinvented/tracked.
+  The one substantive gap: main's `precmd_functions`/`preexec_functions`/
+  `chpwd_functions` are backed by `.sh_lib/bash-precmd.sh` (the third-party
+  `rcaloras/bash-preexec`, a real DEBUG-trap-based implementation) +
+  `bash-chpwd.sh`, vs. svelte's home-grown 6-line `PROMPT_COMMAND` shim in
+  `050-precmd-functions.sh` (precmd only, no preexec, no chpwd). This is
+  more capable and its whole purpose is zsh-compatible hook naming — that's
+  005's (zsh port) job, not 000's; noted there instead of pulled in here.
 
 ## Success Criteria
 

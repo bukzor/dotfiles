@@ -50,3 +50,14 @@ structure (todo 000) instead of resurrecting .sh_rc.
 
 docs/annoyances/zsh lists known paper cuts (tmux TERM, cursor highlight, shared
 history too eager) — check whether the port resolves or reproduces them.
+
+**precmd/chpwd mechanism, found 2026-07-09 doing ../2026-07-06-000:**
+svelte's `.config/sh/bashrc.d/050-precmd-functions.sh` is a bespoke 6-line
+`PROMPT_COMMAND` shim with its own `prompt_commands` array name (precmd
+only). main's `.sh_advanced_rc`/`.sh_lib` instead vendors
+`rcaloras/bash-preexec` (`precmd_functions`/`preexec_functions` via a
+DEBUG trap) plus a `bash-chpwd.sh` adding `chpwd_functions` — zsh has all
+three natively, by those exact names. Worth adopting main's naming (at
+minimum) so rc.d content can register hooks the same way under both
+shells; direnv.sh's `PROMPT_COMMAND`-splicing hook is the concrete thing
+in rc.d that would need converting to `precmd_functions+=(...)` either way.
