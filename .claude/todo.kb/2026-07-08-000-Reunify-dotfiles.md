@@ -28,7 +28,8 @@ Working agreements (topology, single-writer-per-branch, file ownership):
 
 `cd ~ && claude --model fable`, `/session-start` (picks up this file's goal
 block), work one group, `/session-end`. Main-branch commits happen only in
-the clone at `~/repo/github.com/bukzor/dotfiles`; svelte commits only in `~`.
+the clone at `~/repo/github.com/bukzor/dotfiles--main-reunify`; svelte commits
+only in `~`.
 No worktrees.
 
 ## Completion

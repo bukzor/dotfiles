@@ -7,7 +7,7 @@ status: open
 
 **Priority:** Medium (must precede final merge; independent of other groups)
 **Complexity:** Medium (bulk decisions, low per-item effort)
-**Branch:** main only (delete-commits in the clone: ~/repo/github.com/bukzor/dotfiles)
+**Branch:** main only (delete-commits in the clone: ~/repo/github.com/bukzor/dotfiles--main-reunify)
 **Context:** 371 paths exist only on main; a no-base merge resurrects all of them as adds
 
 ## Problem Statement

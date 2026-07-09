@@ -17,9 +17,11 @@ content, then `git merge --allow-unrelated-histories` and live on main.
 - **`~` is the master working location** — the home repo, checked out on
   `svelte-crostini`, live config. Sessions start here. svelte-crostini commits
   happen here and ONLY here.
-- **main operations** happen in the plain clone at
-  `~/repo/github.com/bukzor/dotfiles` (main checked out). main commits happen
-  there and ONLY there.
+- **main operations** happen in the dedicated clone at
+  `~/repo/github.com/bukzor/dotfiles--main-reunify` (main checked out). main
+  commits happen there and ONLY there. (Not the general-purpose
+  `~/repo/github.com/bukzor/dotfiles` clone, which floats between branches
+  for ad hoc use and must never carry reunify commits.)
 - Same remote (`github.com/bukzor/dotfiles`) — sync via push/fetch.
 - zsh-support and other historical heads: no checkout; read via
   `git show origin/zsh-support:<path>` from either repo.

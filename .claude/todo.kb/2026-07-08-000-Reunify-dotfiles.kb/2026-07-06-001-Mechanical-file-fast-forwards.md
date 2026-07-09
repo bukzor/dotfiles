@@ -36,7 +36,7 @@ svelte's 2025-10-22 import was seeded from an older snapshot, so main leads 19:7
       bin/tf-graph, bin/tmux-color, bin/unescape, bin/vimmerge, .pythonrc.py,
       .vim/lua/bukzor/aerial.lua
 - [ ] main takes svelte's version (7 files) — commit in the clone
-      (~/repo/github.com/bukzor/dotfiles):
+      (~/repo/github.com/bukzor/dotfiles--main-reunify):
       bin/brew-handle-gnubin, bin/terminal, bin/tmux-cd, bin/uncolor, Brewfile,
       .inputrc, .vim/lua/bukzor/unload.lua
 - [ ] skim each diff during application; anything surprising gets bounced to todo 004

@@ -56,7 +56,7 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
     - [ ] rewrite .bashrc with real guard
     - [ ] rewrite .profile; migrate inline exports to env.d/; wire profile.d
     - [ ] verify: `bash -lc 'echo $COLUMNS'` = 132; `bash -i` prompt/aliases intact
-- [ ] main (mirror in the clone: ~/repo/github.com/bukzor/dotfiles)
+- [ ] main (mirror in the clone: ~/repo/github.com/bukzor/dotfiles--main-reunify)
     - [ ] apply identical `~/.config/sh` tree + `.profile`/`.bashrc`
     - [ ] fold in main-only `.sh_env` content not yet captured (TERM fix, TMPDIR,
           `__orig_PATH`, private-dotfiles hooks) — with OSTYPE guards

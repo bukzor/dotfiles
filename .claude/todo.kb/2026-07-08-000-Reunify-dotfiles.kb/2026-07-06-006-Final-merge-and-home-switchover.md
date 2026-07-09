@@ -27,7 +27,7 @@ this machine, retire svelte-crostini.
       shows zero conflicts; `git diff main svelte-crostini --stat` shows only
       expected one-sided paths
 - [ ] commit/park any uncommitted state in live `~` (gh/config.yml, etc.)
-- [ ] in the clone (~/repo/github.com/bukzor/dotfiles):
+- [ ] in the clone (~/repo/github.com/bukzor/dotfiles--main-reunify):
       `git merge --allow-unrelated-histories svelte-crostini` on main
 - [ ] review merged tree vs live `~` (`git diff main svelte-crostini` empty;
       spot-check resurrected main-only survivors)
