@@ -42,20 +42,34 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
 
 ## Implementation Steps
 
-- [ ] unit tests first: shell-startup invariants runnable as one command — the
+- [x] unit tests first: shell-startup invariants runnable as one command — the
       login/interactive matrix (bash -l, bash -i, bash -lc) asserting COLUMNS, PATH
       correctness, PATH idempotent on re-source, prompt present when interactive,
       and zero references to dead paths; keep it cheap enough to run per commit
       (harness live, see ../2026-07-07-000: -l/-lc fit the hermetic-HOME
       `X_test.sh` pattern as-is; -i cells need the pty allowance; the
-      dead-path grep is a run-once `X_check.sh`)
-- [ ] svelte-crostini (work in live `~`, smoke-test each commit)
-    - [ ] commit the two in-flight fixes (symlink repair + columns.sh)
-    - [ ] move env.d under sh/ as real dir; delete `~/.config/env/`
-    - [ ] delete dead shims (env.sh, bashrc.sh, rc.sh, interactive_only.sh)
-    - [ ] rewrite .bashrc with real guard
-    - [ ] rewrite .profile; migrate inline exports to env.d/; wire profile.d
-    - [ ] verify: `bash -lc 'echo $COLUMNS'` = 132; `bash -i` prompt/aliases intact
+      dead-path grep is a run-once `X_check.sh`): extended `.profile_test.sh`
+      (COLUMNS, idempotent re-source), added `.bashrc_test.sh` (guard
+      regression + interactive smoke via `with_pty`), added
+      `.config/sh/no-dead-paths_check.sh`. All 8 shell-matrix cells green.
+- [x] svelte-crostini (work in live `~`, smoke-test each commit): commit
+      `979953d`, prepared fully (env.d move, new env.d files, dead-shim
+      deletion, tests all written and green against hermetic HOME) before
+      ever touching the live `.profile`/`.bashrc`, so the actual cutover was
+      two `Write` calls immediately followed by verification (git-revertable
+      if either had failed) — minimum live-downtime window.
+    - [x] commit the two in-flight fixes (symlink repair + columns.sh): the
+          symlink repair had already landed in an earlier session; columns.sh
+          landed in `979953d` along with everything else below
+    - [x] move env.d under sh/ as real dir; delete `~/.config/env/`
+    - [x] delete dead shims (env.sh, bashrc.sh, rc.sh, interactive_only.sh)
+    - [x] rewrite .bashrc with real guard
+    - [x] rewrite .profile; migrate inline exports to env.d/; wire profile.d
+      (found and fixed a latent bug while wiring profile.d in:
+      `00-basics.sh` unconditionally recomputed HOME/USER, clobbering an
+      already-correct `$HOME` — caught by the hermetic-HOME test)
+    - [x] verify: `bash -lc 'echo $COLUMNS'` = 132; `bash -i` prompt/aliases
+          intact — both confirmed live, post-commit
 - [ ] main (mirror in the clone: ~/repo/github.com/bukzor/dotfiles--main-reunify)
     - [ ] apply identical `~/.config/sh` tree + `.profile`/`.bashrc`
     - [ ] fold in main-only `.sh_env` content not yet captured (TERM fix, TMPDIR,
@@ -70,8 +84,12 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
 ## Success Criteria
 
 - [ ] `.profile`, `.bashrc`, `~/.config/sh/**` byte-identical on both branches
-- [ ] fresh login shell on this machine: COLUMNS, PATH, prompt all correct
-- [ ] zero references to nonexistent paths (`grep -r '\.sh/' ~/.config/sh` clean)
+      (svelte side done; blocked on the main-mirror bullet above)
+- [x] fresh login shell on this machine: COLUMNS, PATH, prompt all correct
+      (live-verified post-commit `979953d`)
+- [x] zero references to nonexistent paths (`grep -r '\.sh/' ~/.config/sh`
+      clean) — now also a standing `no-dead-paths_check.sh`, not just a
+      one-time grep
 
 ## Notes
 
