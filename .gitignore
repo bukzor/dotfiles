@@ -28,3 +28,12 @@ trash/**/
 .vscode
 .aider*
 .env
+
+# test/check harness (../.claude/todo.kb/2026-07-08-000-Reunify-dotfiles.kb/
+# 2026-07-07-000-CI-and-testing-foundations.md); narrow opt-in landed ahead of
+# the rest of this file's reconciliation, which is still task 004's -- see
+# that task file's Notes for why splitting this slice out was safe.
+!test.do
+!default.tested.do
+!default.checked.do
+!HACKING.md

@@ -1,0 +1,28 @@
+#!/bin/sh
+# Fans out every *_test.sh to a <name>.<shell>.tested per installed shell,
+# and every *_check.sh (anywhere; run-once, no shell fan-out) to a
+# <name>.checked. A group adds either beside its code for zero harness work.
+# Absent shells skip (crostini, CI, and macOS carry different sets).
+set -eu
+exec >&2
+
+targets=
+for t in .profile_test.sh .config/sh/functions.d/*_test.sh lib/sh/*_test.sh; do
+  [ -e "$t" ] || continue # literal entry absent, or glob matched nothing
+  name=${t%_test.sh}
+  for shell in dash ash bash zsh; do
+    case $shell in ash) cmd=busybox ;; *) cmd=$shell ;; esac
+    if command -v "$cmd" >/dev/null; then
+      targets="$targets $name.$shell.tested"
+    else
+      echo "skip: $shell not installed"
+    fi
+  done
+done
+
+check_targets=$(git ls-files --cached --others --exclude-standard -- '*_check.sh' |
+  sed 's/_check\.sh$/.checked/')
+targets="$targets $check_targets"
+
+# shellcheck disable=SC2086  # word-splitting the target list is the point
+redo-ifchange $targets

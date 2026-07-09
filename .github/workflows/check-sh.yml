@@ -1,0 +1,18 @@
+name: Check sh
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: shell test matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shells
+        run: sudo apt-get update && sudo apt-get install -y dash busybox zsh
+
+      - name: Run shell test matrix
+        # vendored minimal/do: no redo install needed (serial, but the
+        # matrix is ~2s; installing real redo cost 30s)
+        run: ./.local/share/redo/do test
