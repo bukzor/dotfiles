@@ -93,16 +93,33 @@ Derived requirements, status:
 - [x] document invocation in-repo (how a group adds `X_test.sh` /
       `X_check.sh`; local per-commit usage): `~/HACKING.md`
 - [ ] land the harness identically on main (this is itself convergence
-      content — same tree both sides)
+      content — same tree both sides) — **BLOCKED, escalated to 004** (see
+      sessions.kb `reunify-dotfiles-lineages.md` for full writeup): main's
+      root `.gitignore` is deny-first (`*`/`**/*` then per-directory `!*`
+      opt-ins), unlike svelte's allowlist-of-ignores. `lib/sh/assert.sh` +
+      `assert_test.sh` land fine as-is (`lib/.gitignore` already opts in
+      `lib/*`), verified via `git add -n`. Everything else the harness
+      needs at repo root -- `test.do`, `default.tested.do`,
+      `default.checked.do`, `HACKING.md`, `.github/workflows/check-sh.yml`,
+      `.local/share/redo/*` -- is currently ignored on main and needs a
+      root `.gitignore` opt-in to become trackable. Root `.gitignore` is
+      explicitly a task-004 hand-merge file (line 31 of 004's task file:
+      `.gitconfig, .gitignore, ...`) — not mine to edit or decide here.
 
 ## Open Questions
 
 - Does crostini's environment differ enough from GitHub's ubuntu runner that startup
   tests need a container image, or is plain ubuntu-latest close enough? (Start plain;
   containerize only when a real discrepancy bites.)
-- What of main's existing `.github/` should be absorbed or retired? (svelte
-  carries check-sh.yml, Check Vim, Check Neovim, and a broken lint-lua —
-  survey both sides when landing the harness on main.)
+- ~~What of main's existing `.github/` should be absorbed or retired?~~
+  **Corrected 2026-07-09:** main has zero tracked files under `.github/`
+  (verified: `git ls-tree -r origin/main -- .github` is empty, local
+  `main` == `origin/main`). All four workflows (check-sh.yml, Check Vim,
+  Check Neovim, broken lint-lua) exist only on svelte-crostini. Nothing to
+  absorb/retire on main's side; the open question is whether the other
+  three should land on main too, and whether lint-lua's brokenness gets
+  fixed first -- out of scope for this task, revisit after the shell
+  harness itself lands.
 
 ## Success Criteria
 
