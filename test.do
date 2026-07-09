@@ -1,5 +1,7 @@
 #!/bin/sh
-# Fans out every *_test.sh to a <name>.<shell>.tested per installed shell.
+# Fans out every *_test.sh to a <name>.<shell>.tested per installed shell,
+# and every *_check.sh (anywhere; run-once, no shell fan-out) to a
+# <name>.checked. A group adds either beside its code for zero harness work.
 # Absent shells skip (crostini, CI, and macOS carry different sets).
 set -eu
 exec >&2
@@ -16,6 +18,10 @@ for t in .profile_test.sh .config/sh/functions.d/*_test.sh; do
     fi
   done
 done
+
+check_targets=$(git ls-files --cached --others --exclude-standard -- '*_check.sh' |
+  sed 's/_check\.sh$/.checked/')
+targets="$targets $check_targets"
 
 # shellcheck disable=SC2086  # word-splitting the target list is the point
 redo-ifchange $targets

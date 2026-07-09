@@ -1,5 +1,6 @@
 # shellcheck shell=sh
-# Shared by *.t.sh -- must run under dash, busybox ash, bash, zsh --emulate sh.
+# Shared by *_test.sh and *_check.sh -- must run under dash, busybox ash,
+# bash, zsh --emulate sh.
 # Runners export TEST_SH (the interpreter command) so tests can re-invoke it.
 fails=0
 
