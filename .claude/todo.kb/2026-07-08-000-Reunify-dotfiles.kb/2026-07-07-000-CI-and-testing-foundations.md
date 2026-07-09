@@ -88,8 +88,10 @@ Derived requirements, status:
       needs to run there — flagged in sessions.kb, not yet a blocker since
       current runners (crostini, GitHub ubuntu-latest) are both Linux.
 - [ ] CI: `fetch-depth: 0` + fetch both branches once cross-ref checks land
-- [ ] document invocation in-repo (how a group adds `X_test.sh` /
-      `X_check.sh`; local per-commit usage)
+      (deferred: no cross-ref `X_check.sh` exists yet to consume it --
+      lands with 001 or 006, whichever writes the first one)
+- [x] document invocation in-repo (how a group adds `X_test.sh` /
+      `X_check.sh`; local per-commit usage): `~/HACKING.md`
 - [ ] land the harness identically on main (this is itself convergence
       content — same tree both sides)
 
