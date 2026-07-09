@@ -71,9 +71,23 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
     - [x] verify: `bash -lc 'echo $COLUMNS'` = 132; `bash -i` prompt/aliases
           intact — both confirmed live, post-commit
 - [ ] main (mirror in the clone: ~/repo/github.com/bukzor/dotfiles--main-reunify)
-    - [ ] apply identical `~/.config/sh` tree + `.profile`/`.bashrc` — not yet
-          started; main's `.config/sh` doesn't exist at all yet (confirmed
-          empty this session)
+    - [x] apply identical `~/.config/sh` tree + `.profile`/`.bashrc`: commit
+          `d7dac7a` (counterpart: svelte-crostini `979953d`). Byte-identical
+          copy, all 20 shell-matrix cells + no-dead-paths check green via
+          the vendored zero-dependency `./.local/share/redo/do -c test`.
+          Found and fixed two narrow harness gaps while at it: main's
+          `test.do` predated `.bashrc_test.sh` (silently skipped its whole
+          matrix — one-line fix); `.config/.gitignore`'s and
+          `lib/.gitignore`'s un-ignore-everything-non-dotfile rules also
+          swept up generated `*.tested`/`*.checked` stamp certificates —
+          added re-ignores to both (narrow/additive, not the full
+          ignore-scheme reconciliation, which stays a separate later
+          effort).
+    - [x] homebrew PATH prepend-vs-append (flagged below): user decided
+          2026-07-09 — keep svelte's current unconditional prepend, no
+          OSTYPE branch. Applies once the homebrew env.d file itself is
+          touched (not yet — svelte's `300-homebrew.sh` already prepends
+          and was copied as-is by the mirror above).
     - [ ] fold in main-only `.sh_env` content not yet captured — analysis
           done 2026-07-09, not yet implemented. Plan for next session:
         - port, with OSTYPE/existence guards (new env.d files, applied
@@ -94,15 +108,6 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
           call -- svelte doesn't have the "PATH grows on re-source" problem
           `__orig_PATH` exists to solve. Porting both mechanisms together
           would just be two competing idempotency strategies.
-        - **flag for user, don't decide silently:** main's `.sh_env`
-          appends homebrew to PATH on Linux instead of prepending
-          ("prepending caused too many issues" per its own comment), but
-          svelte's current `300-homebrew.sh` always prepends (unconditionally,
-          regardless of OS) -- svelte's live behavior today actually matches
-          main's *Darwin* branch, not its Linux one. Adopting main's Linux
-          behavior would reorder PATH precedence on this actual live
-          crostini machine, not just add new content -- real user-visible
-          risk, worth asking rather than silently changing.
         - cross-shell PS1, `precmd_functions`/`preexec_functions`/
           `chpwd_functions` (main vendors `rcaloras/bash-preexec`): already
           correctly out of scope here, tracked in ../2026-07-06-005 instead.
