@@ -6,9 +6,20 @@ set -eu
 name=${2%.*}
 shell=${2##*.}
 
-redo-ifchange lib/sh/assert.sh "${name}_test.sh" \
-  .config/sh/functions.sh .config/sh/functions.d/*.sh \
-  .profile .bashrc .config/sh/bashrc.d/*.sh
+# Only the shared assert lib and the test itself are universal deps; the
+# shell-config surface (absent on a pre-convergence checkout, e.g. main
+# before task 000 lands) is an extra staleness dep where present, not a
+# hard requirement -- a test that doesn't source it shouldn't need it to
+# exist.
+deps="lib/sh/assert.sh ${name}_test.sh"
+for f in .config/sh/functions.sh .config/sh/functions.d/*.sh \
+  .profile .bashrc .config/sh/bashrc.d/*.sh; do
+  if [ -e "$f" ]; then
+    deps="$deps $f"
+  fi
+done
+# shellcheck disable=SC2086  # word-splitting the dep list is the point
+redo-ifchange $deps
 
 case $shell in
   ash) set -- busybox ash ;;
