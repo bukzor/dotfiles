@@ -103,4 +103,5 @@ Derived requirements, status:
 ## Notes
 
 Numbering: this file is 2026-07-07-000, which sorts after the 2026-07-06-* group
-files by name; execution order is defined by `.claude/todo.md`, where this is first.
+files by name; execution order is defined by
+`../2026-07-08-000-Reunify-dotfiles.md`, where this is first.
