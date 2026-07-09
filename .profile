@@ -1,33 +1,35 @@
-# ~/.profile: executed for all login shells.
-# shellcheck disable=SC2006  # allow backticks for hecka-ancient shells
-home=`sh -c 'unset HOME; echo ~'`
-if [ -d "$home" ]; then
-  export HOME="$home"
+#!/not-executable/bash
+# ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# bootstrap HOME/USER: everything below is located via $HOME, so this can't
+# itself move into profile.d/00-basics.sh (which needs source_dir, which
+# needs functions.sh, which needs $HOME).
+if [ -z "$HOME" ]; then
+  export HOME USER
+  USER=$(whoami)
+  HOME=$(eval "echo ~$USER")
 fi
 
-# If not running interactively, don't do anything
-case $- in
-*i*) ;;
-*)
-  . "$HOME"/.sh_plugins.d/basics.sh
-  return
-  ;;
-esac
+# get source_dir, path, has, nproc, ... (functions.d)
+. "$HOME/.config/sh/functions.sh"
 
-# for preferred_shell in /usr/bin/zsh /bin/zsh; do
-#   if [ ! "$SHELL" -ef "$preferred_shell" -a -x "$preferred_shell" ]; then
-#     SHELL="$preferred_shell" exec "$preferred_shell" -xil
-#   fi
-# done
+# HOME/USER/PATH basics (idempotent re-check), then all noninteractive env
+source_dir "$HOME/.config/sh/profile.d"
+source_dir "$HOME/.config/sh/env.d"
 
-# General shell environment, shared by zsh
-. "$HOME/".sh_env
-
-# if running bash
-if [ -n "${BASH_VERSION:-}" ]; then
-  . "$HOME"/.bashrc
-elif [ "$ZSH_VERSION" ]; then
-  : zsh will source .zshrc
-else
-  . "$HOME"/.sh_rc
+# if running bash, hand off for interactive-only additions
+if [ -n "$BASH_VERSION" ]; then
+  . "$HOME/.bashrc"
 fi
+
+alias login="source ~/.profile"
+
+env > ~/profile.env

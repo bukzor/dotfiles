@@ -29,11 +29,17 @@ trash/**/
 .aider*
 .env
 
-# test/check harness (../.claude/todo.kb/2026-07-08-000-Reunify-dotfiles.kb/
-# 2026-07-07-000-CI-and-testing-foundations.md); narrow opt-in landed ahead of
-# the rest of this file's reconciliation, which is still task 004's -- see
-# that task file's Notes for why splitting this slice out was safe.
+# redo-based test/check harness: narrow opt-in landed ahead of this file's
+# full ignore-scheme reconciliation (deny-first here vs. svelte-crostini's
+# allowlist-of-ignores), which is still a separate, later effort.
 !test.do
 !default.tested.do
 !default.checked.do
 !HACKING.md
+
+# shell config unification (.profile/.bashrc/.config/sh/** convergence):
+# same narrow-opt-in precedent as the harness block above -- .config/sh/**
+# itself is already trackable via .config/.gitignore's un-ignore-non-dotfiles
+# rule.
+!.profile_test.sh
+!.bashrc_test.sh

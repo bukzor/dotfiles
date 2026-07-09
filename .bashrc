@@ -1,46 +1,26 @@
-#!/not/executable/bash
+#!/sourceme/bash
 # ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
+# all new functionality should be added in ~/.config/sh/*.d/ directories
 
-# If not running interactively, don't do anything
-# coshells are "interactive" (ish)
-case "$-${COSHELL_VERSION:+i}" in
-    *i*) ;;
-      *) return;;
+# return early for noninteractive shells. Inlined (not delegated to a
+# sourced file): a `return` inside a *sourced* file only unwinds that `.`
+# invocation, not this one -- that's what made the old interactive_only.sh
+# a no-op guard.
+case $- in
+  *i*) ;;
+  *) return ;;
 esac
 
+# get source_dir, path, has, nproc, ... (functions.d)
+. ~/.config/sh/functions.sh
 
-# bash options  ==============================================================
+# environment variables (idempotent; .profile also sources these for
+# noninteractive login shells -- this covers interactive-only invocations,
+# e.g. a fresh shell inside tmux, that never go through .profile at all)
+source_dir ~/.config/sh/env.d
+# bash-specific shell settings
+source_dir ~/.config/sh/bashrc.d
+# generic shell startup, shared with zsh
+source_dir ~/.config/sh/rc.d
 
-# append to the history file, don't overwrite it
-shopt -s histappend
-# let me fix it if history-substition fails.
-shopt -s histreedit
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# If set, the pattern "**" used in a pathname expansion context will
-# match all files and zero or more directories and subdirectories.
-shopt -s globstar
-
-# allow regex-like functionality in globs
-shopt -s extglob
-
-# shell settings and aliases, shared by zsh
-. "$HOME"/.sh_rc
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  trysource  "$HOMEBREW_PREFIX"/etc/bash_completion
-  trysource /usr/share/bash-completion/bash_completion
-  trysource /etc/bash_completion
-
-  . "$HOME"/.sh_lib/functions.d/source_dir.sh
-  source_dir ~/.bash_completion/
-fi
-# vim:et:sw=2:sts=2:
+export TZ="America/Chicago"

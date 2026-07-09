@@ -1,4 +1,9 @@
 !*
 
+# generated test-harness certificates (X_test.sh/X_check.sh produce
+# X.<shell>.tested / X.checked beside the source), never tracked
+*.tested
+*.checked
+
 # binaries and local files
 __pycache__
