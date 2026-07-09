@@ -46,19 +46,22 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
 
 ## Notes
 
-- **New blocking dependency (found 2026-07-09, doing ../2026-07-07-000):**
-  root `.gitignore` needs to reconcile before that task's "land the
-  harness identically on main" step can finish. main's root `.gitignore`
-  is deny-first (`*`/`**/*` then per-directory `!*` opt-ins); svelte's is
-  a conventional allowlist-of-ignores. Root-level new files the test
-  harness needs on main (`test.do`, `default.tested.do`,
-  `default.checked.do`, `HACKING.md`, `.github/workflows/check-sh.yml`,
-  `.local/share/redo/*`) are all currently ignored there and need opt-in
-  entries. `lib/sh/*` is unaffected (already opted in via `lib/.gitignore`).
-  Consider pulling the root-`.gitignore` reconciliation out ahead of the
-  rest of this group's git-config theme, given CI-foundations was meant
-  to run first in the overall execution order. Full writeup in sessions.kb
-  `reunify-dotfiles-lineages.md`.
+- **Resolved narrowly, 2026-07-09** (was flagged as a blocking dependency
+  when found doing ../2026-07-07-000): that task needed root-`.gitignore`
+  opt-ins for six new harness files on main, and root `.gitignore` is this
+  group's file to own. Rather than block CI-foundations on this group's
+  turn in the execution order, added just the narrow `!` opt-ins needed
+  (four root files; two new nested `.gitignore`s for `.github/` and
+  `.local/share/redo/`, both `!*` matching the existing `lib/.gitignore`
+  pattern) — see commit `b59d84f` in `dotfiles--main-reunify`. This is a
+  strict subset of what this group's actual job is here: **the full
+  ignore-scheme reconciliation is still open** — main's deny-first scheme
+  vs. svelte's allowlist-of-ignores hasn't been decided, and everything
+  else under `.gitignore`/`.config/.gitignore`/etc. in this theme is
+  untouched. The lesson: task ownership in these files is a
+  concurrent-edit heuristic, not a permission gate — a narrow, additive,
+  non-preempting slice needed by an earlier task doesn't have to wait for
+  a later one's turn.
 - `.bashrc`/`.profile` are OWNED BY todo 000 — do not touch here.
 - macOS-vs-crostini differences resolve via OSTYPE guards (pattern in main's .sh_env),
   not by picking a side.

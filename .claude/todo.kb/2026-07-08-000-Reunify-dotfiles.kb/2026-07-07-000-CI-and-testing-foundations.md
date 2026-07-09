@@ -92,19 +92,18 @@ Derived requirements, status:
       lands with 001 or 006, whichever writes the first one)
 - [x] document invocation in-repo (how a group adds `X_test.sh` /
       `X_check.sh`; local per-commit usage): `~/HACKING.md`
-- [ ] land the harness identically on main (this is itself convergence
-      content — same tree both sides) — **BLOCKED, escalated to 004** (see
-      sessions.kb `reunify-dotfiles-lineages.md` for full writeup): main's
-      root `.gitignore` is deny-first (`*`/`**/*` then per-directory `!*`
-      opt-ins), unlike svelte's allowlist-of-ignores. `lib/sh/assert.sh` +
-      `assert_test.sh` land fine as-is (`lib/.gitignore` already opts in
-      `lib/*`), verified via `git add -n`. Everything else the harness
-      needs at repo root -- `test.do`, `default.tested.do`,
-      `default.checked.do`, `HACKING.md`, `.github/workflows/check-sh.yml`,
-      `.local/share/redo/*` -- is currently ignored on main and needs a
-      root `.gitignore` opt-in to become trackable. Root `.gitignore` is
-      explicitly a task-004 hand-merge file (line 31 of 004's task file:
-      `.gitconfig, .gitignore, ...`) — not mine to edit or decide here.
+- [x] land the harness identically on main (this is itself convergence
+      content — same tree both sides): commit `b59d84f` in the
+      `dotfiles--main-reunify` clone. Was flagged BLOCKED/escalated to 004
+      (root `.gitignore` ownership) but that was over-cautious — the fix
+      needed was a narrow, additive `!` opt-in for the four new root files
+      plus two new nested `.gitignore`s (`.github/`, `.local/share/redo/`,
+      both `!*` matching the `lib/.gitignore` precedent), not the full
+      ignore-scheme reconciliation 004 actually owns. Done directly; noted
+      in 004's task file so it doesn't redo the slice. `lib/sh/assert.sh` +
+      `assert_test.sh` also landed (already opted in via `lib/.gitignore`).
+      `./.local/share/redo/do -c test` green on that checkout (which has no
+      `.profile`/`.config/sh/**` yet — exercises the two dynamic-dep fixes).
 
 ## Open Questions
 
@@ -123,12 +122,16 @@ Derived requirements, status:
 
 ## Success Criteria
 
-- [ ] `redo test` (or `./.local/share/redo/do test`) green on both branches,
-      locally and in CI
+- [x] `redo test` (or `./.local/share/redo/do test`) green on both branches,
+      locally and in CI (locally verified both sides; CI only runs on
+      svelte-crostini pushes today — main isn't wired to a workflow trigger
+      yet, out of scope here)
 - [x] a group agent adds a matrix test by dropping `X_test.sh` beside the
       code — zero harness work
 - [x] same for a run-once `X_check.sh`
-- [ ] main's tree is testable from the clone without touching live `~`
+- [x] main's tree is testable from the clone without touching live `~`
+      (verified: `./.local/share/redo/do -c test` run and green inside
+      `dotfiles--main-reunify`, no reads/writes to `~`)
 
 ## Notes
 
