@@ -70,8 +70,13 @@ Derived requirements, status:
       Ref-dependent checks still need `redo-always` under real redo
       (branch tips aren't file deps); vendored do always builds fresh, so
       CI is covered without it.
-- [ ] skip-if-absent helper in `lib/sh/assert.sh` (kitty, tmux, vim, brew —
-      degrade to skip, never fail; shells already handled in test.do)
+- [x] skip-if-absent helper in `lib/sh/assert.sh` (kitty, tmux, vim, brew —
+      degrade to skip, never fail; shells already handled in test.do):
+      `skip_if_absent TOOL...` prints `skip: TOOL not installed` to stderr
+      and exits 0, short-circuiting the rest of the check body. Test-driven
+      via a new co-located `lib/sh/assert_test.sh`, which required adding
+      `lib/sh/*_test.sh` to `test.do`'s fan-out glob (previously only
+      `.profile_test.sh` and `functions.d/*_test.sh` were discovered).
 - [ ] pty allowance for interactive (`-i`) startup tests: without a tty,
       bash/zsh/busybox-ash emit job-control noise on stderr, colliding with
       the empty-stderr assertion style — wrap those cells in `script -qc`

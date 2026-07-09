@@ -7,7 +7,7 @@ set -eu
 exec >&2
 
 targets=
-for t in .profile_test.sh .config/sh/functions.d/*_test.sh; do
+for t in .profile_test.sh .config/sh/functions.d/*_test.sh lib/sh/*_test.sh; do
   name=${t%_test.sh}
   for shell in dash ash bash zsh; do
     case $shell in ash) cmd=busybox ;; *) cmd=$shell ;; esac

@@ -19,3 +19,12 @@ assert_done() {
     exit 1
   fi
 }
+
+skip_if_absent() { # skip_if_absent TOOL...
+  for tool; do
+    if ! command -v "$tool" >/dev/null; then
+      echo "skip: $tool not installed" >&2
+      exit 0
+    fi
+  done
+}
