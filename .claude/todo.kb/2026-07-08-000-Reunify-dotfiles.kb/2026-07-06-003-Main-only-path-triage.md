@@ -41,7 +41,13 @@ setup/ 2 (+ a few singletons).
     - [ ] .config/ main-only subset
     - [ ] lib/, libexec/, .local/
     - [ ] .jq/, .bash_completion/, .subversion/, setup/, repo/
-    - [ ] .claude/ main-only subset (old commands/context — much superseded by svelte)
+    - [ ] .claude/ main-only subset (old commands/context — much superseded by svelte).
+          Concrete example found 2026-07-09 while working task 000: root
+          `CLAUDE.md` and `.claude/CLAUDE.md` in the main-reunify clone carry an
+          old, different convention set (TodoWrite-disabled/`bin/trash`/
+          "REVIEW NEEDED:" prefix) and a self-declared precedence claim that it
+          overrides everything — superseded by the current `~/.claude` system,
+          candidate for deletion here.
     - [ ] .vim/ main-only subset
 - [ ] full list: regenerate with
       `comm -23 <(git ls-tree -r --name-only main | sort) <(git ls-tree -r --name-only svelte-crostini | sort)`
