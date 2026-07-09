@@ -28,3 +28,9 @@ skip_if_absent() { # skip_if_absent TOOL...
     fi
   done
 }
+
+with_pty() { # with_pty 'CMD STRING' -- run CMD under a pty (via script -e),
+  # so an interactive-shell startup doesn't emit job-control noise ("cannot
+  # set terminal process group", "no job control in this shell") on stderr.
+  script -qec "$1" /dev/null
+}

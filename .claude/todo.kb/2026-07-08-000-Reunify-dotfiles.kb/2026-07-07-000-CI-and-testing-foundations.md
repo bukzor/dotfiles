@@ -77,10 +77,16 @@ Derived requirements, status:
       via a new co-located `lib/sh/assert_test.sh`, which required adding
       `lib/sh/*_test.sh` to `test.do`'s fan-out glob (previously only
       `.profile_test.sh` and `functions.d/*_test.sh` were discovered).
-- [ ] pty allowance for interactive (`-i`) startup tests: without a tty,
+- [x] pty allowance for interactive (`-i`) startup tests: without a tty,
       bash/zsh/busybox-ash emit job-control noise on stderr, colliding with
       the empty-stderr assertion style — wrap those cells in `script -qc`
-      (or grant per-mode expected-stderr patterns)
+      (or grant per-mode expected-stderr patterns). Added `with_pty` to
+      `lib/sh/assert.sh` (`script -qec 'CMD' /dev/null`); `-e/--return`
+      propagates the wrapped command's exit status. **Review note:** this
+      is a util-linux-only flag (>= 2.35); BSD/macOS `script(1)` takes no
+      `-c`/`-e` and would need a different wrapper if a startup test ever
+      needs to run there — flagged in sessions.kb, not yet a blocker since
+      current runners (crostini, GitHub ubuntu-latest) are both Linux.
 - [ ] CI: `fetch-depth: 0` + fetch both branches once cross-ref checks land
 - [ ] document invocation in-repo (how a group adds `X_test.sh` /
       `X_check.sh`; local per-commit usage)
