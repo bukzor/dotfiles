@@ -39,8 +39,8 @@ Steps:
 - [x] Extract history with `git filter-repo` in the `~/repo/github.com/bukzor/dotfiles` working copy
 - [x] Push the extracted repo to GitHub — https://github.com/bukzor/bukzor.claude-sessions, `main`, 77 commits, `gitleaks detect` clean
 - [ ] **Go/no-go checkpoint**: strip sessions.kb from dotfiles history (force-push, rewrites shared `svelte-crostini`)
-- [ ] Switch the working host: `git rm`, `git submodule add` at `~/.claude/sessions.kb`, `mkdir penguin/`
-- [ ] Add CLAUDE.md inside new repo (per-host subdir convention, push/pointer-bump cadence, `cwd:` portability stance)
+- [~] Switch the working host: `git rm`, `git submodule add` at `~/.claude/sessions.kb`, `mkdir penguin/` — **blocked**, see review note in `~/.claude/sessions.kb/extract-sessions-kb-to-own-repo.md` (apparent concurrent activity in the live directory)
+- [x] Add CLAUDE.md inside new repo (per-host subdir convention, push/pointer-bump cadence, `cwd:` portability stance) — pushed as `7f33915`
 - [ ] Init the submodule on other hosts
 - [ ] Verify: entries visible, dotfiles gitlink clean, fresh claude-code session can read sessions.kb
 
