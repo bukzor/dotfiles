@@ -9,64 +9,26 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
+# bootstrap HOME/USER: everything below is located via $HOME, so this can't
+# itself move into profile.d/00-basics.sh (which needs source_dir, which
+# needs functions.sh, which needs $HOME).
 if [ -z "$HOME" ]; then
   export HOME USER
   USER=$(whoami)
   HOME=$(eval "echo ~$USER")
-  ##@#exit 0   # ???
 fi
 
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-  # include .bashrc if it exists
-  . "$HOME/.bashrc"
-fi
-
-# `nproc` and `path`
+# get source_dir, path, has, nproc, ... (functions.d)
 . "$HOME/.config/sh/functions.sh"
 
-# set some defaults
-export CLICOLOR=truecolor
-export COLORTERM=truecolor
-export EDITOR=vim
-export MAKEFLAGS="-j $(($(nproc) * 3))"
-export HOMEBREW_CC=clang
+# HOME/USER/PATH basics (idempotent re-check), then all noninteractive env
+source_dir "$HOME/.config/sh/profile.d"
+source_dir "$HOME/.config/sh/env.d"
 
-# set claude to always ultrathink
-# any higher value sets 21332 as the number...
-# https://github.com/anthropics/claude-code/issues/11211
-export MAX_THINKING_TOKENS=63999
-
-export PREFIX=$HOME/prefix
-export GOPREFIX="$PREFIX/golang"
-export GOPATH="$GOPREFIX"
-
-export VOLTA_HOME="$HOME/.volta"
-export PYTHONPATH="$HOME/lib/pythonpath${PYTHONPATH:+:$PYTHONPATH}"
-
-# NOTE: in `path prepend`, last wins
-# enabling meta-tools: rustup, volta, etc.
-path prepend PATH <<EOF
-  $HOME/.local/share/nvim/mason/bin
-  $HOME/bin/shim
-  /opt/homebrew/bin
-  /opt/homebrew/sbin
-  /usr/sbin
-  /sbin
-
-  $GOPREFIX/bin
-
-  $HOME/.bun/bin
-  $VOLTA_HOME/bin
-  $PREFIX/pnpm/bin
-
-  $PREFIX/cargo/bin
-  $HOME/.cargo/bin
-
-  # enable ~/bin/ unconditionally, so we can create it after login
-  $HOME/.local/bin  # similar, but XDG style
-  $HOME/bin
-EOF
+# if running bash, hand off for interactive-only additions
+if [ -n "$BASH_VERSION" ]; then
+  . "$HOME/.bashrc"
+fi
 
 alias login="source ~/.profile"
 

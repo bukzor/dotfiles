@@ -43,4 +43,22 @@ case ":$got:" in
 esac
 assert_eq "inherited PATH entries retained" yes "$kept"
 
+# COLUMNS: noninteractive shells (git, etc.) fall back to 80 columns unless
+# COLUMNS is exported; .profile must set this itself (not rely on .bashrc's
+# side effect) since a `bash -lc` invocation is login-but-noninteractive.
+# shellcheck disable=SC2086
+got_columns=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; printf %s "$COLUMNS"')
+assert_eq "COLUMNS is set (git/etc. non-interactive width)" 132 "$got_columns"
+
+# Idempotent re-source: PATH must not grow or reorder on a second sourcing
+# in the same shell (interactive shells re-source env.d via .bashrc too).
+# shellcheck disable=SC2086
+once=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; printf %s "$PATH"')
+# shellcheck disable=SC2086
+twice=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; . "$HOME/.profile" 2>/dev/null; printf %s "$PATH"')
+assert_eq "re-sourcing .profile leaves PATH unchanged (idempotent)" "$once" "$twice"
+
 assert_done
