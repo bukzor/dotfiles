@@ -27,7 +27,7 @@ maintenance conventions.
 # claude-path must be on PATH
 which claude-path
 
-# git-localhost-store, migrate-from-gitfile, audit-gitfiles must be on PATH
+# git-localhost-store, git-localhost-clone, migrate-from-gitfile, audit-gitfiles must be on PATH
 export PATH="$HOME/.local/share/git-localhost-store/bin:$PATH"
 
 # Either: global config so all tests get our hooks

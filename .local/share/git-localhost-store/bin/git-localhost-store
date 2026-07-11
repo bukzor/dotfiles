@@ -39,7 +39,7 @@ if [ -e "$STORE" ]; then
     if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
        || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
         echo "git-localhost-store: ❌ .git has refs but store already exists: $STORE" >&2
-        echo "   Refusing to merge. Resolve manually." >&2
+        echo "   Refusing to merge. Needs a human decision." >&2
         exit 1
     fi
     (set -x

@@ -193,6 +193,10 @@ Enable verbose tracing by setting `DEBUG=1` in the hook env, or by adding
 - ❌ **Don't quietly accommodate unknown `.git` shapes** — assert and
   let the user (or future agent) elaborate proper handling once we
   see a real case.
+- ❌ **Don't resolve a "store already exists" refusal solo** — that
+  refusal *is* the human-decision point, not an obstacle to route
+  around. For the common re-clone trigger, use `git-localhost-clone`
+  instead of plain `git clone` to avoid hitting it at all.
 - ❌ **Don't enumerate directory contents in docs** — goes stale.
 - ❌ **Don't hide errors** — `set -euo pipefail` and let things fail
   visibly.
@@ -212,6 +216,8 @@ scripts and pattern details.
 - **README.md** — User-facing documentation
 - **TESTING.md** — Manual testing procedures
 - **bin/git-localhost-store** — the relocator
+- **bin/git-localhost-clone** — `git clone` wrapper that attaches to an
+  existing store before fetching, avoiding the re-clone refusal
 - **bin/migrate-from-gitfile** — converts legacy gitfile layout to symlink layout
 - **bin/audit-gitfiles** — lists repos still in the legacy layout
 - **template-repo/hooks/*** — git hooks
