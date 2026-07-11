@@ -88,21 +88,19 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
           OSTYPE branch. Applies once the homebrew env.d file itself is
           touched (not yet — svelte's `300-homebrew.sh` already prepends
           and was copied as-is by the mirror above).
-    - [ ] fold in main-only `.sh_env` content not yet captured — analysis
-          done 2026-07-09, not yet implemented. Plan for next session:
-        - port, with OSTYPE/existence guards (new env.d files, applied
-          identically to both branches once authored — these become new
-          convergence content, not main-only): `CPUTYPE`/`OSTYPE` exports;
-          macOS `/usr/libexec/path_helper` invocation; TMPDIR selection
-          (candidate-list + mkdir/chmod/writable-check loop, easily
-          testable); private-dotfiles hook (`has private-dotfiles-check &&
-          ...`, `trysource .../.sh_env` — safe no-op today: confirmed
-          neither the commands nor `~/private-dotfiles` exist on this
-          machine yet, so this ports as inert/future-proofing); TERM-fixing
-          (psget/process-tree TERM detection) -- valuable per this task's
-          own "Adopt from main's .sh_env" bullet but the most complex/
-          fragile piece, test carefully or scope down
-        - **deliberately skip** `__orig_PATH` save/restore: redundant with
+    - [x] fold in main-only `.sh_env` content: ported CPUTYPE/OSTYPE
+          exports, macOS `path_helper`, TMPDIR selection, the
+          private-dotfiles hook, and TERM-fixing into five new env.d
+          files (`010-ostype.sh`, `020-path-helper.sh`,
+          `030-private-dotfiles.sh`, `700-tmpdir.sh`,
+          `800-term-fixing.sh`) plus two new functions.d helpers
+          (`warn.sh`, `abspath.sh`). Commits: `855ac0d` (svelte-crostini),
+          `31b7c44` (main, counterpart). Full clean harness green on both
+          (`./.local/share/redo/do test`, all 4 shells): 137/137
+          assertions, incl. two new regression assertions added to
+          `.profile_test.sh` (OSTYPE set, TMPDIR set-and-writable).
+          shellcheck clean on all new files.
+        - **deliberately skipped** `__orig_PATH` save/restore: redundant with
           svelte's `path` function (functions.d/path.sh), which is already
           idempotent via remove-then-reinsert on every `prepend`/`append`
           call -- svelte doesn't have the "PATH grows on re-source" problem
@@ -114,6 +112,31 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
         - travis completions, VCS-prompt detection (disabled by its own
           author, `return 0 # too slow!`): dead weight, skip, not worth a
           question.
+        - **adaptations beyond a literal port** (env.d is re-sourced by
+          every shell, including hermetic/noninteractive test invocations,
+          unlike main's interactive-session-scoped `.sh_env`):
+          TERM-fixing gated behind `tty` (existing house idiom) so its
+          process-tree walk/warnings only fire when actually attached to a
+          terminal -- unconditional, it broke `.profile_test.sh`'s
+          clean-stderr invariant. path_helper's own PATH assignment isn't
+          idempotent (repeat calls duplicate entries); routed its output
+          through the existing `path()` function instead of a raw `eval`
+          (untestable on this Linux machine -- verify live if this ever
+          lands on a Mac checkout). Dropped main's `$PREFIX` TMPDIR
+          candidate: that name means something different here (~/prefix,
+          a local install prefix -- see `050-prefix.sh`) than main's
+          (filesystem root, which reduces to the same value as the literal
+          `/tmp` candidate anyway on this layout).
+        - **incidental fixes found while landing this**: a stale `test.did`
+          marker in the svelte-crostini checkout was silently making
+          `./.local/share/redo/do test` (no `-c`) a permanent no-op since
+          2026-07-08 -- local-checkout-only, CI unaffected (fresh clone,
+          gitignored artifact); removed. main's `.config/.gitignore` and
+          `lib/.gitignore` re-ignore generated `*.tested`/`*.checked` but
+          were missing `*.did`/`*.did.tmp` (the redo build markers) --
+          added, same narrow/additive precedent as the two gaps fixed
+          landing `d7dac7a`, not the full ignore-scheme reconciliation
+          task 004 owns.
     - [ ] delete superseded `.sh_env`/`.sh_rc`/`.sh_advanced_rc`/`.sh_lib`/`.sh_plugins.d`
           only after zsh port (todo 005) consumes them
 
@@ -134,8 +157,10 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
 
 ## Success Criteria
 
-- [ ] `.profile`, `.bashrc`, `~/.config/sh/**` byte-identical on both branches
-      (svelte side done; blocked on the main-mirror bullet above)
+- [x] `.profile`, `.bashrc`, `~/.config/sh/**` byte-identical on both branches
+      (verified 2026-07-11 via full-tree diff, post `855ac0d`/`31b7c44`;
+      excludes the superseded `.sh_env`/etc. files on main, still deferred
+      to after 005 per the checklist item above)
 - [x] fresh login shell on this machine: COLUMNS, PATH, prompt all correct
       (live-verified post-commit `979953d`)
 - [x] zero references to nonexistent paths (`grep -r '\.sh/' ~/.config/sh`
