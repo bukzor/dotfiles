@@ -4,6 +4,8 @@
 # X.<shell>.tested / X.checked beside the source), never tracked
 *.tested
 *.checked
+*.did
+*.did.tmp
 
 # binaries and local files
 __pycache__

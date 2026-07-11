@@ -5,6 +5,8 @@
 # X.<shell>.tested / X.checked beside the source), never tracked
 *.tested
 *.checked
+*.did
+*.did.tmp
 
 # dont care:
 cros-garcon.conf

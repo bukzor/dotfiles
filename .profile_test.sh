@@ -61,4 +61,20 @@ twice=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
   ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; . "$HOME/.profile" 2>/dev/null; printf %s "$PATH"')
 assert_eq "re-sourcing .profile leaves PATH unchanged (idempotent)" "$once" "$twice"
 
+# main-only content folded in (task 000): OSTYPE/CPUTYPE exports.
+# shellcheck disable=SC2086
+got_ostype=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; printf %s "$OSTYPE"')
+assert_eq "OSTYPE is set" "$(uname -s | tr '[:upper:]' '[:lower:]')" "$got_ostype"
+
+# TMPDIR selection: must land on a real, writable directory (the loop falls
+# back through /tmp/$USER/... and $HOME/tmp if the preferred candidates
+# aren't writable, but under the hermetic sandbox HOME the first real
+# candidate should always succeed).
+# shellcheck disable=SC2086
+got_tmpdir=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; printf %s "$TMPDIR"')
+[ -n "$got_tmpdir" ] && [ -d "$got_tmpdir" ] && [ -w "$got_tmpdir" ] && tmpdir_ok=yes || tmpdir_ok="no: $got_tmpdir"
+assert_eq "TMPDIR is set to a writable directory" yes "$tmpdir_ok"
+
 assert_done
