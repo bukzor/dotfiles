@@ -63,8 +63,11 @@ Plain `git clone`:
 
 ## Why plain `git clone` still refuses (and should)
 
-It's a single opaque command with no hook point between `git init` and
-the fetch that populates refs — see `git-localhost-clone`'s header
-comment for the timing fix. Nothing to change in the hook path itself;
-use the wrapper for re-clones, or resolve the refusal with the user when
-it happens.
+Not for lack of an early-enough hook — `reference-transaction` does fire
+before clone's first ref lands. Confirmed (2026-07-11 devlog) that using
+it to swap `.git` for the store mid-transaction crashes `git clone`
+itself (`BUG: refs/files-backend.c:3072: initial ref transaction called
+with existing refs`, aborts) — its internal state machine assumes
+uninterrupted ownership of the gitdir from `init` through fetch. Clone
+can't safely be interposed on at all, hook or no hook. Use the wrapper
+for re-clones, or resolve the refusal with the user when it happens.
