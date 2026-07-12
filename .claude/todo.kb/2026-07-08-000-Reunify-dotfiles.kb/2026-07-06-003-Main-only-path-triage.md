@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 ---
 
 # Main-only path triage
@@ -26,22 +26,29 @@ setup/ 2 (+ a few singletons).
 
 ## Implementation Steps
 
-- [ ] unit tests first (vague reminder): a dangling-reference sweep — after each
-      delete-commit, grep the surviving tree for mentions of deleted paths
-      (bin names, sourced files); zero hits expected
-      (shape: run-once `X_check.sh` — see ../2026-07-07-000)
+- [x] ~~unit tests first (vague reminder): a dangling-reference sweep... shape:
+      run-once `X_check.sh`~~ — **dropped 2026-07-12 (user decision).** Ad hoc
+      dangling-ref greps were done before each actual deletion (all clean, see
+      commit messages); a *permanent* regression script wasn't built. Not worth
+      it: the main-only/svelte-only distinction this would guard is inherently
+      temporary (gone once 006's final merge lands), and the main-reunify clone
+      itself is a short-lived, single-purpose checkout — not worth standing up
+      CI infrastructure for a comparison that's going away soon.
 - [x] audit .ssh/ (15 files) first — already public on origin, but confirm nothing
       sensitive; document findings. Done 2026-07-11 (as a side effect of 002's
       `.ssh/.gitignore` investigation): `authorized_keys`, `config`, `config.d/`
       (colima.sshconfig, github.sshconfig), `current/` (a tree of pubkey
       symlinks), and 7× `id_rsa.pub.*`/`id_dsa.pub.*` — every content-checked
       file is a public key (`ssh-rsa`/`ssh-dss` prefix) or non-secret ssh-client
-      config. No secrets found. One landmine for whoever keeps this: `.ssh/config`
-      hardcodes macOS paths (`/Users/buck/.config/colima/ssh_config`,
-      `/Users/buck/.colima/ssh_config`) — needs an OSTYPE guard or stripping,
-      not a verbatim keep, if adopted. Tracked in 004 alongside `.ssh/.gitignore`.
-- [ ] KEEP (feeds other groups — do not delete): .zsh_completion/, .zkbd/,
-      .sh_lib/, .sh_plugins.d/, docs/ (incl. docs/annoyances/zsh)
+      config. No secrets found. `.ssh/config` hardcodes macOS paths
+      (`/Users/buck/.config/colima/ssh_config`, `/Users/buck/.colima/ssh_config`)
+      — originally flagged as needing an OSTYPE guard; **corrected 2026-07-12**
+      (verified empirically + via ssh_config(5)) that `Include` of a nonexistent
+      path is a silent noop, not an error — safe to keep verbatim, no guard
+      needed (see Notes; also fixed in 004's task file).
+- [x] KEEP (feeds other groups — do not delete): .zsh_completion/, .zkbd/,
+      .sh_lib/, .sh_plugins.d/, docs/ (incl. docs/annoyances/zsh) — never a
+      deletion candidate, just a guardrail note; nothing to execute
 - [x] triage per directory — swept 2026-07-12 (full findings in Notes below);
       resolved to keep-by-default with four flagged exceptions:
     - [x] Library/ — keep, fully inert
@@ -100,8 +107,15 @@ setup/ 2 (+ a few singletons).
           sql*bigquery*` spelling variants — no `plugin/*.vim` auto-loaded
           files among them, all autoload/filetype-scoped/dev-config/empty. No
           startup behavior change. Safe keep, no exceptions.
-- [ ] full list: regenerate with
-      `comm -23 <(git ls-tree -r --name-only main | sort) <(git ls-tree -r --name-only svelte-crostini | sort)`
+- [x] full list: regenerated 2026-07-12 with
+      `comm -23 <(git ls-tree -r --name-only main | sort) <(git ls-tree -r --name-only origin/svelte-crostini | sort)`
+      (caught and refetched a stale `origin/svelte-crostini` ref on the first
+      attempt). Final reconciliation, exact: 373 original main-only paths − 5
+      deleted (`bin/claude`, `.local/bin/claude`, `.config/direnv/lib/stdlib.sh`,
+      `bin/vim`, root `CLAUDE.md`) − 25 converged (the whole ported
+      `bukzor.readline` package, now byte-identical on both branches under
+      `lib/pythonpath/bukzor/`) = **343 remaining main-only, all accounted for
+      as deliberately kept.** Nothing missed, nothing stray.
 
 ## Success Criteria
 
