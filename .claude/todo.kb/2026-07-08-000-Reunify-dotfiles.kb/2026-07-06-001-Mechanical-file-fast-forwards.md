@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 ---
 
 # Mechanical file fast-forwards
@@ -23,27 +23,36 @@ svelte's 2025-10-22 import was seeded from an older snapshot, so main leads 19:7
 
 ## Implementation Steps
 
-- [ ] unit tests first (vague, mostly a reminder): a cross-branch identity check —
-      given the 26 paths, assert `git diff main svelte-crostini -- <paths>` is empty;
-      becomes the regression guard as other groups land
-      (shape: run-once `X_check.sh` with redo-always; CI needs
-      fetch-depth: 0 — see ../2026-07-07-000)
-- [ ] svelte-crostini takes main's version (19 files) — commit in live `~`,
+- [x] unit tests first: `mechanical-fast-forwards_check.sh` (root, both
+      branches), a cross-branch identity check over the 26 paths via
+      `redo-always` + `git diff HEAD origin/<other-branch>`. CI's
+      `fetch-depth: 0` added to `check-sh.yml` (both branches) so
+      `origin/main`/`origin/svelte-crostini` are reachable. Landed red first
+      (commits `7ba94f2` svelte-crostini, `661e5ae` main).
+- [x] svelte-crostini takes main's version (19 files) — commit in live `~`,
       thematic commits (bin tools / gcloud tools / misc):
       bin/alert-slack, bin/deinterlace, bin/gcloud-dump-roles, bin/gcloud-logging-cat,
       bin/gcloud-python, bin/gcpenv, bin/git-main, bin/git-prune-branches,
       bin/git-upstream, bin/groupby, bin/json-to-jq, bin/mangrep, bin/strace-defaults,
       bin/tf-graph, bin/tmux-color, bin/unescape, bin/vimmerge, .pythonrc.py,
-      .vim/lua/bukzor/aerial.lua
-- [ ] main takes svelte's version (7 files) — commit in the clone
+      .vim/lua/bukzor/aerial.lua. Commits `fad2951`, `4e80e78`, `7111ed5`.
+- [x] main takes svelte's version (7 files) — commit in the clone
       (~/repo/github.com/bukzor/dotfiles--main-reunify):
       bin/brew-handle-gnubin, bin/terminal, bin/tmux-cd, bin/uncolor, Brewfile,
-      .inputrc, .vim/lua/bukzor/unload.lua
-- [ ] skim each diff during application; anything surprising gets bounced to todo 004
+      .inputrc, .vim/lua/bukzor/unload.lua. Commit `d84c30e`.
+- [x] skim each diff during application; anything surprising gets bounced to todo 004.
+      One finding, bounced to todo 003 instead (main-only-path triage owns it,
+      not a same-path divergence): main's fast-forwarded `.pythonrc.py` imports
+      `bukzor.readline` from main-only `lib/python/bukzor/`, a separate
+      namespace package from svelte's existing `lib/pythonpath/bukzor/` (no
+      filename overlap). Currently inert — `PYTHONSTARTUP` unset on svelte.
+      Noted in 003's task file (commit `d54fc9a`).
 
 ## Success Criteria
 
-- [ ] all 26 paths byte-identical across branches (`git diff main svelte-crostini -- <paths>` empty)
+- [x] all 26 paths byte-identical across branches — verified via
+      `mechanical-fast-forwards.checked`, green on both branches after both
+      fast-forward commits were pushed (`redo -c test` clean end to end).
 
 ## Notes
 
