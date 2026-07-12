@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from io import FileIO
+
+TTY = tuple[FileIO, FileIO]
 
 #read -s -dc -p $'\E[>c' da;da=${da##$'\E'[>};echo "${da//;/ }"
 
@@ -21,13 +24,14 @@ def tty_fixture(tty):
 
 
 
-def getpass(tty, prompt="Password: "):
+def getpass(tty: TTY, prompt=b"Password: "):
   r, w = tty
 
   with tty_fixture(r):
     from tty import setcbreak
+
     # See: https://github.com/python/cpython/blob/3.9/Lib/tty.py#L30
-    setcbreak(r)  #, termios.TCSADRAIN)
+    setcbreak(r.fileno())  #, termios.TCSADRAIN)
 
     print('QUERY:', repr(prompt))
     w.write(prompt)
@@ -49,9 +53,10 @@ def get_tty():
     if w.isatty():
       print('TTY:', fd)
       return (r, w)
+  raise Exception("no tty found")
 
 def main():
-  tty = get_tty()
+  tty: TTY = get_tty()
 
   da = getpass(tty, XTERM_DA)
   assert da.startswith(ESC + b'[?'), da

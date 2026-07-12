@@ -50,3 +50,6 @@ tab: complete
 "\eOA": previous-history
 "\e[A": previous-history
 "\C-r": reverse-search-history
+
+# Map Shift+Return to insert a literal newline
+"\e[13;2u": "\C-v\C-j"

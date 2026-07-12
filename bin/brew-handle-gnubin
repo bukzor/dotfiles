@@ -46,7 +46,7 @@ def cmd_lines(cmd):
     proc = S.Popen(cmd, stdout=S.PIPE)
     assert proc.stdout is not None
     for line in proc.stdout:
-        yield line.decode("US-ASCII").rstrip("\n")
+        yield line.decode("UTF-8").rstrip("\n")
     if returncode := proc.wait():
         raise S.CalledProcessError(returncode, cmd)
 
