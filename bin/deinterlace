@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # TEST:
-# yes | xargs -P10  --replace deinterlace sh -c 'r=$((RANDOM % 100)); sleep "$((r / 10))"; yes "$r" | head -n "$r" | SLOWLY_RATE="$((r))" slowly'
+# yes | xargs -P10 --replace deinterlace sh -c 'r=$((RANDOM % 100)); sleep "$((r / 10))"; yes "$r" | head -n "$r" | SLOWLY_RATE="$((r))" slowly'
 
 PID=$$
 

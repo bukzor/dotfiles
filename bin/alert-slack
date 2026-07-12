@@ -22,7 +22,7 @@ fi
 
 # my private channel in my private workspace:
 SLACK_CHANNEL="${SLACK_CHANNEL:-C04515GTLNM}"
-curl \
+curl -sSL --fail-with-body -o /dev/null \
   -H "Authorization: Bearer $ALERT_SLACK_AUTH" \
   -d "text=$*" \
   -d "channel=$SLACK_CHANNEL" \
