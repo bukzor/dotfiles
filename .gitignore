@@ -36,6 +36,7 @@ trash/**/
 !default.tested.do
 !default.checked.do
 !HACKING.md
+!mechanical-fast-forwards_check.sh
 
 # shell config unification (.profile/.bashrc/.config/sh/** convergence):
 # same narrow-opt-in precedent as the harness block above -- .config/sh/**

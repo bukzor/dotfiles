@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # full history + all branches: reunify-dotfiles task 001's
+          # cross-branch identity check needs origin/main and
+          # origin/svelte-crostini both reachable
+          fetch-depth: 0
 
       - name: Install shells
         run: sudo apt-get update && sudo apt-get install -y dash busybox zsh
