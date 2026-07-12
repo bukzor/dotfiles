@@ -1,3 +1,1 @@
-global-dir=${HOME}/prefix/pnpm
-global-bin-dir=${HOME}/prefix/pnpm/bin
-store-dir=${HOME}/prefix/pnpm/store
+prefix=~/prefix/pnpm
