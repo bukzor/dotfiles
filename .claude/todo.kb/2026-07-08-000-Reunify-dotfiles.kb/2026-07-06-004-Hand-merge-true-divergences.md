@@ -80,10 +80,12 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
           main's `!authorized_keys`/`!.gitignore`/`!*.pub.*`/`!current`
           allowances. Coordinate with 003's `.ssh/` main-only-path audit
           (authorized_keys, config, config.d/, current/, 7× id_rsa.pub.* —
-          content-checked 2026-07-11, all public keys/non-secret client config,
-          but main's `.ssh/config` hardcodes macOS paths like
-          `/Users/buck/.config/colima/ssh_config` that need an OSTYPE guard or
-          removal, not a verbatim take).
+          content-checked 2026-07-11, all public keys/non-secret client config.
+          main's `.ssh/config` hardcodes macOS paths like
+          `/Users/buck/.config/colima/ssh_config` — verified 2026-07-12
+          (empirical `ssh -F ... -G host` test + ssh_config(5)) that `Include`
+          of a nonexistent glob/path is a silent noop, not an error, so this
+          is safe to take verbatim, no OSTYPE guard needed).
         - [ ] authored / [ ] svelte / [ ] main
 
 ## Success Criteria
