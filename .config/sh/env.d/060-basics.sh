@@ -12,8 +12,5 @@ export MAKEFLAGS="-j $(($(nproc) * 3))"
 export MAX_THINKING_TOKENS=63999
 
 export VOLTA_HOME="$HOME/.volta"
-# lib/python and lib/pythonpath both use bukzor/ as a PEP 420 implicit
-# namespace package (no __init__.py at the top level) -- they merge
-# transparently, not shadow each other.
-export PYTHONPATH="$HOME/lib/python:$HOME/lib/pythonpath${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$HOME/lib/pythonpath${PYTHONPATH:+:$PYTHONPATH}"
 export PYTHONSTARTUP="$HOME/.pythonrc.py"
