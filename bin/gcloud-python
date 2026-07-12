@@ -9,5 +9,4 @@ pythonpath=$(jq '.installation.python_path | join(":")' -r <<< "$gcloud_info")
 export PYTHONPATH
 
 set -x
-PYTHONPATH="$pythonpath"
-exec "$python" "$@"
+exec env PYTHONPATH="$pythonpath" "$python" "$@"
