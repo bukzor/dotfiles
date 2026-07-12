@@ -33,14 +33,101 @@ if [ ! -d .git ]; then
 fi
 
 if [ -e "$STORE" ]; then
-    # Recovery: workdir was rm -rf'd, then re-init'd. Adopt the existing
-    # store and restore tracked files. Refuse only if the fresh .git has
-    # picked up commits (refs in heads or remotes) that would conflict.
+    # Recovery: workdir was rm -rf'd, then re-init'd (or plain re-cloned).
+    # Adopt the existing store. A clone only ever writes two things:
+    # refs/remotes/* (an unconditional mirror of the remote -- always safe
+    # to force-overwrite, same as any ordinary `git fetch`) and exactly one
+    # local branch (an unconditional copy of the matching remote-tracking
+    # ref -- the only ref that can actually collide with pre-existing store
+    # content). Everything else already in the store was never written by
+    # clone, so it's never in conflict and is left untouched.
     if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
        || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
-        echo "git-localhost-store: ❌ .git has refs but store already exists: $STORE" >&2
-        echo "   Refusing to merge. Needs a human decision." >&2
-        exit 1
+        # The store has its own hooks (installed when it was first created).
+        # Fetching into it fires its reference-transaction hook, which calls
+        # this same script again -- and that nested call inherits GIT_DIR
+        # pointed at the store, so it can recurse into itself. core.hooksPath
+        # does NOT suppress reference-transaction during fetch (verified:
+        # neither -c nor a persisted config value stops it) -- only removing
+        # the hooks dir does. Move it aside for the duration, restore via
+        # trap so a crash mid-fetch can't leave the store hookless.
+        hooks_aside="$STORE/.git-localhost-store-hooks-disabled"
+        if [ -d "$hooks_aside" ] && [ ! -e "$STORE/hooks" ]; then
+            # Leftover from a prior run that crashed mid-fetch: hooks are
+            # already stashed. Recover first, otherwise this run finds no
+            # hooks/ to move and never re-enables them at exit either.
+            mv "$hooks_aside" "$STORE/hooks"
+        fi
+        hooks_moved=0
+        restore_store_hooks() {
+            if [ "$hooks_moved" -eq 1 ] && [ -d "$hooks_aside" ]; then
+                mv "$hooks_aside" "$STORE/hooks"
+            fi
+        }
+        trap restore_store_hooks EXIT
+        if [ -d "$STORE/hooks" ]; then
+            mv "$STORE/hooks" "$hooks_aside"
+            hooks_moved=1
+        fi
+
+        # Hooks also run with GIT_DIR already set (to the fresh .git) in the
+        # environment, which silently overrides `-C`. Set GIT_DIR/unset
+        # GIT_WORK_TREE/GIT_INDEX_FILE explicitly so this actually targets
+        # the store, not the repo we're trying to fetch *from*.
+        store_git() { env -u GIT_WORK_TREE -u GIT_INDEX_FILE GIT_DIR="$STORE" git "$@"; }
+
+        # A real `git clone` only ever writes refs/remotes/* and exactly one
+        # local branch (whatever HEAD points at -- see the bipartite
+        # ref-writing analysis in reclone-after-workdir-deletion.md).
+        # Anything else under refs/heads/* is a shape clone never produces:
+        # don't guess how to merge it, refuse and let a human explain it.
+        default_branch="$(git -C "$WORK_DIR/.git" symbolic-ref --quiet --short HEAD || true)"
+        if [ -n "$default_branch" ]; then
+            unexpected_refs="$(git -C "$WORK_DIR/.git" for-each-ref --format='%(refname)' refs/heads \
+                | grep -v -x "refs/heads/$default_branch" || true)"
+        else
+            unexpected_refs="$(git -C "$WORK_DIR/.git" for-each-ref --format='%(refname)' refs/heads)"
+        fi
+        if [ -n "$unexpected_refs" ]; then
+            echo "git-localhost-store: ❌ .git has unexpected local branches (not produced by a real clone): $STORE" >&2
+            echo "$unexpected_refs" | sed 's/^/   /' >&2
+            echo "   Refusing to merge. Needs a human decision." >&2
+            exit 1
+        fi
+
+        # Rule 1: refs/remotes/* always mirror the remote -- force-sync
+        # unconditionally. Ahead, behind, or diverged from the store's prior
+        # value, it doesn't matter: this ref exists only to reflect "what
+        # does the remote currently say", same as any ordinary `git fetch`.
+        store_git fetch --update-head-ok "$WORK_DIR/.git" '+refs/remotes/*:refs/remotes/*'
+
+        # Rule 2: the one local branch clone actually wrote. Compare
+        # directly rather than relying on `git fetch`'s fast-forward check:
+        # fetch can't tell "store is ahead" (harmless -- unpushed local
+        # work, nothing to do) apart from real divergence, both come back as
+        # an identical non-fast-forward rejection.
+        if [ -n "$default_branch" ] \
+           && new_oid="$(git -C "$WORK_DIR/.git" rev-parse --verify -q "refs/heads/$default_branch" 2>/dev/null)"; then
+            ref="refs/heads/$default_branch"
+            if old_oid="$(store_git rev-parse --verify -q "$ref" 2>/dev/null)"; then
+                if [ "$old_oid" = "$new_oid" ]; then
+                    : # Up to date.
+                elif store_git merge-base --is-ancestor "$old_oid" "$new_oid"; then
+                    store_git update-ref "$ref" "$new_oid" "$old_oid"  # Fast-forward.
+                elif store_git merge-base --is-ancestor "$new_oid" "$old_oid"; then
+                    : # Store is ahead (unpushed local work) -- keep it, nothing to do.
+                else
+                    echo "git-localhost-store: ❌ .git has local branches that diverge from existing store: $STORE" >&2
+                    echo "   $ref: store=$old_oid fresh=$new_oid" >&2
+                    echo "   Refusing to merge. Needs a human decision." >&2
+                    exit 1
+                fi
+            else
+                store_git update-ref "$ref" "$new_oid"  # New branch, no conflict.
+            fi
+        fi
+        restore_store_hooks
+        trap - EXIT
     fi
     (set -x
         rm -r .git

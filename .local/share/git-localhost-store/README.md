@@ -55,10 +55,12 @@ git checkout -- .
 ```
 
 **Re-cloning instead of `git init`:** if the workdir had a remote and you
-don't have local files to restore from, use `git-localhost-clone` instead
-of plain `git clone` — see below. Plain `git clone` into a path whose
-store survived will refuse (it can't tell which of two independent ref
-sets should win); that refusal needs a human, not another `rm -rf`.
+don't have local files to restore from, plain `git clone` into a path
+whose store survived works directly — the hook force-syncs
+remote-tracking refs and fast-forwards the local branch when possible.
+It only refuses if the store has local commits that aren't a
+fast-forward of the fresh clone (genuine divergence); that refusal needs
+a human, not another `rm -rf`.
 
 ## Commands
 
@@ -86,25 +88,6 @@ or after changing the global hook config.
 
 **Note:** `git-localhost-store` is automatically called by hooks; manual
 invocation is rarely needed.
-
-### `git-localhost-clone`
-
-`git clone URL DIR`, but attaches to any store surviving from a prior
-`rm -rf DIR` *before* fetching, instead of after — so there's only ever
-one set of refs to reconcile, not two.
-
-```bash
-git-localhost-clone git@github.com:you/repo.git ~/projects/myrepo
-```
-
-**When to use:** re-cloning a path whose workdir was deleted but whose
-store wasn't (the store is designed to survive exactly this). Plain
-`git clone` there hits a refusal; this doesn't.
-
-**Note:** never auto-resets an existing local branch onto the fetched
-remote, even on a clean fast-forward — it prints both SHAs and leaves
-the decision to you. MVP scope: single default branch, no
-`--branch`/`--depth`/`--recurse-submodules`.
 
 ### `migrate-from-gitfile`
 

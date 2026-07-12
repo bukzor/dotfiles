@@ -54,6 +54,13 @@ cd "$TEST_DIR" && git-localhost-store
 ### Expected
 
 - `git-localhost-store` exits 1.
-- Stderr: `❌ .git has refs but store already exists: $STORE`.
+- Stderr: `❌ .git has unexpected local branches (not produced by a real
+  clone): $STORE`, listing `refs/heads/somebranch`.
 - `.git` unchanged (still a real directory, not a symlink).
 - `$STORE` unchanged (pre-existing seed commit still there).
+
+See `reclone-after-workdir-deletion.md` for why this refuses: a real
+`git clone` only ever writes `refs/remotes/*` and one local branch
+(whatever `HEAD` points at). `somebranch` isn't that branch, so it's a
+shape `git-localhost-store` doesn't recognize — it refuses rather than
+silently ignoring it.
