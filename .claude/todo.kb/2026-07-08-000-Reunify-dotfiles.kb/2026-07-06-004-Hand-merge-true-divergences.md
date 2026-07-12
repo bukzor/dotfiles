@@ -38,7 +38,53 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
     - [ ] authored / [ ] svelte / [ ] main
 - [ ] bin: bin/brew-desc, bin/colortest17x17, bin/osc52
     - [ ] authored / [ ] svelte / [ ] main
-- [ ] misc: .config/gcloud/.gitignore etc. — anything escalated from 002
+- [ ] escalated from 002 (stale-seed adjudication turned out mostly *not*
+      stale-seed — see that task file's per-item notes for full findings):
+    - [ ] .config/kitty/kitty.conf + .gitmodules (linked: main's kitty.conf
+          `include`s a theme from main-only submodule `kitty-gruvbox-theme`) —
+          union: main's font/theme/ligature/scrollback/keybind customization +
+          svelte's `linux_display_server x11` (crostini-specific, don't drop) +
+          a merged submodule set (svelte's session.kb/vim-plugin submodules +
+          main's theme/scratch/gcloud-data submodules, checking `scratch`'s two
+          different remotes for which is current)
+        - [ ] authored / [ ] svelte / [ ] main
+    - [ ] .vimrc — diff main's 526-line monolithic file against svelte's 19
+          `.vimrc.d/*.vim` files (actively maintained, most recent edit
+          2026-05-12); port anything main has that svelte's modular set lacks,
+          discard the rest. Do not just take main's file — it would silently
+          disable all 19 modular files by replacing the loader.
+        - [ ] authored / [ ] svelte / [ ] main
+    - [ ] .vim/init.lua (symlink) + its target: svelte's `init-nvim.lua`
+          (rewritten 2026-05-05, "nvim 0.11 modernization") already beats main's
+          stale `nvim-init.lua` (2023-05-25) — no content merge needed, just
+          decide the final filename (svelte's name, main's, or a third) and land
+          svelte's content + symlink under it on both branches.
+        - [ ] authored / [ ] svelte / [ ] main
+    - [ ] .config/gh/config.yml — trivial union, no real judgment call: svelte's
+          `markdown-preview: '!grip "$@"'` alias (matches active untracked
+          `.grip/` in svelte's tree) + main's `"pr co": pr checkout` alias, both
+          alongside the existing shared `co: pr checkout`.
+        - [ ] authored / [ ] svelte / [ ] main
+    - [ ] .config/gcloud/.gitignore — union: main's improved secret/cache/config
+          split (`configurations/`, `*_configs.db`, `cache/`, `logs/`,
+          `application_default_credentials.json`, `*credential*`) + svelte's 5
+          gcloud-transient patterns main dropped (`config_sentinel`, `gce`,
+          `.last_opt_in_prompt.yaml`, `.last_survey_prompt.yaml`,
+          `.metricsUUID`). Also `git rm --cached
+          .config/gcloud/configurations/config_default` on svelte (currently
+          tracked, contents are just `account = buck.evan@sentry.io` — not a
+          secret, but shouldn't be tracked under the merged policy).
+        - [ ] authored / [ ] svelte / [ ] main
+    - [ ] .ssh/.gitignore — union of svelte's `!*.pub` (needed — narrower than
+          main's `!*.pub.*`, which wouldn't match svelte's plain-named keys) with
+          main's `!authorized_keys`/`!.gitignore`/`!*.pub.*`/`!current`
+          allowances. Coordinate with 003's `.ssh/` main-only-path audit
+          (authorized_keys, config, config.d/, current/, 7× id_rsa.pub.* —
+          content-checked 2026-07-11, all public keys/non-secret client config,
+          but main's `.ssh/config` hardcodes macOS paths like
+          `/Users/buck/.config/colima/ssh_config` that need an OSTYPE guard or
+          removal, not a verbatim take).
+        - [ ] authored / [ ] svelte / [ ] main
 
 ## Success Criteria
 
