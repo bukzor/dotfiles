@@ -37,10 +37,12 @@ trash/**/
 !default.checked.do
 !HACKING.md
 !mechanical-fast-forwards_check.sh
+!zsh-startup_check.sh
 
 # shell config unification (.profile/.bashrc/.config/sh/** convergence):
 # same narrow-opt-in precedent as the harness block above -- .config/sh/**
 # itself is already trackable via .config/.gitignore's un-ignore-non-dotfiles
 # rule.
 !.profile_test.sh
+!.zshenv
 !.bashrc_test.sh

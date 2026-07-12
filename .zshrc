@@ -1,164 +1,28 @@
-# Executes commands at the start of any interactive session.
-# Shell options, functions, and aliases go here!
-# Environment variables do *not* go here. They go in .zprofile.
-#
+#!/sourceme/zsh
+# ~/.zshrc: executed by zsh(1) for interactive shells.
+# all new functionality should be added in ~/.config/sh/*.d/ directories
 
-# If not running interactively, don't do anything
+# return early for noninteractive shells (see .bashrc for why this guard
+# must be inlined, not delegated to a sourced file)
 case $- in
-    *i*) ;;
-      *) return;;
+  *i*) ;;
+  *) return ;;
 esac
 
-# no ding!
-ZBEEP=""
+# get source_dir, path, has, nproc, ... (functions.d)
+. ~/.config/sh/functions.sh
 
-# allow variables in PS1
-setopt PROMPT_SUBST
+# environment variables (idempotent; .zshenv already ran this too, but a
+# config-sh consumer shouldn't have to reason about invocation order --
+# same rationale as .bashrc's redundant env.d re-source)
+source_dir ~/.config/sh/env.d
+# zsh-specific shell settings
+source_dir ~/.config/sh/zshrc.d
+# generic shell startup, shared with bash
+source_dir ~/.config/sh/rc.d
 
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_EXPIRE_DUPS_FIRST    # Expire duplicate entries first when trimming history.
-setopt HIST_IGNORE_ALL_DUPS      # Delete old recorded entry if new entry is a duplicate.
-setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
-setopt COMPLETE_IN_WORD          # tab in the middle of a word works correctly!
-setopt ALWAYS_TO_END
-setopt INTERACTIVE_COMMENTS      # sometimes I copy-paste comments
-setopt NOMATCH                   # refuse to use ambiguous globs
-setopt CHASE_DOTS                # resolve ".." paths textually, not physically
-setopt AUTO_CD                   # using a directory as a command implies "cd"
-
-unsetopt EXTENDED_GLOB           # weird zsh-specific globbing
-unsetopt BEEP                    # no, thanks
-unsetopt NOTIFY                  # background jobs' status waits for prompt
-
-HISTFILE="$HOME/.zsh_history"
-
-function history() {
-  if [[ "$#" -eq 0 ]] ; then
-    # Modify default options.
-    set -- -LDi -n
-  elif [[ "$#" -eq 1 ]] && [[ "$1" -ne 0 ]]; then
-    set -- -n -- -"$1"
-  fi
-  # > same as `fc -l`
-  builtin history "$@"
-}
-
-. ~/.sh_rc
-
-# enable advanced command completion: fpath must be set before "compinit"
-fpath+=(
-  ~/.zsh_completion
-  "$HOMEBREW_PREFIX"/completions/zsh
-  "$HOMEBREW_PREFIX"/share/zsh/site-functions
-)
-zmodload -i zsh/parameter
-if ! (( $+functions[compdef] )) ; then
-    autoload -U +X compinit && compinit
-fi
-zstyle ':completion:*' insert-unambiguous yes
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*' select yes
-## this causes ambiguous completions:
-#zstyle ':completion:*' menu yes
-
-autoload -U +X bashcompinit && bashcompinit
-
-zkbd_dir="${ZDOTDIR:-$HOME}/.zkbd"
-zkbd_file="$zkbd_dir/$TERM-$VENDOR-$OSTYPE"
-ln -sf $zkbd_file $zkbd_dir/$TERM.tmp
-if ! [[ "$(grep -c '^key\[' "$zkbd_file")" -eq 24 ]]; then
-    autoload zkbd && zkbd
-fi
-if [[ -e "$zkbd_file" ]]; then
-  source "$zkbd_file"
-fi
-
-# reset and enable vim bindings
-bindkey -d
-bindkey -v
-
-# Anoyances:
-# allow backspace after vi-A
-bindkey "$key[Backspace]" backward-delete-char
-# backspace doesn't work if you were ever in normal mode
-bindkey "^?" backward-delete-char
-bindkey "^W" backward-kill-word
-bindkey "^H" backward-delete-char
-bindkey "^U" backward-kill-line
-
-# tab completion is over-eager
-unsetopt MENU_COMPLETE
-setopt AUTO_MENU
-bindkey "^[[Z" reverse-menu-complete
-
-# default vim bindings can't move cursor left to previous line
-bindkey "^[OC" forward-char
-bindkey "^[OD" backward-char
-bindkey "^[OF" end-of-line
-bindkey "^[OH" beginning-of-line
-bindkey "^[[3~" delete-char
-bindkey "^[[C" forward-char
-bindkey "^[[D" backward-char
-
-# fix home/end keys
-bindkey "$key[Home]" beginning-of-line
-bindkey "$key[End]" end-of-line
-bindkey -a "$key[Home]" beginning-of-line
-bindkey -a "$key[End]" end-of-line
-
-# esc-v to edit command in vim
-autoload -U edit-command-line
-zle -N edit-command-line
-bindkey -M vicmd v edit-command-line
-
-# jj for normal mode
-bindkey 'jj' vi-cmd-mode
-
-# ctrl-w remove word backwards
-bindkey '^w' backward-kill-word
-
-# ctrl-r starts searching history backward
-bindkey '^s' history-incremental-pattern-search-forward
-bindkey '^r' history-incremental-pattern-search-backward
-
-# Use vim cli mode
-bindkey '^P' up-history
-bindkey '^N' down-history
-
-# this makes more sense, to me:
-bindkey -a '/' history-incremental-pattern-search-forward
-bindkey -a '?' history-incremental-pattern-search-backward
-
-# up and down keys only search through the local history
-# use ctrl-P/N for shared history {
-up-line-or-local-history() {
-    zle set-local-history -n 1
-    zle up-line-or-history
-    zle set-local-history -N
-}
-zle -N up-line-or-local-history
-bindkey "$key[Up]" up-line-or-local-history
-bindkey -a "k" up-line-or-local-history
-
-down-line-or-local-history() {
-    zle set-local-history -n 1
-    zle down-line-or-history
-    zle set-local-history -N
-}
-zle -N down-line-or-local-history
-bindkey "$key[Down]" down-line-or-local-history
-bindkey -a "j" down-line-or-local-history
-
-# opam configuration
-if [ -r ~/.opam/opam-init/init.zsh ]; then
-  . ~/.opam/opam-init/init.zsh
-fi
+export TZ="America/Chicago"
 
 if [ -e "$HOME/private-dotfiles/.zshrc" ]; then
-    source "$HOME/private-dotfiles/.zshrc"
+  source "$HOME/private-dotfiles/.zshrc"
 fi
-
-
-eval "$(direnv hook zsh)"
