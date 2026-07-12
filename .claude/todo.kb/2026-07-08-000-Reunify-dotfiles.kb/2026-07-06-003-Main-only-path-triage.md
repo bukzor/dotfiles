@@ -39,7 +39,19 @@ setup/ 2 (+ a few singletons).
     - [ ] .weechat/ (still used?)
     - [ ] work-era tooling in bin/ (gcloud-*, sentry-adjacent) — keep/delete per file
     - [ ] .config/ main-only subset
-    - [ ] lib/, libexec/, .local/
+    - [ ] lib/, libexec/, .local/. Concrete example found 2026-07-11 while
+          fast-forwarding `.pythonrc.py` in task 001: main's version imports
+          `bukzor.readline`, which lives in main-only `lib/python/bukzor/`
+          (23 files: ansi.py, color.py, dotfiles/, functions.py, gruvbox.py,
+          json.py, oklab.cpp, readline.py, sh/, types.py). No filename
+          overlap with svelte's existing `lib/pythonpath/bukzor/`
+          (claude/, git_localhost_store/, to_toon.py, xtrace.py) — a
+          separate, differently-named namespace package sharing the
+          `bukzor` name, not a same-path divergence for 004. Decide:
+          keep-and-add-to-PYTHONPATH, keep-and-rename-into
+          `lib/pythonpath/bukzor/`, or delete. Currently inert either way:
+          `PYTHONSTARTUP` isn't set anywhere in svelte's shell config, so
+          `.pythonrc.py` isn't sourced yet.
     - [ ] .jq/, .bash_completion/, .subversion/, setup/, repo/
     - [ ] .claude/ main-only subset (old commands/context — much superseded by svelte).
           Concrete example found 2026-07-09 while working task 000: root
