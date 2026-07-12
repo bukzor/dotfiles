@@ -3,6 +3,7 @@ requires:
     - Skill(llm-kb)
 depends:
     - Skill(llm-collab)
+git-caution: personal
 ---
 
 # Maintenance Guide for git-localhost-store
@@ -51,10 +52,11 @@ in git terminology), and the store was a bare repo with a per-worktree
 subdir holding HEAD/index/refs. That layout is correct for git itself but
 broke naive `.git/<x>` readers; see
 `docs/adr/2026-04-30-000-switch-from-gitfile-to-symlink-layout.md` for the
-analysis and decision to switch.
-
-The migration tool `bin/migrate-from-gitfile` brings such repos into the
-current symlink layout. `bin/audit-gitfiles` lists candidates.
+analysis and decision to switch, and
+`docs/adr/2026-07-12-000-retire-legacy-gitfile-migration-tooling.md` for
+why the tooling that migrated repos into the new layout was later retired
+(migration completed 18/18) and how to recover it if a legacy repo ever
+resurfaces.
 
 ## Path Encoding
 
@@ -113,9 +115,6 @@ Use subshells for targeted tracing:
 PS4 is `export PS4=$'\e[36m$\e[0m '` (teal `$`). Trace only the actual
 operations — not conditionals, assignments, echo statements.
 
-The Python migration code uses the same convention via `bukzor.xtrace.run`,
-which prints the command in PS4 style before fork/exec.
-
 ### Error handling
 
 - Use `set -euo pipefail`.
@@ -123,38 +122,8 @@ which prints the command in PS4 style before fork/exec.
 - Exit non-zero with a message that explains what's wrong.
 - Never `|| true` to hide failures.
 
-## Migration tooling
-
-`bin/migrate-from-gitfile <workdir>` (a bash wrapper around
-`python -m bukzor.git_localhost_store.migrate`) implements deterministic
-conversion from the legacy gitfile layout to the symlink layout:
-
-1. Discover layout from the workdir's gitfile.
-2. Run preconditions:
-   - `.git` is a regular file with `gitdir: ...` content
-   - `<store>/worktrees/` contains exactly one entry (multi-worktree-per-store
-     not supported)
-   - No in-progress ops (`MERGE_HEAD`, `rebase-merge/`, etc.)
-   - Per-worktree refs/ is empty
-   - No unexpected files in worktree dir
-   - Target store path doesn't already exist
-3. Execute steps:
-   - Install symlink-layout hooks into the store
-   - Promote worktree HEAD/index up one level
-   - Remove the worktrees subdir
-   - Set `core.bare = false`, drop `submodule.active` if present
-   - Move store from worktree-pointer style to single-tier
-   - Atomic gitfile→symlink swap (`ln -s` + `mv -Tf`)
-
-If preconditions fail, the script reports all of them and exits with code 1
-without touching anything.
-
 ## Testing
 
-- `bin/audit-gitfiles` lists outstanding repos in the legacy layout.
-- For migration: synthesize a gitfile-layout repo in `~/trash/`, run
-  `migrate-from-gitfile`, verify `.git/HEAD` reads, `git status` works,
-  new commits land.
 - For hooks: `git -c init.templateDir=$HOME/trash/empty-template clone ...`
   bypasses our template, useful for testing the manual conversion path.
 
@@ -168,8 +137,7 @@ See `TESTING.md` for the manual test suite.
 2. Test against a fresh clone (the global `init.templateDir` makes new
    clones pick up the change immediately).
 3. Existing repos retain the hooks copied at clone time — they pick up
-   changes only on re-init or via explicit re-install. The migration
-   tool re-installs hooks as part of its work.
+   changes only on re-init.
 
 ### Debugging Issues
 
@@ -219,8 +187,6 @@ scripts and pattern details.
 - **README.md** — User-facing documentation
 - **TESTING.md** — Manual testing procedures
 - **bin/git-localhost-store** — the relocator
-- **bin/migrate-from-gitfile** — converts legacy gitfile layout to symlink layout
-- **bin/audit-gitfiles** — lists repos still in the legacy layout
 - **template-repo/hooks/*** — git hooks
 - **lib/init** — one-time setup script
 

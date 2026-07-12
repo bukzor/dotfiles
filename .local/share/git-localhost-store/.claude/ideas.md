@@ -9,21 +9,16 @@ small and few.
 
 ## Ideas
 
-- **Fold submodule `core.worktree` rewrite into `migrate.py`.**
-  Trigger: a future submodule-bearing legacy gitfile repo runs
-  through `migrate-from-gitfile` and post-migration `git status`
-  fails with `cannot chdir to '../../../...'`. Recipe: devlog
-  `2026-05-08-000`. Rationale to defer: 0 of the 18 migrated
-  candidates needed it; codify after the *next* occurrence, when
-  recurrence justifies generalization.
-
-- **Extend `bin/audit-gitfiles` to find no-`.git` workdirs.**
-  Trigger: another workdir loses its `.git` while the store remains
-  (the `claude-plugins-official` shape from 2026-05-11). Recipe:
-  walk `<repos>/`, decode each name, flag those whose decoded
-  workdir-path exists but lacks a `.git`. Reference script at
-  `trash/2026-05-11-migration/audit-classify.sh` (gitignored;
-  rescue from there if needed).
+- **Inline the path encoding; drop the `claude-path` dependency.**
+  The encoding is frozen forever regardless — changing it would orphan
+  every existing store — so depending on an external, mutable script
+  for it is a liability, not flexibility. Counterweight: `claude-path`
+  is the canonical slug tool across the toolchain; user's call
+  (2026-07-12 review, undecided). Trigger: next substantive edit to
+  `bin/git-localhost-store`, or any claude-path/claude-slug behavior
+  change. Recipe: `p="${p//-/--}"; p="${p//\//-}"` on the
+  `rev-parse --show-toplevel` output; drop the README dependency
+  section and TESTING.md's claude-path troubleshooting.
 
 - **Re-run absolute-path rewrite on home-dir migration.**
   Trigger: moving home directory, changing username, or shipping

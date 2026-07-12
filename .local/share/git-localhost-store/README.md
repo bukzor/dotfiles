@@ -89,42 +89,12 @@ or after changing the global hook config.
 **Note:** `git-localhost-store` is automatically called by hooks; manual
 invocation is rarely needed.
 
-### `migrate-from-gitfile`
-
-Brings a repo from the legacy gitfile-pointer layout (where `.git` is a
-regular file containing `gitdir: ...`) to the current symlink layout.
-See `docs/adr/2026-04-30-000-switch-from-gitfile-to-symlink-layout.md`
-for context.
-
-```bash
-migrate-from-gitfile /path/to/legacy/repo
-```
-
-Refuses to operate unless preconditions hold (single-worktree-per-store,
-no in-progress git ops, etc.).
-
-### `audit-gitfiles`
-
-Lists workdirs whose `.git` is still a gitfile pointing into this
-system's store — i.e., candidates for `migrate-from-gitfile`.
-
-```bash
-audit-gitfiles [root]   # default root: $HOME
-```
-
-Pipe straight into the migrator when ready:
-```bash
-audit-gitfiles | xargs -rn1 migrate-from-gitfile
-```
-
 ## Structure
 
 ```
 ~/.local/share/git-localhost-store/   (version controlled in $HOME)
 ├── bin/
-│   ├── git-localhost-store       # the relocator
-│   ├── migrate-from-gitfile   # legacy → symlink layout migrator
-│   └── audit-gitfiles         # find unmigrated legacy repos
+│   └── git-localhost-store       # the relocator
 ├── template-repo/             # git init template
 │   └── hooks/
 │       ├── post-index-change
@@ -165,9 +135,6 @@ The state directory is created automatically on first use.
 ## Dependencies
 
 - `~/bin/claude-path` — path encoding utility
-- A python interpreter on `PATH` (for `migrate-from-gitfile`)
-- `~/lib/pythonpath/bukzor/` on PYTHONPATH (the migration wrapper sets this
-  inline; see `bukzor.xtrace` and `bukzor.git_localhost_store.migrate`)
 
 ## Maintenance
 
@@ -179,7 +146,10 @@ ls -la .git
 ```
 
 If `.git` is a regular file containing `gitdir: ...` → legacy gitfile
-layout, run `migrate-from-gitfile` on the workdir.
+layout. The automatic migration tooling was retired 2026-07-12 (all
+known repos migrated) — see
+`docs/adr/2026-07-12-000-retire-legacy-gitfile-migration-tooling.md` for
+how to recover it from git history if one resurfaces.
 
 ### List all backed-up repos
 

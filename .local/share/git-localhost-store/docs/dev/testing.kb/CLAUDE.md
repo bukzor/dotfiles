@@ -8,13 +8,10 @@ file in this directory.
 
 Manual end-to-end scenarios that exercise git-localhost-store's
 user-facing behavior: hooks firing, the relocator's branches, the
-migration tool, the path encoder, recovery flows.
+path encoder, recovery flows.
 
 ## What does NOT belong
 
-- Unit-test-shaped checks of the Python migration module's preconditions
-  — those belong wherever `bukzor.git_localhost_store.migrate` is unit
-  tested.
 - Tests of the `claude-path` encoder's logic in isolation — those belong
   with `claude-path` itself.
 - Tests of git itself.
@@ -38,9 +35,7 @@ inherently ordered.
 ```bash
 which claude-path                                      # must be in $PATH
 export PATH="$HOME/.local/share/git-localhost-store/bin:$PATH"
-                                                       # for git-localhost-store,
-                                                       # migrate-from-gitfile,
-                                                       # audit-gitfiles
+                                                       # for git-localhost-store
 git config --global init.templateDir                   # must point at
                                                        # template-repo, OR
                                                        # each test passes

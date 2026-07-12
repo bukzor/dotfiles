@@ -1,3 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-exec env PYTHONPATH="$HOME/lib/pythonpath" python3 -m bukzor.git_localhost_store.migrate "$@"
