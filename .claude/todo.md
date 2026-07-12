@@ -16,6 +16,9 @@ cost-benefit-sweh:
 
 Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 
+- [ ] Add a `/must-read` command for llm-kb's `SKILL.kb/must-read/` (must-read-kb-skill.md's other follow-up; the `SKILL.kb/must-read/` dir itself already exists) — deferred
+- [ ] Finish yaml-date-jsonschema's remaining follow-ups in `bukzor-agent-skills/llm-kb`: `finish-debolding-cleanup` (still ~40 bold instances across 8 files beyond `references/pattern-guide.md`, which is now fixed — not actually done despite earlier belief), `auto-migrate-scripts-for-kb-dirs`, `schema-migrate-string-pattern-to-date`
+- [ ] Resolve `todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md`'s D6 held-review items: `bin/CLAUDE.md` (deleted uncommitted by another session — restore or finish rename?), `claudesh`/`finder.sh`/`scratch/python/`/`empty/`/`bin/colortest17x17*` triage, `.envrc`/`.zsh_profile`/`profile.env` review, `.claude/claude-alignment-2026-04-29.{jsonschema.yaml,kb/}` commit-or-trash
 - [ ] [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md) — converge svelte-crostini ↔ main to identical content, merge, live on main
 - [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md) — overlaps reunify 006's "commit/park uncommitted state" step; fold in or close when 006 runs
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
@@ -33,5 +36,3 @@ We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
 - [ ] [todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md](todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md) — may belong under `private.bukzor-llc`
-- [ ] [todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md](todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md)
-- [x] [todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md](todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md)
