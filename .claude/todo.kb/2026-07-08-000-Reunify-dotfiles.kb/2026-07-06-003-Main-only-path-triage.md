@@ -30,8 +30,16 @@ setup/ 2 (+ a few singletons).
       delete-commit, grep the surviving tree for mentions of deleted paths
       (bin names, sourced files); zero hits expected
       (shape: run-once `X_check.sh` — see ../2026-07-07-000)
-- [ ] audit .ssh/ (15 files) first — already public on origin, but confirm nothing
-      sensitive; document findings
+- [x] audit .ssh/ (15 files) first — already public on origin, but confirm nothing
+      sensitive; document findings. Done 2026-07-11 (as a side effect of 002's
+      `.ssh/.gitignore` investigation): `authorized_keys`, `config`, `config.d/`
+      (colima.sshconfig, github.sshconfig), `current/` (a tree of pubkey
+      symlinks), and 7× `id_rsa.pub.*`/`id_dsa.pub.*` — every content-checked
+      file is a public key (`ssh-rsa`/`ssh-dss` prefix) or non-secret ssh-client
+      config. No secrets found. One landmine for whoever keeps this: `.ssh/config`
+      hardcodes macOS paths (`/Users/buck/.config/colima/ssh_config`,
+      `/Users/buck/.colima/ssh_config`) — needs an OSTYPE guard or stripping,
+      not a verbatim keep, if adopted. Tracked in 004 alongside `.ssh/.gitignore`.
 - [ ] KEEP (feeds other groups — do not delete): .zsh_completion/, .zkbd/,
       .sh_lib/, .sh_plugins.d/, docs/ (incl. docs/annoyances/zsh)
 - [ ] triage per directory, delete-commit per decision group:
