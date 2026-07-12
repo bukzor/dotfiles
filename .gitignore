@@ -35,8 +35,9 @@ bak/
 # transient history
 *.sw[a-p]
 .bash_history
-.python_history
+.python_history*
 .lesshst
+/profile.env
 .node_repl_history
 .wget-hsts
 Brewfile.lock.json
