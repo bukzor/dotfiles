@@ -38,10 +38,10 @@ Steps:
 - [x] Create `bukzor/bukzor.claude-sessions` repo (public) via `gh repo create`
 - [x] Extract history with `git filter-repo` in the `~/repo/github.com/bukzor/dotfiles` working copy
 - [x] Push the extracted repo to GitHub — https://github.com/bukzor/bukzor.claude-sessions, `main`, 77 commits, `gitleaks detect` clean
-- [ ] **Go/no-go checkpoint**: strip sessions.kb from dotfiles history (force-push, rewrites shared `svelte-crostini`)
+- [x] **Go/no-go checkpoint**: strip sessions.kb from dotfiles history (force-push, rewrites shared `svelte-crostini`) — found already executed and pushed to `origin/svelte-crostini` (verified 2026-07-11 via forensic git-history check; see session file's "For User Review" #2 for evidence). Who/when did it is undetermined but not blocking.
 - [x] Switch the working host: `git submodule add` at `~/.claude/sessions.kb`, done live via user-directed swap procedure (add-new-at-temp-path → mv old aside → mv new into place → merge latest content → untrack old) despite concurrent edits in the live directory — dotfiles `5ae0792`, submodule content synced/pushed as `5d63b44`
 - [x] Add CLAUDE.md inside new repo (per-host subdir convention, push/pointer-bump cadence, `cwd:` portability stance) — pushed as `7f33915`
-- [ ] Init the submodule on other hosts — not actionable this session (single host, `penguin`)
+- [x] Init the submodule on other hosts — moot, confirmed 2026-07-11 no other hosts exist
 - [x] Verify: entries visible (41 in `penguin/`), `git submodule status` shows `5d63b44 (heads/main)`, dotfiles gitlink clean, submodule itself clean, checked out on real branch `main` (not detached)
 
 ## Decisions (confirmed by user 2026-07-09; full rationale in
