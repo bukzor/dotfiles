@@ -35,6 +35,8 @@ bak/
 # transient history
 *.sw[a-p]
 .bash_history
+.zsh_history
+.zcompdump*
 .python_history*
 .lesshst
 /profile.env
@@ -182,6 +184,7 @@ _viminfo
 # redo build system
 .redo/
 *.tested
+*.checked
 # bookkeeping litter from vendored minimal/do (.local/share/redo/do)
 .do_built
 .do_built.dir/

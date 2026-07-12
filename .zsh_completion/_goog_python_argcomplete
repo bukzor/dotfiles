@@ -1,0 +1,53 @@
+#compdef gcloud gsutil
+# from: /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
+
+_goog_python_argcomplete() {
+    local prefix=
+    if [[ $COMP_LINE == 'gcloud '* ]]; then
+        if [[ $3 == ssh  && $2 == *@* ]] ;then
+            # handle ssh user@instance specially
+            prefix=${2%@*}@
+            COMP_LINE=${COMP_LINE%$2}"${2#*@}"
+        elif [[ $2 == *'='* ]] ; then
+            # handle --flag=value
+            prefix=${2%=*}'='
+            COMP_LINE=${COMP_LINE%$2}${2/'='/' '}
+        fi
+    fi
+    local IFS=''
+    COMPREPLY=( $(
+      IFS="$IFS" \
+        COMP_LINE="$COMP_LINE" \
+        COMP_POINT="$COMP_POINT" \
+        _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+        _ARGCOMPLETE=1 \
+        "$1" \
+        8>&1 \
+        9>&2 \
+        1>/dev/null \
+        2>/dev/null \
+      ;
+    ) )
+    if [[ $? != 0 ]]; then
+        unset COMPREPLY
+        return
+    fi
+    # if one completion without a trailing space, add the space
+    if [[ ${#COMPREPLY[@]} == 1 && $COMPREPLY != *[=' '] ]]; then
+        COMPREPLY+=' '
+    fi
+    if [[ $prefix != '' ]]; then
+        typeset -i n
+        for ((n=0; n < ${#COMPREPLY[@]}; n++));do
+            COMPREPLY[$n]=$prefix${COMPREPLY[$n]}
+        done
+    fi
+}
+
+complete -o nospace -F _goog_python_argcomplete gsutil
+complete -o nospace -o default -F _goog_python_argcomplete "gcloud"
+
+# don't run the completion function when being source-ed or eval-ed
+if [ "$funcstack[1]" = "_goog_python_argcomplete" ]; then
+    _goog_python_argcomplete
+fi

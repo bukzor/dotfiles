@@ -1,0 +1,17 @@
+#!/bin/zsh
+set -euo pipefail
+TOP="$(cd "$(dirname "$0")"/..; pwd)"
+
+cd "$TOP"
+
+find . -mindepth 1 -maxdepth 1 -type f -name '[!.]*' |
+  xargs grep -c '^key\[' |
+  grep -v :24 |
+  sed 's/:.*//' |
+  grep -v tmp |
+  xargs grep -L zkbd |
+  tee /dev/tty |
+  xargs --replace sh -c '
+    echo "\nautoload zkbd && zkbd  # redo incomplete mapping" >> {}
+  ' \
+;
