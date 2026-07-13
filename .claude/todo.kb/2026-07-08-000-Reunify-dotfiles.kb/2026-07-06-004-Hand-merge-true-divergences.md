@@ -28,9 +28,30 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
 - [ ] claude config: .claude/CLAUDE.md, .claude/settings.json,
       .claude/commands/curl.md, .claude/.gitignore
     - [ ] authored / [ ] svelte / [ ] main
-- [ ] git config: .gitconfig, .gitignore, .config/git/ignore, .config/.gitignore,
-      repo/.gitignore, bin/.gitignore, .vim/.gitignore
-    - [ ] authored / [ ] svelte / [ ] main
+- [x] git config: .gitconfig, .gitignore, .config/git/ignore, .config/.gitignore,
+      repo/.gitignore, bin/.gitignore, .vim/.gitignore — done 2026-07-13.
+      Resolved the ignore-scheme question flagged as deferred in 000/CI-
+      foundations: **user decision — keep svelte's allow-by-default scheme**
+      over main's deny-by-default + opt-in scheme (rationale: allow-first
+      surfaces anomalies as untracked-in-status; deny-first would silently
+      swallow them). main's whole deny-first apparatus (root `*`/`**/*`,
+      `!**/`, `!**/.gitignore`, and the narrow opt-in exceptions it required)
+      dropped as now-unnecessary. `.gitconfig`: union of settings/aliases;
+      kept svelte's `l`/`xl` (this project's own git-conventions depend on
+      them) over main's same-named-but-different upstream-diffing versions;
+      dropped main's inline `feature` alias (was shadowing a more capable
+      same-named `bin/git-feature` script); dropped `core.excludesfile` in
+      favor of the XDG default, matching svelte. `.gitconfig.d/vimdiff.conf`
+      (svelte-only file): kept as sole source — fixes two real bugs main's
+      inline difftool block had (bad $MERGED path on renames,
+      GIT_EXTERNAL_DIFF not unset). `.config/git/ignore`: was a dead
+      symlink to `.hgignore_global` on main (shadowed by the excludesfile
+      setting just dropped) — now a plain file on both, content unioned
+      with main's actually-active `.gitignore_global` (retired, absorbed
+      here). Validated: `git config --list` + alias resolution on both;
+      confirmed `repo/mine/`'s tracked content and `.zkbd/`'s tracked
+      content are unaffected by the scheme switch.
+    - [x] authored / [x] svelte (`9cb75f1`) / [x] main (`59082f3`)
 - [ ] vim: .vim/lazy-lock.json, .vim/lua/bukzor/{lsp,plugins,tree-sitter,which-key}.lua,
       .vim/pack/invented-here/start/diffmode/plugin/diffmode.vim
     - [ ] authored / [ ] svelte / [ ] main
