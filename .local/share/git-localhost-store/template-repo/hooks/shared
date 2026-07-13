@@ -1,0 +1,14 @@
+#!/bin/bash
+# git-localhost-store: shared hook body. post-index-change, post-commit, and
+# post-checkout are symlinks to this file -- guarding/state logic lives in
+# the relocator itself, this just dispatches into it.
+
+set -euo pipefail
+
+export DEBUG="${DEBUG:-0}"
+if (( DEBUG > 0 )); then
+  set -x
+  : "$(basename "$0")" "$@"
+fi
+
+exec "${XDG_DATA_HOME:-$HOME/.local/share}/git-localhost-store/bin/git-localhost-store" "$(basename "$0")"

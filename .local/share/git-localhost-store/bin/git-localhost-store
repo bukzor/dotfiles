@@ -6,6 +6,19 @@
 set -euo pipefail
 export PS4=$'\e[36m$\e[0m '
 
+# Hooks inherit our env. The recovery merge below writes refs directly into
+# the store -- if the store still carries its own (possibly old-style,
+# real-file) reference-transaction hook, that nested git process re-execs
+# this script. This flag caps recursion at 1: the nested run sees it already
+# set and exits immediately.
+if [ -n "${GIT_LOCALHOST_STORE_ACTIVE:-}" ]; then
+    exit 0
+fi
+export GIT_LOCALHOST_STORE_ACTIVE=1
+
+# The invoking hook's name, if any (empty for a direct/manual invocation).
+HOOK_NAME="${1:-}"
+
 REPOS_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
 WORK_DIR="$(git rev-parse --show-toplevel)"
 ENCODED="$(claude-path "$WORK_DIR")"
@@ -33,6 +46,21 @@ if [ ! -d .git ]; then
 fi
 
 if [ -e "$STORE" ]; then
+    # post-index-change fires *during* `git commit` (its internal index
+    # refresh), *before* commit's own ref-transaction lands -- unlike
+    # `git clone`, whose refs are already written before checkout/
+    # post-index-change fire. Adopting the store here would swap `.git`
+    # out from under the still-in-flight commit, which then fails trying
+    # to write a ref into what's now a symlink to a store with unrelated
+    # pre-existing content. Defer to post-commit/post-checkout, which fire
+    # at true quiescent points where this is safe. A manual invocation (no
+    # hook, empty HOOK_NAME) has no enclosing git command to race, so it
+    # proceeds.
+    if [ "$HOOK_NAME" = post-index-change ]; then
+        echo "git-localhost-store: - Store already has content; deferring adoption to post-commit/post-checkout." >&2
+        exit 0
+    fi
+
     # Recovery: workdir was rm -rf'd, then re-init'd (or plain re-cloned).
     # Adopt the existing store. A clone only ever writes two things:
     # refs/remotes/* (an unconditional mirror of the remote -- always safe
@@ -43,32 +71,12 @@ if [ -e "$STORE" ]; then
     # clone, so it's never in conflict and is left untouched.
     if [ -n "$(ls -A .git/refs/heads 2>/dev/null)" ] \
        || [ -n "$(ls -A .git/refs/remotes 2>/dev/null)" ]; then
-        # The store has its own hooks (installed when it was first created).
-        # Fetching into it fires its reference-transaction hook, which calls
-        # this same script again -- and that nested call inherits GIT_DIR
-        # pointed at the store, so it can recurse into itself. core.hooksPath
-        # does NOT suppress reference-transaction during fetch (verified:
-        # neither -c nor a persisted config value stops it) -- only removing
-        # the hooks dir does. Move it aside for the duration, restore via
-        # trap so a crash mid-fetch can't leave the store hookless.
-        hooks_aside="$STORE/.git-localhost-store-hooks-disabled"
-        if [ -d "$hooks_aside" ] && [ ! -e "$STORE/hooks" ]; then
-            # Leftover from a prior run that crashed mid-fetch: hooks are
-            # already stashed. Recover first, otherwise this run finds no
-            # hooks/ to move and never re-enables them at exit either.
-            mv "$hooks_aside" "$STORE/hooks"
-        fi
-        hooks_moved=0
-        restore_store_hooks() {
-            if [ "$hooks_moved" -eq 1 ] && [ -d "$hooks_aside" ]; then
-                mv "$hooks_aside" "$STORE/hooks"
-            fi
-        }
-        trap restore_store_hooks EXIT
-        if [ -d "$STORE/hooks" ]; then
-            mv "$STORE/hooks" "$hooks_aside"
-            hooks_moved=1
-        fi
+        # The store may still carry an old-style, real-file
+        # reference-transaction hook (installed before the quiescent-point
+        # hook redesign). Fetching/update-ref-ing into it below fires that
+        # hook, which calls this same script again -- the
+        # GIT_LOCALHOST_STORE_ACTIVE guard at the top makes that nested call
+        # a no-op, so no suppression dance is needed here.
 
         # Hooks also run with GIT_DIR already set (to the fresh .git) in the
         # environment, which silently overrides `-C`. Set GIT_DIR/unset
@@ -81,10 +89,11 @@ if [ -e "$STORE" ]; then
         # ref-writing analysis in reclone-after-workdir-deletion.md).
         # Anything else under refs/heads/* is a shape clone never produces:
         # don't guess how to merge it, refuse and let a human explain it.
-        default_branch="$(git -C "$WORK_DIR/.git" symbolic-ref --quiet --short HEAD || true)"
+        default_branch="$(git -C "$WORK_DIR/.git" symbolic-ref --quiet --short HEAD \
+            || : "detached HEAD, no default branch")"
         if [ -n "$default_branch" ]; then
             unexpected_refs="$(git -C "$WORK_DIR/.git" for-each-ref --format='%(refname)' refs/heads \
-                | grep -v -x "refs/heads/$default_branch" || true)"
+                | grep -v -x "refs/heads/$default_branch" || : "no unexpected refs")"
         else
             unexpected_refs="$(git -C "$WORK_DIR/.git" for-each-ref --format='%(refname)' refs/heads)"
         fi
@@ -126,8 +135,6 @@ if [ -e "$STORE" ]; then
                 store_git update-ref "$ref" "$new_oid"  # New branch, no conflict.
             fi
         fi
-        restore_store_hooks
-        trap - EXIT
     fi
     (set -x
         rm -r .git
