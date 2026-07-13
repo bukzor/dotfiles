@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eEuo pipefail
 
-echo -n $'\e]52;c;'
-base64
-echo -n $'\x07'
+# send data to the terminal's clipboard, via an ansi escape (OSC 52)
+printf '\e]52;c;'
+base64 | tr -d '\n'
+printf '\x07'

@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env python3
+from __future__ import annotations
+from typing import Iterator, Iterable, TypeVar, Self
+
 #
 #   This file echoes a bunch of color codes to the
 #   terminal to demonstrate what's available.  Each
@@ -6,77 +9,86 @@
 #   out of 17 (default + 16 escapes), followed by a
 #   test use of that color on all nine background
 #   colors (default + 8 escapes).
-
-
-colorgrid() {
-  BGs="$1"
-  FGs="$2"
-
-  # BG header
-  printf '           0m'
-  #printf '      '
-  for BG in $BGs; do
-    printf ' %7s' "$BG"
-  done  # BG
-  echo
-
-  # FG body
-  for FG in $FGs; do
-    for bold in '' '1;'; do
-      fg="$bold$FG"
-      printf ' %6s \033[%s  %s  ' "$fg"  "$fg" "$T"
-      #printf ' %6s ' "$fg"
-      for BG in $BGs; do
-        printf ' \033[%s\033[%s  %s  \033[0m' "$fg" "$BG" "$T"
-      done  # BG
-      echo
-    done  # bold
-  done  # FG
-  echo
-}
-
-
-T='1il'   # The test text
-#BGs_dark='7m 40m 41m 42m 43m 44m 45m 46m 47m'
-#BGs_bright='7m 100m 101m 102m 103m 104m 105m 106m 107m'
-
-#FGs_dark='0m 7m 30m 31m 32m 33m 34m 35m 36m 37m'
-#FGs_bright='0m 7m 90m 91m 92m 93m 94m 95m 96m 97m'
-
-BGs_dark='7m 40m 41m 42m 43m 44m 45m 46m 47m'
-FGs_bright='0m 7m 90m 91m 92m 93m 94m 95m 96m 97m'
-colorgrid "$BGs_dark" "$FGs_bright"
-
-BGs_bright='7m 100m 101m 102m 103m 104m 105m 106m 107m'
-FGs_dark='0m 7m 30m 31m 32m 33m 34m 35m 36m 37m'
-colorgrid "$BGs_bright" "$FGs_dark"
-
-
-# contrast priority:
-#   1. always bright vs dark
-#   1. bg
-#   1. fg
-#   1. bright yellow
-#   1. dark black
-#   1. dark red
-#   1. dark blue
-#   1. bright green
-#   1. dark purple
-#   1. light teal
-#   1. never white/white
-
-
-###
-# ansi colors
-###
 #
-# 0 black
-# 1 red
-# 2 green
-# 3 yellow
-# 4 blue
-# 5 purple
-# 6 teal
-# 7 white
-#
-###
+
+T = TypeVar("T")
+Several = tuple[T, ...]
+TEXT = "1il"  # The test text
+COLORS = tuple(range(8))
+BG1S = (40, 100)  # bright backgrounds are invariably horrid.
+FG1S = (30, 90)   # bright foregrounds are nonstandard and ugly
+WIDTH = 7
+
+
+class AnsiCode(frozenset[int]):
+    def __str__(self):
+        return ";".join(str(x) for x in sorted(self))
+
+    def __or__(self, other: Iterable[int]) -> Self:
+        cls = type(self)
+        return cls(super().__or__(set(other)))
+
+    def __format__(self, *args, **kwargs):
+        return format(str(self), *args, **kwargs)
+
+AnsiCodes = Several[AnsiCode]
+INVERSE = AnsiCode({7})
+
+
+def show_bgs(fg: AnsiCode, bg_styles: AnsiCodes, bg1s: Several[int]) -> Iterator[str]:
+    yield f"{fg:>{WIDTH}} "
+    for bg_style in bg_styles:
+        yield f"\033[{fg | bg_style}m"
+        yield TEXT.center(WIDTH)
+    yield "\033[m "
+
+    for bg2 in COLORS:
+        for bg_style in bg_styles:
+            for bg1 in bg1s:
+                bg = AnsiCode({bg1 + bg2})
+                color = fg | bg_style | bg
+                yield f"\033[{color}m"
+                yield TEXT.center(WIDTH)
+        yield "\033[m "
+
+    yield "\033[m\n"
+
+
+def show_header(bg_styles: AnsiCodes, bg1s: Several[int]) -> Iterator[str]:
+    yield " " * (WIDTH + 1)
+    for bg_style in bg_styles:
+        yield f"{bg_style:^{WIDTH}}"
+    yield " "
+
+    for bg2 in COLORS:
+        for bg_style in bg_styles:
+            for bg1 in bg1s:
+                bg = bg_style | {bg1 + bg2}
+                yield f"{bg:^{WIDTH}}"
+        yield " "
+
+    yield "\033[m\n"
+
+
+def show_fgs(
+    fg_styles: AnsiCodes, fg1s: Several[int], bg_styles: AnsiCodes, bg1s: Several[int]
+) -> Iterator[str]:
+    yield from show_header(bg_styles, bg1s)
+    for fg_style in fg_styles:
+        yield from show_bgs(fg_style, bg_styles, bg1s)
+    for fg2 in COLORS:
+        for fg1 in fg1s:
+            for fg_style in fg_styles:
+                fg = fg_style | {fg1 + fg2}
+                yield from show_bgs(fg, bg_styles, bg1s)
+
+
+def main():
+    for x in show_fgs((AnsiCode(), AnsiCode({1})), FG1S, (AnsiCode(),), BG1S):
+        print(x, end="")
+    for x in show_fgs((AnsiCode(), AnsiCode({1})), BG1S, (AnsiCode({7}),), FG1S):
+        print(x, end="")
+
+
+if __name__ == "__main__":
+    exit(main())
