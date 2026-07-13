@@ -34,8 +34,15 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
 - [ ] vim: .vim/lazy-lock.json, .vim/lua/bukzor/{lsp,plugins,tree-sitter,which-key}.lua,
       .vim/pack/invented-here/start/diffmode/plugin/diffmode.vim
     - [ ] authored / [ ] svelte / [ ] main
-- [ ] terminal: .tmux.conf
-    - [ ] authored / [ ] svelte / [ ] main
+- [x] terminal: .tmux.conf — done 2026-07-13, union of real functionality
+      (main's display-time/base-index/ctrl-hold binding layer,
+      svelte's mouse-wheel scroll speed, pane-nav union), dead
+      commented-out experiments dropped, default-terminal kept at
+      svelte's xterm-256color pending the terminfo todo (main's
+      xterm-kitty intent recorded as a comment). User decision: keep
+      main's `base-index 5`. Validated via `tmux -f .tmux.conf
+      new-session`.
+    - [x] authored / [x] svelte (`8c98844`) / [x] main (`159393f`)
 - [x] bin: bin/brew-desc, bin/colortest17x17, bin/osc52 — done 2026-07-13:
       brew-desc adopts main's simpler `brew desc --eval-all --search`;
       colortest17x17 adopts svelte's python3 rewrite wholesale (main's bash
