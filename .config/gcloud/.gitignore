@@ -14,3 +14,11 @@ access_tokens.db
 application_default_credentials.json
 credentials.db
 *credential*
+legacy_credentials/
+
+# transient data
+config_sentinel
+gce
+.last_opt_in_prompt.yaml
+.last_survey_prompt.yaml
+.metricsUUID
