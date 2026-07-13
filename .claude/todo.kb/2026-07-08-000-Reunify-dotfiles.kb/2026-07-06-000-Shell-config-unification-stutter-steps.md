@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 ---
 
 # Shell config unification stutter-steps
@@ -137,8 +137,12 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
           added, same narrow/additive precedent as the two gaps fixed
           landing `d7dac7a`, not the full ignore-scheme reconciliation
           task 004 owns.
-    - [ ] delete superseded `.sh_env`/`.sh_rc`/`.sh_advanced_rc`/`.sh_lib`/`.sh_plugins.d`
-          only after zsh port (todo 005) consumes them
+    - [x] delete superseded `.sh_env`/`.sh_rc`/`.sh_advanced_rc`/`.sh_plugins.d`
+          — done 2026-07-12 by ../2026-07-06-005 (commit `8efa600`, main).
+          `.sh_lib` kept, not superseded: `bin/gcpenv` (byte-identical on
+          both branches) still sources `.sh_lib/minimal.sh`; retiring it
+          waits on 005's follow-up (port `minimal.sh` into functions.d, or
+          rewrite gcpenv)
 
 ## Open Questions
 
@@ -159,8 +163,9 @@ Single tree `~/.config/sh/{functions.d,profile.d,env.d,rc.d,bashrc.d}`:
 
 - [x] `.profile`, `.bashrc`, `~/.config/sh/**` byte-identical on both branches
       (verified 2026-07-11 via full-tree diff, post `855ac0d`/`31b7c44`;
-      excludes the superseded `.sh_env`/etc. files on main, still deferred
-      to after 005 per the checklist item above)
+      the superseded `.sh_env`/`.sh_rc`/`.sh_advanced_rc`/`.sh_plugins.d`
+      files on main, deferred above, were deleted 2026-07-12 by 005 —
+      `.sh_lib` deliberately excepted, see checklist item above)
 - [x] fresh login shell on this machine: COLUMNS, PATH, prompt all correct
       (live-verified post-commit `979953d`)
 - [x] zero references to nonexistent paths (`grep -r '\.sh/' ~/.config/sh`
