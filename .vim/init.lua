@@ -1,1 +1,1 @@
-lua/bukzor/nvim-init.lua
+lua/bukzor/init-nvim.lua
