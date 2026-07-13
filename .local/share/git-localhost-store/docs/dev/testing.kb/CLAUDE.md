@@ -21,7 +21,7 @@ path encoder, recovery flows.
 Each file:
 
 - Starts with `# Test: <name>` then a one-line "What it tests:" sentence.
-- Sets up its own state from scratch — `rm -rf "$TEST_DIR" "$STORE"` at
+- Sets up its own state from scratch -- `rm -r "$TEST_DIR" "$STORE"` at
   the top, no "continuing from prior test" chains.
 - Has an "Expected" section listing concrete post-conditions the test
   should produce.
@@ -33,12 +33,19 @@ inherently ordered.
 ## Prerequisites for running any test
 
 ```bash
-which claude-path                                      # must be in $PATH
+which claude-path                             # must be in $PATH
 export PATH="$HOME/.local/share/git-localhost-store/bin:$PATH"
-                                                       # for git-localhost-store
-git config --global init.templateDir                   # must point at
-                                                       # template-repo, OR
-                                                       # each test passes
-                                                       # --template=<path>
-                                                       # explicitly
+                                              # for git-localhost-store
+export XDG_STATE_HOME=~/trash/test-state-home # isolates the store tree --
+                                              # never point this at the
+                                              # real ~/.local/state
+git config --global init.templateDir          # must point at
+                                              # template-repo, OR
+                                              # each test passes
+                                              # --template=<path>
+                                              # explicitly
 ```
+
+Every test's `STORE=` line must derive from `${XDG_STATE_HOME:-$HOME/.local/state}`,
+never a hardcoded `$HOME/.local/state` -- that hardcoding is exactly what
+sends test cleanup into the real, durable store.

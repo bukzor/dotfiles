@@ -4,11 +4,11 @@ What it tests: commits land in the central store, not in the working
 directory's `.git`.
 
 ```bash
-TEST_DIR=~/tmp/test-storage
+TEST_DIR=~/trash/test-storage
 ENCODED=$(claude-path "$TEST_DIR")
-STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$ENCODED"
 
-rm -rf "$TEST_DIR" "$STORE"
+rm -r "$TEST_DIR" "$STORE"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 
 git init -q

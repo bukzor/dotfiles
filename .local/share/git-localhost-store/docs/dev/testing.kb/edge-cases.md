@@ -8,11 +8,11 @@ What it tests: conversion still works when the workdir has no commits —
 just a fresh `.git/` directory and a single index entry.
 
 ```bash
-TEST_DIR=~/tmp/test-empty
+TEST_DIR=~/trash/test-empty
 ENCODED=$(claude-path "$TEST_DIR")
-STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$ENCODED"
 
-rm -rf "$TEST_DIR" "$STORE"
+rm -r "$TEST_DIR" "$STORE"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 git init
 touch dummy
@@ -31,10 +31,10 @@ fresh `.git` exist, `git-localhost-store` refuses rather than silently
 merging.
 
 ```bash
-TEST_DIR=~/tmp/test-conflict
+TEST_DIR=~/trash/test-conflict
 ENCODED=$(claude-path "$TEST_DIR")
-STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
-rm -rf "$TEST_DIR" "$STORE"
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$ENCODED"
+rm -r "$TEST_DIR" "$STORE"
 
 # Seed the store
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
@@ -43,7 +43,7 @@ git add seed.txt
 git -c user.email=t@t -c user.name=t commit -q -m seed
 
 # Wipe the workdir, init bypassing our hooks, plant a competing ref
-cd ~/tmp && rm -rf "$TEST_DIR"
+cd ~/trash && rm -r "$TEST_DIR"
 git -c init.templateDir= init -q "$TEST_DIR" --template=
 echo "0000000000000000000000000000000000000001" \
     > "$TEST_DIR/.git/refs/heads/somebranch"

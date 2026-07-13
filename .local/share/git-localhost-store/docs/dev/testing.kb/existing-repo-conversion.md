@@ -5,11 +5,11 @@ What it tests: applying `git-localhost-store` to an already-existing repo
 any commits or tracked files.
 
 ```bash
-TEST_DIR=~/tmp/test-existing
+TEST_DIR=~/trash/test-existing
 ENCODED=$(claude-path "$TEST_DIR")
-STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$ENCODED"
 
-rm -rf "$TEST_DIR" "$STORE"
+rm -r "$TEST_DIR" "$STORE"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 
 # Build a normal repo without our hooks

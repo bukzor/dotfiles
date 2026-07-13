@@ -36,10 +36,10 @@ deleting the stale store solo, without asking).
 ## Scenario A: compatible re-clone (auto-merges, no human needed)
 
 ```bash
-ORIGIN=~/tmp/test-reclone-origin
-TEST_DIR=~/tmp/test-reclone-compat
-STORE="$HOME/.local/state/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
-rm -rf "$ORIGIN" "$TEST_DIR" "$STORE"
+ORIGIN=~/trash/test-reclone-origin
+TEST_DIR=~/trash/test-reclone-compat
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
+rm -r "$ORIGIN" "$TEST_DIR" "$STORE"
 
 mkdir -p "$ORIGIN" && cd "$ORIGIN"
 git init -q
@@ -69,10 +69,10 @@ design exists to protect — and the one a naive `git fetch`-based merge
 gets wrong (see "Why not just `git fetch`" below).
 
 ```bash
-ORIGIN=~/tmp/test-reclone-origin
-TEST_DIR=~/tmp/test-reclone-behind
-STORE="$HOME/.local/state/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
-rm -rf "$ORIGIN" "$TEST_DIR" "$STORE"
+ORIGIN=~/trash/test-reclone-origin
+TEST_DIR=~/trash/test-reclone-behind
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
+rm -r "$ORIGIN" "$TEST_DIR" "$STORE"
 
 mkdir -p "$ORIGIN" && cd "$ORIGIN"
 git init -q
@@ -102,10 +102,10 @@ git clone -q "$ORIGIN" "$TEST_DIR"       # fresh clone brings back only v1 -- be
 ## Scenario B: genuine divergence (still refuses, local branch left untouched)
 
 ```bash
-ORIGIN=~/tmp/test-reclone-origin
-TEST_DIR=~/tmp/test-reclone-diverge
-STORE="$HOME/.local/state/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
-rm -rf "$ORIGIN" "$TEST_DIR" "$STORE"
+ORIGIN=~/trash/test-reclone-origin
+TEST_DIR=~/trash/test-reclone-diverge
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$(claude-path "$TEST_DIR")"
+rm -r "$ORIGIN" "$TEST_DIR" "$STORE"
 
 mkdir -p "$ORIGIN" && cd "$ORIGIN"
 git init -q
@@ -126,10 +126,16 @@ git clone -q "$ORIGIN" "$TEST_DIR"
 
 ### Expected
 
-- Exits 0 (git itself doesn't fail — only the hook does), but stderr shows
-  `git-localhost-store: ❌ .git has local branches that diverge from
-  existing store: ...` / `refs/heads/main: store=<sha> fresh=<sha>` /
-  `Needs a human decision.`
+- Exits non-zero. Unlike the old `reference-transaction` trigger (whose
+  failure never reached `git clone`'s own exit code -- the hook's stderr
+  was the only signal), `post-checkout`'s failure *does* propagate to
+  `git clone`'s exit status (verified 2026-07-13, part of the
+  quiescent-point hook redesign). This is a deliberate improvement: a
+  script or CI step that only checks `git clone`'s exit code can no
+  longer sail past a "needs a human" refusal.
+- Stderr shows `git-localhost-store: ❌ .git has local branches that
+  diverge from existing store: ...` / `refs/heads/main: store=<sha>
+  fresh=<sha>` / `Needs a human decision.`
 - `$TEST_DIR/.git` is a real directory (not a symlink) — unrelocated.
 - `$STORE`'s `refs/heads/main` is **unchanged**, still at `store-only-wip`.
 - `$STORE`'s `refs/remotes/origin/main` **does** update to
@@ -168,24 +174,42 @@ of conflated. See `bin/git-localhost-store`'s recovery branch.
 This fetch (and the direct `rev-parse`/`merge-base`/`update-ref` calls in
 rule 2) target the store directly via an explicit `GIT_DIR` override —
 hooks otherwise run with `GIT_DIR` already pointed at the *fresh* `.git`,
-which silently defeats a naive `git -C "$STORE"`. The recovery path also
-temporarily disables the store's own hooks for its duration — see
+which silently defeats a naive `git -C "$STORE"`. A store created before
+the 2026-07-13 hook redesign may still carry its own real
+`reference-transaction` hook, which this fetch/update-ref traffic would
+otherwise fire recursively -- `bin/git-localhost-store`'s
+`GIT_LOCALHOST_STORE_ACTIVE` env guard caps that at one no-op level; see
 `merge-fetch-recurses-through-store-hooks.md` for why that's
 load-bearing, not defensive programming, and how to test *that* safely.
 
 ## Why plain `git clone` can't be made to *never* refuse
 
-Not for lack of an early-enough hook — `reference-transaction` does fire
-before clone's first ref lands. Confirmed (2026-07-11 devlog) that using
-it to swap `.git` for the store mid-transaction crashes `git clone`
-itself (`BUG: refs/files-backend.c:3072: initial ref transaction called
-with existing refs`, aborts) — its internal state machine assumes
-uninterrupted ownership of the gitdir from `init` through fetch. Clone
-can't be interposed on mid-transaction, hook or no hook. The fix that
-does work (Scenario A/A2/B above) runs at the same `committed` phase the
-non-conflict path already used successfully — it just makes the
-refuse-or-not decision itself smarter and per-ref, rather than trying to
-intervene earlier or trusting one blanket fetch to sort it out.
+Not for lack of an early-enough hook -- `reference-transaction` (retired
+2026-07-13) used to fire before clone's first ref lands. Confirmed
+(2026-07-11 devlog) that using it to swap `.git` for the store
+mid-transaction crashes `git clone` itself (`BUG:
+refs/files-backend.c:3072: initial ref transaction called with existing
+refs`, aborts) -- its internal state machine assumes uninterrupted
+ownership of the gitdir from `init` through fetch. Clone can't be
+interposed on mid-transaction, hook or no hook.
+
+The current trigger is `post-checkout`, which fires at the very end of
+`git clone` -- by then, clone has already written both `refs/remotes/*`
+and `refs/heads/<default>` (its ref-transaction is long since committed),
+so there's no in-flight state left to disrupt. This is *not* symmetric
+with `git commit`: `post-index-change` also fires during clone's
+internal checkout (as it does during commit), but since clone's own
+refs already landed before checkout begins, letting `post-index-change`
+do the real merge work here would be safe too -- the relocator instead
+defers uniformly (any hook named `post-index-change` skips the
+store-exists branch entirely, see `bin/git-localhost-store`), because
+the *same* deferral is unconditionally required for `git commit` (see
+`recovery-after-deletion.md`'s "How recovery is triggered" and the note
+below it) and one uniform rule beats one that's conditionally safe
+depending on which porcelain command triggered it. The visible effect:
+during a recovering `git clone`, `post-index-change` fires first, prints
+a "deferring" note, and does nothing; `post-checkout` fires moments
+later and does the actual merge (Scenario A/A2/B above).
 
 Genuine divergence (Scenario B) still needs a human — there's no
 principled way to pick a winner between two histories that both moved.

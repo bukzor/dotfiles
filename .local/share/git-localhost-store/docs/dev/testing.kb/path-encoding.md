@@ -9,14 +9,14 @@ claude-path "/home/user/projects/repo"
 claude-path "/home/user/my-repo"
 claude-path "/home/user/my--special--repo"
 
-TEST_DIR=~/tmp/test-with-hyphens
+TEST_DIR=~/trash/test-with-hyphens
 ENCODED=$(claude-path "$TEST_DIR")
-STORE="$HOME/.local/state/git-localhost-store/repos/$ENCODED"
+STORE="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/$ENCODED"
 
-rm -rf "$TEST_DIR" "$STORE"
+rm -r "$TEST_DIR" "$STORE"
 mkdir -p "$TEST_DIR" && cd "$TEST_DIR"
 git init && touch f && git add f
-ls "$HOME/.local/state/git-localhost-store/repos/"
+ls "${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/"
 ```
 
 ## Expected
