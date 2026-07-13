@@ -3,18 +3,30 @@ weston.ini
 
 # App-managed configs
 Code/
+colima/
+containers/
 dconf/
+gcloud-logs/
 github-copilot/
 glib-2.0/
 go/
 gtk-3.0/
 lazyvim/
+lvim/
 lvim2/
 menus/
+nextjs-nodejs/
 ngrok/
 obsidian/
+packer/
+prometheus/
 pudb/
 scoop/
+sentry-devenv/
+timestamps/
+
+# dirty hacks
+gcloud.*
 
 # Lock files
 **/lazy-lock.json

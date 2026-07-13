@@ -49,11 +49,15 @@ Brewfile.lock.json
 .Xauthority
 .aptitude/
 
+# defensive: nested repos accidentally copied in with their .git intact
+.git/
+
 # externally managed
 Dropbox/
 .cpan/
 .docker/
 .conda/
+.fzf/
 
 # local-machine binaries
 package/
@@ -62,6 +66,7 @@ package/
 !.cargo/config.toml
 .volta
 .npm
+.goenv
 .dropbox
 .dropbox-dist
 .local/*
@@ -102,6 +107,7 @@ package/
 # Misc transient
 .sqlite_history
 *.tmp
+.env
 
 # ---------------------------------------------------------------------------
 # Windows user profile (host is %USERPROFILE%, never VCS)

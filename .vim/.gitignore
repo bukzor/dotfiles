@@ -1,8 +1,11 @@
-
 # don't care
+munge*
+mangle*
+data/
 
 # files with transient data
 .netrwhist
 
 # files with host-local data
 trash/
+bak/

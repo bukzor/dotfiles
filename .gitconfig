@@ -1,22 +1,114 @@
-[init]
-  defaultBranch = main
-	templateDir = /home/bukzor/.local/share/git-localhost-store/template-repo
-[alias]
-  l = log --graph --format='%C(auto)%h %aI (%ar)%d %s'
-  xl = l --all
-  top = rev-parse --show-toplevel
-  amend = commit --amend --no-edit
-  commit-empty = commit --allow-empty -m '(empty)'
 [user]
-  email = workitharder@gmail.com
-  name = Buck Evan
+    name = Buck Evan
+    handle = bukzor
+    email = workitharder@gmail.com
 
-[include]
-  path = ~/.gitconfig.d/vimdiff.conf
+[init]
+    defaultBranch = main
+    templateDir = ~/.local/share/git-localhost-store/template-repo
+
+[color]
+    ui = auto
+
+[pack]
+    threads = 0
+    packSizeLimit = 64m
+
+[diff]
+    renamelimit = 0
+    algorithm = histogram
+    # detect renames and copies by default
+    renames = copy
+    color-moved = zebra
+    # relative = false  # break git-vimdiff otherwise
+    relative = true  # less useful otherwise
+    # SADFACE: these don't work (yet?)
+    find-renames = 10%
+    find-copies = 10%
+    find-copies-harder = true
+
+[difftool "debug"]
+    cmd = "echo ---; echo \"BASE:$BASE\"; echo \"LOCAL:$LOCAL\"; echo \"MERGED:$MERGED\"; echo \"REMOTE:$REMOTE\""
+
+[merge]
+    renamelimit = 0
+    tool = vimmerge
+    conflictstyle = diff3
+[mergetool]
+    prompt = false
+    keepBackup = false
+    trustExitCode = true
+[mergetool "vimmerge"]
+    cmd = "set -x; vimmerge $REMOTE $MERGED $LOCAL $BASE"
+
 [push]
-  default = current
+    default = current
+    useForceIfIncludes = true
+[pull]
+    ff = only
+[rebase]
+    rebaseMerges = rebase-cousins
+    # mark any 'fixup! ...' commits as fixup
+    autoSquash = true
+    # use reflog to pick a better base SHA
+    forkPoint = true
+
+    # Automatically force-update any branches that point to commits that are
+    # being rebased. Any branches that are checked out in a worktree are not
+    # updated in this way.
+    updateRefs = true
+
+[advice]
+    detachedHead = false
+
+[alias]
+    l = log --graph --format='%C(auto)%h %aI (%ar)%d %s'
+    xl = l --all
+    ll = log --oneline --graph --decorate --color=always --pretty=format:%C(auto)%h\\ %C(bold\\ blue)%aE\\ %Cgreen(%cr)%C(auto)%d%Creset\\ %s
+    ff = merge --ff-only
+    top = rev-parse --show-toplevel
+    amend = commit --amend --no-edit
+    amendall = amend --all
+    commit-empty = commit --allow-empty -m '(empty)'
+    push-mine = !git-push-mine
+    branch-name = symbolic-ref -q --short HEAD
+    tag-name = !sh -exc 'git tag -l --points-at ${1:-HEAD}' -
+    base = !sh -exc 'git merge-base "$(git upstream)" ${1:-HEAD}' -
+    diffbase = !git diff $(git base)
+    diff3 = !git range-diff "$(git upstream)"
+    is-clean = diff-index --quiet HEAD
+    vimdiff = difftool
+    dt = difftool
+    d = diff
+    mt = mergetool
+    wip = commit -m 'WIP' --no-verify
+    co = checkout
+    ci = commit
+    s = status -s
+    sha = !sh -exc 'git rev-parse ${1:-HEAD}' -
+
+[http]
+    cookiefile = ~/.gitcookies
+[include]
+    path = ~/.gitconfig.d/vimdiff.conf
+    path = ./private-dotfiles/.gitconfig
+
 [sendemail]
-  smtpEncryption = tls
-  smtpServer = smtp.gmail.com
-  smtpUser = workitharder@gmail.com
-  smtpServerPort = 587
+    smtpEncryption = tls
+    smtpServer = smtp.gmail.com
+    smtpUser = workitharder@gmail.com
+    smtpServerPort = 587
+
+[log]
+    diffMerges = dense-combined
+[safe]
+    directory = /Users/buck/repo/getsentry/tacos-gha.hg
+    directory = /Users/buck/repo/getsentry/tacos-gha.hg2
+    directory = /Users/buck/repo/getsentry/tacos-gha
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+
+# vim:sts=4:sw=4:et:
