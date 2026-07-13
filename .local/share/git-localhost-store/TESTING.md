@@ -30,6 +30,9 @@ which claude-path
 # git-localhost-store must be on PATH
 export PATH="$HOME/.local/share/git-localhost-store/bin:$PATH"
 
+# Isolate the store tree -- never point this at the real ~/.local/state
+export XDG_STATE_HOME=~/trash/test-state-home
+
 # Either: global config so all tests get our hooks
 git config --global init.templateDir "$HOME/.local/share/git-localhost-store/template-repo"
 
@@ -51,18 +54,17 @@ git config --global init.templateDir "$HOME/.local/share/git-localhost-store/tem
 
 - Hook must be executable:
   `ls -la ~/.local/share/git-localhost-store/template-repo/hooks/post-index-change`
-- Parent of state directory must exist: `ls -la ~/.local/state/`
+- Parent of state directory must exist: `ls -la "${XDG_STATE_HOME:-$HOME/.local/state}"`
 
 ### Recovery doesn't work
 
 - Object store must exist:
-  `ls ~/.local/state/git-localhost-store/repos/`
+  `ls "${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos/"`
 - Encoded name must match: `claude-path <workdir>` and look for the
   matching directory under `repos/`.
 
 ## Cleanup
 
 ```bash
-rm -rf ~/tmp/test-*
-rm -rf ~/.local/state/git-localhost-store/repos/-home-*-tmp-test--*
+rm -r ~/trash/test-* "$XDG_STATE_HOME"
 ```

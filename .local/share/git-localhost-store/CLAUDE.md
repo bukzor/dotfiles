@@ -68,31 +68,50 @@ Working directory paths are encoded by `~/bin/claude-path`:
 
 ## Hook Logic Flow
 
-Hooks live in `template-repo/hooks/` and are copied into every newly-init'd
-or cloned repo via `init.templateDir`. They each call
-`bin/git-localhost-store`.
+`template-repo/hooks/{post-index-change,post-commit,post-checkout}` are
+symlinks to one file, `template-repo/hooks/shared`, copied (as symlinks)
+into every newly-init'd or cloned repo via `init.templateDir`. `shared`
+just execs `bin/git-localhost-store`, passing its own invoked name
+(`$(basename "$0")`) as `$1` -- all guarding/state logic lives in the
+relocator, not the hook body.
 
-### post-index-change (triggered by `git add`)
+Trigger points, all quiescent (fire after the triggering operation's own
+ref-transaction has landed, never mid-operation):
 
-Catches fresh `git init` repos that haven't yet hit `reference-transaction`.
+- **post-index-change** -- `git add` on a fresh repo (also fires during
+  `git commit`, see below).
+- **post-commit** -- any commit, including `--allow-empty` and
+  `--no-verify` (post-commit isn't skipped by `--no-verify`).
+- **post-checkout** -- end of `git clone` (after checkout), or a plain
+  `git checkout`/`git switch`.
 
-### pre-commit (fallback)
+`bin/git-localhost-store` itself short-circuits when `.git` is already a
+symlink or a gitfile -- the hooks no longer duplicate that check (removed
+as redundant once invocation frequency dropped from every ref write to
+once per commit/checkout).
 
-Catches the case where the user commits without running `git add`.
-
-### reference-transaction (triggered on ref changes)
-
-Fires during `git clone` (after refs land) and during normal commits. Skips
-the "fresh init, no refs yet" case so the conversion happens at the right
-moment.
-
-All three hooks short-circuit when `.git` is already a symlink (idempotent).
+**The `post-index-change` exception:** `git commit` fires
+`post-index-change` too (its internal index-refresh touches the same
+mechanism `git add` uses), and -- unlike `git clone`, whose refs are
+already written before checkout/`post-index-change` fire -- it fires
+*before* `git commit`'s own ref-transaction lands. Adopting an
+existing store at that point would swap `.git` out from under the
+still-in-flight commit. So `bin/git-localhost-store` never runs the
+"store already exists" branch when invoked as `post-index-change`,
+regardless of whether adoption would have been clean or divergent -- it
+always defers to `post-commit`/`post-checkout`. See
+`docs/dev/testing.kb/store-recovery-via-commit.md`.
 
 ### bin/git-localhost-store
 
-The actual relocation: `mv .git <store>` then `ln -s <store> .git`. Refuses
-to operate if `.git` isn't a directory (asserts cleanly on unexpected
-states).
+The actual relocation: `mv .git <store>` then `ln -s <store> .git` (or,
+recovering an existing store, `rm -r .git` then `ln -s`). Refuses to
+operate if `.git` isn't a directory, symlink, or gitfile (asserts
+cleanly on unexpected states). Exports `GIT_LOCALHOST_STORE_ACTIVE=1` and
+exits immediately if already set -- hooks inherit this from the invoking
+git process, so the recovery merge's own fetch/update-ref calls into the
+store can't recurse through a stale, pre-2026-07-13 store's real
+`reference-transaction` hook (new stores never get one).
 
 ## Making Changes
 

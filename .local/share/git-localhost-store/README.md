@@ -97,9 +97,10 @@ invocation is rarely needed.
 │   └── git-localhost-store       # the relocator
 ├── template-repo/             # git init template
 │   └── hooks/
-│       ├── post-index-change
-│       ├── pre-commit
-│       └── reference-transaction
+│       ├── shared                # the actual hook body
+│       ├── post-index-change     # symlink -> shared
+│       ├── post-commit           # symlink -> shared
+│       └── post-checkout         # symlink -> shared
 ├── lib/init                   # one-time setup helper
 ├── CLAUDE.md                  # maintenance guide for AI agents
 ├── README.md                  # this file

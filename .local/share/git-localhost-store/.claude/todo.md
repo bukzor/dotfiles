@@ -2,7 +2,7 @@
 
 Suggested order: hook redesign next, then cleanup — one commit each.
 
-- [ ] `todo.kb/2026-07-12-001-hook-redesign-quiescent-point-triggers.md`
+- [x] `todo.kb/2026-07-12-001-hook-redesign-quiescent-point-triggers.md`
       — replace mid-operation `reference-transaction` with
       post-commit/post-checkout; env re-entrancy guard replaces the
       hooks-aside dance; hooks become symlinks to one shared body

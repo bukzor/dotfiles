@@ -1,6 +1,20 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
+closeout: |
+  Resolved 2026-07-13. Shared symlinked hook body, env re-entrancy guard,
+  and post-checkout exit-code propagation landed; full testing.kb pass
+  green under an isolated XDG_STATE_HOME (fork-bomb check stably 0
+  against a simulated legacy-hook store). Unplanned addition during
+  implementation: post-index-change fires during `git commit` itself
+  (its internal index refresh), before commit's own ref-transaction
+  lands -- adopting the store there would swap `.git` out from under the
+  in-flight commit, so `bin/git-localhost-store` now always defers that
+  case to post-commit/post-checkout. Documented in
+  `docs/dev/testing.kb/store-recovery-via-commit.md` and the "Hook Logic
+  Flow" section of CLAUDE.md. Both open questions resolved (see below).
+  Optional hooks-sweep step left undone -- non-urgent, the env guard
+  already covers legacy stores.
 required-reading:
     - bin/git-localhost-store
     - docs/dev/testing.kb/merge-fetch-recurses-through-store-hooks.md
@@ -56,42 +70,48 @@ Three parts, landing together:
 
 ## Implementation Steps
 
-- [ ] Write the shared hook body (short-circuit when `.git` is a
+- [x] Write the shared hook body (short-circuit when `.git` is a
       symlink/gitfile, else exec `bin/git-localhost-store`); replace
       `template-repo/hooks/{post-index-change,pre-commit,reference-transaction}`
       with `{post-index-change,post-commit,post-checkout}` symlinks to it
-- [ ] Replace the hooks-aside/trap/self-heal block in
+- [x] Replace the hooks-aside/trap/self-heal block in
       `bin/git-localhost-store` with the env guard
-- [ ] Update testing.kb: `empty-commit-on-fresh-repo.md` (conversion now
+- [x] Update testing.kb: `empty-commit-on-fresh-repo.md` (conversion now
       via post-commit), `merge-fetch-recurses-through-store-hooks.md`
       (must run against an old-style store with real-file
       reference-transaction hooks — that's the case the guard exists
       for), `fresh-repository-setup.md` (hooks are symlinks)
-- [ ] Full testing.kb pass, including reclone scenarios A/A2/B
+- [x] Full testing.kb pass, including reclone scenarios A/A2/B
 - [ ] Optional follow-up: sweep `~/.local/state/git-localhost-store/repos/*/hooks/`,
       replacing our three known hook files with the new symlinks
       (retroactively fixes stale hooks — cf.
       `abandoned/2026-05-05-000-audit-and-sweep-stale-hooks.md`;
       the env guard makes this non-urgent)
-- [ ] ADR + devlog; update CLAUDE.md hook-flow sections and README
+- [x] ADR + devlog; update CLAUDE.md hook-flow sections and README
 
 ## Open Questions
 
-- Scenario B behavior delta: a failing post-checkout makes `git clone`
+- ~~Scenario B behavior delta: a failing post-checkout makes `git clone`
   exit non-zero (today: exit 0, stderr only). Clone's junk cleanup is
   already in LEAVE_ALL mode by checkout time, so nothing gets deleted —
-  arguably better visibility for the "needs a human" refusal. Accept?
-- Keep the hook-level `[ -L .git ]` fast path, or always exec the
+  arguably better visibility for the "needs a human" refusal. Accept?~~
+  **Resolved: accept.** Per the user: never allow things to be quietly
+  wrong; rare/expected-never situations should fail loudly and early.
+- ~~Keep the hook-level `[ -L .git ]` fast path, or always exec the
   relocator (which re-checks)? post-commit/post-checkout fire far less
-  often than reference-transaction did, so the fork cost is lower now.
+  often than reference-transaction did, so the fork cost is lower now.~~
+  **Resolved: dropped.** `bin/git-localhost-store` already re-checks;
+  the hook-level duplicate added no safety, only an extra fork per
+  invocation, which is cheap now that invocation frequency dropped from
+  every ref write to once per commit/checkout.
 
 ## Success Criteria
 
-- [ ] All testing.kb scenarios pass
-- [ ] Fork-bomb check stably 0 against a legacy-hook store
-- [ ] Fresh `git init` + template yields symlink hooks; conversion still
+- [x] All testing.kb scenarios pass
+- [x] Fork-bomb check stably 0 against a legacy-hook store
+- [x] Fresh `git init` + template yields symlink hooks; conversion still
       fires on first add/commit/clone
-- [ ] `bin/git-localhost-store` loses the hooks-aside block entirely
+- [x] `bin/git-localhost-store` loses the hooks-aside block entirely
 
 ## Rationale
 
