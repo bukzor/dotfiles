@@ -1,1 +1,28 @@
-../../.hgignore_global
+# Files that can appear anywhere in the tree.
+*.py[cod]
+*.so
+*.bak
+*.orig
+.coverage
+.coverage.*
+.*.sw[a-z]
+**/.*.sw[a-z]
+
+# Stuff in the root.
+/build/
+/*.egg-info
+/dist
+/.tox
+
+# temporary data
+tmp/
+*.tmp
+log
+*.log
+*.log.*
+
+terraform.tfstate.*.backup
+
+# Claude configuration files
+**/.claude/settings.local.json
+**/CLAUDE.local.md

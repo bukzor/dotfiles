@@ -1,26 +1,32 @@
-# un-ignore non-hidden stuff
-![!.]*
-
-# generated test-harness certificates (X_test.sh/X_check.sh produce
-# X.<shell>.tested / X.checked beside the source), never tracked
-*.tested
-*.checked
-*.did
-*.did.tmp
-
-# dont care:
 cros-garcon.conf
-nextjs-nodejs/
 weston.ini
+
+# App-managed configs
+Code/
 colima/
 containers/
+dconf/
 gcloud-logs/
+github-copilot/
+glib-2.0/
+go/
+gtk-3.0/
+lazyvim/
 lvim/
+lvim2/
+menus/
+nextjs-nodejs/
 ngrok/
+obsidian/
 packer/
 prometheus/
+pudb/
+scoop/
 sentry-devenv/
 timestamps/
 
-# dirty hacks:
+# dirty hacks
 gcloud.*
+
+# Lock files
+**/lazy-lock.json

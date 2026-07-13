@@ -1,48 +1,199 @@
-# Ignore everything ...
-*
-**/*
+# hacking
+*.log
+demo*
+*.strace
+*.bak
+*~
 
-# ... except subdirectories containing a .gitignore ...
-# NOTE: This causes a scan of all subdirectories, looking for .gitignore files.
-#   To prevent scans of huge/slow directories add a .gitignore to explicitly
-#   ignore all subdirectories, as in:
-#     ./Library/CloudStorage/.gitignore
-!**/
-!**/.gitignore
-tmp/**/
-trash/**/
+# don't care
+.sommelierrc
+.emscripten
 
-# these have to be explicitly ignored because they sometimes contain git repos
-.cargo/
-.cache/
-.opam/
+# Python bytecode
+__pycache__/
+
+# Ruby
+.bundle/
+
+# Vim plugin directories (managed by plugin manager)
+.vim/plugged/
+
+# Chrome OS symlinks to host filesystem
+Downloads
+GoogleDrive
+MyFiles
+
+# files with transient data
+.local/state/
+.viminfo
+.cache
+.emscripten_cache/
+tmp/
+**/trash/
+bak/
+
+# transient history
+*.sw[a-p]
+.bash_history
+.zsh_history
+.zcompdump*
+.python_history*
+.lesshst
+/profile.env
+.node_repl_history
+.wget-hsts
+Brewfile.lock.json
+.sudo_as_admin_successful
+
+# files with host-local data
+.Xauthority
+.aptitude/
+
+# defensive: nested repos accidentally copied in with their .git intact
 .git/
-.local/share/pnpm
-.goenv/
-.zkbd/
 
-# dontcare:
+# externally managed
+Dropbox/
+.cpan/
+.docker/
+.conda/
 .fzf/
 
-# binaries and local files
-.vscode
+# local-machine binaries
+package/
+.rustup
+.cargo
+!.cargo/config.toml
+.volta
+.npm
+.goenv
+.dropbox
+.dropbox-dist
+.local/*
+
+# Opt-in .local/share (controlled by .local/share/.gitignore)
+!.local/share/
+
+
+# Pants workspace files
+/.pants.d
+/dist/
 .aider*
+
+# Claude state files
+.claude.json
+.claude.json.*
+/.agents/
+**/.claude/settings.local.json
+
+# Tool/runtime directories
+.android/
+.bun/
+.copilot/
+.gnupg/
+.mitmproxy/
+.obsidian/
+.opam/
+.parallel/
+.pki/
+.pyenv/
+.solargraph/
+.terraform.d/
+.vscode/
+/.config/google-chrome-for-testing/
+/.config/pulse/
+/node_modules/
+
+# Misc transient
+.sqlite_history
+*.tmp
 .env
 
-# redo-based test/check harness: narrow opt-in landed ahead of this file's
-# full ignore-scheme reconciliation (deny-first here vs. svelte-crostini's
-# allowlist-of-ignores), which is still a separate, later effort.
-!test.do
-!default.tested.do
-!default.checked.do
-!HACKING.md
-!mechanical-fast-forwards_check.sh
-!zsh-startup_check.sh
+# ---------------------------------------------------------------------------
+# Windows user profile (host is %USERPROFILE%, never VCS)
+# ---------------------------------------------------------------------------
 
-# shell config unification (.profile/.bashrc/.config/sh/** convergence):
-# same narrow-opt-in precedent as the harness block above -- .config/sh/**
-# itself is already trackable via .config/.gitignore's un-ignore-non-dotfiles
-# rule.
-!.profile_test.sh
-!.zshenv
-!.bashrc_test.sh
+# Registry hives and transactional logs
+NTUSER.DAT
+NTUSER.DAT{*}.TxR.*
+NTUSER.DAT{*}.TM*
+ntuser.dat.LOG*
+ntuser.ini
+
+# Windows-XP-era backward-compat junctions (inaccessible reparse points)
+/Application Data
+/Cookies
+/Local Settings
+/My Documents
+/NetHood
+/PrintHood
+/Recent
+/SendTo
+/Start Menu
+/Templates
+
+# Other host-local Windows state
+.wslconfig
+.git-for-windows-updater
+_viminfo
+
+# ---------------------------------------------------------------------------
+# Windows shell / user-data folders — bulk content, not VCS
+# ---------------------------------------------------------------------------
+/3D Objects/
+/AppData/
+/Contacts/
+/Desktop/
+/Documents/
+/Favorites/
+/Links/
+/Music/
+/OneDrive/
+/Pictures/
+/Saved Games/
+/Searches/
+/Videos/
+
+# ---------------------------------------------------------------------------
+# Package managers / runtimes / caches on Windows
+# ---------------------------------------------------------------------------
+.chocolatey/
+.dotnet/
+.gradle/
+.ipynb_checkpoints/
+.ipython/
+.m2/
+.matplotlib/
+.nuget/
+.nx/
+.spyder-py3/
+.templateengine/
+/packages/
+/scoop/
+
+# ---------------------------------------------------------------------------
+# Bulk external trees (game installs, VM rootfs, etc.)
+# ---------------------------------------------------------------------------
+/curseforge/
+/hlserver/
+/wsl/
+
+# ---------------------------------------------------------------------------
+# IDE / source-checkout holder dirs (each subdir has its own VCS).
+# Unlike /repo/, these should NOT be materialized on clone.
+# ---------------------------------------------------------------------------
+/AndroidStudioProjects/
+/PycharmProjects/
+/source/
+/trash/
+
+# redo build system
+.redo/
+*.tested
+*.checked
+# bookkeeping litter from vendored minimal/do (.local/share/redo/do)
+.do_built
+.do_built.dir/
+*.did
+*.did.tmp
+*.redo.tmp

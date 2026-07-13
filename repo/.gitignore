@@ -1,5 +1,3 @@
-# Ignore everything, regardless of their gitigore
-*
-
-# ... except don't ignore my stuff
-!mine
+# all these directories have their own source control
+*/
+!mine/
