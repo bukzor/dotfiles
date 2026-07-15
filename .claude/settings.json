@@ -63,7 +63,7 @@
       "Bash(git add -A:*)",
       "Bash(git add --all:*)",
       "Bash(git add .:*)",
-      "Write(~/.claude/projects/*/memory/**)"
+      "Edit(~/.claude/projects/*/memory/**)"
     ],
     "ask": [
       "Bash(git push:*)",
