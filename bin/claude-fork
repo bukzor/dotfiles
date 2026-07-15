@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+usage() {
+  cat >&2 <<'EOF'
+usage: claude-fork <task-name> [session-id] [claude-args...]
+
+Fork a Claude Code session into its own worktree, session ID, and name.
+Without session-id, claude opens its interactive session picker -- prefer
+this over --continue, which would grab the most recently created fork
+rather than the original session.
+
+To branch from an earlier point, rewind inside the fork: esc-esc, pick
+the message, "Restore conversation". The original session is untouched.
+EOF
+  exit 2
+}
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+name="${1:-}"
+test -n "$name" || usage
+shift
+
+resume=(--resume)
+if (( $# > 0 )) && [[ "$1" != -* ]]; then
+  resume+=("$1")
+  shift
+fi
+
+exec claude "${resume[@]}" --fork-session --worktree "$name" --name "$name" "$@"
