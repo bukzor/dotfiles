@@ -1,3 +1,8 @@
+---
+description: Orient to the project -- read context, propose next-task priorities
+argument-hint: "[taskfile or brief -- default: @.claude/todo.md]"
+---
+
 --- # workaround: anthropics/claude-code#13003
 depends:
   - Skill(llm-collab)
@@ -5,9 +10,19 @@ depends:
 
 # Session Start
 
-ARGUMENTS: $ARGUMENTS
+ARGUMENTS:
 
-Default (no arguments): orient by heuristic matching only.
+> $ARGUMENTS
+
+Default arguments (if none provided):
+
+> @.claude/todo.md, in order
+
+## Background
+
+- .claude/todo.md and .claude/todo.kb/\*.md are governed by the /llm-subtask skill
+- todo.md is intended to be the prioritized listing of work remaining
+- "session files" are located in ~/.claude/sessions.kb (see its CLAUDE.md for detail)
 
 ## Workflow
 
@@ -18,37 +33,24 @@ Default (no arguments): orient by heuristic matching only.
    If `$ARGUMENTS` resolves to an existing file (taskfile, plan, brief):
    - Read it; it is the primary brief.
    - Read any files listed under its frontmatter `requires:` before
-     acting.
+     acting (and any transitive `requires:`).
    - Grep `~/.claude/sessions.kb/*.md` for the file's basename.
      - 1 match: read that entry; continue the session.
-     - 0 matches: create a new entry following
-       `~/.claude/sessions.kb/.template.md` (substitute the
-       `$(...)` placeholders). Filename: a kebab-case slug
-       describing the work; prefer exact match with the taskfile's
-       slug (strip `CLAUDE.`/`.Task.`/`.md` affixes) — exact-match
-       ids across files with the same referent make
-       cross-reference cheap.
+     - 0 matches: create a new entry
      - 2+ matches: ask the user which to use.
 
    Otherwise (no argument, or argument is not a file path):
-   - Look for an existing sessions.kb entry. Search recipes:
-     - `grep -Rl "uuid: $CLAUDE_CODE_SESSION_ID" ~/.claude/sessions.kb/`
+   - Look for a .claude/todo.md
+   - Look for an existing sessions.kb entry. Search recipe:
      - `grep -Rl "^cwd: $PWD" ~/.claude/sessions.kb/`
-     - Or scan filenames for topic match.
-     If found, read it and any files listed under `focus:`.
-   - Consider creating a new entry (same template) when any apply:
-     - Complex or nuanced task
-     - Will take more than a couple hours
-     - Has already been more than a day
-     - Context already > 100k tokens (plan a separate session)
 
-   See `~/.claude/sessions.kb/CLAUDE.md` for what belongs.
 3. **Discover and read context files.**
    ```
    Bash(find . -xtype f -name '*.md' \( -path '*/.claude/todo*' -o -path '*/devlog/*' -o -path '*/adr/*' \))
    ```
    Read or skim each.
-4. **Synthesize** what you found into a brief status summary.
+4. **Synthesize** what you found into a brief status summary. Include an ordered listing of next-task priorities.
+5. **Continue** if your confidence (that user will agree with your inference) is >95%.
 
 ## Output Format
 
