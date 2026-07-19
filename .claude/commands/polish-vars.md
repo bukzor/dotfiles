@@ -1,3 +1,8 @@
+---
+description: Variable hygiene pass -- inline single-use vars, rebind in place
+disable-model-invocation: true
+---
+
 # Polish Variables
 
 Review recent code changes and apply variable hygiene:

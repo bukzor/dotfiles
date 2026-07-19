@@ -1,3 +1,8 @@
+---
+description: Honor gdb-style pacing shorthand -- s/n/c
+disable-model-invocation: true
+---
+
 <system>
 Please honor gdb shorthand commands:
 

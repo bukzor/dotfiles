@@ -1,3 +1,8 @@
+---
+description: How to write effective WebSearch queries
+disable-model-invocation: true
+---
+
 (or: how to use WebSearch effectively)
 
 Bad: `Web Search("site:github.com "CLI LLM code assistant" OR "terminal AI coding" OR "command line GPT" OR "CLI Claude"")`

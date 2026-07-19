@@ -1,3 +1,8 @@
+---
+description: Fetch full web content via curl + hq (Fetch tool only summarizes)
+argument-hint: "[url]"
+---
+
 The Fetch tool is near useless, unless you want a ~100 character summary.
 
 Instead, use curl.
