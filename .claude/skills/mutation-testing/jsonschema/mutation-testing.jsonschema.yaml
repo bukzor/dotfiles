@@ -10,11 +10,13 @@ additionalProperties: false
 properties:
   status:
     type: string
-    enum: [todo, done, gap]
+    enum: [todo, done, gap, equivalent]
     description: |
       todo -- not yet attempted
       done -- tests reliably catch this mutation
       gap -- unable to harden tests (deferred to Opus)
+      equivalent -- mutation doesn't change behavior (not a bug); may reveal redundant code
   attempts:
     type: integer
-    description: Number of strengthening attempts (required for gap)
+    minimum: 0
+    description: Number of strengthening attempts (for gap or equivalent)

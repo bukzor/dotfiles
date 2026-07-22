@@ -45,8 +45,12 @@ Strengthen until tests reliably catch the injected bug:
 
 0. Add or improve a test to catch the bug, then run tests
    - If tests pass:
-     - try again, but after 2-5 attempts: revert test changes, mark `status: gap`
-       - document what was tried in `## Test Result`
+     - try again, but after 2-5 attempts:
+       - If investigation shows the mutation changes no observable behavior (dead/redundant
+         code), revert the bug and mark `status: equivalent` -- document the finding in
+         `## Finding`
+       - Otherwise: revert test changes, mark `status: gap`
+         - document what was tried in `## Test Result`
 1. Try to create buggy-passing code
    - If you can: repeat from 0
 2. Revert bug, run tests -- should pass
@@ -66,6 +70,8 @@ with frontmatter per the schema in Appendix A.
   - `## Injection`: specific code change to make
   - `## Test Coverage` (done): which tests catch it
   - `## Test Result` (gap): why tests couldn't catch it
+  - `## Finding` (equivalent): why the mutation changes no observable behavior; note if it
+    revealed dead/redundant code
 
 ## Appendix A: Schema
 
