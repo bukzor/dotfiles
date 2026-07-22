@@ -69,24 +69,12 @@ with frontmatter per the schema in Appendix A.
 
 ## Appendix A: Schema
 
+Canonical schema: `jsonschema/mutation-testing.jsonschema.yaml` (this skill).
+
+A consuming project's `docs/dev/mutation-testing.jsonschema.yaml` must not copy
+the schema inline -- that drifts. Instead make it a one-line `$ref` stub:
+
 ```yaml
-$schema: "https://json-schema.org/draft/2020-12/schema"
-title: Mutation Testing
-description: Tracks planned code mutations for post-hoc TDD
-
-type: object
-required: [status]
-additionalProperties: false
-
-properties:
-  status:
-    type: string
-    enum: [todo, done, gap]
-    description: |
-      todo -- not yet attempted
-      done -- tests reliably catch this mutation
-      gap -- unable to harden tests (deferred to Opus)
-  attempts:
-    type: integer
-    description: Number of strengthening attempts (required for gap)
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$ref: "skill://mutation-testing/jsonschema/mutation-testing.jsonschema.yaml"
 ```
