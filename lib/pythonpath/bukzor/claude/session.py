@@ -145,6 +145,90 @@ class Session:
             key=lambda n: n.line,
         )
 
+    def descendants_of(self, uuid: str) -> list[Node]:
+        """The subtree rooted at uuid, including uuid itself, sorted by line.
+
+        >>> from pathlib import Path
+        >>> sess = build_session(Path("x"), iter([
+        ...     Node(0, {"uuid": "a", "parentUuid": None}),
+        ...     Node(1, {"uuid": "b", "parentUuid": "a"}),
+        ...     Node(2, {"uuid": "c", "parentUuid": "a"}),
+        ...     Node(3, {"uuid": "d", "parentUuid": "b"}),
+        ... ]))
+        >>> [n.uuid for n in sess.descendants_of("b")]
+        ['b', 'd']
+        """
+        out: list[Node] = []
+        stack = [uuid]
+        seen: set[str] = set()
+        while stack:
+            cur = stack.pop()
+            if cur in seen or cur not in self.by_uuid:
+                continue
+            seen.add(cur)
+            out.append(self.by_uuid[cur])
+            stack.extend(self.children.get(cur, []))
+        out.sort(key=lambda n: n.line)
+        return out
+
+    def tip_of(self, uuid: str) -> Node | None:
+        """The record `--resume` would land on if this branch stood alone.
+
+        Claude Code chooses a chain by taking the newest message and walking
+        `parentUuid` back, so a branch's identity is its newest descendant --
+        not its deepest, and not its last-appended. Attachments carry
+        timestamps too, but resume only ever anchors on user/assistant
+        records, so those win when present.
+
+        >>> from pathlib import Path
+        >>> sess = build_session(Path("x"), iter([
+        ...     Node(0, {"uuid": "a", "parentUuid": None,
+        ...              "type": "user", "timestamp": "2026-01-01T00:00:00Z"}),
+        ...     Node(1, {"uuid": "b", "parentUuid": "a",
+        ...              "type": "assistant", "timestamp": "2026-01-01T00:00:02Z"}),
+        ...     Node(2, {"uuid": "c", "parentUuid": "a",
+        ...              "type": "assistant", "timestamp": "2026-01-01T00:00:09Z"}),
+        ...     Node(3, {"uuid": "d", "parentUuid": "b",
+        ...              "type": "attachment", "timestamp": "2026-01-01T00:00:99Z"}),
+        ... ]))
+        >>> sess.tip_of("a").uuid
+        'c'
+        >>> sess.tip_of("b").uuid
+        'b'
+        >>> print(sess.tip_of("missing"))
+        None
+        """
+        kin = self.descendants_of(uuid)
+        speakers = [n for n in kin if n.type in ("user", "assistant")]
+        return max(
+            speakers or kin,
+            key=lambda n: (n.timestamp or "", n.line),
+            default=None,
+        )
+
+    def cwd(self, among: list[Node] | None = None) -> str | None:
+        """The directory this session ran in -- required to resume it.
+
+        Read from the file, never decoded from the projects/<slug>/ dir name:
+        the slug maps both '/' and '.' to '-', so it is not invertible. The
+        last value wins, since a resume from elsewhere rewrites it -- which
+        is why `among` exists: branches of one file can live in different
+        directories, and the whole-file answer is then the live branch's.
+
+        >>> from pathlib import Path
+        >>> sess = build_session(Path("x"), iter([
+        ...     Node(0, {"uuid": "a", "parentUuid": None, "cwd": "/one"}),
+        ...     Node(1, {"uuid": "b", "parentUuid": "a"}),
+        ...     Node(2, {"uuid": "c", "parentUuid": "b", "cwd": "/two"}),
+        ... ]))
+        >>> sess.cwd()
+        '/two'
+        >>> sess.cwd(among=sess.ancestors_of("b"))
+        '/one'
+        """
+        found = [n.record["cwd"] for n in (among or self.nodes) if n.record.get("cwd")]
+        return found[-1] if found else None
+
 
 def parse_jsonl(text_lines: Iterator[tuple[int, str]]) -> Iterator[Node]:
     """Pure: yield Nodes from (line_no, raw_line) pairs.

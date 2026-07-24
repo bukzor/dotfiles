@@ -27,14 +27,20 @@ cost-benefit-sweh:
 
 **Priority:** Low
 **Complexity:** Low
-**Context:** `~/bin/claude-jsonl-path`, `~/bin/claude-jsonl-summarize`
+**Context:** `~/bin/claude-jsonl-*`, `~/bin/claude-branch-*`, `~/bin/claude-path`,
+`~/bin/claude-slug`, `~/bin/claude-fork`, `~/lib/pythonpath/bukzor/claude/`
+(`session.py`, `branch_extract.py`, `branch_list.py`, `tree.py`,
+`format_short.py`) — grown well past the original two scripts as of
+2026-07-24 (branch recovery session; see
+`docs/dev/devlog/2026-07-24-000-Claude-Code-branch-recovery--extract-by-leaf--not-by-carve.md`).
 
 ## Problem Statement
 
-The claude-jsonl-path and claude-jsonl-summarize scripts live loose in
-~/bin/. They should be a proper package — either a standalone repo or
-part of an existing one (e.g. bukzor-agent-skills or a new
-claude-jsonl-tools repo).
+A family of `claude-jsonl-*`/`claude-branch-*` scripts plus a
+`bukzor.claude` Python package live loose in `~/bin/` and
+`~/lib/pythonpath/`. They should be a proper package — either a
+standalone repo or part of an existing one (e.g. bukzor-agent-skills or
+a new claude-jsonl-tools repo).
 
 ## Implementation Steps
 

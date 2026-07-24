@@ -1,0 +1,19 @@
+#!/bin/sh
+# Print the directory a Claude Code session ran in -- `claude --resume` only
+# finds a session from its own cwd, so you need this to get back into one.
+#
+# The projects/<slug>/ dir name cannot be decoded back into a path: claude-slug
+# maps both '/' and '.' to a '-', so `prototype.chatfs/docs` and
+# `prototype-chatfs-docs` are the same slug. The cwd is only recoverable from
+# the file's own records -- this is the inverse of claude-jsonl-path in intent,
+# not in mechanism.
+#
+# Last value wins: resuming a session from a different directory rewrites it.
+# Branches of one file can therefore disagree, and this answers for the live
+# branch; claude-branch-extract reports the cwd of the branch it extracted.
+#
+# Usage: claude-jsonl-cwd SESSION.jsonl
+
+set -eu
+
+jq -r 'select(.cwd) | .cwd' "$1" | tail -n1
