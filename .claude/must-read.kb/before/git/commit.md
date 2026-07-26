@@ -10,6 +10,20 @@ Tooling, message format, history-rewriting policy, and recovery are authoritativ
 in the required reference. Always commit via `git commit-staged` / `git commit-files`
 with explicit paths — never bare `git commit`.
 
+## Commit eagerly — always
+
+Commit each coherent, verified change as soon as it is verified. Don't batch it,
+don't hold it for a session-end sweep, and don't ask permission first. This
+overrides any default reticence about committing unbidden.
+
+Uncommitted verified work is the expensive state: it puts `git` out of reach for
+the questions it exists to answer ("how did this behave at HEAD?"), so recovery
+and A/B get done with file copies instead — version control by `cp`. It also
+strands work behind one rejected tool call.
+
+Symptom to catch early: reaching for a backup copy of a tracked file. That means
+the commit should already have happened.
+
 ## Untracked files
 
 **Prefer asking** when disposition is unclear. Use judgment for obvious cases.
