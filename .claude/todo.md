@@ -33,7 +33,6 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 - [ ] Finish yaml-date-jsonschema's remaining follow-ups in `bukzor-agent-skills/llm-kb`: `finish-debolding-cleanup` (still ~40 bold instances across 8 files beyond `references/pattern-guide.md`, which is now fixed — not actually done despite earlier belief), `auto-migrate-scripts-for-kb-dirs`, `schema-migrate-string-pattern-to-date`
 - [ ] Resolve `todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md`'s D6 held-review items: `bin/CLAUDE.md` (deleted uncommitted by another session — restore or finish rename?), `claudesh`/`finder.sh`/`scratch/python/`/`empty/` triage, `.envrc`/`profile.env` review, `.claude/claude-alignment-2026-04-29.{jsonschema.yaml,kb/}` commit-or-trash — NOTE: `bin/colortest17x17*` and `.zsh_profile` (formerly listed here too) are resolved: colortest17x17 merged clean in reunify task 004 (2026-07-13, no stray variant found), `.zsh_profile` deleted on both branches by reunify task 005 (2026-07-12, dead debug artifact)
 - [ ] [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md) — converge svelte-crostini ↔ main to identical content, merge, live on main
-- [ ] `~/.config/sh/env.d/300-homebrew.sh:11` sets `export HOMEBREW_EVAL_ALL=1`, which brew now warns is deprecated ("Use HOMEBREW_REQUIRE_TAP_TRUST or HOMEBREW_NO_REQUIRE_TAP_TRUST instead") — found incidentally while merging `bin/brew-desc` (reunify task 004); needs investigating whether those are actually equivalent replacements (they sound like a different concern: eval-all vs. tap-trust) before changing anything
 - [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md) — overlaps reunify 006's "commit/park uncommitted state" step; fold in or close when 006 runs
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
@@ -43,6 +42,10 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
   - [ ] Document the upgrade flow: bump brew tmux → bump tag → re-fetch + re-`tic`
   - [ ] Verify: `infocmp tmux-256color` resolves to the `~/.terminfo` copy
   - Goal: pin terminfo to the tmux binary version so brewed-tmux + distro-ncurses can't drift.
+- [ ] [todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md](todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md) — dogfood via chatfs, file the `--help` wart upstream, decide from the patch queue
+- [ ] Remove `HOMEBREW_EVAL_ALL=1` from shell config — new brew treats it as a fatal
+      deprecation in `brew tap`; per-tap `brew trust` replaces it (found 2026-07-26
+      while fixing the sub install)
 
 ## Later
 
