@@ -19,6 +19,15 @@ export GIT_LOCALHOST_STORE_ACTIVE=1
 # The invoking hook's name, if any (empty for a direct/manual invocation).
 HOOK_NAME="${1:-}"
 
+# Report a no-op. A human who ran this directly wants to hear "nothing to do";
+# a hook fires it on every commit/checkout of every already-relocated repo,
+# where the same line is pure noise.
+note() {
+    if [ -z "$HOOK_NAME" ] || (( ${DEBUG:-0} > 0 )); then
+        echo "git-localhost-store: $*" >&2
+    fi
+}
+
 REPOS_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/git-localhost-store/repos"
 WORK_DIR="$(git rev-parse --show-toplevel)"
 ENCODED="$(claude-path "$WORK_DIR")"
@@ -30,13 +39,12 @@ chmod 700 "$REPOS_ROOT"
 cd "$WORK_DIR"
 
 if [ -L .git ]; then
-    echo "git-localhost-store: ✓ Already a symlink: $(readlink .git)" >&2
+    note "✓ Already a symlink: $(readlink .git)"
     exit 0
 fi
 
 if [ -f .git ]; then
-    gitfile="$(cat .git)"
-    echo "git-localhost-store: ✓ Gitfile (worktree/submodule), out of scope: $gitfile" >&2
+    note "✓ Gitfile (worktree/submodule), out of scope: $(cat .git)"
     exit 0
 fi
 
@@ -99,6 +107,7 @@ if [ -e "$STORE" ]; then
         fi
         if [ -n "$unexpected_refs" ]; then
             echo "git-localhost-store: ❌ .git has unexpected local branches (not produced by a real clone): $STORE" >&2
+            # shellcheck disable=SC2001  # sed indents every line; ${//} misses the first.
             echo "$unexpected_refs" | sed 's/^/   /' >&2
             echo "   Refusing to merge. Needs a human decision." >&2
             exit 1

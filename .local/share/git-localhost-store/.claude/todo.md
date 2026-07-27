@@ -17,6 +17,13 @@ Suggested order: hook redesign next, then cleanup — one commit each.
         `git config` line in README
   - [ ] Fix `docs/adr/README.md` stale boilerplate ("None yet. Create
         your first ADR!")
+- [ ] Reconcile the documented path encoding with the live one —
+      `CLAUDE.md`'s "Path Encoding" and `docs/dev/testing.kb/path-encoding.md`
+      still describe `-` → `--`, `/` → `-`, but the deployed `claude-path`
+      has delegated to `claude-slug` (every non-alnum → one `-`) since
+      ~2026-07-05, which orphans stores created before then. Evidence and
+      the encoding decision itself:
+      `~/.claude/sessions.kb/penguin/claude-path-encoding-change-orphans-stores.md`
 - [ ] Decide the fate of `CLAUDE.md`'s "Related Files" section — it's a
       content enumeration (`**bin/x** — description`, one line per
       file), the exact pattern the project's own "Don't enumerate

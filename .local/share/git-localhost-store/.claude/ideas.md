@@ -19,6 +19,10 @@ small and few.
   change. Recipe: `p="${p//-/--}"; p="${p//\//-}"` on the
   `rev-parse --show-toplevel` output; drop the README dependency
   section and TESTING.md's claude-path troubleshooting.
+  2026-07-27: trigger fired (both clauses) and produced evidence for
+  the liability side — `bin/claude-path` (the symlink to `~/bin`) was
+  broken the whole time, because the real script located `claude-slug`
+  via `dirname "$0"`. Fixed there, not here. Still the user's call.
 
 - **Re-run absolute-path rewrite on home-dir migration.**
   Trigger: moving home directory, changing username, or shipping

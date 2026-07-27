@@ -79,9 +79,11 @@ git-localhost-store
 - Detects the store path from the working directory.
 - If `.git` is a directory: moves it to the store, replaces it with a
   symlink. Idempotent.
-- If `.git` is already a symlink: no-op (`✓ Already a symlink`).
-- If `.git` is anything else (gitfile, missing, broken): asserts and
-  exits non-zero, leaving you to investigate.
+- If `.git` is already a symlink, or a gitfile (worktree/submodule): no-op.
+  Reported when you run this yourself; silent under a hook, where it would
+  otherwise print on every commit and checkout (`DEBUG=1` un-silences it).
+- If `.git` is anything else (missing, broken): asserts and exits non-zero,
+  leaving you to investigate.
 
 **When to use:** Convert an existing repo, recover after `rm -rf`,
 or after changing the global hook config.

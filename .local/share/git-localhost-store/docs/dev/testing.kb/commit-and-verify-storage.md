@@ -26,3 +26,7 @@ git commit -am "second commit"
 - `$STORE/refs/heads/main` exists with the head SHA.
 - `git --git-dir="$STORE" log --oneline` shows the commits independently
   of the working directory.
+- The second commit prints nothing from `git-localhost-store`: once `.git`
+  is a symlink, the hooks' no-op path is silent. Re-running it as
+  `DEBUG=1 git commit --allow-empty -m x` restores the
+  `✓ Already a symlink` line.
