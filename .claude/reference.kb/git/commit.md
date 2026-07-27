@@ -115,6 +115,10 @@ authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
 Use `git commit-staged paths... -- --amend --no-edit` for the last commit,
 `git commit-staged paths... -- --fixup SHA` for older commits.
 
+**No commit exists to repair another (unpushed, `solo`/`personal`):**
+squash until each commit reads as written right the first time. If
+message and content disagree, fix whichever is the bug.
+
 ### Commit Message Format
 
 Use heredoc to prevent shell escaping failures:
