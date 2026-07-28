@@ -129,6 +129,19 @@ function M.config()
       -- inline LSP hints handled by built-in `vim.lsp.inlay_hint` (nvim 0.10+);
       -- see lsp.lua M.on_attach_lspconfig.
 
+      -- Lean theorem prover: infoview, unicode abbreviations. Spawns its own
+      -- LSP via `lake serve` (repo-pinned toolchain), so no mason entry.
+      {
+        "Julian/lean.nvim",
+        event = { "BufReadPre *.lean", "BufNewFile *.lean" },
+        -- lean.nvim self-activates on lean buffers; setup() is deprecated
+        init = function()
+          vim.g.lean_config = {
+            mappings = true, -- <LocalLeader>-prefixed; see :help lean-mappings
+          }
+        end,
+      },
+
       -- render ANSI escape sequences as colors (view-only via concealer)
       {
         "0xferrous/ansi.nvim",
