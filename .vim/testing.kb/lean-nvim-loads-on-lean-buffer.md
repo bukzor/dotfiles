@@ -10,7 +10,9 @@ Verifies the lean.nvim lazy spec: opening a `.lean` file triggers the plugin,
 filetype detection works, and `vim.g.lean_config` is populated (the plugin
 self-activates; `require("lean").setup()` is deprecated and must not appear).
 The LSP itself runs via `lake serve` and needs a real Lean project, so it's out
-of scope here.
+of scope here; for the end-to-end interactive surface (infoview, unicode
+abbreviations, mappings, LSP navigation) use the walkthrough at
+`~/repo/github.com/bukzor/prototype.personal-reasoning-management/docs/dev/lean-nvim-setup-check.lean`.
 
 ## Procedure
 
@@ -30,4 +32,6 @@ deprecation warning about `require("lean").setup`.
 
 Pass, on the initial lean.nvim installation. An earlier `opts = ...` spec
 tripped the setup() deprecation warning (removal slated for lean.nvim
-v2026.9.1); the `init` + `vim.g.lean_config` spec is silent.
+v2026.9.1); the `init` + `vim.g.lean_config` spec is silent. Same day, the
+user validated the full interactive walkthrough (all six paces) against the
+prototype repo's pinned toolchain.
