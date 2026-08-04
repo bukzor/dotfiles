@@ -77,6 +77,13 @@ unique name when you don't care. Trailing digits vary the name without
 changing its type — `$LINES1` and `$LINES2` are two independent
 LINES-type placeholders.
 
+`$NAME` in `replace.md` re-emits what the search's same-named
+placeholder captured — how a rewrite keeps dynamic content it can't
+know ahead of time (session paths, branch names); see
+`strip-scratchpad-bloat`. A name the search didn't capture is a
+patch-config error and fails hard (caught by `check_patches.py`, not at
+proxy time).
+
 ### Multiple match templates: `match.d/*.md`
 
 A patch can target multiple Claude Code prompt versions by providing
