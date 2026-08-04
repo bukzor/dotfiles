@@ -9,11 +9,13 @@ Claude Code injects a hardcoded system prompt that the user cannot configure.
 Some directives contradict user CLAUDE.md instructions, add bloat, or cause
 overfit behavior. These patches surgically modify the prompt in transit.
 
-As of v2.1.199, the patches strip ~32% of the long-form prompt
-(15.0k → 10.2k chars) and ~12% of the shorter `# Harness` variant served
-to Fable-class models (9.5k → 8.3k). These numbers drift as Anthropic
-reworks the prompt (v2.1.186 was down to 6.8k before growing back);
-`check_patches.py` prints current stats.
+As of v2.1.221, prompt shapes are model-scoped and the patches strip
+~37% of the opus-5 `# Harness` shape (10.8k → 6.8k chars), ~20% of the
+fable-5 one (9.9k → 7.9k), and ~18% of the sonnet-5 long-form
+(27.9k → 22.8k, dominated by a session-optional `# auto memory` block).
+These numbers drift as Anthropic reworks the prompt; `check_patches.py`
+prints current stats, and the proxy's `_strip-rate` tripwire fires if a
+live body strips far below its shape's expectation.
 
 ## Patch format
 
