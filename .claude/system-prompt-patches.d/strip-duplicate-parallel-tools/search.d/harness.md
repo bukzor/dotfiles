@@ -1,0 +1,1 @@
+ Independent tool calls can run in parallel in one response.
