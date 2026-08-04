@@ -130,8 +130,8 @@ Verify patches against a captured system prompt:
 
 ```bash
 cd ~/claude/mitmproxy
-python3 check_patches.py          # prints patched result to stdout, stats to stderr
-python3 check_patches.py system.md  # test against a specific capture
+python3 check_patches.py   # newest unsuffixed capture in system-prompts.kb/
+python3 check_patches.py system-prompts.kb/v2.1.221-opus.md  # a specific one
 ```
 
 ## Current patches
