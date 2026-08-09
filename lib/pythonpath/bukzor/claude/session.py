@@ -230,6 +230,38 @@ class Session:
         return found[-1] if found else None
 
 
+def is_user_text(node: Node) -> bool:
+    """A genuine user message (not a tool_result wrapped as type=user).
+
+    String content and a text-block list both count; anything starting with
+    a tool_result block does not.
+
+    >>> is_user_text(Node(0, {"type": "user", "message": {"content": "hi"}}))
+    True
+    >>> is_user_text(Node(0, {"type": "user", "message": {"content": [
+    ...     {"type": "text", "text": "hi"},
+    ... ]}}))
+    True
+    >>> is_user_text(Node(0, {"type": "user", "message": {"content": [
+    ...     {"type": "tool_result", "content": "x"},
+    ... ]}}))
+    False
+    >>> is_user_text(Node(0, {"type": "assistant", "message": {"content": "hi"}}))
+    False
+    """
+    if node.type != "user":
+        return False
+    msg = node.record.get("message")
+    if not isinstance(msg, Mapping):
+        return False
+    c = msg.get("content")
+    if isinstance(c, str):
+        return True
+    if isinstance(c, list) and c and isinstance(c[0], Mapping):
+        return c[0].get("type") == "text"
+    return False
+
+
 def parse_jsonl(text_lines: Iterator[tuple[int, str]]) -> Iterator[Node]:
     """Pure: yield Nodes from (line_no, raw_line) pairs.
 

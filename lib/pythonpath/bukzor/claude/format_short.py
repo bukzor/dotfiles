@@ -13,16 +13,16 @@ from typing import Any
 from .session import Node
 
 
-def _truncate(s: str, n: int = 80) -> str:
+def truncate(s: str, n: int = 80) -> str:
     """Collapse newlines to ' / ' and ellipsize past n chars.
 
-    >>> _truncate("hello")
+    >>> truncate("hello")
     'hello'
-    >>> _truncate("hello world", 5)
+    >>> truncate("hello world", 5)
     'hell…'
-    >>> _truncate("line1\\nline2\\nline3", 50)
+    >>> truncate("line1\\nline2\\nline3", 50)
     'line1 / line2 / line3'
-    >>> _truncate("  surrounded by space  ", 50)
+    >>> truncate("  surrounded by space  ", 50)
     'surrounded by space'
     """
     s = s.replace("\n", " / ").strip()
@@ -102,7 +102,7 @@ def _label_user(record: Mapping[str, Any]) -> str:
     for b in _content_blocks(record):
         t = b.get("type")
         if t == "text":
-            return _truncate(b.get("text") or "")
+            return truncate(b.get("text") or "")
         if t == "tool_result":
             tr = b.get("content")
             text = ""
@@ -114,7 +114,7 @@ def _label_user(record: Mapping[str, Any]) -> str:
                         text = x["text"]
                         break
             err = " ERR" if b.get("is_error") else ""
-            return _truncate(f"tool_result{err}: {text}")
+            return truncate(f"tool_result{err}: {text}")
     return "(user, empty)"
 
 
@@ -142,7 +142,7 @@ def _label_assistant(record: Mapping[str, Any]) -> str:
                 parts.append(_label_tool_use(b))
             case _:
                 pass
-    return _truncate(" | ".join(p for p in parts if p))
+    return truncate(" | ".join(p for p in parts if p))
 
 
 def label(node: Node) -> str:
@@ -156,7 +156,7 @@ def label(node: Node) -> str:
             sub = node.record.get("subtype", "")
             return f"system/{sub}" if sub else "system"
         case "summary":
-            return _truncate(f"summary: {node.record.get('summary', '')}")
+            return truncate(f"summary: {node.record.get('summary', '')}")
         case "file-history-snapshot":
             snap = node.record.get("snapshot", {})
             tracked = snap.get("trackedFileBackups", {})
@@ -168,7 +168,7 @@ def label(node: Node) -> str:
         case "last-prompt":
             return "last-prompt"
         case "ai-title":
-            return _truncate(f"ai-title: {node.record.get('title', '')}")
+            return truncate(f"ai-title: {node.record.get('title', '')}")
         case other:
             return other
 
