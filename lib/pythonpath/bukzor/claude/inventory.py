@@ -35,6 +35,32 @@ BOILERPLATE_PREFIXES = (
 )
 
 
+def is_substantive(text: str) -> bool:
+    """Whether this user message could serve as the session's label.
+
+    Harness-injected text, slash commands, and my own shorthand ("c",
+    "s", "...") all say nothing about the topic, and the shorthand is
+    what a session most often ends on -- so an unfiltered "last thing the
+    user typed" label is usually the least informative line in the file.
+
+    >>> is_substantive("fix the balloon driver")
+    True
+    >>> is_substantive("c"), is_substantive("...."), is_substantive("  ")
+    (False, False, False)
+    >>> is_substantive("/compact"), is_substantive("<command-name>x")
+    (False, False)
+    >>> is_substantive("This session is being continued from...")
+    False
+    """
+    text = text.strip()
+    return (
+        len(text) >= 4
+        and any(c.isalnum() for c in text)
+        and not text.startswith("/")
+        and not text.startswith(BOILERPLATE_PREFIXES)
+    )
+
+
 @dataclass(frozen=True)
 class Summary:
     mtime: float
@@ -42,14 +68,19 @@ class Summary:
     cwd: str | None
     label: str
     path: Path
+    sidechain: bool = False
 
 
-def summarize(sess: Session, mtime: float) -> Summary | None:
+def summarize(sess: Session, mtime: float, resumable_only: bool = True) -> Summary | None:
     """Distill one session file to an inventory row; None if not resumable.
 
     Sidechain files (subagent transcripts) and empty files are not
     independently resumable. The label prefers an explicit title record,
     falling back to the last thing the user typed.
+
+    Search wants the sidechains too -- a subagent's transcript is still a
+    record of what happened -- so `resumable_only=False` keeps them,
+    flagged, rather than dropping them.
 
     >>> from .session import Node, build_session
     >>> sess = build_session(Path("p/abc.jsonl"), iter([
@@ -83,10 +114,13 @@ def summarize(sess: Session, mtime: float) -> Summary | None:
     ... ]))
     >>> summarize(sidechain, 0.0) is None
     True
+    >>> summarize(sidechain, 0.0, resumable_only=False).sidechain
+    True
     """
     if not sess.nodes:
         return None
-    if sess.nodes[0].record.get("isSidechain"):
+    is_sidechain = bool(sess.nodes[0].record.get("isSidechain"))
+    if is_sidechain and resumable_only:
         return None
     titles = [
         n.record["title"]
@@ -98,7 +132,7 @@ def summarize(sess: Session, mtime: float) -> Summary | None:
         return msg if isinstance(msg, str) else msg[0].get("text", "")
 
     user_texts = [text_of(n) for n in sess.nodes if is_user_text(n)]
-    speech = [t for t in user_texts if not t.startswith(BOILERPLATE_PREFIXES)]
+    speech = [t for t in user_texts if is_substantive(t)]
     if titles:
         label = titles[-1]
     elif speech or user_texts:
@@ -111,6 +145,7 @@ def summarize(sess: Session, mtime: float) -> Summary | None:
         cwd=sess.cwd(),
         label=truncate(label, 60),
         path=sess.path,
+        sidechain=is_sidechain,
     )
 
 
@@ -118,10 +153,17 @@ def _shorten(path: str, home: str) -> str:
     """
     >>> _shorten("/home/u/proj", "/home/u")
     '~/proj'
+    >>> _shorten("/home/u", "/home/u")
+    '~'
+    >>> _shorten("/home/unrelated", "/home/u")
+    '/home/unrelated'
     >>> _shorten("/etc", "/home/u")
     '/etc'
     """
-    return "~" + path.removeprefix(home) if path.startswith(home + "/") else path
+    if path == home or path.startswith(home + "/"):
+        return "~" + path.removeprefix(home)
+    else:
+        return path
 
 
 def _stamp(mtime: float, tz: tzinfo) -> str:
@@ -136,9 +178,16 @@ def format_row(s: Summary, tz: tzinfo, home: str) -> str:
     ...             cwd="/home/u/proj", label="Bug fixing", path=Path("x"))
     >>> format_row(s, tz=timezone.utc, home="/home/u")
     '2026-08-08 19:06  0e9272f7  ~/proj  Bug fixing'
+
+    A subagent transcript is marked, because `--resume` cannot open one.
+
+    >>> import dataclasses
+    >>> format_row(dataclasses.replace(s, sidechain=True), timezone.utc, "/home/u")
+    '2026-08-08 19:06  0e9272f7  ~/proj  [subagent] Bug fixing'
     """
     cwd = _shorten(s.cwd, home) if s.cwd else "(cwd unknown)"
-    return f"{_stamp(s.mtime, tz)}  {s.session_id[:8]}  {cwd}  {s.label}"
+    mark = "[subagent] " if s.sidechain else ""
+    return f"{_stamp(s.mtime, tz)}  {s.session_id[:8]}  {cwd}  {mark}{s.label}"
 
 
 def format_sh(s: Summary, tz: tzinfo, home: str) -> str:
