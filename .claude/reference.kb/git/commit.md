@@ -108,6 +108,9 @@ Behavior depends on the repo's `git-caution` level.
 
 Reflog makes all local operations recoverable.
 
+Ordinary (non-force) `push` is not a caution-gated action at `solo`/`personal`:
+push freely, don't ask. Only the force variants consult the table.
+
 **Amending your own commits from this session needs no verification.** Verify
 authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
 (session start, unfamiliar repo, shared branch).
