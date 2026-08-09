@@ -222,7 +222,9 @@ def _invoked_via_shebang() -> bool:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and not _invoked_via_shebang():
+    # `--doctest` runs the tests in every module of this package, even the
+    # ones whose bare invocation already means that.
+    if len(sys.argv) > 1 and "--doctest" not in sys.argv and not _invoked_via_shebang():
         raise SystemExit(main())
     import doctest
 
