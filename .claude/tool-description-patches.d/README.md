@@ -24,7 +24,7 @@ carried moves to `~/.claude/must-read.kb/`, loaded only when relevant.
 At apply time the tool's live description is compared to the accepted
 upstream texts (modulo trailing newline). On mismatch the stub is still
 applied, but a `changed-upstream` incident is captured under
-`~/claude/mitmproxy/patch-failures/` -- loud once per distinct upstream text,
+`~/claude/mitmproxy/log/patch-failures/` -- loud once per distinct upstream text,
 like a syspatch drift. Triage: diff the captured body against the accepted
 upstreams, fold anything worth keeping into `description.md` or the
 must-read entry, then add the captured body to `upstream.d/` (or replace
@@ -36,14 +36,26 @@ just cc_version -- so prefer accumulating in `upstream.d/` over replacing.
 A tool absent from a request (denied, restricted subagent toolset) is silently
 skipped -- absence is not drift.
 
-## Refreshing upstream.md
+## Getting the upstream text
 
-Descriptions ride in `request.tools[]`; extract from a `traffic.jsonl` capture:
+For a tool that already has a patch, don't go to `traffic.jsonl`: `toolpatch`
+runs ahead of `flow2jsonl` in the addon chain, so the logged
+`request.tools[]` entry already carries the stub. The incident body *is* the
+capture -- `log/patch-failures/_bodies/{digest}.md` holds the live text
+verbatim. `cp` it straight into `upstream.d/`, named for the axis that varies
+(model family, cc_version).
+
+For a tool with no patch yet -- nothing mutates it, so the log has the real
+thing -- descriptions ride in `request.tools[]`:
 
     jq -rn 'first(inputs
-      | select(.phase=="request" and (.data.path | startswith("/v1/messages")))
+      | select(.phase=="request" and (.data.content | type == "object"))
+      | select(.data.path | startswith("/v1/messages"))
       | .data.content.tools // empty | .[]
       | select(.name=="Monitor")) | .description' traffic.jsonl
+
+The `type == "object"` guard is load-bearing: non-JSON request bodies log
+`content` as a string, and indexing that aborts the whole scan.
 
 ## Testing
 
