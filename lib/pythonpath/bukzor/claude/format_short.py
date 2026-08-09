@@ -29,19 +29,19 @@ def truncate(s: str, n: int = 80) -> str:
     return s if len(s) <= n else s[: n - 1] + "…"
 
 
-def _content_blocks(record: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+def content_blocks(record: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     """Normalize a record's message content to a list of block dicts.
 
     A string message.content becomes a synthetic text block — that's the
     shape user-typed prompts take in Claude Code JSONLs.
 
-    >>> _content_blocks({"message": {"content": "hi"}})
+    >>> content_blocks({"message": {"content": "hi"}})
     [{'type': 'text', 'text': 'hi'}]
-    >>> _content_blocks({"message": {"content": [{"type": "text", "text": "a"}]}})
+    >>> content_blocks({"message": {"content": [{"type": "text", "text": "a"}]}})
     [{'type': 'text', 'text': 'a'}]
-    >>> _content_blocks({})
+    >>> content_blocks({})
     []
-    >>> _content_blocks({"message": "not-a-mapping"})
+    >>> content_blocks({"message": "not-a-mapping"})
     []
     """
     msg = record.get("message")
@@ -83,6 +83,30 @@ def _label_tool_use(block: Mapping[str, Any]) -> str:
             return f"{name}({json.dumps(inp)[:60]})"
 
 
+def result_text(block: Mapping[str, Any]) -> str:
+    """The text a tool_result block carries, whichever shape it took.
+
+    >>> result_text({"content": "output text"})
+    'output text'
+    >>> result_text({"content": [{"type": "text", "text": "from a block"}]})
+    'from a block'
+    >>> result_text({"content": [{"type": "image"}]})
+    ''
+    >>> result_text({})
+    ''
+    """
+    content = block.get("content")
+    if isinstance(content, str):
+        return content
+    elif isinstance(content, list):
+        for item in content:
+            if isinstance(item, Mapping) and "text" in item:
+                return item["text"]
+        return ""
+    else:
+        return ""
+
+
 def _label_user(record: Mapping[str, Any]) -> str:
     """First text block wins; otherwise show a truncated tool_result.
 
@@ -99,22 +123,13 @@ def _label_user(record: Mapping[str, Any]) -> str:
     >>> _label_user({})
     '(user, empty)'
     """
-    for b in _content_blocks(record):
+    for b in content_blocks(record):
         t = b.get("type")
         if t == "text":
             return truncate(b.get("text") or "")
         if t == "tool_result":
-            tr = b.get("content")
-            text = ""
-            if isinstance(tr, str):
-                text = tr
-            elif isinstance(tr, list):
-                for x in tr:
-                    if isinstance(x, Mapping) and "text" in x:
-                        text = x["text"]
-                        break
             err = " ERR" if b.get("is_error") else ""
-            return truncate(f"tool_result{err}: {text}")
+            return truncate(f"tool_result{err}: {result_text(b)}")
     return "(user, empty)"
 
 
@@ -132,7 +147,7 @@ def _label_assistant(record: Mapping[str, Any]) -> str:
     '[thinking]'
     """
     parts: list[str] = []
-    for b in _content_blocks(record):
+    for b in content_blocks(record):
         match b.get("type"):
             case "text":
                 parts.append(b.get("text") or "")
