@@ -1,4 +1,5 @@
-# Issue threads watched by ~/bin/upstream-replies.
+# Issue threads watched by `upstream-replies` (from bukzor-tools).
+# Add one with: upstream-replies add <issue-url>
 # vm-freeze-2026-08-08 investigation:
 https://github.com/rfjakob/earlyoom/issues/378
 https://github.com/rfjakob/earlyoom/issues/214
