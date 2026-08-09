@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Nag about activity on upstream issue threads I care about.
+
+Reads issue URLs (one per line, # comments allowed) from
+~/.config/upstream-replies.txt; remembers last-acknowledged activity in
+~/.local/state/upstream-replies.json. A URL's first sighting seeds state
+silently. Prints one line per thread with newer activity; exit 1 when
+there is none (grep semantics).
+
+A plain run acknowledges what it prints; `--rc` (for shell startup)
+does NOT acknowledge and rechecks at most every 6 hours, so a reply
+keeps nagging until a by-hand run acknowledges it.
+"""
+
+import json
+import re
+import subprocess
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+CONFIG = Path.home() / ".config/upstream-replies.txt"
+STATE = Path.home() / ".local/state/upstream-replies.json"
+JSON_PREFIX = ")]}'"
+RC_INTERVAL_SEC = 6 * 3600
+
+GITHUB = re.compile(r"https://github\.com/([^/]+)/([^/]+)/issues/(\d+)")
+BUGANIZER = re.compile(
+    r"https://(issuetracker\.google\.com|issues\.chromium\.org)/issues/(\d+)"
+)
+
+
+def read_urls(text: str) -> list[str]:
+    lines = (line.partition("#")[0].strip() for line in text.splitlines())
+    return [line for line in lines if line]
+
+
+def fetch_github_updated(owner: str, repo: str, number: str) -> str:
+    proc = subprocess.run(
+        ["gh", "api", f"repos/{owner}/{repo}/issues/{number}", "-q", ".updated_at"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return proc.stdout.strip()
+
+
+def fetch_buganizer_updated(host: str, issue_id: str) -> str:
+    """Modified time as ISO-8601 UTC, comparable with GitHub's updated_at."""
+    body = [None, None, None, None, None, None, [f"id:{issue_id}", None, 2]]
+    req = urllib.request.Request(
+        f"https://{host}/action/issues/list",
+        data=json.dumps(body).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (upstream-replies)",
+        },
+    )
+    with urllib.request.urlopen(req) as resp:
+        raw = resp.read().decode()
+    assert raw.startswith(JSON_PREFIX), raw[:80]
+    data = json.loads(raw.removeprefix(JSON_PREFIX))
+    assert not isinstance(data, dict), data
+    rows = data[0][6][0] or []
+    matches = [row for row in rows if str(row[1]) == issue_id]
+    assert matches, (issue_id, rows)
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(matches[0][4][0]))
+
+
+def fetch_updated(url: str) -> str:
+    if m := GITHUB.match(url):
+        return fetch_github_updated(*m.groups())
+    elif m := BUGANIZER.match(url):
+        return fetch_buganizer_updated(*m.groups())
+    else:
+        raise SystemExit(f"unsupported issue URL: {url}")
+
+
+def main() -> int:
+    rc_mode = sys.argv[1:] == ["--rc"]
+    assert rc_mode or not sys.argv[1:], sys.argv
+
+    recently_checked = (
+        STATE.exists() and time.time() - STATE.stat().st_mtime < RC_INTERVAL_SEC
+    )
+    if rc_mode and recently_checked:
+        return 1
+
+    state = json.loads(STATE.read_text()) if STATE.exists() else {}
+    news = 0
+    for url in read_urls(CONFIG.read_text()):
+        updated = fetch_updated(url)
+        last = state.get(url)
+        if last is None:
+            print(f"watching {url} (as of {updated})", file=sys.stderr)
+            state[url] = updated
+        elif updated > last:
+            print(f"UPSTREAM REPLY? {url} -- activity {updated}, acked {last}")
+            news += 1
+            if not rc_mode:
+                state[url] = updated
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(state, indent=1) + "\n")
+    return 0 if news else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

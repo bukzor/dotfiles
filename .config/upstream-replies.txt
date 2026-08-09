@@ -1,0 +1,6 @@
+# Issue threads watched by ~/bin/upstream-replies.
+# vm-freeze-2026-08-08 investigation:
+https://github.com/rfjakob/earlyoom/issues/378
+https://github.com/rfjakob/earlyoom/issues/214
+https://github.com/lxc/lxcfs/issues/695
+https://issuetracker.google.com/issues/544148694
