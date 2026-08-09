@@ -2,24 +2,22 @@
 managed-by: Skill(llm-subtask)
 cost-benefit-sweh:
   timebox:
-    "@value": 2.0
+    "@value": 1.0
     rationale: |
-      ~0.5h decision on packaging shape, ~1h README + repo structure,
-      ~0.5h migrate scripts + smoke-test. Low complexity per the file's
-      own assessment.
+      Packaging shape is decided and proven; what's left is moving one
+      714-line script into an existing package and making it survive
+      pyright strict + doctests.
     confidence: tentative
   benefit-2w:
-    "@value": 0.5
+    "@value": 0.3
     rationale: |
-      Minor cleanup win: scripts become discoverable + versioned. No
-      blocking downstream. ~$50 worth of "less embarrassing if shared"
-      and "easier to maintain."
+      The valuable half already shipped. Remainder is consistency:
+      one more untested script becomes tested and installable.
     confidence: tentative
   cost-of-delay-2w:
     "@value": 0.1
     rationale: |
-      Scripts work fine in ~/bin/ today. Only cost: each 2w delay
-      leaves more callers/usage to migrate later. Trivial.
+      Scripts work fine in ~/bin/ today.
     confidence: tentative
 ---
 
@@ -27,23 +25,33 @@ cost-benefit-sweh:
 
 **Priority:** Low
 **Complexity:** Low
-**Context:** `~/bin/claude-jsonl-*`, `~/bin/claude-branch-*`, `~/bin/claude-path`,
-`~/bin/claude-slug`, `~/bin/claude-fork`, `~/lib/pythonpath/bukzor/claude/`
-(`session.py`, `branch_extract.py`, `branch_list.py`, `tree.py`,
-`format_short.py`) — grown well past the original two scripts as of
-2026-07-24 (branch recovery session; see
-`docs/dev/devlog/2026-07-24-000-Claude-Code-branch-recovery--extract-by-leaf--not-by-carve.md`).
+**Context:** `~/bin/claude-jsonl-{display,cwd,path,to-log}`
 
 ## Problem Statement
 
-A family of `claude-jsonl-*`/`claude-branch-*` scripts plus a
-`bukzor.claude` Python package live loose in `~/bin/` and
-`~/lib/pythonpath/`. They should be a proper package — either a
-standalone repo or part of an existing one (e.g. bukzor-agent-skills or
-a new claude-jsonl-tools repo).
+Packaging is decided and half-executed: 2026-08-09 moved `claude-search`,
+`claude-inventory`, `claude-branch-list`, `claude-branch-extract` and the
+whole `bukzor.claude` library out of `~/bin` + `~/lib/pythonpath` into
+`bukzor-tools/packages/claude-code-archeology` (bukzor-tools commit
+f6c2700; dotfiles f155f32).
+
+Still loose in `~/bin`: `claude-jsonl-display` (714 lines of stdlib
+Python, untested), and the thin `claude-jsonl-{cwd,path,to-log}`
+wrappers. `claude-jsonl-display` duplicates content-block walking that
+`claude_code_archeology.format_short` already does.
+
+Not in scope: `claude-path`, `claude-slug`, `claude-fork`, `claude-plan`,
+`claude-s`, and friends stay in dotfiles -- they're shell glue for local
+config, which is the line bukzor-tools' README draws. `claude-path` also
+has an external consumer (git-localhost-store symlinks it).
 
 ## Implementation Steps
 
-- [ ] Decide packaging: standalone repo vs skill vs dotfiles
-- [ ] Add README with usage
-- [ ] Add to package manager if applicable
+- [x] Decide packaging: a sub-package of bukzor-tools, one command family
+      per package
+- [x] Add README with usage (bukzor-tools README table + SKILL.md)
+- [x] Add to package manager (`uv tool install bukzor-tools`)
+- [ ] Move `claude-jsonl-display` in as `claude_code_archeology.display`,
+      sharing `format_short`'s block walking; doctest it
+- [ ] Fold `claude-jsonl-{cwd,path}` into that package (or into
+      `claude-inventory` as flags) and delete the wrappers

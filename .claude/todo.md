@@ -16,12 +16,13 @@ cost-benefit-sweh:
 
 Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 
-- [ ] `bukzor.claude.session.Session.tips()` counts attachment records as
-      tips (671 of them on one real session file, vs ~7 real conversation
-      branches) — should filter to user/assistant, matching `tip_of()`'s
-      approach; also `claude-branch-list --branches-only` doesn't print
-      each branch's tip uuid, which is exactly what `claude-branch-extract`
-      needs as input — found while rebuilding branch_extract.py 2026-07-24
+- [ ] `claude_code_archeology.session.Session.tips()` counts attachment
+      records as tips (671 of them on one real session file, vs ~7 real
+      conversation branches) — should filter to user/assistant, matching
+      `tip_of()`'s approach; also `claude-branch-list --branches-only`
+      doesn't print each branch's tip uuid, which is exactly what
+      `claude-branch-extract` needs as input — found while rebuilding
+      branch_extract.py 2026-07-24
 - [ ] Verify (or drop) the belief that an older Claude Code version had a
       rewind/resume picker capable of switching among sibling branches of
       a branched chat — user recalls this from ~a year ago; 2.1.219's
