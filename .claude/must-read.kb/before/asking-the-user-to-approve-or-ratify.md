@@ -13,7 +13,7 @@ factor the items into three kinds; only one is a real ask:
   doors. The only real asks. Present few, each with what would make
   the user agree or disagree. A batch of these wants the walkthrough
   format -- alternatives and fallout per decision:
-  `Skill(decision-review)`.
+  `Skill(review-open-questions)`.
 
 Drift smells: a long "pending approvals" list; recommending the user
 "sign wholesale"; requesting ratification of already-running
