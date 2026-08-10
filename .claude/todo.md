@@ -44,6 +44,17 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
   - [ ] Verify: `infocmp tmux-256color` resolves to the `~/.terminfo` copy
   - Goal: pin terminfo to the tmux binary version so brewed-tmux + distro-ncurses can't drift.
 - [ ] [todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md](todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md) — dogfood via chatfs, file the `--help` wart upstream, decide from the patch queue
+- [ ] Restore `.sh_lib/functions-cli.sh` — tracked on `main` and
+      `origin/main`, absent on `svelte-crostini`, which leaves `~/bin/has`
+      and `~/bin/bootstamp` dangling (found 2026-08-10). Belongs to
+      [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
+- [ ] Reunifying must not resurrect `bin/claude-path` — the clone at
+      `~/repo/github.com/bukzor/dotfiles` still carries the pre-2026-07-05
+      legacy encoder, and `~/bin` precedes `~/.local/bin`, so restoring it
+      shadows the installed `claude-code-slug` silently and names new
+      git-localhost-store keys with the old encoding (found 2026-08-10).
+      Belongs to
+      [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
 - [ ] Remove `HOMEBREW_EVAL_ALL=1` from shell config — new brew treats it as a fatal
       deprecation in `brew tap`; per-tap `brew trust` replaces it (found 2026-07-26
       while fixing the sub install)
