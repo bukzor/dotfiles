@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""Kill the biggest memory hog when the whole machine stalls on memory.
+
+earlyoom watches a *level* -- MemAvailable -- and so is blind to the failure
+this machine actually has: a reclaim livelock where MemAvailable stays healthy
+while nothing makes progress. This watches a *rate* instead. `full avg10` in
+/proc/pressure/memory is the fraction of the last 10s during which *every*
+runnable task was stalled waiting on memory; it is unaffected by how much
+"available" page cache the kernel is thrashing.
+
+/proc/pressure is not among the files lxcfs overlays, so this signal survives
+both lxcfs failure modes that have taken earlyoom down.
+
+Reasoning and threshold derivation:
+  crostini-health remediations.kb/psi-oom-watch.md
+"""
+
+import ctypes
+import os
+import signal
+import sys
+import time
+
+PSI_PATH = "/proc/pressure/memory"
+
+INTERVAL = 1.0  # seconds between samples
+TERM_PSI = 20.0  # full avg10 at or above this ...
+TERM_HOLD = 20.0  # ... held this long -> SIGTERM the biggest hog
+KILL_PSI = 60.0  # full avg10 at or above this ...
+KILL_HOLD = 10.0  # ... held this long -> SIGKILL it
+LOG_PSI = 5.0  # log every sample at or above this, act on none of them
+COOLDOWN = 60.0  # after acting, let the machine recover before judging again
+
+# Killing any of these makes things worse, not better.
+PROTECTED = frozenset(
+    (
+        "systemd",
+        "systemd-journal",
+        "systemd-logind",
+        "systemd-udevd",
+        "dbus-daemon",
+        "sshd",
+        "monit",
+        "earlyoom",
+        "psi-oom-watch",
+        "garcon",
+        "sommelier",
+        "cros-garcon",
+        "init",
+    )
+)
+
+
+def log(message):
+    print(message, flush=True)
+
+
+def lock_memory():
+    """mlockall(MCL_CURRENT|MCL_FUTURE), so our own pages are never the ones
+    being refaulted in the storm we exist to break. Needs CAP_IPC_LOCK."""
+    try:
+        libc = ctypes.CDLL("libc.so.6", use_errno=True)
+        if libc.mlockall(1 | 2) != 0:
+            log("warning: mlockall failed: {}".format(os.strerror(ctypes.get_errno())))
+    except OSError as error:
+        log("warning: mlockall unavailable: {}".format(error))
+
+
+def read_full_avg10(fd):
+    """Parse `full avg10=N` without allocating a file object per tick."""
+    for line in os.pread(fd, 256, 0).decode().splitlines():
+        if line.startswith("full "):
+            return float(line.split()[1].split("=")[1])
+    raise ValueError("no `full` line in " + PSI_PATH)
+
+
+def biggest_hog():
+    """(pid, name, rss_kb) of the largest resident non-protected process."""
+    worst = None
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        pid = int(entry)
+        if pid == 1 or pid == os.getpid():
+            continue
+        try:
+            with open("/proc/{}/status".format(pid)) as status:
+                name = None
+                rss = None
+                for line in status:
+                    if line.startswith("Name:"):
+                        name = line.split(maxsplit=1)[1].strip()
+                    elif line.startswith("VmRSS:"):
+                        rss = int(line.split()[1])
+                        break
+        except (OSError, ValueError, IndexError):
+            continue  # process exited, or a kernel thread with no VmRSS
+        if rss is None or name in PROTECTED:
+            continue
+        if worst is None or rss > worst[2]:
+            worst = (pid, name, rss)
+    return worst
+
+
+def act(sig, psi, held):
+    victim = biggest_hog()
+    if victim is None:
+        log("full avg10 {:.2f} for {:.0f}s but no eligible victim".format(psi, held))
+        return
+    pid, name, rss = victim
+    log(
+        "full avg10 {:.2f} held {:.0f}s -- sending {} to {} (pid {}, {} MiB rss)".format(
+            psi, held, signal.Signals(sig).name, name, pid, rss // 1024
+        )
+    )
+    try:
+        os.kill(pid, sig)
+    except OSError as error:
+        log("kill failed: {}".format(error))
+
+
+def report():
+    """Print what we see and who would die, then exit. No action taken."""
+    fd = os.open(PSI_PATH, os.O_RDONLY)
+    log("full avg10 {:.2f}".format(read_full_avg10(fd)))
+    victim = biggest_hog()
+    if victim is None:
+        log("no eligible victim")
+    else:
+        log("next victim: {} (pid {}, {} MiB rss)".format(victim[1], victim[0], victim[2] // 1024))
+
+
+def main():
+    if "--report" in sys.argv[1:]:
+        return report()
+    dry_run = "--dry-run" in sys.argv[1:]
+    lock_memory()
+    fd = os.open(PSI_PATH, os.O_RDONLY)
+    log(
+        "watching {} full avg10: SIGTERM at {:.0f}/{:.0f}s, SIGKILL at {:.0f}/{:.0f}s{}".format(
+            PSI_PATH, TERM_PSI, TERM_HOLD, KILL_PSI, KILL_HOLD,
+            " (dry run)" if dry_run else "",
+        )
+    )
+
+    term_since = kill_since = None
+    quiet_until = 0.0
+
+    while True:
+        now = time.monotonic()
+        psi = read_full_avg10(fd)
+
+        term_since = now if (psi >= TERM_PSI and term_since is None) else term_since
+        kill_since = now if (psi >= KILL_PSI and kill_since is None) else kill_since
+        if psi < TERM_PSI:
+            term_since = None
+        if psi < KILL_PSI:
+            kill_since = None
+
+        if psi >= LOG_PSI:
+            log("full avg10 {:.2f}".format(psi))
+
+        if now >= quiet_until:
+            if kill_since is not None and now - kill_since >= KILL_HOLD:
+                if not dry_run:
+                    act(signal.SIGKILL, psi, now - kill_since)
+                else:
+                    log("dry run: would SIGKILL at full avg10 {:.2f}".format(psi))
+                term_since = kill_since = None
+                quiet_until = now + COOLDOWN
+            elif term_since is not None and now - term_since >= TERM_HOLD:
+                if not dry_run:
+                    act(signal.SIGTERM, psi, now - term_since)
+                else:
+                    log("dry run: would SIGTERM at full avg10 {:.2f}".format(psi))
+                term_since = None
+                quiet_until = now + COOLDOWN
+
+        time.sleep(INTERVAL)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
