@@ -18,16 +18,24 @@ Scope: Claude configuration (`~/.claude` itself).
   - Prompted 2026-08-10 by the bukzor-packaging ledger, where three claim
     files had grown `verify:` blocks holding a 15-line python one-liner each;
     they collapsed into one `seams.py` with flags.
-- [ ] `sessions.kb`'s per-host layout hides its entries from validation:
-      `llm.kb-validate ~/.claude/sessions.kb/` reports **1 file, 0 errors**
-      because the walker only descends into `*.kb/` directories and
-      `penguin/` is not one. Pointed at `penguin/` explicitly it finds 44.
-      A green check on the collection therefore means nothing. Fix is
-      either renaming the per-host dirs to `penguin.kb/` or teaching the
-      walker to recurse plain subdirectories of a `.kb/` — decide which,
-      then do it. Found 2026-08-10; the latent bug it was hiding
-      (`sessions.jsonschema.yaml` declaring the stock dialect while using
-      `type: instant`) had been unnoticed since 2026-07-10.
+- [ ] Adjudicate 14 sessions.kb entries the schema rejects, uncovered by
+      the `penguin/` -> `penguin.kb/` rename (2026-08-10). The collection
+      had been invisible to `llm.kb-validate` since the per-host layout
+      landed, so a month of drift accumulated unseen. Three groups, and
+      in most of them **the corpus looks right and the schema looks
+      wrong**:
+  - [ ] `cost-benefit-sweh` on 8 entries. Eight independent sessions
+        added SWEh ratings to session entries; the schema never learned
+        the field and `additionalProperties: false` rejects them. Almost
+        certainly bless it — `$ref` llm-subtask's `$defs/sweh-value` so
+        `wsjf-rank` can read sessions the same way it reads todos.
+  - [ ] Relationship fields, organically grown, three spellings for
+        arguably two ideas: `parent` (2), `prior-sessions` (2),
+        `spawned` (1). Pick a vocabulary, migrate, then schematize.
+  - [ ] Two `session.started` values are bare dates, not instants, and
+        one entry (`move-skill-triggers-to-must-read-kb.md`) has no
+        `session` block at all. Decide whether `started` should accept
+        `date` for entries that only ever knew the day.
 - [x] [todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md](todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md)
 
 ## Later
