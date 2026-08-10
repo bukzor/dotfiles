@@ -5,7 +5,6 @@
 # would otherwise fire on every boot against a legitimately fresh earlyoom.
 set daemon 30 with start delay 240
 
-set logfile syslog
 set pidfile /home/bukzor/.local/state/monit/pid
 set idfile /home/bukzor/.local/state/monit/id
 set statefile /home/bukzor/.local/state/monit/state
