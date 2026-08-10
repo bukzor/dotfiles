@@ -41,6 +41,7 @@ KILL_PSI = 60.0  # full avg10 at or above this ...
 KILL_HOLD = 10.0  # ... held this long -> SIGKILL it
 LOG_PSI = 5.0  # log every sample at or above this, act on none of them
 COOLDOWN = 60.0  # after acting, let the machine recover before judging again
+REPORT = 3600.0  # heartbeat: peak pressure since the last one, matching earlyoom -r
 
 # Bounds on our own authority. A watchdog that keeps killing because its
 # thresholds are wrong is worse than the freeze it was installed to prevent:
@@ -178,10 +179,21 @@ def main():
     term_since = kill_since = None
     quiet_until = 0.0
     spent = []  # monotonic timestamps of actions taken, within BUDGET_WINDOW
+    peak = 0.0
+    next_report = time.monotonic() + REPORT
 
     while True:
         now = time.monotonic()
         psi = read_full_avg10(fd)
+        peak = max(peak, psi)
+
+        # A journal with nothing in it is ambiguous -- no pressure, or no
+        # daemon? The heartbeat resolves that, and its peaks are the dataset
+        # these thresholds were guessed without.
+        if now >= next_report:
+            log("hourly: peak full avg10 {:.2f}, now {:.2f}".format(peak, psi))
+            peak = 0.0
+            next_report = now + REPORT
 
         term_since = now if (psi >= TERM_PSI and term_since is None) else term_since
         kill_since = now if (psi >= KILL_PSI and kill_since is None) else kill_since
