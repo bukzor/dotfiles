@@ -99,6 +99,19 @@ granularity is the floor.
       Committed and pushed (mitmproxy f1d47c7, ~/.claude 47a11a3).
 - [ ] Verify whether project-scope `disableBundledSkills: false` overrides
       user-scope true (classifies it realm 2 vs realm 3)
+  - Measured 2026-08-10 on 2.1.226 in `~/repo/claude-empty`, **user scope
+    only** — the override question itself is untouched. `disableBundledSkills`
+    alone removes all 12 bundled skills from the model's view, worth 2.0k
+    tokens; `disableClaudeAiConnectors` alone removes the Drive tool set,
+    worth 4.1k — more than the ~3k estimated above. The two are independent:
+    each delta holds at both levels of the other, and they sum to the observed
+    6.1k.
+  - Method, reusable for the override question: a 2x2 read from
+    `claude -p --output-format json`'s `.usage`, with `mcp-logs-*` directories
+    as corroboration, rather than asking the model what it has —
+    `~/repo/claude-empty/testing.kb/measure-what-a-setting-suppresses.md`.
+    A self-report moves with a restriction; the token count moves only with an
+    absence.
 - [ ] Consider extending toolpatch to the rest of the deny list / fat
       always-on tools (Bash, Agent, ...) — measured wins pending appetite
 - [ ] Update `must-read.kb/before/lazy-loading/{skills,commands}.md` — they
