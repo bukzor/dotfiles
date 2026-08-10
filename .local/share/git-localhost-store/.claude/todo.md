@@ -24,6 +24,17 @@ Suggested order: hook redesign next, then cleanup — one commit each.
       ~2026-07-05, which orphans stores created before then. Evidence and
       the encoding decision itself:
       `~/.claude/sessions.kb/penguin/claude-path-encoding-change-orphans-stores.md`
+- [ ] Renaming a workdir silently orphans its store name. `bin/git-localhost-store`
+      exits at `[ -L .git ]` (line 41) before `$STORE` is ever compared to
+      `readlink .git`, so after `mv` the symlink still points at the old
+      encoded name and no run ever notices. Functionally harmless -- the
+      absolute symlink stays valid -- but the store name becomes a lie, which
+      is exactly what a path-encoded store is for. Hit live 2026-08-10
+      renaming `~/claude/bukzor-packaging.kb` -> `bukzor-packaging`; fixed by
+      hand (`mv` the store, re-`ln -s`). Options: report the mismatch and
+      exit non-zero (matches "don't quietly accommodate unknown states"), or
+      detect and re-point. Note a rename is indistinguishable from a *copy*
+      until you look, so auto-repair could steal a live store.
 - [ ] Decide the fate of `CLAUDE.md`'s "Related Files" section — it's a
       content enumeration (`**bin/x** — description`, one line per
       file), the exact pattern the project's own "Don't enumerate
