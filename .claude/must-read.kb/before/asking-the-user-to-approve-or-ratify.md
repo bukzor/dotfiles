@@ -20,5 +20,5 @@ Drift smells: a long "pending approvals" list; recommending the user
 practice. If the answer wouldn't change what happens next, it isn't a
 question.
 
-Background: SIGNATURE, PROVISIONAL in llm-claim-ledger
+Background: SIGNATURE, PROVISIONAL in llm-claims
 (bukzor-agent-skills); incident: session "over-veto", 2026-08-09.
