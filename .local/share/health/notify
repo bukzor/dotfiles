@@ -1,0 +1,11 @@
+#!/bin/bash
+# Raise a desktop notification, which cros-garcon forwards to the ChromeOS tray.
+set -euo pipefail
+
+# monit runs exec'd programs with a minimal environment, so the session bus
+# address has to be reconstructed or notify-send finds no notification daemon.
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/bus}"
+
+# MONIT_DESCRIPTION is set by monit for exec actions, and holds the specific
+# test result that fired.
+exec notify-send --app-name=health --urgency=critical -- "$*" "${MONIT_DESCRIPTION:-}"

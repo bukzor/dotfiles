@@ -1,0 +1,21 @@
+## User-scoped monit. Started by ~/.config/systemd/user/monit.service.
+## Checks live in conf.d/; the programs they run live in ~/.local/share/health/.
+
+# The start delay outlasts the "uptime < 2 minutes" test in earlyoom.conf, which
+# would otherwise fire on every boot against a legitimately fresh earlyoom.
+set daemon 30 with start delay 240
+
+set logfile syslog
+set pidfile /home/bukzor/.local/state/monit/pid
+set idfile /home/bukzor/.local/state/monit/id
+set statefile /home/bukzor/.local/state/monit/state
+
+# `monit status` and friends reach the daemon through this socket. A TCP port
+# would also serve the web dashboard, which a single-user container has no use
+# for.
+set httpd unixsocket /home/bukzor/.local/state/monit/sock
+    permission 600
+    allow localhost
+
+# include takes a glob(7) pattern; naming the directory alone is silently ignored.
+include /home/bukzor/.config/monit/conf.d/*.conf

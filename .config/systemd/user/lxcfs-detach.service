@@ -1,0 +1,12 @@
+[Unit]
+Description=Detach LXCFS /proc overlays
+
+[Service]
+# LXCFS is healthy at boot and only goes stale mid-run, so detaching once per
+# session start prevents the failure that monit would otherwise have to repair.
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=%h/.local/share/health/lxcfs-detach
+
+[Install]
+WantedBy=default.target

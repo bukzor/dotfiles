@@ -1,0 +1,46 @@
+#!/bin/bash
+# Health check, Nagios contract: 0 OK, 2 CRITICAL, 3 UNKNOWN.
+#
+# LXCFS FUSE-mounts container-scoped views over these /proc files, served by a
+# daemon running outside the container in the host VM. When that daemon dies the
+# mounts go stale and every read returns ENOTCONN, breaking earlyoom, sysstat,
+# top, and anything else that reads memory or cpu state.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo "PROC UNKNOWN - check exited $error"
+  exit 3
+}
+trap onerror ERR
+
+# Every file LXCFS overlays except /proc/slabinfo, which is root-only and so
+# cannot be read by an unprivileged check.
+PROC_FILES=(
+  /proc/cpuinfo
+  /proc/diskstats
+  /proc/loadavg
+  /proc/meminfo
+  /proc/stat
+  /proc/swaps
+  /proc/uptime
+)
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+for proc_file in "${PROC_FILES[@]}"; do
+  # A stale mount fails at open(2), so the redirect is the test. Capturing the
+  # message rather than discarding it puts the errno in the check's output --
+  # and 2>&1 must precede the input redirect, since redirections apply left to
+  # right and the diagnostic is emitted the moment the input redirect fails.
+  failure="$(read -r _ 2>&1 <"$proc_file")" || {
+    echo "PROC CRITICAL - $proc_file: ${failure##*: }"
+    exit 2
+  }
+done
+
+echo "PROC OK - ${#PROC_FILES[@]} files readable"

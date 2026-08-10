@@ -1,0 +1,14 @@
+[Unit]
+Description=Health checks and self-repair
+
+[Service]
+# git records only the executable bit, so a fresh clone leaves monitrc
+# world-readable, and monit exits rather than read a control file above 0700.
+ExecStartPre=/usr/bin/chmod 0600 %h/.config/monit/monitrc
+ExecStartPre=/usr/bin/mkdir -p %h/.local/state/monit
+ExecStart=/usr/bin/monit -I -c %h/.config/monit/monitrc
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

@@ -11,3 +11,7 @@
 # Opt-in vendored apenwarr minimal/do (public domain; see redo/README.md)
 !redo/
 !redo/**
+
+# Opt-in the health checks and repairs run by monit (see ~/.config/monit/)
+!health/
+!health/**
