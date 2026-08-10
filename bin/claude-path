@@ -1,12 +1,17 @@
 #!/bin/bash
-# Encode a path using Claude Code's encoding scheme
+# Encode a path using Claude Code's project-directory slug scheme.
 # Usage: claude-path [PATH]
-#   Encodes PATH (or PWD if not provided)
+#   Encodes PATH (or $PWD if not provided), normalized to absolute first:
+#   the scheme has no relative form, since a projects/ dir name and a
+#   git-localhost-store key must name one directory from every cwd.
+#   For text with no path semantics at all, call claude-slug directly.
 
 set -euo pipefail
 
 path="${1:-$PWD}"
 path=$(realpath -Lm "$path")
 
-# Encoding: - → --, then / → -
-sed -e 's/-/--/g' -e 's/\//-/g' <<<"$path"
+# Resolve $0 -- this is invoked through symlinks (e.g. git-localhost-store's
+# bin/claude-path), where a bare dirname points at the symlink's directory,
+# not at claude-slug's.
+exec "$(dirname "$(realpath "$0")")/claude-slug" "$path"
