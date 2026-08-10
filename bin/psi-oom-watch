@@ -11,6 +11,16 @@ runnable task was stalled waiting on memory; it is unaffected by how much
 /proc/pressure is not among the files lxcfs overlays, so this signal survives
 both lxcfs failure modes that have taken earlyoom down.
 
+One signal, one job: the memory *level* stays earlyoom's, deliberately. Two
+independent killers on this machine is a worse failure mode than a slightly
+mistuned threshold on either.
+
+Everything here is bounded on purpose. It kills nothing without --dry-run
+removed, refuses to act more than KILL_BUDGET times an hour, refuses to kill
+anything too small to matter, and stands down entirely while DISABLE_FLAG
+exists. A watchdog that runs as root at Nice=-20 with Restart=always is the
+last process you can stop by hand, so it must be the one that stops itself.
+
 Reasoning and threshold derivation:
   crostini-health remediations.kb/psi-oom-watch.md
 """
@@ -22,6 +32,7 @@ import sys
 import time
 
 PSI_PATH = "/proc/pressure/memory"
+DISABLE_FLAG = "/etc/psi-oom-watch.off"  # exists -> observe, never act
 
 INTERVAL = 1.0  # seconds between samples
 TERM_PSI = 20.0  # full avg10 at or above this ...
@@ -30,6 +41,14 @@ KILL_PSI = 60.0  # full avg10 at or above this ...
 KILL_HOLD = 10.0  # ... held this long -> SIGKILL it
 LOG_PSI = 5.0  # log every sample at or above this, act on none of them
 COOLDOWN = 60.0  # after acting, let the machine recover before judging again
+
+# Bounds on our own authority. A watchdog that keeps killing because its
+# thresholds are wrong is worse than the freeze it was installed to prevent:
+# it survives reboots, outranks everything, and takes the machine with it.
+# Past the budget we go quiet and keep logging -- noise, not damage.
+KILL_BUDGET = 3  # actions ...
+BUDGET_WINDOW = 3600.0  # ... per this many seconds
+MIN_VICTIM_MIB = 100  # below this, killing cannot relieve memory pressure
 
 # Killing any of these makes things worse, not better.
 PROTECTED = frozenset(
@@ -99,14 +118,20 @@ def biggest_hog():
             continue
         if worst is None or rss > worst[2]:
             worst = (pid, name, rss)
+    if worst is not None and worst[2] < MIN_VICTIM_MIB * 1024:
+        return None  # nothing here is big enough for killing it to help
     return worst
 
 
 def act(sig, psi, held):
+    """Returns True only if a signal was actually sent."""
     victim = biggest_hog()
     if victim is None:
-        log("full avg10 {:.2f} for {:.0f}s but no eligible victim".format(psi, held))
-        return
+        log(
+            "full avg10 {:.2f} for {:.0f}s, but no process is over {} MiB -- "
+            "not acting".format(psi, held, MIN_VICTIM_MIB)
+        )
+        return False
     pid, name, rss = victim
     log(
         "full avg10 {:.2f} held {:.0f}s -- sending {} to {} (pid {}, {} MiB rss)".format(
@@ -117,12 +142,19 @@ def act(sig, psi, held):
         os.kill(pid, sig)
     except OSError as error:
         log("kill failed: {}".format(error))
+        return False
+    return True
 
 
 def report():
-    """Print what we see and who would die, then exit. No action taken."""
+    """Print what we see and who would die. No action taken. Safe to call in
+    the loop -- the fd is closed, because leaking one per action would take the
+    daemon out on its file limit during exactly the episode it exists for."""
     fd = os.open(PSI_PATH, os.O_RDONLY)
-    log("full avg10 {:.2f}".format(read_full_avg10(fd)))
+    try:
+        log("full avg10 {:.2f}".format(read_full_avg10(fd)))
+    finally:
+        os.close(fd)
     victim = biggest_hog()
     if victim is None:
         log("no eligible victim")
@@ -145,6 +177,7 @@ def main():
 
     term_since = kill_since = None
     quiet_until = 0.0
+    spent = []  # monotonic timestamps of actions taken, within BUDGET_WINDOW
 
     while True:
         now = time.monotonic()
@@ -160,21 +193,37 @@ def main():
         if psi >= LOG_PSI:
             log("full avg10 {:.2f}".format(psi))
 
+        due = None
         if now >= quiet_until:
             if kill_since is not None and now - kill_since >= KILL_HOLD:
-                if not dry_run:
-                    act(signal.SIGKILL, psi, now - kill_since)
-                else:
-                    log("dry run: would SIGKILL at full avg10 {:.2f}".format(psi))
-                term_since = kill_since = None
-                quiet_until = now + COOLDOWN
+                due = (signal.SIGKILL, now - kill_since)
             elif term_since is not None and now - term_since >= TERM_HOLD:
-                if not dry_run:
-                    act(signal.SIGTERM, psi, now - term_since)
-                else:
-                    log("dry run: would SIGTERM at full avg10 {:.2f}".format(psi))
-                term_since = None
-                quiet_until = now + COOLDOWN
+                due = (signal.SIGTERM, now - term_since)
+
+        if due is not None:
+            sig, held = due
+            spent = [t for t in spent if now - t < BUDGET_WINDOW]
+            if dry_run:
+                log(
+                    "dry run: would send {} at full avg10 {:.2f} held {:.0f}s".format(
+                        signal.Signals(sig).name, psi, held
+                    )
+                )
+                report()
+            elif os.path.exists(DISABLE_FLAG):
+                log("{} exists -- standing down at full avg10 {:.2f}".format(DISABLE_FLAG, psi))
+            elif len(spent) >= KILL_BUDGET:
+                log(
+                    "budget spent ({} actions in the last hour) -- refusing to act "
+                    "at full avg10 {:.2f}. Something is wrong with these thresholds; "
+                    "fix them rather than raising the budget.".format(len(spent), psi)
+                )
+            elif act(sig, psi, held):
+                spent.append(now)
+
+            # Whether or not we acted, wait before judging the situation again.
+            term_since = kill_since = None
+            quiet_until = now + COOLDOWN
 
         time.sleep(INTERVAL)
 
