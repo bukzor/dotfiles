@@ -8,13 +8,6 @@ onerror() {
 }
 trap onerror ERR
 
-# Helper function to convert paths to Claude's project directory name format
-claudepath() {
-  # Convert paths to Claude's project directory name format
-  # /home/user/path -> -home-user-path
-  echo "${1//[^A-Za-z0-9]/-}"
-}
-
 # Helper function to get absolute path
 abspath() {
   realpath -Lm "$1"
@@ -110,8 +103,8 @@ fi
 merge_and_symlink "$src" "$dst"
 
 # Step 3: Claude Project Directory Symlink
-src_claude="$HOME/.claude/projects/$(claudepath "$src")"
-dst_claude="$HOME/.claude/projects/$(claudepath "$dst")"
+src_claude="$HOME/.claude/projects/$(claude-path "$src")"
+dst_claude="$HOME/.claude/projects/$(claude-path "$dst")"
 merge_and_symlink "$src_claude" "$dst_claude" "Claude history"
 
 echo ""
