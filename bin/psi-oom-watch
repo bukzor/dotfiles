@@ -21,6 +21,10 @@ anything too small to matter, and stands down entirely while DISABLE_FLAG
 exists. A watchdog that runs as root at Nice=-20 with Restart=always is the
 last process you can stop by hand, so it must be the one that stops itself.
 
+A dry run is a faithful simulation, not a mute one: it consults every bound
+and spends budget exactly as the armed daemon would, skipping only the kill
+itself. Restraint that only appears in the untested mode is not restraint.
+
 Reasoning and threshold derivation:
   crostini-health remediations.kb/psi-oom-watch.md
 """
@@ -124,8 +128,12 @@ def biggest_hog():
     return worst
 
 
-def act(sig, psi, held):
-    """Returns True only if a signal was actually sent."""
+def act(sig, psi, held, dry_run):
+    """Signal the biggest hog, or say why nobody was signalled.
+
+    Returns whether this counted against the kill budget. A dry run counts:
+    the restraint the log shows must be the restraint the armed daemon would
+    have shown, or the log is not evidence about the armed daemon."""
     victim = biggest_hog()
     if victim is None:
         log(
@@ -135,10 +143,18 @@ def act(sig, psi, held):
         return False
     pid, name, rss = victim
     log(
-        "full avg10 {:.2f} held {:.0f}s -- sending {} to {} (pid {}, {} MiB rss)".format(
-            psi, held, signal.Signals(sig).name, name, pid, rss // 1024
+        "full avg10 {:.2f} held {:.0f}s -- {} {} to {} (pid {}, {} MiB rss)".format(
+            psi,
+            held,
+            "would send" if dry_run else "sending",
+            signal.Signals(sig).name,
+            name,
+            pid,
+            rss // 1024,
         )
     )
+    if dry_run:
+        return True
     try:
         os.kill(pid, sig)
     except OSError as error:
@@ -147,11 +163,9 @@ def act(sig, psi, held):
     return True
 
 
-def report():
-    """Print what we see and who would die. No action taken. Safe to call in
-    the loop -- the fd is closed, because leaking one per action would take the
-    daemon out on its file limit during exactly the episode it exists for."""
-    fd = os.open(PSI_PATH, os.O_RDONLY)
+def report(psi_path):
+    """Print what we see and who would die, then exit. No action taken."""
+    fd = os.open(psi_path, os.O_RDONLY)
     try:
         log("full avg10 {:.2f}".format(read_full_avg10(fd)))
     finally:
@@ -164,14 +178,19 @@ def report():
 
 
 def main():
-    if "--report" in sys.argv[1:]:
-        return report()
-    dry_run = "--dry-run" in sys.argv[1:]
+    args = sys.argv[1:]
+    # --psi-path exists so the decision logic can be driven from a scripted
+    # file. The alternative is proving it against a real livelock, and this
+    # machine has already demonstrated it does not survive one of those.
+    psi_path = args[args.index("--psi-path") + 1] if "--psi-path" in args else PSI_PATH
+    if "--report" in args:
+        return report(psi_path)
+    dry_run = "--dry-run" in args
     lock_memory()
-    fd = os.open(PSI_PATH, os.O_RDONLY)
+    fd = os.open(psi_path, os.O_RDONLY)
     log(
         "watching {} full avg10: SIGTERM at {:.0f}/{:.0f}s, SIGKILL at {:.0f}/{:.0f}s{}".format(
-            PSI_PATH, TERM_PSI, TERM_HOLD, KILL_PSI, KILL_HOLD,
+            psi_path, TERM_PSI, TERM_HOLD, KILL_PSI, KILL_HOLD,
             " (dry run)" if dry_run else "",
         )
     )
@@ -215,14 +234,7 @@ def main():
         if due is not None:
             sig, held = due
             spent = [t for t in spent if now - t < BUDGET_WINDOW]
-            if dry_run:
-                log(
-                    "dry run: would send {} at full avg10 {:.2f} held {:.0f}s".format(
-                        signal.Signals(sig).name, psi, held
-                    )
-                )
-                report()
-            elif os.path.exists(DISABLE_FLAG):
+            if os.path.exists(DISABLE_FLAG):
                 log("{} exists -- standing down at full avg10 {:.2f}".format(DISABLE_FLAG, psi))
             elif len(spent) >= KILL_BUDGET:
                 log(
@@ -230,7 +242,7 @@ def main():
                     "at full avg10 {:.2f}. Something is wrong with these thresholds; "
                     "fix them rather than raising the budget.".format(len(spent), psi)
                 )
-            elif act(sig, psi, held):
+            elif act(sig, psi, held, dry_run):
                 spent.append(now)
 
             # Whether or not we acted, wait before judging the situation again.
