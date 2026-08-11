@@ -36,7 +36,7 @@ Scope: Claude configuration (`~/.claude` itself).
         one entry (`move-skill-triggers-to-must-read-kb.md`) has no
         `session` block at all. Decide whether `started` should accept
         `date` for entries that only ever knew the day.
-- [ ] State "no inline code in docs" as default policy — code goes in
+- [~] State "no inline code in docs" as default policy — code goes in
       `{prefix}.py`, or `{prefix}.d/` past a file or two. Currently it is
       folk knowledge re-derived per kb; `llm-claims-kb`'s maintenance
       guide argues it well ("a `verify:` is a command, never a program")
@@ -44,6 +44,13 @@ Scope: Claude configuration (`~/.claude` itself).
       `must-read.kb/before/editing-documentation.md` and
       `before/writing-python-code.md`, and a pointer from the claims-kb
       skill's `verify:` guidance (raised 2026-08-10).
+  - [x] `must-read.kb/before/editing-documentation.md` — stated as default
+        policy, with the reason and the boundary (fragments and transcripts
+        stay welcome, implementations don't)
+  - [x] `before/writing-python-code.md` — one sentence, pointing at the above
+  - [ ] the claims-kb skill's `verify:` guidance — left for whoever owns the
+        `llm-claim-ledger` → `llm-claims` rename, so an outside edit doesn't
+        collide with it
 - [x] [todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md](todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md)
 
 ## Later
