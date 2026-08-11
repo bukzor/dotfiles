@@ -60,11 +60,25 @@ resurfaces.
 
 ## Path Encoding
 
-Working directory paths are encoded by `~/bin/claude-path`:
+Working directory paths are encoded by `claude-path`, the console script
+of `claude-code-slug` on PyPI (`uv tool install claude-code-slug`). Every
+character that is not ASCII alphanumeric becomes exactly one `-` -- no
+squeezing of runs, no case folding:
 ```
-/home/user/projects/repo → -home-user-projects-repo
+/home/user/projects/repo    → -home-user-projects-repo
+/home/user/my--weird--repo  → -home-user-my--weird--repo
 ```
-`-` becomes `--`, `/` becomes `-`. Deterministic and collision-free.
+Deterministic, but **not** collision-free: `-` is the image of `/`, of
+`.`, and of itself, so `~/a.b` and `~/a-b` name one store. Nothing
+prevents that; the worktree a store belongs to is recovered from the
+`.git` symlink, never by decoding the name.
+
+The function is **frozen**: store directories are *named* by it, so
+editing it orphans stores rather than renaming them. Most stores on disk
+were named by an older rule (`-` → `--`, `/` → `-`, dots verbatim) and
+keep working because the encoding is consulted only when a store is
+created or recovered -- the hook short-circuits when `.git` is already a
+symlink.
 
 ## Hook Logic Flow
 
