@@ -71,7 +71,7 @@ in scope" from "does the known text still match."
 `$ALLCAPS` tokens act as placeholders, matching dynamic content:
 
 - `$NAME` — matches the rest of the line (`[^\n]*`)
-- `$LINES` — matches one or more non-empty lines
+- `$LINES` — matches zero or more non-empty lines
 
 Placeholders are delimited by the next literal text in the template.
 Same-named placeholders must match the same text (backreference); use a
