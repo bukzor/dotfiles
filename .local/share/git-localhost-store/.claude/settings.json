@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Skill(struggle-bus)"
-    ],
-    "deny": [],
-    "ask": []
-  }
-}
