@@ -55,6 +55,11 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       git-localhost-store keys with the old encoding (found 2026-08-10).
       Belongs to
       [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
+- [ ] Delete `~/trash/git-localhost-store-dotfiles-copy/` (6.7M) once the
+      packaged `git-localhost-store` has run a while without regret. It is
+      the retired dotfiles copy of the tool plus untracked May-2026 migration
+      artifacts, kept only for recovery; the installed system was verified
+      before it was moved aside (2026-08-10).
 - [ ] Remove `HOMEBREW_EVAL_ALL=1` from shell config — new brew treats it as a fatal
       deprecation in `brew tap`; per-tap `brew trust` replaces it (found 2026-07-26
       while fixing the sub install)

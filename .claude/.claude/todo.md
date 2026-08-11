@@ -5,19 +5,6 @@ managed-by: Skill(llm-subtask)
 Scope: Claude configuration (`~/.claude` itself).
 
 - [ ] [todo.kb/2026-07-07-000-lazy-load-system-for-capabilities-disabled-in-context-slimming-pass.md](todo.kb/2026-07-07-000-lazy-load-system-for-capabilities-disabled-in-context-slimming-pass.md)
-- [ ] Write the no-inline-code policy into the docs as *default* policy: code
-      goes in `{prefix}.py` beside the thing it serves, or `{prefix}.d/` once
-      it's more than a file or two — never inline in `python3 -c`, a heredoc,
-      or a markdown `verify:`/example block. Rationale to state: inline code
-      is unmaintainable, unreviewable, un-runnable by the user, and invisible
-      to pyright/black/pytest.
-  - [ ] Decide the home: `CLAUDE.md` "Values" (it's a how-to-work rule) vs
-        `must-read.kb/before/running-ANY-Bash-commands.md` (inline code
-        arrives through Bash) vs both — a one-line Values entry pointing at
-        the must-read is probably right
-  - Prompted 2026-08-10 by the bukzor-packaging ledger, where three claim
-    files had grown `verify:` blocks holding a 15-line python one-liner each;
-    they collapsed into one `seams.py` with flags.
 - [ ] Adjudicate 14 sessions.kb entries the schema rejects, uncovered by
       the `penguin/` -> `penguin.kb/` rename (2026-08-10). The collection
       had been invisible to `llm.kb-validate` since the per-host layout
@@ -36,14 +23,13 @@ Scope: Claude configuration (`~/.claude` itself).
         one entry (`move-skill-triggers-to-must-read-kb.md`) has no
         `session` block at all. Decide whether `started` should accept
         `date` for entries that only ever knew the day.
-- [~] State "no inline code in docs" as default policy — code goes in
-      `{prefix}.py`, or `{prefix}.d/` past a file or two. Currently it is
-      folk knowledge re-derived per kb; `llm-claims-kb`'s maintenance
-      guide argues it well ("a `verify:` is a command, never a program")
-      but only for itself. Wants a sentence in
-      `must-read.kb/before/editing-documentation.md` and
-      `before/writing-python-code.md`, and a pointer from the claims-kb
-      skill's `verify:` guidance (raised 2026-08-10).
+- [~] "No inline code in docs" as default policy — code goes in
+      `{prefix}.py`, or `{prefix}.d/` past a file or two. It was folk
+      knowledge re-derived per kb; `llm-claims-kb`'s maintenance guide
+      argued it well ("a `verify:` is a command, never a program") but only
+      for itself. Raised 2026-08-10 by three bukzor-packaging claim files
+      whose `verify:` blocks each held a 15-line python one-liner; they
+      collapsed into one `seams.py` with flags.
   - [x] `must-read.kb/before/editing-documentation.md` — stated as default
         policy, with the reason and the boundary (fragments and transcripts
         stay welcome, implementations don't)
