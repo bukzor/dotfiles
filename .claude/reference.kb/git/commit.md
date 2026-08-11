@@ -124,24 +124,39 @@ message and content disagree, fix whichever is the bug.
 
 ### Commit Message Format
 
-Use heredoc to prevent shell escaping failures:
+Single-quote the message — a prose body is full of backticks and `$`, which
+double quotes substitute. `'"'"'` for a literal apostrophe. See
+`../bash-conventions.md`.
 
 ```bash
 bash <<'BASH'
-git -C <directory> add path/to/file1 path/to/dir/
-git -C <directory> commit-staged \
+git -C <directory> commit-files \
   path/to/file1 \
   path/to/dir/ \
   -- \
-  -m "Short summary usable as PR title
+  -m 'Short summary usable as PR title
 
 Describe the change in more detail, usable as PR description.
 Focus on why over what.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>'
 BASH
+```
+
+### Rewording a pushed commit
+
+`git commit-tree` reuses the original's own tree and parent, so only the message
+changes. Chain a second onto `$new` to reach the commit above it; force-push per
+the caution table.
+
+```bash
+new=$(GIT_AUTHOR_DATE="$(git log --format=%aI -1)" \
+      GIT_COMMITTER_DATE="$(git log --format=%cI -1)" \
+      git commit-tree 'HEAD^{tree}' -p HEAD^ -m 'new message')
+git update-ref refs/heads/main "$new" "$(git rev-parse HEAD)"   # old-value guard
+git diff --stat <old-sha> HEAD                                  # must be empty
 ```
 
 ### Recovery: Accidental Index Inclusion

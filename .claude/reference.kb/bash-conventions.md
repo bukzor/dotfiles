@@ -40,6 +40,18 @@ Always under `Bash()`; in scripts only when `DEBUG>0`.
   trace-only note, use the noop: `: "what the next step does"`.
 - `xargs -t` to print each command it runs.
 
+## Quoting
+
+**Single quotes by default.** Reach for double quotes only when you actually
+want expansion of a `$var` you wrote on purpose. For a literal single quote
+inside, end the quote, add an escaped one, reopen: `'"'"'`.
+
+    -m 'a message mentioning `import gzip` and $HOME'   # literal, always
+    -m "a message mentioning `import gzip` and $HOME"   # runs import, expands HOME
+
+Quoting a heredoc delimiter protects the body from the shell reading it, not
+from a shell you then hand the body to.
+
 ## Composition & style
 
 Multi-line pipeline: `|` at line end (so you can `# comment` between stages).
@@ -52,6 +64,22 @@ explicitly with ` \` then `;`:
       a |
       b \
     ;
+
+Per-item shell logic: never loop (`for …; do`, `while read`) over a long list —
+xtrace traces every command of every iteration, and the `IFS=`/`-r` quoting is
+easy to fumble. `xargs` traces once for the whole run. Filter with
+`exists` (test(1) predicate over stdin paths, default `-e`), then one bash per
+item via xargs. Both flags are load-bearing: without `-r`, GNU xargs runs once
+even on empty input; without `-d'\n'`, `-L1` still word-splits within each line
+and treats quote chars specially (`unmatched single quote`).
+
+    # not this
+    list-files | while IFS= read -r f; do
+      test -f "$f" && printf '%s\t%s\n' "$(date -Im -r "$f")" "$f"
+    done
+    # this
+    list-files | exists -f |
+      xargs -d'\n' -rL1 bash -ec 'printf "%s\t%s\n" "$(date -Im -r "$1")" "$1"' -
 
 Prefer a parent-shell redirect (`exec 2>&1`) over per-command (`cmd 2>&1`) where
 practical.
