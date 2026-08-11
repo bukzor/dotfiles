@@ -48,13 +48,6 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       `origin/main`, absent on `svelte-crostini`, which leaves `~/bin/has`
       and `~/bin/bootstamp` dangling (found 2026-08-10). Belongs to
       [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
-- [ ] Reunifying must not resurrect `bin/claude-path` — the clone at
-      `~/repo/github.com/bukzor/dotfiles` still carries the pre-2026-07-05
-      legacy encoder, and `~/bin` precedes `~/.local/bin`, so restoring it
-      shadows the installed `claude-code-slug` silently and names new
-      git-localhost-store keys with the old encoding (found 2026-08-10).
-      Belongs to
-      [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
 - [ ] Delete `~/trash/git-localhost-store-dotfiles-copy/` (6.7M) once the
       packaged `git-localhost-store` has run a while without regret. It is
       the retired dotfiles copy of the tool plus untracked May-2026 migration
