@@ -6,6 +6,24 @@ description: |
   one claude-code session -- in flight, planned, or recently relevant.
   Helps the user keep track of many parallel lines of work.
 
+$defs:
+  uuid:
+    type: string
+    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    description: |
+      A claude-code session id ($CLAUDE_CODE_SESSION_ID) -- the name of
+      one run, and of its transcript under `~/.claude/projects/`.
+
+  when:
+    type: [instant, date, "null"]
+    description: |
+      A point in time, recorded as precisely as it is known: an instant
+      (`2026-05-21T10:46:43-05:00`) when the clock or the transcript
+      said so, a bare date when only the day survives -- retrospective
+      entries and expired transcripts leave nothing finer -- and null
+      when nothing does. Prefer the instant; writing midnight to
+      satisfy a type records a time that never happened.
+
 type: object
 required: [cwd, session]
 additionalProperties: false
@@ -44,8 +62,7 @@ properties:
       uuid:
         type: array
         items:
-          type: string
-          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          $ref: "#/$defs/uuid"
         description: |
           The claude-code session UUIDs ($CLAUDE_CODE_SESSION_ID) that
           have worked this entry, chronological (oldest first): a
@@ -53,14 +70,66 @@ properties:
           or empty for planned or proposed sessions that have not been
           started yet.
       started:
-        type: [instant, "null"]
+        $ref: "#/$defs/when"
         description: |
           When the session became active. Required; null is
-          load-bearing -- means the session is planned but has not
-          yet begun.
+          load-bearing -- most often the session is planned and has
+          not begun, occasionally its start was never recorded.
       ended:
-        type: [instant, "null"]
+        $ref: "#/$defs/when"
         description: |
           When the session terminated. Required; null is load-bearing
           -- means the session is still in flight or its end was not
           recorded.
+
+  parent:
+    type: string
+    pattern: '\.md$'
+    description: |
+      Filename of the sibling entry whose session split this work off
+      rather than doing it inline. One link, pointing up; follow the
+      chain by reading the parent's own `parent`.
+
+      Recorded on the child only. A `spawned:` list on the parent was
+      tried and struck (2026-08-13): it named one child while two
+      entries named it as parent, which is the drift a derived list
+      invites. The children are `grep -l 'parent: <filename>'`.
+
+  provenance:
+    type: array
+    description: |
+      Sessions this entry's work descends from -- predecessors whose
+      output it inherits and whose transcripts are, often, the only
+      place that context survives. Distinct from `parent`, which names
+      a sibling entry: provenance names session *runs*, which may have
+      no entry of their own, and carries a summary so the reader need
+      not open the transcript to know what came from where.
+    items:
+      type: object
+      required: [uuid, started, ended, summary]
+      additionalProperties: false
+      properties:
+        uuid:
+          $ref: "#/$defs/uuid"
+        started:
+          $ref: "#/$defs/when"
+        ended:
+          $ref: "#/$defs/when"
+        summary:
+          type: string
+          description: |
+            What that session settled, and where its durable artifacts
+            live -- decisions recorded in a workspace kb, files it
+            wrote. Enough that the transcript stays optional reading.
+
+  cost-benefit-sweh:
+    $ref: "skill://llm-subtask/jsonschema/todo.jsonschema.yaml#/$defs/cost-benefit-sweh"
+    description: |
+      WSJF-style rating of this line of work in SWE-hours, in the shape
+      `todo.kb/` entries carry. The definition is llm-subtask's,
+      referenced rather than copied, so a session and a todo rank in
+      one frame.
+
+      Optional: rate an entry when it competes for time against the
+      backlog; omit it when the entry records what happened rather than
+      queueing what should.
