@@ -1,0 +1,126 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Compare current usage pace against the pace that would exactly land at
+100% by reset, for each Claude usage-limit bucket (session, weekly, and any
+per-model weekly scope).
+
+Data source: GET https://api.anthropic.com/api/oauth/usage -- the same
+undocumented endpoint the `/usage` slash command itself calls, authenticated
+with the OAuth token Claude Code already stores at
+~/.claude/.credentials.json. There is no public API for this; the shape may
+change without notice.
+
+`percent` is defined as usage since the window opened, so percent divided by
+hours-elapsed-since-window-start is the exact average rate so far -- no
+history or sampling needed.
+
+Usage: claude-usage-rate
+"""
+
+import json
+import sys
+import urllib.error
+import urllib.request
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
+CREDENTIALS_PATH = Path.home() / ".claude" / ".credentials.json"
+USAGE_API_URL = "https://api.anthropic.com/api/oauth/usage"
+PERIOD_HOURS = {"session": 5, "weekly": 24 * 7}
+
+
+class TokenExpired(Exception):
+    pass
+
+
+@dataclass(frozen=True)
+class RateReport:
+    label: str
+    percent: float
+    resets_at: datetime
+    elapsed_hours: float
+    current_rate: float
+    avg_remaining_rate: float
+    projected_percent: float
+
+    @property
+    def rate_adjustment(self) -> float:
+        return self.avg_remaining_rate / self.current_rate
+
+
+def load_token() -> str:
+    creds = json.loads(CREDENTIALS_PATH.read_text())["claudeAiOauth"]
+    expires_at = datetime.fromtimestamp(creds["expiresAt"] / 1000, tz=UTC)
+    if expires_at < datetime.now(UTC):
+        raise TokenExpired(f"expired at {expires_at}")
+    return creds["accessToken"]
+
+
+def fetch_usage(token: str) -> dict:
+    request = urllib.request.Request(
+        USAGE_API_URL,
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return json.load(response)
+
+
+def limit_label(limit: dict) -> str:
+    scope = limit["scope"] or {}
+    model = (scope.get("model") or {}).get("display_name")
+    return f"{limit['group']} ({model})" if model else limit["group"]
+
+
+def compute_rate_report(now: datetime, limit: dict) -> RateReport:
+    resets_at = datetime.fromisoformat(limit["resets_at"])
+    period_hours = PERIOD_HOURS[limit["group"]]
+    window_start = resets_at - timedelta(hours=period_hours)
+    elapsed_hours = (now - window_start).total_seconds() / 3600
+    remaining_hours = (resets_at - now).total_seconds() / 3600
+    percent = limit["percent"]
+    current_rate = percent / elapsed_hours
+
+    return RateReport(
+        label=limit_label(limit),
+        percent=percent,
+        resets_at=resets_at,
+        elapsed_hours=elapsed_hours,
+        current_rate=current_rate,
+        avg_remaining_rate=(100 - percent) / remaining_hours,
+        projected_percent=percent + current_rate * remaining_hours,
+    )
+
+
+def format_report(report: RateReport) -> str:
+    local_reset = report.resets_at.astimezone().strftime("%a %b %d %I:%M%p %Z")
+    lines = [
+        f"{report.label}: {report.percent}% used, resets {local_reset}",
+        f"  current rate:        {report.current_rate:.4f} %/hr  (over {report.elapsed_hours:.1f}h elapsed)",
+        f"  avg-remaining rate:  {report.avg_remaining_rate:.4f} %/hr  (pace to land at exactly 100%)",
+        f"  rate adjustment:     {(report.rate_adjustment - 1) * 100:+.0f}%  (change current rate by this to land at exactly 100%)",
+        f"  projected at reset:  {report.projected_percent:.1f}%",
+    ]
+    return "\n".join(lines)
+
+
+def main() -> None:
+    try:
+        token = load_token()
+    except TokenExpired as e:
+        sys.exit(f"OAuth token expired ({e}) -- run any `claude` command to refresh it, then retry.")
+
+    data = fetch_usage(token)
+    assert "limits" in data, data
+    limits = [limit for limit in data["limits"] if limit["resets_at"] is not None]
+
+    now = datetime.now(UTC)
+    reports = [compute_rate_report(now, limit) for limit in limits]
+    print("\n\n".join(format_report(report) for report in reports))
+
+
+if __name__ == "__main__":
+    main()
