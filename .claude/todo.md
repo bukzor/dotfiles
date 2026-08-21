@@ -30,7 +30,7 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       `docs/dev/devlog/2026-07-24-000-Claude-Code-branch-recovery--extract-by-leaf--not-by-carve.md`)
       but older builds weren't inspected — would need an old release
       tarball/changelog to check
-- [ ] Add a `/must-read` command for llm-kb's `SKILL.kb/must-read/` (must-read-kb-skill.md's other follow-up; the `SKILL.kb/must-read/` dir itself already exists) — deferred
+- [ ] Add a `/must-read` command for llm-kb's `skill.kb/must-read.kb/` (must-read-kb-skill.md's other follow-up; the `skill.kb/must-read.kb/` dir itself already exists) — deferred
 - [ ] Finish yaml-date-jsonschema's remaining follow-ups in `bukzor-agent-skills/llm-kb`: `finish-debolding-cleanup` (still ~40 bold instances across 8 files beyond `references/pattern-guide.md`, which is now fixed — not actually done despite earlier belief), `auto-migrate-scripts-for-kb-dirs`, `schema-migrate-string-pattern-to-date`
 - [ ] Resolve `todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md`'s D6 held-review items: `bin/CLAUDE.md` (deleted uncommitted by another session — restore or finish rename?), `claudesh`/`finder.sh`/`scratch/python/`/`empty/` triage, `.envrc`/`profile.env` review, `.claude/claude-alignment-2026-04-29.{jsonschema.yaml,kb/}` commit-or-trash — NOTE: `bin/colortest17x17*` and `.zsh_profile` (formerly listed here too) are resolved: colortest17x17 merged clean in reunify task 004 (2026-07-13, no stray variant found), `.zsh_profile` deleted on both branches by reunify task 005 (2026-07-12, dead debug artifact)
 - [ ] [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md) — converge svelte-crostini ↔ main to identical content, merge, live on main
