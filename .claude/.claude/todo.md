@@ -23,6 +23,12 @@ Scope: Claude configuration (`~/.claude` itself).
         one entry (`move-skill-triggers-to-must-read-kb.md`) has no
         `session` block at all. Decide whether `started` should accept
         `date` for entries that only ever knew the day.
+- [ ] Rule on `disable-model-invocation: true` for `commands/session-end.md`
+      and `commands/commit.md`. Both are model-invocable today, so an agent
+      can decide on its own to commit and push; the skills doc names exactly
+      this case ("workflows with side effects ... like `/commit`, `/deploy`").
+      Raised 2026-08-21 while diagnosing why `/session-end` drew "no such
+      skill" pushback.
 - [~] "No inline code in docs" as default policy — code goes in
       `{prefix}.py`, or `{prefix}.d/` past a file or two. It was folk
       knowledge re-derived per kb; `llm-claims-kb`'s maintenance guide

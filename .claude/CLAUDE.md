@@ -113,7 +113,8 @@ Never put scratch in `/tmp` unless the user explicitly says so;
 
 ## Shorthand
 
-- `/xxyy` -- SlashCommand(command="/xxyy")
+- `/xxyy` -- Skill("xxyy"), even mid-sentence (the UI only expands a slash
+  command that starts the message; anywhere else it arrives as plain text)
 - `c` -- Please, continue.
 - `s` -- One, smallest, step, please.
 - `n` -- Perform one (top-level) step.

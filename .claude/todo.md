@@ -23,6 +23,12 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       doesn't print each branch's tip uuid, which is exactly what
       `claude-branch-extract` needs as input — found while rebuilding
       branch_extract.py 2026-07-24
+- [ ] `claude-search` reports a JSONL line number but nothing in
+      `claude-code-archeology` renders the records *around* one — reading a
+      hit's context means writing a throwaway parser every time (did it again
+      2026-08-21; that copy is `~/.claude/trash/peek.py`). Add a range view:
+      `claude-jsonl-peek FILE --range LO HI`, or `--around N` on
+      `claude-jsonl-display`.
 - [ ] Verify (or drop) the belief that an older Claude Code version had a
       rewind/resume picker capable of switching among sibling branches of
       a branched chat — user recalls this from ~a year ago; 2.1.219's
