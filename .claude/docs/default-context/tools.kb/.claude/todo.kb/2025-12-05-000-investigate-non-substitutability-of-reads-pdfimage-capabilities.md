@@ -1,4 +1,5 @@
 ---
+managed-by: Skill(llm-subtask)
 cost-benefit-sweh:
   timebox:
     '@value': 1

@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: exploring
+status: deferred
 cost-benefit-sweh:
   timebox:
     "@value": 0.5 # SWEh worth exploring before promoting or abandoning

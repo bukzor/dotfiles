@@ -21,7 +21,7 @@ cost-benefit-sweh:
     confidence: tentative
 ---
 
-- [ ] .claude/todo.d/2025-12-05-000-investigate-non-substitutability-of-reads-pdfimage-capabilities.md
+- [ ] todo.kb/2025-12-05-000-investigate-non-substitutability-of-reads-pdfimage-capabilities.md
 
 ## Later
 
