@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$schema: https://json-schema.org/draft/2020-12/schema
+title: claude-alignment-2026-04-29 frontmatter
+description: >
+  Every note in this dated alignment kb, at every depth: who the
+  understanding came from, how settled it is, and what else to read.
+
+  The three fields are shared by the root notes and by all four
+  sub-collections, which is why each of those carries a $ref stub back
+  here rather than a schema of its own.
+
+  The two enums are closed. This kb is a frozen artifact of one session
+  -- its CLAUDE.md says it "dies when its content lives elsewhere" --
+  so the vocabularies cannot grow, and naming their members is
+  documentation the CLAUDE.md never wrote down.
+type: object
+required:
+  - source
+  - status
+properties:
+  source:
+    description: >
+      Who the understanding came from. `user` is something the user
+      asserted, `agent` something the prior Claude concluded about
+      itself, `mutual` something the two arrived at together and both
+      signed.
+    enum: [user, agent, mutual]
+  status:
+    description: >
+      How settled the item is. `firm` was affirmed in the session and
+      is meant to be acted on; `tentative` was proposed and neither
+      affirmed nor rejected; `exploratory` is a candidate answer to an
+      open question, written to be argued with.
+    enum: [firm, tentative, exploratory]
+  see-also:
+    description: >
+      Sibling notes worth reading alongside this one, as paths
+      relative to this kb's root. Not a citation -- nothing here
+      depends on what it points at.
+    type: array
+    items:
+      type: string
+    minItems: 1
+additionalProperties: false
