@@ -112,6 +112,17 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/claude/mitmproxy/lib/claude_mitmproxy/binpatch.py"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
