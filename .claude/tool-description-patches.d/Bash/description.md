@@ -6,4 +6,4 @@ Executes a bash command and returns its output.
 - `run_in_background` runs the command detached and notifies you when it exits (no `&` needed). Foreground `sleep` is blocked; to wait on a condition, use Monitor with an until-loop.
 - Git: interactive flags (`-i`) are unsupported; use `gh` for GitHub operations. Never skip hooks, amend, force-push, or run destructive operations (`reset --hard`, `checkout --`, `clean -f`) unless explicitly requested. Conventions (commit tooling, message format) are in `~/.claude/must-read.kb/before/git/` -- required reading before any git command.
 
-REQUIRED before any Bash use: read `~/.claude/must-read.kb/before/running-ANY-Bash-commands.md`.
+REQUIRED before any post-bootstrap Bash use: read `~/.claude/must-read.kb/before/running-ANY-post-bootstrap-Bash-commands.md`.
