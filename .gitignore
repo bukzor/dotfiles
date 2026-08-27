@@ -103,6 +103,8 @@ package/
 /.config/google-chrome-for-testing/
 /.config/pulse/
 /node_modules/
+# recreated empty by `corepack use`; ~/package.json declares no dependencies
+/pnpm-lock.yaml
 
 # Misc transient
 .sqlite_history
@@ -197,3 +199,4 @@ _viminfo
 *.did
 *.did.tmp
 *.redo.tmp
+backups/
