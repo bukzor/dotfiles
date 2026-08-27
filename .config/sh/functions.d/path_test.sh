@@ -39,4 +39,19 @@ EOF
 assert_eq "heredoc form processes every line (regression: silent no-op)" \
   "/h2:/b:/h1:/a" "$PVAR"
 
+# Regression: an empty variable, and an entry that filters the list down to
+# nothing, once made the underlying grep(1) exit 1 -- which aborted the whole
+# caller under `set -e`, taking every profile.d/env.d file after it.
+PVAR=""
+path prepend PVAR /only
+assert_eq "empty variable gains its first entry" "/only" "$PVAR"
+
+PVAR="/only"
+path prepend PVAR /only
+assert_eq "re-prepending the only entry keeps it" "/only" "$PVAR"
+
+PVAR=":"
+path append PVAR /only
+assert_eq "variable of only separators is cleaned up" "/only" "$PVAR"
+
 assert_done
