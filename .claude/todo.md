@@ -59,9 +59,6 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       the retired dotfiles copy of the tool plus untracked May-2026 migration
       artifacts, kept only for recovery; the installed system was verified
       before it was moved aside (2026-08-10).
-- [ ] Remove `HOMEBREW_EVAL_ALL=1` from shell config — new brew treats it as a fatal
-      deprecation in `brew tap`; per-tap `brew trust` replaces it (found 2026-07-26
-      while fixing the sub install)
 
 - [ ] Delete `~/trash/pnpm-global-5-retired/` (820M) and `~/trash/pnpm-stubs/`
       once corepack-provided pnpm has run a few days without regret. The dir
