@@ -63,6 +63,24 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       deprecation in `brew tap`; per-tap `brew trust` replaces it (found 2026-07-26
       while fixing the sub install)
 
+- [ ] Delete `~/trash/pnpm-global-5-retired/` (820M) and `~/trash/pnpm-stubs/`
+      once corepack-provided pnpm has run a few days without regret. The dir
+      is pnpm 10's global root; the stubs are the four bin shims that pointed
+      into it. Both were verified replaced before being moved aside
+      (2026-08-27).
+- [ ] Remove `~/prefix/npm/` — an empty scaffold (`lib/.gitkeep`) for a prefix
+      nothing reads: `.npmrc` was deleted 2026-08-27 (pnpm 11 reads `.npmrc`
+      for auth/registry only) and `npm` here is a shim to pnpm.
+- [ ] `.config/sh/functions.sh` still sources `functions.d/*.sh` with a bare
+      loop that reports nothing when a file fails. `source_dir` got that
+      treatment 2026-08-27; this loop can't use `warn` because `warn.sh`
+      loads last. Rename it `00-warn.sh`, or inline an `echo >&2`.
+- [ ] corepack's `pnpm`/`pnpx` shims are symlinks into
+      `~/.volta/tools/image/node/<version>/`, so a `volta install node` strands
+      them and only `cron-health_check.sh` would notice, a day later. Consider
+      re-running `corepack enable pnpm --install-directory ~/prefix/pnpm/bin`
+      from `bin/pnpm-upgrade-g` when the shim is broken.
+
 ## Later
 
 We haven't (yet) decided where to place these in the task queue.
