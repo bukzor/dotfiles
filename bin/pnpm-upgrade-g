@@ -14,37 +14,84 @@ trap onerror ERR
 # pnpm -g update replaces packages in the virtual store but does NOT
 # regenerate bin stubs, leaving them pointing at deleted version dirs.
 # This script uses `pnpm add -g <pkg>@latest` which does the full
-# install + bin-link cycle, then syncs the packageManager pin in
-# ~/package.json so corepack stays in agreement.
+# install + bin-link cycle, and `corepack use pnpm@latest`, which moves the
+# packageManager pin in ~/package.json that decides which pnpm runs.
+#
+# The whole set goes in ONE `pnpm add -g` with a fixed flag list. pnpm keys the
+# global install directory on the effective settings, so a run with a different
+# flag list can land in a fresh empty directory and unlink every bin it didn't
+# install itself.
 
+# The declared set, tracked in git -- the only restorable record of it. pnpm 11
+# keeps no aggregate manifest: each global package gets its own directory under
+# a hashed name that pnpm renames at will. Only the names are read; every
+# upgrade takes @latest. Packages installed from a path (`pnpm add -g ../foo`)
+# don't belong here -- they have no registry version to upgrade to.
+MANIFEST="$HOME/.config/pnpm/global/package.json"
 PACKAGE_JSON="$HOME/package.json"
 
+# Install scripts cannot be approved from a file: allowBuilds is rejected in
+# the global config, and `pnpm approve-builds` refuses global packages. The
+# allow-list has to ride on the command line.
+ALLOW_BUILD=(--allow-build=bun)
+
 packages() {
-  pnpm ls -g --depth=0 --json |
-    jq -r '.[].dependencies | keys[]'
+  jq -r '.dependencies | keys[]' "$MANIFEST"
 }
 
-sync_package_manager_pin() {
-  local version
-  version="$(pnpm -v)"
-  local tmp
-  tmp="$(mktemp)"
-  jq --arg v "$version" '.packageManager = "pnpm@" + $v' "$PACKAGE_JSON" > "$tmp"
-  mv "$tmp" "$PACKAGE_JSON"
+installed() {
+  pnpm ls -g --depth=0 --json | jq -r '.[0].dependencies | keys[]'
 }
 
-if (( DEBUG > 0 )); then
+# The failures this catches ran unnoticed for three months: a pnpm upgrade that
+# moves the global bin directory off PATH, and an install that silently starts
+# from an empty package set.
+smoke_test() {
+  local failed=0
+
+  local bindir
+  bindir="$(pnpm bin -g)" # nonzero when that directory isn't in PATH
+  case ":$PATH:" in
+    *":$bindir:"*) ;;
+    *)
+      echo >&2 "FAIL: global bin directory is not in PATH: $bindir"
+      failed=1
+      ;;
+  esac
+
+  local missing
+  missing="$(comm -23 <(packages | sort) <(installed | sort))"
+  if [ -n "$missing" ]; then
+    echo >&2 "FAIL: declared in $MANIFEST but not installed:"
+    echo >&2 "$missing"
+    failed=1
+  fi
+
+  local pin
+  pin="$(jq -r .packageManager "$PACKAGE_JSON")"
+  pin="${pin%%+*}" # corepack appends a +sha512 integrity hash
+  if [ "$pin" != "pnpm@$(pnpm -v)" ]; then
+    echo >&2 "FAIL: $PACKAGE_JSON pins $pin, but pnpm is $(pnpm -v)"
+    failed=1
+  fi
+
+  return "$failed"
+}
+
+if ((DEBUG > 0)); then
   set -x
 fi
 
-# Build the argument list: each package@latest
+# self-update edits the packageManager pin of the surrounding project
+cd "$HOME"
+
 args=()
 while IFS= read -r pkg; do
   args+=("${pkg}@latest")
 done < <(packages)
 
-if (( ${#args[@]} == 0 )); then
-  echo >&2 "No global packages found"
+if ((${#args[@]} == 0)); then
+  echo >&2 "No packages declared in $MANIFEST"
   exit 1
 fi
 
@@ -52,9 +99,17 @@ echo "Upgrading ${#args[@]} global packages:"
 printf '  %s\n' "${args[@]}"
 echo
 
-pnpm add -g "${args[@]}"
+pnpm add -g "${ALLOW_BUILD[@]}" "${args[@]}"
 
 echo
-echo "Syncing packageManager pin..."
-sync_package_manager_pin
+echo "Upgrading pnpm itself..."
+# pnpm can be neither a global package (ERR_PNPM_GLOBAL_PNPM_INSTALL) nor
+# self-updating under corepack (ERR_PNPM_CANT_SELF_UPDATE_IN_COREPACK).
+corepack use pnpm@latest
+
 echo "  packageManager: $(jq -r .packageManager "$PACKAGE_JSON")"
+
+echo
+echo "Checking..."
+smoke_test
+echo "  ok"

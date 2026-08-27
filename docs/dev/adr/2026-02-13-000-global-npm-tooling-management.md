@@ -1,7 +1,7 @@
 # Global npm tooling management
 
 **Date:** 2026-02-13
-**Status:** Accepted
+**Status:** Accepted -- mechanism superseded by [2026-08-27-000]
 
 ## Context
 
@@ -23,6 +23,10 @@ pointing at removed package versions → `MODULE_NOT_FOUND` at runtime.
 ## Decision
 
 **`pnpm add -g` is the sole authority for global npm-sourced tooling.**
+
+The bullets below describe the pnpm 10 mechanism. pnpm 11 forbids
+`pnpm add -g pnpm`, and reads its configuration from a different file; see
+[2026-08-27-000] for what replaced them.
 
 - `packageManager` in `~/package.json` pins the pnpm version.
 - corepack bootstraps pnpm from any available node (volta-bundled, brew, etc.).
@@ -90,4 +94,7 @@ Node-independent:
 ## Related
 
 - Extends: `bukzor.garden: docs/dev/adr/2026-02-05-000-corepack-over-volta-for-pnpm-management.md`
+- Extended by: [2026-08-27-000] — the pnpm 11 mechanism
 - See also: `setup/volta.sh` — implements the bootstrap chain
+
+[2026-08-27-000]: 2026-08-27-000-pnpm-11-global-tooling-mechanism.md

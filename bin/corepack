@@ -1,0 +1,4 @@
+#!/bin/sh
+# corepack, as shipped with volta's current node.
+# Bypasses volta's shim to avoid PATH injection, and follows node upgrades.
+exec "$(dirname "$(volta which node)")/corepack" "$@"

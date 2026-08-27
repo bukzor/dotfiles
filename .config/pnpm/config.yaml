@@ -1,0 +1,11 @@
+# pnpm's global install locations. Replaces the `prefix` setting of the
+# ini-format `rc` file, which pnpm 11 no longer reads. `${HOME}` is expanded;
+# `~` and `$HOME` are not. pnpm appends its layout version to globalDir.
+# storeDir is left at its default, ~/.local/share/pnpm/store.
+#
+# Install scripts cannot be approved from here: allowBuilds is rejected in the
+# global config, and `pnpm approve-builds` refuses to run against global
+# packages. Global installs must pass `--allow-build=<pkg>` on the command
+# line, so that list lives in bin/pnpm-upgrade-g.
+globalBinDir: ${HOME}/prefix/pnpm/bin
+globalDir: ${HOME}/prefix/pnpm/global

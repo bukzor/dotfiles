@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@openai/codex": "^0.150.0",
+    "amazon-buddy": "^2.2.45",
+    "bun": "^1.4.0",
+    "js-beautify": "^2.0.3",
+    "neovim": "^5.4.0",
+    "vim-language-server": "^2.3.1"
+  }
+}
