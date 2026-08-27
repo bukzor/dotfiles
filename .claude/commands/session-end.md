@@ -33,6 +33,11 @@ Key questions:
 - Are all unfinished work, inconsitencies, "loose ends" documented?
 - Is there anything you know that future claude would want or need, but not have?
 - Any cleanup we should do before we go, to reduce future claude/user confusion?
+- Judgment calls awaiting the owner's ruling (agent-standing content,
+  chosen defaults): swept explicitly? Finished work doesn't dangle, so
+  the loose-ends sweep misses it. The batch belongs in the
+  brief/register its ruling sitting reads
+  (`Skill(review-open-questions)`), not only in a devlog or breadcrumb.
 - If `Skill(llm-design-kb)`: run the maintenance checklist from that skill
 
 Steps:
