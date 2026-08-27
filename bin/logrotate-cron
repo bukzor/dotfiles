@@ -33,4 +33,15 @@ EOF
 exec >> "$logfile" 2>&1
 echo --
 date -Ins
-exec "$@"
+
+if "$@"; then
+  status=0
+else
+  status=$?
+fi
+
+# The status file is what anything else checks. anacron writes its own
+# timestamp whether the job worked or not, and this log is an archive nobody
+# reads -- neither can answer "did the last run succeed?".
+echo "$status" > "${logfile%.log}.status"
+exit "$status"

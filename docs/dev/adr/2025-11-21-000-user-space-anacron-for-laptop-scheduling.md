@@ -86,6 +86,9 @@ Full paths required in crontab due to minimal PATH in cron environment.
 
 ## References
 
+- Extended by: `docs/dev/adr/2026-08-27-001-scheduled-job-health.md`
+  -- jobs record exit status, and failures get surfaced
+
 - Anacron man pages: `anacron(8)`, `anacrontab(5)`
 - XDG Base Directory Specification: https://specifications.freedesktop.org/basedir-spec/
 - Initial discussion focused on systemd vs portability tradeoffs
