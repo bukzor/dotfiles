@@ -14,6 +14,30 @@ agents the harness has written off.
 Read the patient first, with archeology's tools — never operate on a
 transcript you haven't parsed.
 
+## Tools
+
+The `claude-code-archeology` package (bukzor-tools) carries the
+write-side pair; prefer them over hand-rolled scripts — they encode
+the iron rules below as refusals:
+
+- `claude-jsonl-truncate FILE (REF | --match REGEX) [--write | --in-place]`
+  — the tail cut. Dry-run by default; either mode refuses a cut that
+  strands a `tool_use`, suggesting the nearest clean boundary.
+  `--write` lands the kept prefix as a NEW session (fresh id, records
+  retargeted, path on stdout) — safe even on a live session, since
+  the original is never opened for writing. `--in-place` keeps the
+  file's own id — required when the id is load-bearing (a subagent's
+  `agentId`; a session whose `subagents/` must stay reachable) — with
+  liveness guard, backup-first, byte-identical kept lines, and
+  `--repoint-leaf` for a kept `last-prompt` anchored in the dropped
+  era. `--check` diagnoses a tail without naming a cut.
+- `claude-agent-unstop PATH` — clears `stoppedByUser` from an agent's
+  meta.json (backup first) and reports whether the transcript tail is
+  clean enough to resume.
+
+Installed by `uv tool install bukzor-tools`; or run as
+`uv run --project ~/repo/github.com/bukzor/bukzor-tools <cmd>`.
+
 ## Iron rules
 
 - **Operate only on a stopped writer.** The jsonl must be mtime-static
