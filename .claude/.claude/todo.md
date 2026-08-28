@@ -50,4 +50,26 @@ Scope: Claude configuration (`~/.claude` itself).
 We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
-- (none)
+- [ ] Postbox convention — implement once the runtime-directory name is
+      ruled (see the QUESTION in `postbox.design.kb/convention.md`). Then:
+      trigger-bank entries via Skill(llm-triggers) (hand-off, boundary
+      inbox check, live-channels-carry-no-content), gitignore convention,
+      optional hook/statusline mechanisms. Design converged 2026-08-28;
+      `postbox.design.kb/CLAUDE.md` has the re-entry path.
+- [ ] autoCompactWindow discrepancy: `settings.json` says 500000
+      (set 2026-08-28) but 194 historical auto-compactions fired at mean
+      ~172k — including never-fable sessions, so not model-linked. Watch
+      the next auto-compactions; if still ~170k, file upstream. Evidence:
+      `~/claude/how-to-claude-code/findings/2026-08-28-usage-review.md`.
+- [ ] Effort experiment: default `high` for one week, xhigh reserved for
+      the effort-tier agents. Motivation: xhigh everywhere = 87% of spend,
+      thinking:text 93:7. Quality tradeoff is unmeasured — judge by feel,
+      revert freely. Same findings doc.
+- [ ] Bash SIGPIPE enforcement + hook silence: 167 head-under-pipefail
+      failures in 21 days despite `bash-conventions.md`; hooks emitted
+      3.5 Mtok of success noise. Candidates: PreToolUse hook rejecting
+      `| head` patterns; audit hooks to be silent on success.
+- [ ] Default model is fable-5 (a `/model opus[1m]` revert attempt printed
+      "Kept model as Fable 5"). Routing analysis (findings doc,
+      "Amendments") says: default opus, fable by deliberate switch or in
+      lean workers.
