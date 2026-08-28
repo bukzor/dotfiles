@@ -1,8 +1,3 @@
---- # workaround: anthropics/claude-code#13003
-requires:
-    - Skill(llm-subtask)
----
-
 # Reunify dotfiles lineages — working agreements
 
 Applies to every task file in this directory. Read before acting on any of them.
