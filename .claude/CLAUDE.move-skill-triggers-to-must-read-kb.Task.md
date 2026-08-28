@@ -1,6 +1,4 @@
 --- # workaround: anthropics/claude-code#13003
-triggers:
-  - read: ./must-read.kb/before/git/commit.md
 cost-benefit-sweh:
   timebox:
     "@value": 2.0
