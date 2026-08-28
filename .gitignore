@@ -200,3 +200,8 @@ _viminfo
 *.did.tmp
 *.redo.tmp
 backups/
+
+# written by bukzor-tmpwatch-install; the source of truth is the unit files in
+# bukzor-tools/packages/bukzor-tmpwatch
+/.config/systemd/user/bukzor-tmpwatch.service
+/.config/systemd/user/bukzor-tmpwatch.timer

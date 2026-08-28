@@ -13,11 +13,17 @@ BOOT="$(bootstamp)"
 export TMPDIR
 # NB: macos date(1) doesn't support -I nor -Id
 date="$(date -Idate)"
+# $HOME first: /tmp here is tmpfs (RAM, no swap) and is emptied at boot, so
+# scratch there is unrecoverable and competes with real memory. Under $HOME it
+# is durable, renames into $HOME atomically, and ChromeOS can open it -- the
+# host only ever sees the container's homedir. bukzor-tmpwatch(1) does the GC.
+# The literal /tmp candidates stay as fallbacks, and as a way to opt a single
+# heavy job back into RAM: `TMPDIR=/tmp/$USER/$BOOT/$(date -Idate) some-cmd`.
 for TMPDIR in \
   "$TMPDIR" \
+  "$HOME/tmp/boot=$BOOT/$date" \
   "/tmp/$USER/$BOOT/$date" \
   "/tmp" \
-  "$HOME/tmp/$BOOT/$date" \
   "$HOME/tmp"; do
   if [ "$TMPDIR" ]; then
     mkdir -p "$TMPDIR" 2>/dev/null
