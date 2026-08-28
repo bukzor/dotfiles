@@ -3,7 +3,7 @@ triggers:
   - read: ~/.claude/reference.kb/claude-md-frontmatter.md
 ---
 
-# Writing agent-facing instruction
+# Before writing agent-facing instruction
 
 Triggers on the artifact, not the request: any text an agent will load
 as instruction rather than read as prose — a `CLAUDE.md`, an entry in
