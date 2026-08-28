@@ -31,20 +31,11 @@ While planning, before taking ANY action, review **all three** trigger banks:
    file that all agents **must read before running any Bash command past the
    bootstrap `ls` above**.
 2. the available-skills list -- a skill's `description` names the occasion to
-   load it; read it as a trigger, not a summary. A skill whose trigger matches
-   MUST be loaded even when nothing in the repo points at it.
-3. the `triggers:` frontmatter of every file you have loaded -- each entry names
-   what to `read:`. An entry with no `before:`/`when:`/`after:` is unconditional:
-   it fires the moment you act on that file's content.
+   load it; read it as a trigger, not a summary.
+3. the `triggers:` frontmatter of every file you have loaded.
 4. evaluate whether any of the triggers match your situation
 5. when a trigger condition matches, you MUST read that file or load that skill
    - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent -- they MUST be executed sequentially.
-
-### Frontmatter Directives
-
-`triggers:` is the only directive field. An entry pairs an optional juncture -- `before:`, `when:`, `after:` -- with what to `read:`, which takes one target or a list. A bare entry is legal only where the carrier was itself reached conditionally, as a must-read entry is.
-
-A skipped trigger is a documented failure mode: you read the file, saw the directive, and acted anyway.
 
 > WARNING:
 >
