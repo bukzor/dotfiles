@@ -1,6 +1,7 @@
 ---
 triggers:
-    - read: ~/repo/github.com/bukzor/ideation.epistemics/preservation-audit.md
+    - when: writing the side-by-side
+      read: ~/repo/github.com/bukzor/ideation.epistemics/preservation-audit.md
 ---
 
 # When redesigning something that already exists
