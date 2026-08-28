@@ -24,22 +24,25 @@ How to work -- on everything, not just these instructions:
 >
 > Your FIRST tool use in every conversation MUST be: Bash("ls -RF ~/.claude/must-read.kb")
 
-While planning, before taking ANY action:
+While planning, before taking ANY action, review **both** trigger banks:
 
-1. mentally review the must-read paths -- the path names its own trigger. For
+1. the must-read paths -- the path names its own trigger. For
    example, `must-read.kb/before/running-ANY-post-bootstrap-Bash-commands.md` is a
    file that all agents **must read before running any Bash command past the
    bootstrap `ls` above**.
-2. evaluate whether any of the triggers match your situation
-3. when a trigger condition matches, you MUST read that file
+2. the available-skills list -- a skill's `description` names the occasion to
+   load it; read it as a trigger, not a summary. A skill whose trigger matches
+   MUST be loaded even when nothing in the repo points at it.
+3. evaluate whether any of the triggers match your situation
+4. when a trigger condition matches, you MUST read that file or load that skill
    - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent -- they MUST be executed sequentially.
 
 ### Frontmatter Directives
 
-CLAUDE.md and other agent-context markdown files -- the must-read entries among them -- carry frontmatter that is an action trigger, not passive metadata:
+Directives are triggers -- (condition, target). A bare one is well-formed only where the carrier was itself reached conditionally, as a must-read entry is:
 
-- `requires:` -- all agents MUST read the listed files before acting on this file's content; failure to do so WILL result in task failure.
-- `depends:` -- informational; read when relevant.
+- `requires:` -- read before acting on this file's content.
+- `depends:` -- read when relevant. Legacy; prefer the target's own trigger.
 
 A skipped `requires:` is a documented failure mode: you read the file, saw the directive, and acted anyway.
 

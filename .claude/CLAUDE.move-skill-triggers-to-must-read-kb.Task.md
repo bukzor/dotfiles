@@ -20,6 +20,29 @@ cost-benefit-sweh:
 
 # Task: Move skill auto-load triggers from SKILL.md descriptions to `~/.claude/must-read.kb/`
 
+> [!IMPORTANT] Superseded 2026-08-27 — do not execute as written.
+>
+> The asymmetry diagnosed below was real, and is now fixed from the
+> other side: `~/.claude/CLAUDE.md`'s Required Reading binds the
+> descriptions as a second trigger bank, scanned during planning. The
+> "Bound by CLAUDE.md?" column now reads Yes for both rows. Descriptions
+> stay authoritative and are being repaired in place — made intent-keyed
+> rather than location-keyed, which is the defect that actually made
+> them misfire.
+>
+> Why the opposite direction won: a `description:` ships with its skill,
+> while `must-read.kb/` lives in bukzor/dotfiles. Moving skill triggers
+> here would file skill details in a separate repo, and would leave a
+> skill installed by anyone else carrying no triggers at all.
+>
+> **Revive if** `must-read.kb` gains a federation mechanism — banks
+> contributed by an installed skill, merged into the user-scope scan.
+> That condition, and only that, makes this task's direction cheaper
+> than the one taken.
+>
+> Background: `bukzor-agent-skills/CLAUDE.md` (design guidance) and
+> `llm-triggers/design.kb/use-cases.kb/arrival-fired-directives.md`.
+
 ## Problem
 
 Several skills carry imperative auto-load text in their `description:`
