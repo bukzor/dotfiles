@@ -5,10 +5,8 @@ SendMessage/ListAgents. Status: **design converged 2026-08-28, nothing
 implemented.** One ruling gates implementation (runtime directory name —
 see the QUESTION in `convention.md`).
 
-Placement note: this kb sits in `~/.claude` because that is the governing
-project — triggers, hooks, and permission rules land here. Agent-chosen,
-unratified; the owner floated per-project scope. Revisit on ruling; moving
-the kb is a `git mv`.
+Placement: `~/.claude/docs/dev/` by owner ruling (2026-08-28); `~/.claude`
+is the governing project — triggers, hooks, and permission rules land here.
 
 ## Re-entry (reading order for a cold agent)
 
