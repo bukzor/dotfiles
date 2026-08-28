@@ -39,12 +39,9 @@ While planning, before taking ANY action, review **both** trigger banks:
 
 ### Frontmatter Directives
 
-Directives are triggers -- (condition, target). A bare one is well-formed only where the carrier was itself reached conditionally, as a must-read entry is:
+`triggers:` entries pair a condition -- `before:`, `when:`, `after:` -- with what to `read:`. A bare entry inherits its carrier's condition, and is well-formed only where the carrier was itself reached conditionally, as a must-read entry is.
 
-- `requires:` -- read before acting on this file's content.
-- `depends:` -- read when relevant. Legacy; prefer the target's own trigger.
-
-A skipped `requires:` is a documented failure mode: you read the file, saw the directive, and acted anyway.
+A skipped trigger is a documented failure mode: you read the file, saw the directive, and acted anyway.
 
 > WARNING:
 >

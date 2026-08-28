@@ -1,7 +1,8 @@
 ---
-requires:
-  - ~/.claude/reference.kb/git/commit.md
-  - ./running-ANY-git-command.md
+triggers:
+  - read:
+      - ~/.claude/reference.kb/git/commit.md
+      - ./running-ANY-git-command.md
 ---
 
 # Before committing

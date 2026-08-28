@@ -1,6 +1,6 @@
 ---
-depends:
-    - ~/repo/github.com/bukzor/ideation.epistemics/preservation-audit.md
+triggers:
+    - read: ~/repo/github.com/bukzor/ideation.epistemics/preservation-audit.md
 ---
 
 # When redesigning something that already exists

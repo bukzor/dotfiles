@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/bash-conventions.md
+triggers:
+  - read: ~/.claude/reference.kb/bash-conventions.md
 ---
 
 # Shell scripting

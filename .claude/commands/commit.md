@@ -3,9 +3,10 @@ description: Commit workflow -- scope, triage untracked files, commit by path
 ---
 
 --- # workaround: anthropics/claude-code#13003
-requires:
-  - ../must-read.kb/before/git/running-ANY-git-command.md
-  - ../must-read.kb/before/git/commit.md
+triggers:
+  - read:
+      - ../must-read.kb/before/git/running-ANY-git-command.md
+      - ../must-read.kb/before/git/commit.md
 ---
 
 # Commit Command

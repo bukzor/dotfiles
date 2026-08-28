@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/python/style.md
+triggers:
+  - read: ~/.claude/reference.kb/python/style.md
 ---
 
 # Writing Python code

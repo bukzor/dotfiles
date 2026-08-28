@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/git/conventions.md
+triggers:
+  - read: ~/.claude/reference.kb/git/conventions.md
 ---
 
 # Before any git command

@@ -4,8 +4,8 @@ argument-hint: "[taskfile or brief -- default: @.claude/todo.md]"
 ---
 
 --- # workaround: anthropics/claude-code#13003
-depends:
-  - Skill(llm-collab)
+triggers:
+  - read: Skill(llm-collab)
 ---
 
 # Session Start

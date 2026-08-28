@@ -3,11 +3,6 @@ name: mutation-testing
 description: "Post-hoc TDD via mutation testing — inject bugs, harden tests"
 ---
 
-```yaml # workaround: anthropics/claude-code#13003
-requires:
-  - Skill(llm.kb)
-```
-
 # Post-Hoc TDD
 
 Test-driven development applied retroactively to existing code. Use when code exists but test coverage is uncertain.

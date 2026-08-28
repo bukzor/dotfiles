@@ -4,14 +4,13 @@ argument-hint: "[actions -- default: commit; push]"
 ---
 
 --- # workaround: anthropics/claude-code#13003
-depends:
-
-- ../must-read.kb/before/git/running-ANY-git-command.md
-- ../must-read.kb/before/git/commit.md
-  requires:
-- Skill(llm-collab)
-- Skill(llm-subtask)
-- Command(commit)
+triggers:
+  - read:
+      - ../must-read.kb/before/git/running-ANY-git-command.md
+      - ../must-read.kb/before/git/commit.md
+      - Skill(llm-collab)
+      - Skill(llm-subtask)
+      - Command(commit)
 
 ---
 

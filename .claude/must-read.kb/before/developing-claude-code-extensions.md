@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/claude-md-frontmatter.md
+triggers:
+  - read: ~/.claude/reference.kb/claude-md-frontmatter.md
 ---
 
 # Developing claude-code extensions (hooks, skills, commands, …)
