@@ -33,9 +33,10 @@ While planning, before taking ANY action, review **all three** trigger banks:
 2. the available-skills list -- a skill's `description` names the occasion to
    load it; read it as a trigger, not a summary.
 3. the `triggers:` frontmatter of every file you have loaded.
-4. evaluate whether any of the triggers match your situation
-5. when a trigger condition matches, you MUST read that file or load that skill
-   - `before/` creates a dependency: the read MUST complete before related actions. These operations are NOT independent -- they MUST be executed sequentially.
+
+When a trigger's condition matches your situation, you MUST read that file or
+load that skill. `before/` creates a dependency: the read MUST complete before
+related actions -- they are NOT independent and MUST be executed sequentially.
 
 > WARNING:
 >
