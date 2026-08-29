@@ -46,17 +46,27 @@ Derived bans:
 > body as a file diff, and unlike push messaging the owner can also edit
 > the message before it is read.
 
-> [!QUESTION] runtime directory name and resolution
-> Owner ruled global/local must unify; the name is unruled. Candidates:
-> - `postbox/` at repo root, gitignored, `trash/`-style resolution (walk
->   up to `.git/`, fall back to `~/postbox/`) — **recommended**:
->   observability was a core selling point (visible in `ls`, tmux panes);
->   reuses an already-internalized pattern.
-> - `.claude/postbox/` — hidden; `.claude/` is committed in many repos,
->   putting transient mail one careless `git add` from history.
-> - `postbox.kb/` — `.kb` currently means durable knowledge under
->   governance; mail is ephemeral traffic and would dilute the suffix.
-> Settles by: owner ruling. Gates all implementation.
+> [!TODO] runtime location (owner-ruled)
+> The postbox root is `<root>/.local/state/llm-postbox/` — a cwd-grafted
+> XDG layout, the owner's proven convention for runtime incidentals.
+> `<root>` resolves by walking up from `$CWD` to the nearest `.git/`;
+> outside any repo the graft degrades to genuine XDG:
+> `~/.local/state/llm-postbox/`. Ignore `.local/` once globally
+> (`core.excludesFile`) rather than per-repo.
+>
+> **Why not bare `postbox/` at repo root:** fails the stranger-`ls` test —
+> visibility without context reads as clutter, not discovery, and
+> discovery is the trigger bank's job either way. The property the design
+> needs is *inspectability as plain files*, which is path-independent;
+> visibility in root `ls` was a mechanism mistaken for the property.
+> **Why not `.claude/postbox/`:** `.claude/` is committed in many repos —
+> transient mail one careless `git add` from history.
+> **Why not `postbox.kb/`:** `.kb` means durable knowledge under
+> governance; ephemeral traffic would dilute the suffix.
+> **Why `state`, not `share`:** XDG files transient runtime data under
+> `state`; `share` is for durable user data, which mail is not
+> (owner-ruled). **Why not `spool`:** semantically nearest, but XDG has
+> no spool slot; `state` is the closest standard one.
 
 ## Mechanisms (each optional; all must pass the invariant)
 

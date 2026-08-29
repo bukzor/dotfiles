@@ -50,11 +50,12 @@ Scope: Claude configuration (`~/.claude` itself).
 We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
-- [ ] Postbox convention — implement once the runtime-directory name is
-      ruled (see the QUESTION in `docs/dev/postbox.design.kb/convention.md`). Then:
-      trigger-bank entries via Skill(llm-triggers) (hand-off, boundary
-      inbox check, live-channels-carry-no-content), gitignore convention,
-      optional hook/statusline mechanisms. Design converged 2026-08-28;
+- [ ] Postbox convention — unblocked; runtime root ruled:
+      `<repo>/.local/state/llm-postbox/` (cwd-grafted XDG, plain XDG
+      outside repos). Implement: trigger-bank entries via
+      Skill(llm-triggers) (hand-off, boundary inbox check,
+      live-channels-carry-no-content), global gitignore of `.local/`,
+      optional hook/statusline mechanisms. Design fully ruled 2026-08-28;
       `docs/dev/postbox.design.kb/CLAUDE.md` has the re-entry path.
 - [ ] autoCompactWindow discrepancy: `settings.json` says 500000
       (set 2026-08-28) but 194 historical auto-compactions fired at mean
