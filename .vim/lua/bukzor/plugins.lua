@@ -65,8 +65,13 @@ function M.config()
       },
 
       -- syntax highlighting (using treesitter)
+      -- `main` is the actively maintained rewrite; `master` is archived/locked
+      -- upstream (nvim-treesitter/nvim-treesitter#8475) and its install path
+      -- passes a `tree-sitter generate` flag current tree-sitter CLIs reject.
       {
         "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
         config = require("bukzor.tree-sitter").setup,
         build = ":TSUpdate",
       },

@@ -2,84 +2,75 @@ local M = {}
 
 M.treesitter_dir = vim.fn.stdpath("data") .. "/tree-sitters"
 
--- TODO:
-local function todo_jinja2()
-  local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-  parser_config.zimbu = {
-    install_info = {
-      url = "~/projects/tree-sitter-zimbu", -- local path or git repo
-      files = {"src/parser.c"}, -- note that some parsers also require src/scanner.c or src/scanner.cc
-      -- optional entries:
-      branch = "main", -- default branch in case of git repo if different from master
-      generate_requires_npm = false, -- if stand-alone parser without npm dependencies
-      requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
-    },
-    filetype = "zu", -- if filetype does not match the parser name
-  }
+M.ensure_installed = {
+  "lua",
+  "rust",
+  "python",
+  "terraform",
+  "vim",
+  "query", -- tree-sitter query.scm files
+  "bash",
+  "markdown",
+  "markdown_inline",
+  "latex",
+}
+
+M.au_highlight = "BukzorTreesitterHighlight"
+
+local max_filesize = 100 * 1024 -- 100 KB
+
+local function too_big(bufnr)
+  local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+  return ok and stats and stats.size > max_filesize
+end
+
+-- TODO: register a local jinja2 parser once one exists, e.g.:
+-- vim.api.nvim_create_autocmd("User", { pattern = "TSUpdate", callback = function()
+--   require("nvim-treesitter.parsers").jinja2 = {
+--     install_info = { path = "~/projects/tree-sitter-jinja2" },
+--   }
+-- end })
+
+-- Auto-install a missing parser (mirrors the old `auto_install = true`) and
+-- turn on highlighting for any filetype with an available tree-sitter parser
+-- (mirrors the old blanket `highlight.enable = true`).
+local function on_filetype(args)
+  if too_big(args.buf) then return end
+
+  local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+  local ts = require("nvim-treesitter")
+
+  if not vim.tbl_contains(ts.get_installed("parsers"), lang) then
+    if not vim.tbl_contains(ts.get_available(), lang) then return end
+    ts.install(lang):wait(120000)
+  end
+
+  pcall(vim.treesitter.start, args.buf)
+end
+
+function M.init()
+  vim.opt.runtimepath:append(M.treesitter_dir)
+  require("nvim-treesitter").setup({ install_dir = M.treesitter_dir })
+
+  vim.api.nvim_create_augroup(M.au_highlight, { clear = true })
+  vim.api.nvim_create_autocmd("FileType", {
+    group = M.au_highlight,
+    pattern = "*",
+    callback = on_filetype,
+  })
+end
+
+function M.unload()
+  local ok, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_highlight)
+  if not ok and err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
+    error(err)
+  end
 end
 
 function M.setup()
-  vim.opt.runtimepath:append(M.treesitter_dir)
-  -- nvim-treesitter's TSConfig type lists `modules` as required, but it's an
-  -- internal/legacy slot users aren't meant to populate. The plugin's own docs
-  -- omit it. Disabling here is the upstream-recommended workaround, not a
-  -- general license to silence missing-fields elsewhere.
-  ---@diagnostic disable-next-line: missing-fields
-  require("nvim-treesitter.configs").setup({
-    -- A list of parser names, or "all"
-    ensure_installed = {
-      "lua",
-      "rust",
-      "python",
-      "terraform",
-      "vim",
-      "query", -- tree-sitter query.scm files
-      "bash",
-      "markdown",
-      "markdown_inline",
-      "latex",
-    },
-
-    -- Install parsers synchronously (only applied to `ensure_installed`)
-    sync_install = false,
-
-    -- Automatically install missing parsers when entering buffer
-    auto_install = true,
-
-    -- List of parsers to ignore installing (for "all")
-    ignore_install = {},
-
-    -- A directory to install the parsers into.
-    -- Remember to run vim.opt.runtimepath:append()!
-    parser_install_dir = M.treesitter_dir,
-
-    highlight = {
-      enable = true,
-
-      -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-      -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-      -- the name of the parser)
-      disable = function(lang, buf)
-        if vim.tbl_contains({ "badlang" }, lang) then
-          return true
-        end
-
-        local max_filesize = 100 * 1024 -- 100 KB
-        local ok, stats =
-            pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-        if ok and stats and stats.size > max_filesize then
-          return true
-        end
-      end,
-
-      -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-      -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-      -- Using this option may slow down your editor, and you may see some duplicate highlights.
-      -- Instead of true it can also be a list of languages
-      additional_vim_regex_highlighting = false,
-    },
-  })
-  require("nvim-treesitter").setup()
+  M.unload()
+  M.init()
+  require("nvim-treesitter").install(M.ensure_installed)
 end
 
 return M

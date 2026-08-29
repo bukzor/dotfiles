@@ -1,5 +1,5 @@
 ---
-last-tested: "2026-07-28"
+last-tested: "2026-08-29"
 result: pass
 scope: nvim-startup
 ---
@@ -26,3 +26,9 @@ plugins are missing; subsequent runs are silent.)
 
 `exit=0`. First run after adding lean.nvim printed its clone progress (expected
 for a missing plugin); subsequent runs silent.
+
+## Last result (2026-08-29)
+
+`exit=0`, silent. Re-verified right after migrating `nvim-treesitter` from
+`master` to `main` (see
+`docs/dev/adr/2026-08-29-000-Migrate-nvim-treesitter-to-main-branch.md`).
