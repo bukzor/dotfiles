@@ -104,12 +104,14 @@ HOUR_W = 6  # e.g. "149.2"
 PCT_W = 5  # e.g. "16.8" / "+945"
 
 
-def format_report(report: RateReport) -> str:
+def format_report(report: RateReport, *, show_window: bool = True) -> str:
     local_reset = report.resets_at.astimezone().strftime("%a %b %d %I:%M%p %Z")
+    elapsed_note = f"  (over {report.elapsed_hours:{HOUR_W}.1f}h elapsed)" if show_window else ""
+    remaining_note = f"  (over {report.remaining_hours:{HOUR_W}.1f}h remaining)" if show_window else ""
     lines = [
         f"{report.label}: {report.percent}% used, resets {local_reset}",
-        f"  {'current rate:':<{LABEL_W}} {report.current_rate:{RATE_W}.4f} %/hr  (over {report.elapsed_hours:{HOUR_W}.1f}h elapsed)",
-        f"  {'avg-remaining rate:':<{LABEL_W}} {report.avg_remaining_rate:{RATE_W}.4f} %/hr  (over {report.remaining_hours:{HOUR_W}.1f}h remaining)",
+        f"  {'current rate:':<{LABEL_W}} {report.current_rate:{RATE_W}.4f} %/hr{elapsed_note}",
+        f"  {'avg-remaining rate:':<{LABEL_W}} {report.avg_remaining_rate:{RATE_W}.4f} %/hr{remaining_note}",
         f"  {'projected at reset:':<{LABEL_W}} {report.projected_percent:{PCT_W}.1f}%",
         f"  {'suggested rate change:':<{LABEL_W}} {report.rate_change_needed:+{PCT_W}.0f}%",
     ]
@@ -128,7 +130,17 @@ def main() -> None:
 
     now = datetime.now(UTC)
     reports = [compute_rate_report(now, limit) for limit in limits]
-    print("\n\n".join(format_report(report) for report in reports))
+
+    # resets_at carries sub-second jitter across limits sharing one window (e.g. the two
+    # weekly buckets), so dedup at minute resolution rather than exact equality.
+    seen_resets: set[datetime] = set()
+    formatted = []
+    for report in reports:
+        window_key = report.resets_at.replace(second=0, microsecond=0)
+        show_window = window_key not in seen_resets
+        seen_resets.add(window_key)
+        formatted.append(format_report(report, show_window=show_window))
+    print("\n\n".join(formatted))
 
 
 if __name__ == "__main__":
