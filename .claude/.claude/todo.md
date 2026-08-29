@@ -50,13 +50,10 @@ Scope: Claude configuration (`~/.claude` itself).
 We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
-- [ ] Postbox convention — unblocked; runtime root ruled:
-      `<repo>/.local/state/llm-postbox/` (cwd-grafted XDG, plain XDG
-      outside repos). Implement: trigger-bank entries via
-      Skill(llm-triggers) (hand-off, boundary inbox check,
-      live-channels-carry-no-content), global gitignore of `.local/`,
-      optional hook/statusline mechanisms. Design fully ruled 2026-08-28;
-      `docs/dev/postbox.design.kb/CLAUDE.md` has the re-entry path.
+Postbox implementation moved to its own sub-project (owner ruling
+2026-08-29): `~/repo/github.com/bukzor/prototype.llm-postbox/` — work
+queue in its `.claude/todo.md`, design kb moved there from
+`docs/dev/postbox.design.kb/`.
 - [ ] autoCompactWindow discrepancy: `settings.json` says 500000
       (set 2026-08-28) but 194 historical auto-compactions fired at mean
       ~172k — including never-fable sessions, so not model-linked. Watch
