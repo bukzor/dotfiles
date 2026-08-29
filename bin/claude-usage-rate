@@ -43,13 +43,15 @@ class RateReport:
     percent: float
     resets_at: datetime
     elapsed_hours: float
+    remaining_hours: float
     current_rate: float
     avg_remaining_rate: float
     projected_percent: float
 
     @property
-    def rate_adjustment(self) -> float:
-        return self.avg_remaining_rate / self.current_rate
+    def rate_change_needed(self) -> float:
+        """% by which current_rate must change to land at exactly 100% by reset."""
+        return (self.avg_remaining_rate / self.current_rate - 1) * 100
 
 
 def load_token() -> str:
@@ -89,20 +91,27 @@ def compute_rate_report(now: datetime, limit: dict) -> RateReport:
         percent=percent,
         resets_at=resets_at,
         elapsed_hours=elapsed_hours,
+        remaining_hours=remaining_hours,
         current_rate=current_rate,
         avg_remaining_rate=(100 - percent) / remaining_hours,
         projected_percent=percent + current_rate * remaining_hours,
     )
 
 
+LABEL_W = 23  # widest label ("suggested rate change:") + 1
+RATE_W = 7  # e.g. "35.1270"
+HOUR_W = 6  # e.g. "149.2"
+PCT_W = 5  # e.g. "16.8" / "+945"
+
+
 def format_report(report: RateReport) -> str:
     local_reset = report.resets_at.astimezone().strftime("%a %b %d %I:%M%p %Z")
     lines = [
         f"{report.label}: {report.percent}% used, resets {local_reset}",
-        f"  current rate:        {report.current_rate:.4f} %/hr  (over {report.elapsed_hours:.1f}h elapsed)",
-        f"  avg-remaining rate:  {report.avg_remaining_rate:.4f} %/hr  (pace to land at exactly 100%)",
-        f"  rate adjustment:     {(report.rate_adjustment - 1) * 100:+.0f}%  (change current rate by this to land at exactly 100%)",
-        f"  projected at reset:  {report.projected_percent:.1f}%",
+        f"  {'current rate:':<{LABEL_W}} {report.current_rate:{RATE_W}.4f} %/hr  (over {report.elapsed_hours:{HOUR_W}.1f}h elapsed)",
+        f"  {'avg-remaining rate:':<{LABEL_W}} {report.avg_remaining_rate:{RATE_W}.4f} %/hr  (over {report.remaining_hours:{HOUR_W}.1f}h remaining)",
+        f"  {'projected at reset:':<{LABEL_W}} {report.projected_percent:{PCT_W}.1f}%",
+        f"  {'suggested rate change:':<{LABEL_W}} {report.rate_change_needed:+{PCT_W}.0f}%",
     ]
     return "\n".join(lines)
 
