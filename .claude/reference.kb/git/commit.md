@@ -156,8 +156,25 @@ new=$(GIT_AUTHOR_DATE="$(git log --format=%aI -1)" \
       GIT_COMMITTER_DATE="$(git log --format=%cI -1)" \
       git commit-tree 'HEAD^{tree}' -p HEAD^ -m 'new message')
 git update-ref refs/heads/main "$new" "$(git rev-parse HEAD)"   # old-value guard
-git diff --stat <old-sha> HEAD                                  # must be empty
+git diff-tree <old-sha> HEAD                                    # no output = identical trees
 ```
+
+### History surgery: verify with plumbing only
+
+Porcelain `git diff` can report clean while trees differ: `diff.relative`
+(set where the worktree root sits above cwd, e.g. the dotfiles repo rooted
+at `~`) silently drops paths outside the cwd subtree. Verify with
+`git diff-tree`, and prove a replayed commit with
+`git diff-tree -p <a> <b> | git patch-id --stable` against the original.
+
+Two path semantics coexist: pathspec arguments (`diff`, `reset`, `ls-tree`)
+resolve cwd-relative, while `<rev>:<path>` and `update-index --cacheinfo`
+are root-relative — the same string can address two different paths, turning
+an edit into a silent no-op that porcelain then hides. Inspect parentage and
+trees in a separate command before every ref mutation, and guard it
+(`update-ref` with old-value). (Worked instance: 2026-08-29, three user
+commits swallowed by a `reset --soft`+amend fixup; two repairs "verified
+clean" by porcelain before plumbing exposed them.)
 
 ### Recovery: Accidental Index Inclusion
 
