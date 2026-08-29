@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List open tasks across conventional locations under ~/repo and ~/.claude.
+"""List open tasks across conventional locations under ~/repo, ~/.claude and ~/claude.
 
 Pending tasks across conventional locations:
 - `todo.md` / `sessions.kb/*.md` files: list open `- [ ]` lines
