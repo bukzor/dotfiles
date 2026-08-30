@@ -129,6 +129,6 @@ Never put scratch in `/tmp` unless the user explicitly says so;
 - `..` -- hesitation
 - `...` -- user is getting frustrated
 - `....` (or more) -- user is frustrated, run Skill("claude-realignment")
-- `Jr?` -- Sycophancy check. Run Advocate/Skeptic/Arbiter protocol (see must-read.kb/when/evaluating-a-contested-or-subjective-position.md)
+- `Jr?` -- Sycophancy check. Run Advocate/Skeptic/Arbiter protocol (see must-read.kb/before/retracting-or-conceding-a-claim.md)
 - `^` -- "above" or "(scroll back)"
 - `please to` -- Please [to] action/execute the above.
