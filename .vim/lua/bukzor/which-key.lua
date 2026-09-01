@@ -44,6 +44,17 @@ function M.config()
     { "<leader>a", vim.lsp.buf.code_action, desc = "Code Actions" },
   })
 
+  -- labels for the VimL mappings in ~/.vimrc.d/finger-savers.vim
+  wk.add({
+    { "<leader>f", group = "File" },
+    { "<leader>bd", desc = "Buffer Delete (keep window)" },
+    { "<leader>fd", desc = "File Directory" },
+    { "<leader>fx", desc = "File Executable" },
+    { "<leader>fp", desc = "File Paste (filename)" },
+    { "<leader>ga", desc = "Git Add (this file)" },
+    { "<leader>cq", desc = "Claude Quote (buffer or selection)", mode = { "n", "x" } },
+  })
+
   group("<leader>l", "Language Server", {
     { "i", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Info (doc)" },
     { "I", "<cmd>Trouble diagnostics toggle<cr>", desc = "Info (workspace)" },

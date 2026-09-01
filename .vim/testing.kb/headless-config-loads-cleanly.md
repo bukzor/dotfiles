@@ -1,5 +1,5 @@
 ---
-last-tested: "2026-08-29"
+last-tested: "2026-09-01"
 result: pass
 scope: nvim-startup
 ---
@@ -32,3 +32,8 @@ for a missing plugin); subsequent runs silent.
 `exit=0`, silent. Re-verified right after migrating `nvim-treesitter` from
 `master` to `main` (see
 `docs/dev/adr/2026-08-29-000-Migrate-nvim-treesitter-to-main-branch.md`).
+
+## Last result (2026-09-01)
+
+`exit=0`, silent. Re-verified after adding which-key labels for the
+`~/.vimrc.d/finger-savers.vim` mappings.
