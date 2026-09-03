@@ -118,6 +118,13 @@ authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
 Use `git commit-staged paths... -- --amend --no-edit` for the last commit,
 `git commit-staged paths... -- --fixup SHA` for older commits.
 
+> [!DRAFT] agent-authored 2026-09-03, vetoable — from an incident that day.
+>
+> **`--amend` is not path-scoped.** The paths constrain staging; the amend
+> reuses HEAD's whole tree. If a parallel session moved HEAD since you last
+> looked, amending absorbs its commit into yours and drops its message.
+> Re-read HEAD immediately before every amend.
+
 **No commit exists to repair another (unpushed, `solo`/`personal`):**
 squash until each commit reads as written right the first time. If
 message and content disagree, fix whichever is the bug.
