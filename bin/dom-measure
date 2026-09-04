@@ -1,0 +1,248 @@
+#!/usr/bin/env node
+// Measure DOM geometry in a real browser, headlessly.
+//
+// dom-measure [options] URL
+//
+//   -s, --select CSS    measure every match; repeatable
+//   -p, --prop NAME     computed property to report per match; repeatable
+//   -e, --eval EXPR     evaluate EXPR in the page, print its JSON result
+//   -f, --eval-file F   same, reading EXPR from a file
+//   -w, --width N       viewport width; repeatable, one pass each (default 1280)
+//   -H, --height N      viewport height (default 900)
+//       --scale N       device pixel ratio (default 1)
+//       --wait-for CSS  poll until this selector matches (default: load event)
+//       --delay MS      wait after ready, before measuring
+//       --screenshot F  write a PNG per width (F gets the width appended)
+//       --json          emit JSON instead of TSV
+//
+// TSV columns: width, selector, index, x, y, w, h, then one per --prop.
+// --eval sees the page; return anything JSON-serializable.
+//
+// Chromium: $DOM_MEASURE_CHROME, else chromium/chrome on PATH, else the
+// playwright download cache.
+
+import { spawn } from "node:child_process";
+import { mkdtemp, writeFile, readdir } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { tmpdir, homedir } from "node:os";
+import { join } from "node:path";
+
+const usage = () => {
+  const lines = readFileSync(process.argv[1], "utf8").split("\n").slice(1);
+  const header = lines.slice(0, lines.findIndex((l) => !l.startsWith("//")));
+  console.error(header.map((l) => l.slice(3)).join("\n"));
+  process.exit(2);
+};
+
+function parseArgs(argv) {
+  const opt = {
+    select: [],
+    prop: [],
+    width: [],
+    height: 900,
+    scale: 1,
+    eval: null,
+    waitFor: null,
+    delay: 0,
+    screenshot: null,
+    json: false,
+    url: null,
+  };
+  const take = () => {
+    const v = argv.shift();
+    if (v === undefined) usage();
+    return v;
+  };
+  while (argv.length) {
+    const a = argv.shift();
+    if (a === "-s" || a === "--select") opt.select.push(take());
+    else if (a === "-p" || a === "--prop") opt.prop.push(take());
+    else if (a === "-e" || a === "--eval") opt.eval = take();
+    else if (a === "-f" || a === "--eval-file") opt.eval = readFileSync(take(), "utf8");
+    else if (a === "-w" || a === "--width") opt.width.push(Number(take()));
+    else if (a === "-H" || a === "--height") opt.height = Number(take());
+    else if (a === "--scale") opt.scale = Number(take());
+    else if (a === "--wait-for") opt.waitFor = take();
+    else if (a === "--delay") opt.delay = Number(take());
+    else if (a === "--screenshot") opt.screenshot = take();
+    else if (a === "--json") opt.json = true;
+    else if (a === "-h" || a === "--help") usage();
+    else if (a.startsWith("-")) usage();
+    else opt.url = a;
+  }
+  if (!opt.url) usage();
+  if (!opt.width.length) opt.width.push(1280);
+  if (!opt.select.length && !opt.eval) opt.select.push("body");
+  return opt;
+}
+
+async function findChrome() {
+  if (process.env.DOM_MEASURE_CHROME) return process.env.DOM_MEASURE_CHROME;
+  for (const dir of (process.env.PATH ?? "").split(":"))
+    for (const name of ["chromium", "chromium-browser", "google-chrome", "chrome"])
+      if (existsSync(join(dir, name))) return join(dir, name);
+  const cache = join(homedir(), ".cache/ms-playwright");
+  if (existsSync(cache))
+    for (const entry of (await readdir(cache)).sort().reverse())
+      for (const sub of ["chrome-linux64/chrome", "chrome-linux/chrome", "chrome-mac/Chromium.app/Contents/MacOS/Chromium"]) {
+        const p = join(cache, entry, sub);
+        if (existsSync(p)) return p;
+      }
+  throw new Error("no chromium found; set $DOM_MEASURE_CHROME");
+}
+
+async function launch() {
+  const profile = await mkdtemp(join(tmpdir(), "dom-measure-"));
+  const chrome = spawn(await findChrome(), [
+    "--headless",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--hide-scrollbars",
+    "--remote-debugging-port=0",
+    `--user-data-dir=${profile}`,
+    "about:blank",
+  ]);
+  const browserWs = await new Promise((resolve, reject) => {
+    let buf = "";
+    chrome.stderr.on("data", (d) => {
+      buf += d;
+      const m = buf.match(/ws:\/\/\S+/);
+      if (m) resolve(m[0]);
+    });
+    chrome.on("exit", (code) => reject(new Error(`chromium exited: ${code}\n${buf}`)));
+  });
+  // The browser endpoint speaks no Page.*; attach to the page target instead.
+  const base = new URL(browserWs).host;
+  for (let i = 0; i < 100; i++) {
+    const targets = await fetch(`http://${base}/json/list`).then((r) => r.json());
+    const page = targets.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
+    if (page) return { chrome, url: page.webSocketDebuggerUrl };
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  throw new Error("no page target appeared");
+}
+
+// Minimal CDP client: send(method, params) -> result, plus once(event).
+function connect(wsUrl) {
+  const ws = new WebSocket(wsUrl);
+  const pending = new Map();
+  const waiters = new Map();
+  let id = 0;
+  ws.addEventListener("message", (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.id !== undefined) {
+      const p = pending.get(msg.id);
+      pending.delete(msg.id);
+      msg.error ? p.reject(new Error(JSON.stringify(msg.error))) : p.resolve(msg.result);
+    } else if (waiters.has(msg.method)) {
+      waiters.get(msg.method).forEach((r) => r(msg.params));
+      waiters.delete(msg.method);
+    }
+  });
+  const ready = new Promise((r) => ws.addEventListener("open", r));
+  return {
+    ready,
+    close: () => ws.close(),
+    send: (method, params = {}) =>
+      new Promise((resolve, reject) => {
+        const n = ++id;
+        pending.set(n, { resolve, reject });
+        ws.send(JSON.stringify({ id: n, method, params }));
+      }),
+    once: (event) =>
+      new Promise((r) => waiters.set(event, [...(waiters.get(event) ?? []), r])),
+  };
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const MEASURE = (sels, props) =>
+  sels.flatMap((sel) =>
+    [...document.querySelectorAll(sel)].map((el, i) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return {
+        sel,
+        i,
+        x: r.x,
+        y: r.y,
+        w: r.width,
+        h: r.height,
+        props: props.map((p) => cs.getPropertyValue(p)),
+      };
+    }),
+  );
+
+async function main() {
+  const opt = parseArgs(process.argv.slice(2));
+  const { chrome, url: wsUrl } = await launch();
+  const cdp = connect(wsUrl);
+  await cdp.ready;
+  await cdp.send("Page.enable");
+  const rows = [];
+  const out = [];
+  try {
+    for (const width of opt.width) {
+      await cdp.send("Emulation.setDeviceMetricsOverride", {
+        width,
+        height: opt.height,
+        deviceScaleFactor: opt.scale,
+        mobile: false,
+      });
+      const loaded = cdp.once("Page.loadEventFired");
+      await cdp.send("Page.navigate", { url: opt.url });
+      await loaded;
+      if (opt.waitFor) {
+        const deadline = Date.now() + 10000;
+        for (;;) {
+          const { result } = await cdp.send("Runtime.evaluate", {
+            expression: `!!document.querySelector(${JSON.stringify(opt.waitFor)})`,
+            returnByValue: true,
+          });
+          if (result.value) break;
+          if (Date.now() > deadline) throw new Error(`--wait-for timed out: ${opt.waitFor}`);
+          await sleep(50);
+        }
+      }
+      if (opt.delay) await sleep(opt.delay);
+
+      const expression = opt.eval
+        ? `(() => (${opt.eval}))()`
+        : `(${MEASURE})(${JSON.stringify(opt.select)}, ${JSON.stringify(opt.prop)})`;
+      const { result, exceptionDetails } = await cdp.send("Runtime.evaluate", {
+        expression,
+        returnByValue: true,
+        awaitPromise: true,
+      });
+      if (exceptionDetails) throw new Error(JSON.stringify(exceptionDetails));
+      if (opt.eval) out.push({ width, result: result.value });
+      else for (const m of result.value) rows.push({ width, ...m });
+
+      if (opt.screenshot) {
+        const { data } = await cdp.send("Page.captureScreenshot", { captureBeyondViewport: true });
+        await writeFile(`${opt.screenshot}-${width}.png`, Buffer.from(data, "base64"));
+      }
+    }
+  } finally {
+    cdp.close();
+    chrome.kill();
+  }
+
+  if (opt.eval) {
+    console.log(JSON.stringify(opt.width.length === 1 ? out[0].result : out, null, 2));
+  } else if (opt.json) {
+    console.log(JSON.stringify(rows, null, 2));
+  } else {
+    const num = (v) => (Math.round(v * 1000) / 1000).toString();
+    console.log(["width", "selector", "i", "x", "y", "w", "h", ...opt.prop].join("\t"));
+    for (const r of rows)
+      console.log(
+        [r.width, r.sel, r.i, num(r.x), num(r.y), num(r.w), num(r.h), ...r.props].join("\t"),
+      );
+  }
+}
+
+main().catch((e) => {
+  console.error(e.message);
+  process.exit(1);
+});
