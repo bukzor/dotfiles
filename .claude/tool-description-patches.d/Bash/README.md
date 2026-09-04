@@ -12,7 +12,7 @@ rule, so nothing to fold in.
 
 The stub keeps mechanics (state persistence, dedicated-tools rule, timeout,
 run_in_background) plus the git safety line, and defers everything else:
-Bash conventions to must-read.kb/before/running-ANY-post-bootstrap-Bash-commands.md, git
+Bash conventions to must-read.kb/before/running-ANY-Bash-commands.md, git
 conventions to must-read.kb/before/git/. The long form's step-by-step
 commit/PR procedure is deliberately dropped, not moved: it teaches bare
 `git commit`/HEREDOC flows and only-commit-when-asked, both of which the

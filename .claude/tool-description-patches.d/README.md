@@ -59,7 +59,7 @@ The `type == "object"` guard is load-bearing: non-JSON request bodies log
 
 ## Testing
 
-    cd ~/claude/mitmproxy && ./check_tool_patches.py
+    cd ~/claude/mitmproxy && uv run claude-mitmproxy-check-tool-patches
 
 applies every patch to its own `upstream.md` (as if live) and prints per-tool
 size stats; expect zero warnings.

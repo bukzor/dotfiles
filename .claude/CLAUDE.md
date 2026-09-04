@@ -26,10 +26,9 @@ How to work -- on everything, not just these instructions:
 
 While planning, before taking ANY action, review **all three** trigger banks:
 
-1. the must-read paths -- the path names its own trigger. For
-   example, `must-read.kb/before/running-ANY-post-bootstrap-Bash-commands.md` is a
-   file that all agents **must read before running any Bash command past the
-   bootstrap `ls` above**.
+1. the must-read paths -- the path names its own trigger:
+   `must-read.kb/before/running-ANY-Bash-commands.md` must be read
+   **before running ANY Bash command**.
 2. the available-skills list -- a skill's `description` names the occasion to
    load it; read it as a trigger, not a summary.
 3. the `triggers:` frontmatter of every file you have loaded.
