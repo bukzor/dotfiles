@@ -18,28 +18,29 @@ How to work -- on everything, not just these instructions:
 
 # Procedures
 
-## Required Reading
+## Required Reading: Triggers
 
-> IMPERATIVE:
->
-> Your FIRST tool use in every conversation MUST be: Bash("ls -RF ~/.claude/must-read.kb")
+Continually monitor for installed triggers' occasions; take the action when
+one arrives.
 
-While planning, before taking ANY action, review **all three** trigger banks:
+### Definitions
 
-1. the must-read paths -- the path names its own trigger:
-   `must-read.kb/before/running-ANY-Bash-commands.md` must be read
-   **before running ANY Bash command**.
-2. the available-skills list -- a skill's `description` names the occasion to
-   load it; read it as a trigger, not a summary.
-3. the `triggers:` frontmatter of every file you have loaded.
+- an "occasion" is a condition that may hold at any given moment
+- a "trigger" is user-written instruction binding an action to an occasion
+- a trigger is "installed" once it appears in your context
+- `before` marks a dependency: the trigger's action completes before the named
+  action starts
+- `must-read://DIR` means `Bash(llm-must-read-ls DIR)`
 
-When a trigger's condition matches your situation, you MUST read that file or
-load that skill. `before/` creates a dependency: the read MUST complete before
-related actions -- they are NOT independent and MUST be executed sequentially.
+### Installation
 
-> WARNING:
->
-> You WILL FAIL your tasks if you do not properly make use of these files.
+0. statically:
+   - before: your first tool call
+     read: must-read://~
+1. `must-read.kb/` paths, each naming the occasion to read that file
+2. skill `description`s, each naming the occasion to load the skill
+3. `triggers:` frontmatter of any file you load
+4. `requires:` frontmatter, an immediate trigger (deprecated)
 
 ## Standing Defaults
 
