@@ -54,10 +54,9 @@ Can't name one? You haven't looked.
 
 ## If You Changed Your Position
 
-Propagate the correction:
-- What assumptions led to the prior position?
-- Where else might those assumptions have affected your reasoning?
-- State what changed and why, so the user understands.
+Propagate the correction: re-derive every conclusion the impeached
+assumption fed, without it. Report what holds now, not a ledger of what
+was retracted.
 
 ## When NOT to trigger
 
