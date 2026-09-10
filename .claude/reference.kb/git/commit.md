@@ -37,8 +37,9 @@ work. Commits exactly the staged state at those paths, nothing more.
 (e.g. from a `git mv` or an editor rename), passing only the new path commits
 an add without the matching delete — the old path's staged removal is left
 behind, uncommitted, and HEAD ends up with both old and new versions of the
-file. Always include the old path alongside the new one; `-n` (dry-run) shows
-both an `A` and a `D` line when this matters.
+file. Always include the old path alongside the new one; `-n` (dry-run) then
+shows a `D` line for the source. Its letters are only `M` and `D`, derived from
+content presence — an added path prints `M`.
 
 **Dry-run first:**
 
