@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+target="${1:?usage: tmux-rename-window <target-window> [name]}"
+name="${2-}"
+
+# Clearing the name reads as "stop overriding, let the program say what this
+# is". tmux's own rename-window takes an empty string literally: the window
+# ends up nameless with automatic-rename still off. Releasing the window-local
+# option restores inheritance from the global automatic-rename instead.
+if [[ "$name" ]]; then
+  tmux rename-window -t "$target" -- "$name"
+else
+  tmux set-window-option -t "$target" -u automatic-rename
+fi
