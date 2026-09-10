@@ -11,10 +11,12 @@ onerror() {
 trap onerror ERR
 
 # Where the alert came from, so a notification found later still says which
-# terminal wants attention.
+# terminal wants attention -- named exactly as the status bar names it, since
+# automatic-rename-format already resolves what a window is: the name I
+# assigned it, else the title its program declares, else the command running.
 origin() {
   if [[ "${TMUX_PANE:-}" ]]; then
-    tmux display-message -p -t "$TMUX_PANE" '#S:#I #{pane_current_path}'
+    tmux display-message -p -t "$TMUX_PANE" '#S:#I #{window_name}'
   else
     echo "$HOSTNAME $PWD"
   fi
@@ -28,6 +30,22 @@ notify_hterm() {
   tmux list-clients -F '#{client_tty}' |
     exists -w |
       xargs -d'\n' -r -I{} bash -ec 'TERM=xterm alert-hterm "$1" >"$2"' - "$1" {}
+}
+
+# A notification is gone the moment it's dismissed, and the urgent ones arrive
+# while you're looking elsewhere. The log is what's left to ask afterward: what
+# wanted me, from where, and did it actually reach me.
+log_alert() {
+  local logfile="$HOME/.local/state/alert.jsonl"
+  mkdir -p "${logfile%/*}"
+  jq -nc \
+    --arg time "$(date -Is)" \
+    --arg origin "$title" \
+    --arg body "$body" \
+    --arg transport "$1" \
+    --arg pane "${TMUX_PANE:-}" \
+    --arg cwd "$PWD" \
+    '$ARGS.named' >> "$logfile"
 }
 
 if (( DEBUG > 0 )); then
@@ -47,6 +65,13 @@ title="${title/$HOME/\~}"
 
 # First transport that works wins. Slack stays a manual `alert-slack` call --
 # an alert leaving the machine is a decision, not a fallback.
-notify-send --urgency=critical --app-name=alert "$title" "$body" ||
-  notify_hterm "$body" ||
+if notify-send --urgency=critical --app-name=alert "$title" "$body"; then
+  transport=notify-send
+elif notify_hterm "$body"; then
+  transport=hterm
+else
   printf '\a'
+  transport=bell
+fi
+
+log_alert "$transport"
