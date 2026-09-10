@@ -12,7 +12,7 @@ trap onerror ERR
 
 usage() {
   cat >&2 <<'EOF'
-usage: claude-rename <new-name> [session-id]
+usage: claude-rename [--force] <new-name> [session-id]
 
 Rename a Claude Code session from outside it, as /rename does inside.
 Session-id defaults to $CLAUDE_CODE_SESSION_ID, so an agent can rename the
@@ -22,6 +22,9 @@ A session keeps its name in process memory; the one path in from outside is
 a UserPromptSubmit hook's sessionTitle. So this queues the name in
 ~/.claude/rename-requests/<session-id>, and ~/.claude/hooks/session-rename.py
 applies it at the session's next prompt.
+
+Refuses to replace a name the user typed themselves (nameSource "user" in
+~/.claude/sessions/<pid>.json) unless --force.
 EOF
   exit 2
 }
@@ -30,12 +33,24 @@ if (( DEBUG > 0 )); then
   set -x
 fi
 
+force=0
+if [[ "${1:-}" == --force ]]; then
+  force=1
+  shift
+fi
+
 name="${1:-}"
 test -n "$name" || usage
 shift
 
 session="${1:-${CLAUDE_CODE_SESSION_ID:-}}"
 test -n "$session" || usage
+
+if (( ! force )) && grep -rlF "\"sessionId\":\"$session\"" ~/.claude/sessions |
+    xargs -r grep -qF '"nameSource":"user"'; then
+  echo >&2 "refusing: the user named this session themselves; --force to override"
+  exit 1
+fi
 
 mkdir -p ~/.claude/rename-requests
 printf '%s\n' "$name" > ~/.claude/rename-requests/"$session"
