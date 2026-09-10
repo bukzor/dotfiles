@@ -56,7 +56,7 @@ wanted and was manual. `must-read.kb/when/the-session-focus-becomes-clear--namin
 (agent-authored draft) makes it the agent's job. An agent can't tell from
 inside whether the user already named the session, but the registry's
 `nameSource` (`derived|user|hook`) can, so `claude-rename` refuses a
-`user`-named session without `--force`. Provisionally accepted; the
+`user`-named session without `--force`. Probationary approval; the
 scorecard is `grep -ho '"nameSource":"[^"]*"' ~/.claude/sessions/*.json |
 sort | uniq -c` -- `hook` should displace `derived`, never `user`.
 

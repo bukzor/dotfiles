@@ -1,10 +1,10 @@
 # When the session's focus becomes clear
 
-> [!DRAFT] agent-authored 2026-09-10, vetoable -- from "how do/should we
-> teach claude about this capability?" after `bin/claude-rename` shipped.
-> Proactive naming provisionally accepted the same day ("I like proactive,
-> yes. I think. We'll see."); promote or veto once a few sessions have
-> named themselves.
+> [!DRAFT] agent-authored 2026-09-10 -- from "how do/should we teach claude
+> about this capability?" after `bin/claude-rename` shipped.
+> Status: probationary approval, 2026-09-10 ("I like proactive, yes. I
+> think. We'll see."). Promote or revert once a few sessions have named
+> themselves.
 
 Name the session for the work it holds: `claude-rename <name>`. The name
 lands at the user's next prompt (a UserPromptSubmit hook applies it); say
