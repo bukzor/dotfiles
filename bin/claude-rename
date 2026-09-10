@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+usage() {
+  cat >&2 <<'EOF'
+usage: claude-rename <new-name> [session-id]
+
+Rename a Claude Code session from outside it, as /rename does inside.
+Session-id defaults to $CLAUDE_CODE_SESSION_ID -- the calling session.
+
+Runs the CLI's own /rename through a headless resume rather than
+reimplementing it: no new session, no model call, no tokens (/rename is an
+`immediate` command and short-circuits before the model).
+
+Effects, exactly /rename's: a custom-title record appended to the session
+transcript, and projects/<project>/<session-id>/custom-title.json rewritten,
+so `claude --resume` pickers show the new name.
+
+Not covered: a *live* session. Its displayed name and its peer-directory
+entry (~/.claude/sessions/<pid>.json) live in that process's memory, written
+only by the in-process rename; no other process can move them -- not this
+tool, not a hook's sessionTitle, not the peer socket. Renaming a live session
+therefore changes what `--resume` shows, and nothing that session displays.
+For a live session, type /rename in it instead.
+EOF
+  exit 2
+}
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+name="${1:-}"
+test -n "$name" || usage
+shift
+
+session="${1:-${CLAUDE_CODE_SESSION_ID:-}}"
+test -n "$session" || usage
+
+# --permission-mode manual: never inherit a permissive default for a headless
+# run; /rename touches nothing that needs a permission anyway.
+# claude appends stdin to the -p prompt; /dev/null keeps it out of the name
+exec claude --resume "$session" --permission-mode manual -p "/rename $name" </dev/null
