@@ -123,6 +123,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/.claude/hooks/session-rename.py"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
