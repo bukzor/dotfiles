@@ -1,7 +1,7 @@
 # Scheduled job health
 
 **Date:** 2026-08-27
-**Status:** Accepted
+**Status:** Accepted -- "at shell start" delivery gap closed for tmux by [2026-09-10-001]
 
 ## Context
 
@@ -67,8 +67,11 @@ rather than the wrapper.
 
 - Extends: `docs/dev/adr/2025-11-21-000-user-space-anacron-for-laptop-scheduling.md`
 - Motivating failure: [2026-08-27-000] -- the pnpm upgrade that broke itself
+- Extended by: [2026-09-10-001] -- "at shell start" doesn't reach long-lived
+  tmux panes; adds a continuously-polled tmux status-line channel
 - Implements: `bin/logrotate-cron`, `.config/sh/rc.d/cron-status.sh`,
   `.config/anacron/cron-health_check.sh`
 
 [2025-11-21-000]: 2025-11-21-000-user-space-anacron-for-laptop-scheduling.md
 [2026-08-27-000]: 2026-08-27-000-pnpm-11-global-tooling-mechanism.md
+[2026-09-10-001]: 2026-09-10-001-tmux-status-bar-cron-alerting.md
