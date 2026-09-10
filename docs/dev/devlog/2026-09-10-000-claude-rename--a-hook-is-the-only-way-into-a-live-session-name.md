@@ -48,6 +48,24 @@ hook events; no tool-level hook does. Renaming mid-turn would mean
 fabricating a prompt, which writes junk into the transcript. Structural,
 not a shortcoming to fix.
 
+### Agents name their session proactively; the tool guards user-typed names
+
+**Rationale:** the registry (`~/.claude/sessions/<pid>.json`) showed 6 of
+13 live sessions with derived junk names and 6 named by hand -- naming is
+wanted and was manual. `must-read.kb/when/the-session-focus-becomes-clear--naming-the-session.md`
+(agent-authored draft) makes it the agent's job. An agent can't tell from
+inside whether the user already named the session, but the registry's
+`nameSource` (`derived|user|hook`) can, so `claude-rename` refuses a
+`user`-named session without `--force`. Provisionally accepted; the
+scorecard is `grep -ho '"nameSource":"[^"]*"' ~/.claude/sessions/*.json |
+sort | uniq -c` -- `hook` should displace `derived`, never `user`.
+
+**Alternatives considered:** teach it in `~/.claude/CLAUDE.md` -- wrong
+tier; that file is values and standing procedure, and a capability with
+an occasion is what `must-read.kb/` binds. A `claude-session-info` helper
+for the registry lookup -- one caller, one grep; extract at the second
+reader.
+
 ## Conventions Established
 
 - Hooks are captured at startup (`setup_hooks_captured`) -- yet a hook
