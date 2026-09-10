@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+# Where the alert came from, so a notification found later still says which
+# terminal wants attention.
+origin() {
+  if [[ "${TMUX_PANE:-}" ]]; then
+    tmux display-message -p -t "$TMUX_PANE" '#S:#I #{pane_current_path}'
+  else
+    echo "$HOSTNAME $PWD"
+  fi
+}
+
+# hterm shows OSC 777 as a Chrome notification. Written to the terminal's own
+# tty rather than our stdout: the sender is usually a pipe (an LLM tool call, a
+# backgrounded job) with no terminal of its own.
+# shellcheck disable=SC2016  # $1/$2 are the inner bash's arguments
+notify_hterm() {
+  tmux list-clients -F '#{client_tty}' |
+    exists -w |
+      xargs -d'\n' -r -I{} bash -ec 'TERM=xterm alert-hterm "$1" >"$2"' - "$1" {}
+}
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+if (( $# > 0 )); then
+  body="$*"
+elif [[ -t 0 ]]; then
+  body="It's done!"
+else
+  body="$(cat)"
+fi
+
+title="$(origin)"
+title="${title/$HOME/\~}"
+
+# First transport that works wins. Slack stays a manual `alert-slack` call --
+# an alert leaving the machine is a decision, not a fallback.
+notify-send --urgency=critical --app-name=alert "$title" "$body" ||
+  notify_hterm "$body" ||
+  printf '\a'
