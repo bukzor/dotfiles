@@ -4,7 +4,7 @@ Any turn that puts questions, approvals, or a batch of decisions to
 the user. First shrink the batch -- only one kind of item deserves
 the ask -- then shape what survives.
 
-## Only acts deserve the ask
+## Only stipulations deserve the ask
 
 Factor the items into three kinds:
 
@@ -14,10 +14,10 @@ Factor the items into three kinds:
 - **Adequacy** -- "this summary/model/reading fits reality." Attach
   the witness (diff, verify command, quote) and invite veto -- silence
   is consent.
-- **Acts** -- genuine stipulations: value choices, scope, one-way
-  doors. The only real asks. Present few, each with what would make
-  the user agree or disagree. A batch of accumulated opens wants the
-  full sweep: `Skill(review-open-questions)`.
+- **Stipulations** -- value choices, scope, one-way doors. The only
+  real asks. Present few, each with what would make the user agree or
+  disagree. A batch of accumulated opens wants the full sweep:
+  `Skill(review-open-questions)`.
 
 ## Preconditions, not steps
 
