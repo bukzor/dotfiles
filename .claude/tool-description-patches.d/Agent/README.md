@@ -8,3 +8,9 @@ stub requires before spawning; the examples are dropped. The stub keeps
 the mechanics all variants share plus the don't-fabricate-results rule,
 and mentions fork with a "where supported" hedge since one live wording
 lacks it.
+
+2.1.257 reworded the no-fork long form's "When not to use" bullet: `grep`
+via the Bash tool became "the Grep tool" (long-form-no-fork-2.1.257) --
+a dedicated Grep tool now exists upstream where before there wasn't one;
+nothing in the stub or must-read.kb names the old wording, so nothing to
+fold in.

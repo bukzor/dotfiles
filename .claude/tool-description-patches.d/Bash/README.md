@@ -19,3 +19,15 @@ commit/PR procedure is deliberately dropped, not moved: it teaches bare
 user's standing config overrides (commit-files/commit-staged, commit
 eagerly). The commit trailer convention lives in
 reference.kb/git/commit.md.
+
+By 2.1.266-267 upstream itself stopped baking a fixed model name into the
+commit/PR trailer example, switching to "the attribution lines given in the
+conversation's system-reminder, when one is present" (harness-fable-2.1.266,
+harness-opus-2.1.267, long-form-sonnet-2.1.267) -- the same mechanism the
+user's own attribution system-reminder already supplies, so this drift moved
+upstream *into* alignment with our setup rather than out of it; still
+nothing to fold in, since the stub never carried a trailer example to begin
+with. The long-form dedicated-tools bullet also churned in place --
+2.1.261 briefly added `find`/`grep` to the avoid-list with a `find`-from-`.`
+caution, 2.1.267 dropped both again -- noise the stub's one-liner already
+covers either way.
