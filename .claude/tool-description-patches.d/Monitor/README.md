@@ -16,3 +16,12 @@ reporting) days later. Nothing to fold in: our stub never described
 `persistent` either, deferring that to the must-read.kb entry, which
 remains accurate to the schema even though upstream's own prose no longer
 advertises the escape hatch.
+
+Same-day, the haiku wording of that same paragraph (v2.1.273-haiku, build
+2.1.273.6b6 vs. the sonnet build 2.1.273.95e above) gives the max as "10
+minutes" where sonnet's says "30 minutes" -- one number swapped, nothing
+else. Whether that's a genuine per-model schema difference (a cheaper model
+gets a shorter leash) or just prose drift, it's still only the top-level
+description string; this session's own actual `timeout_ms` schema field
+(the part a caller can rely on) says max 3600000ms regardless. Nothing to
+fold in: the stub never quoted a number either.
