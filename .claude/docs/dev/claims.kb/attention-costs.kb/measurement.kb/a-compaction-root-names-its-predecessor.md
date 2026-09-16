@@ -17,9 +17,11 @@ work as thrown away. Doing exactly that inflated the abandoned-branch
 figure from 7.3% to 54% — a sevenfold error that looked entirely
 plausible until it was checked.
 
-`Skill(claude-code-archeology)` states that the boundary record "has no
-parent", which is true only of the field it names, and misleading for
-anything walking the tree. That text wants correcting.
+`Skill(claude-code-archeology)` used to state that the boundary record
+"has no parent" -- true only of the field it names, and misleading for
+anything walking the tree. Corrected in bukzor-agent-skills `66fbf30`,
+which now names both fields and says which one the rewind picker
+follows.
 
 ```sh
 python3 -c "
