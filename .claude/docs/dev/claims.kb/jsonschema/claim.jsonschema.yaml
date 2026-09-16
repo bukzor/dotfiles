@@ -1,0 +1,199 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$schema: "skill://llm-kb/jsonschema/dialect.jsonschema.yaml"
+title: claim-ledger claim frontmatter
+description: >
+  One claim per file. The body states the claim and its reasons;
+  frontmatter carries the ledger label and the standing. Shared by
+  every theory in a ledger -- the theories differ in ontology, not in
+  shape.
+
+  A theory is defined by a claim like any other, `$THEORY.md` beside
+  the `$THEORY.kb/` holding the claims confined to it, so this schema
+  governs those too. The last four properties are theirs alone: an
+  ordinary claim carrying `ontology:` is a claim that wanted to be a
+  theory.
+$defs:
+  base:
+    $anchor: base
+    description: >-
+      The extensible base schema: everything but the closure.
+      Consumers that add fields $ref this anchor and close themselves
+      with `unevaluatedProperties: false`; exact-conformance consumers
+      $ref the document root, which is this base plus closure.
+    type: object
+    required:
+      - label
+      - standing
+    properties:
+      label:
+        description: >-
+          Stable ledger label -- names the locus of contention, not the
+          current conclusion, so it survives revision. Upper snake case,
+          two characters at least (the bare label is the mention form,
+          and single capitals are prose). Labels are distinct as whole
+          words, nothing more: `grep -w LABEL` finds one claim, and a
+          family that shares a head (`CONFLICT`, `CONFLICT_ARITY`) is
+          found by `grep '\\<CONFLICT'`. (Ruled 2026-09-16, dfc18e9d and
+          after: the older no-prefix rule dated from two-letter
+          initialisms and forbade the family it should have invited.)
+        type: string
+        pattern: "^(?=..)[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"
+      standing:
+        description: >-
+          The sigil, spelled out -- it signs the judge: bare (no judge
+          needed -- a checkable fact, or follows from its premises) |
+          open (?, no one's yet) | agent (+, the agent's call, veto
+          invited) | user (!, the user's call)
+        type: string
+        enum: [bare, open, agent, user]
+      verdict:
+        description: >-
+          Present only when a judgment took the claim out of force.
+          `standing:` still names the judge -- here, whoever ruled this;
+          `verdict:` names what they ruled. Absent means accepted, so no
+          existing claim needs migration. Open vocabulary, not an enum:
+          `retracted` (a prior accepted standing was withdrawn),
+          `rejected` (a proposal was never accepted to begin with),
+          `dissolved` (the claim's own question was never well-formed, so
+          there was no content left to judge -- a verdict on the framing,
+          not on what was asserted), `retired` (it stopped bearing on
+          anything, which is no finding of error --
+          `Skill(llm-discourse-graph)` writes this one `live: false`),
+          `superseded` (something replaced it; name the replacement in
+          the body), or whatever else a claim actually needs. Scan:
+          `grep -rl 'verdict:'`.
+        type: string
+      why:
+        description: >-
+          The arrows (`<-`), structured: references to the claims whose
+          collapse would make you revisit this one. Motivation, not
+          entailment -- nothing checks that this claim follows from them.
+          In file-per-claim form this field is the arrows' one canonical
+          home; prose mentions are non-normative. Entries are bare
+          references -- file-relative paths to claim files, or ledger
+          labels for claims living in one-line ledgers -- never carrying a
+          copied sigil: standing lives at the definition site only, and
+          the warrant-mix view is computed, not stored. On a defining
+          claim these arrows are the theory's priors -- the theories whose
+          words it also admits -- which is why priors need no field of
+          their own. (Prior art: llm-design-kb `why:`.)
+        type: array
+        minItems: 1
+        items:
+          type: string
+      authority:
+        description: >-
+          The act that settled this claim's standing, where the sigil
+          alone is too coarse -- who or what one would appeal to: a named
+          ruling, literature (with citation), ... Meaningless on open
+          claims. Two forms. A string, free text, is the legacy form and
+          stays legal. An object carries the same act normalized, so a
+          scan can read the address and the owner's words without
+          parsing prose (agent-authored 2026-09-16 on @bukzor's sketch
+          in dfc18e9d, vetoable): `address` is where the act sits, in
+          the form the body's callouts use (`<session>#L<n>`, a bare
+          session prefix, or an owner commit); `words` is the owner's
+          phrase constituting the ruling, quoted sensatim (rather than
+          verbatim); `about` names what
+          was ruled on, which is what makes "seems good enough to me"
+          legible as a ruling on a draft rather than on a content.
+        oneOf:
+          - type: string
+          - type: object
+            required: [address]
+            additionalProperties: false
+            properties:
+              address:
+                type: string
+              words:
+                type: string
+              about:
+                type: string
+      verify:
+        description: >-
+          Re-runnable check that certifies the claim -- the CHECK of
+          `certified(CHECK)`; a certified claim's standing is bare, the
+          check standing where a judge would. A `verify:` must run
+          today; a claim decided but not yet built carries `todo:`
+          instead, and gains its `verify:` when it lands.
+        type: string
+      todo:
+        description: >-
+          Whether this claim is decided but not yet built. The body
+          already states the future state, so this grades the claim's
+          tense rather than restating it. Defaults false, so absent
+          means the claim describes what is and no claim on file needs
+          migration. In chat the tense rides a parenthesized token
+          after the label, before the arrows --
+          `XY! (todo) <- AB!: the island rule is ***` -- which is
+          neither the label (it must survive the day the state ships)
+          nor the sigil (spent on the judge), and does not read as a
+          modifier of the last prior. When the state lands, drop the
+          key and add `verify:` if a check now exists; the label never
+          moves. Scan: `grep -rl '^todo: true'`.
+        type: boolean
+        default: false
+      ontology:
+        description: >-
+          Defining claims only: the words this theory coins. A word earns a
+          place only where the theory stipulates it -- fixes a meaning the
+          reader could not have brought -- so topic vocabulary stays off the
+          list however central the subject makes it; proper nouns are the
+          other admissible kind. Prefer the phrase the prose actually uses:
+          truncating it to its head noun is what turns an ownable term into
+          an unownable one. A theory that coins nothing omits the key.
+          Listing a word excludes the theory's siblings from it, and that
+          exclusion is the list's whole force -- descendants already read
+          every word their container stipulates, and another ledger is out
+          of jurisdiction. Widening the list is a revision to this claim, so
+          it takes a signature.
+        type: array
+        minItems: 1
+        items:
+          type: string
+      non-claim-tokens:
+        description: >-
+          Defining claims only: the label-shaped tokens this theory's
+          prose says without citing a claim the reader could resolve --
+          an acronym, a system name, a keyword quoted from another
+          grammar, a label from a ledger that is gone. The dual of
+          `ontology:`, which names the words the theory coins; this
+          names the ones it disclaims. The distinction is enumerated,
+          never inferred (NON_CLAIM_TOKENS): the scan reports every
+          unreachable label-shaped token that is not listed, so a
+          missing entry is a visible finding, and a quotation mark is
+          not an exemption (BACKTICK_SCOPE). Reachability wins -- the
+          list is read only where a token resolves to nothing, so an
+          entry can never silence a live citation (NON_CLAIM_FIELD).
+          It covers the declaring theory's interior: its own claims,
+          and its descendants', which read it in the way they read in
+          a container's stipulations.
+        type: array
+        minItems: 1
+        items:
+          type: string
+          pattern: "^(?=..)[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"
+      stale-when:
+        description: >-
+          Defining claims only: the cheapest observation witnessing that
+          this theory no longer projects from the world it was stamped
+          against. `last-updated:` says what a roll-up derives from; this
+          says what voids it -- the condition fires, the stamp is dead, and
+          the theory is re-derived before it is cited again. What the
+          re-derivation finds is decided then, not here: usually the words
+          want restating or a boundary redrawing, occasionally they were
+          the wrong words to have. Defeat is a re-derivation that comes
+          back empty -- an act when it happens, not a prediction a header
+          can make. Where a claim's own collapse is what a citing claim's
+          `why:` records, this is what no arrow can record.
+        type: string
+      last-updated:
+        description: >-
+          Defining claims only, and only where the body carries a roll-up
+          of the theory's claims: the date that view was derived from
+          them. A cache is lawful iff it says what revision it derives
+          from; a defining claim with no roll-up has nothing to stamp.
+        type: date
+
+$ref: "#/$defs/base"
+unevaluatedProperties: false
