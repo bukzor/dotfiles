@@ -1,0 +1,142 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Aggregate the token-accounting TSV (from `claude-tokens` or
+`claude-tokens-wire`) into a table, grouped by any of its columns.
+
+The four token classes are never summed into one number: they are priced an
+order of magnitude apart (cache reads ~0.1x input, cache writes ~1.25x,
+output ~5x), so a single "tokens" total measures nothing. They stay in
+separate columns, with a bar drawn from whichever one is asked for.
+
+Usage: claude-tokens[-wire] | claude-tokens-histogram [-g model,effort] [-b output]
+"""
+
+import sys
+from collections import defaultdict
+from collections.abc import Mapping, Sequence
+
+
+# Every numeric column is summable; naming them here would mean editing this
+# file whenever a producer grows one.
+def is_number(cell: str) -> bool:
+    try:
+        float(cell)
+    except ValueError:
+        return False
+    return True
+
+
+def token_columns(header, rows):
+    """The columns holding token counts -- i.e. those that parse as integers."""
+    return tuple(
+        name
+        for position, name in enumerate(header)
+        if rows and all(is_number(row[position]) for row in rows)
+    )
+
+
+BAR_WIDTH = 32
+BAR = "█"
+
+
+def read_tsv(lines: Sequence[str]) -> tuple[list[str], list[list[str]]]:
+    header = lines[0].rstrip("\n").split("\t")
+    rows = [line.rstrip("\n").split("\t") for line in lines[1:] if line.strip()]
+    return header, rows
+
+
+def aggregate(
+    header: Sequence[str], rows: Sequence[Sequence[str]], group: Sequence[str]
+) -> dict[tuple[str, ...], dict[str, int]]:
+    index = {name: position for position, name in enumerate(header)}
+    for name in group:
+        assert name in index, (name, header)
+    token_names = token_columns(header, rows)
+
+    totals: dict[tuple[str, ...], dict[str, int]] = defaultdict(
+        lambda: dict.fromkeys(("requests", *token_names), 0)
+    )
+    for row in rows:
+        bucket = totals[tuple(row[index[name]] for name in group)]
+        bucket["requests"] += 1
+        for name in token_names:
+            bucket[name] += float(row[index[name]])
+    return totals
+
+
+def format_count(value: float, name: str = "") -> str:
+    """Token counts as compact SI-ish magnitudes -- 1.2G, 340M, 5.1k.
+
+    A dollar column is spelled out instead: rounding money to two significant
+    figures is how a total quietly stops reconciling.
+    """
+    if name.endswith("_usd"):
+        return f"${value:,.2f}"
+    for limit, suffix in ((1e9, "G"), (1e6, "M"), (1e3, "k")):
+        if abs(value) >= limit:
+            return f"{value / limit:.1f}{suffix}"
+    return f"{value:,.0f}"
+
+
+def render(
+    totals: Mapping[tuple[str, ...], Mapping[str, int]],
+    group: Sequence[str],
+    bar_column: str,
+) -> str:
+    names = tuple(name for name in next(iter(totals.values())) if name != "requests")
+    assert bar_column in names, (bar_column, names)
+    ranked = sorted(totals.items(), key=lambda item: -item[1][bar_column])
+    peak = max((bucket[bar_column] for _, bucket in ranked), default=0)
+
+    columns = (*group, "requests", *names)
+    table = [
+        [*key, format_count(bucket["requests"]), *(format_count(bucket[name], name) for name in names)]
+        for key, bucket in ranked
+    ]
+    widths = [
+        max(len(name), *(len(row[position]) for row in table)) if table else len(name)
+        for position, name in enumerate(columns)
+    ]
+
+    def line(cells: Sequence[str], bar: str) -> str:
+        padded = "  ".join(cell.ljust(width) for cell, width in zip(cells, widths))
+        return f"{padded}  {bar}"
+
+    out = [line(columns, bar_column)]
+    for (_, bucket), cells in zip(ranked, table):
+        filled = 0 if peak == 0 else round(BAR_WIDTH * bucket[bar_column] / peak)
+        out.append(line(cells, BAR * filled))
+
+    grand = {name: sum(b[name] for b in totals.values()) for name in ("requests", *names)}
+    out.append(
+        line(
+            [*("" for _ in group[:-1]), "TOTAL", *(format_count(grand[n], n) for n in ("requests", *names))],
+            "",
+        )
+    )
+    return "\n".join(out)
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    group = ["model", "effort"]
+    bar_column = "output"
+    while args:
+        flag, value, args = args[0], args[1], args[2:]
+        match flag:
+            case "-g" | "--group":
+                group = value.split(",")
+            case "-b" | "--bar":
+                bar_column = value
+            case _:
+                raise AssertionError(flag)
+
+    header, rows = read_tsv(sys.stdin.readlines())
+    print(render(aggregate(header, rows, group), group, bar_column))
+
+
+if __name__ == "__main__":
+    main()

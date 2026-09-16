@@ -1,0 +1,514 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Regenerate the attention-cost parameters from the corpus.
+
+Every constant in `~/.claude/docs/dev/claims.kb/attention-costs.md` is
+emitted by one of the sections below, so a claim citing a number names the
+section that produces it and nothing is quoted from memory. The functional
+forms are structural and outlive the fit; the constants are perishable --
+they track this operator's task mix, working-context size and CLAUDE.md, and
+drift as any of those change. That asymmetry is the whole reason this is a
+tool rather than a table pasted into a document.
+
+Sections, each independently selectable:
+
+  --rates        $/turn and $/hr by model, and the break-even ratio against
+                 a human hourly rate
+  --warmup       cumulative $/turn against session length: the cold-start
+                 spike, the cheap early turns, and the plateau
+  --estimators   candidate estimators ranked by accuracy, including the
+                 t-shirt bounds and the model-blind degradation
+  --rework       spend on abandoned branches, which is the error rate the
+                 checkpoint-interval formula needs
+  --selfcal      accuracy gained by watching a task's opening turns and
+                 extrapolating, against predicting it cold
+  --typed        spend per character the operator actually typed: the
+                 amplification factor between composing and billing
+
+Reads a costed TSV on stdin (`claude-tokens | claude-tokens-cost`).
+`--rework` and `--typed` additionally walk `~/.claude/projects/`, for the
+branch structure and the authored text respectively, since cost rows carry
+neither parentage nor content.
+
+Usage: claude-tokens | claude-tokens-cost | claude-tokens-params [SECTION...]
+"""
+
+import csv
+import json
+import math
+import statistics as st
+import sys
+from collections import defaultdict
+from collections.abc import Callable, Iterable, Sequence
+from datetime import UTC, datetime
+from pathlib import Path
+
+PROJECTS = Path.home() / ".claude" / "projects"
+NOT_A_SUBAGENT = "-"
+# A model needs this many sessions before a per-model fit means anything.
+MIN_SESSIONS = 20
+# Gaps longer than this are the operator thinking, not the agent working.
+# Used only to report how badly wall-clock is contaminated; no fit uses it.
+IDLE_CEILING_S = 120.0
+HUMAN_RATE_HR = 150.0
+
+
+class Session:
+    """One session, or one subagent run, reduced to what the fits need."""
+
+    def __init__(self, model: str, costs: Sequence[float], stamps: Sequence[datetime]):
+        self.model = model
+        self.costs = costs
+        self.cost = sum(costs)
+        self.turns = len(costs)
+        self.stamps = stamps
+
+    @property
+    def gap_minutes(self) -> float:
+        """Wall-clock across the session, with idle stretches truncated.
+
+        This is the contaminated measure: the median session spends ~30% of
+        it waiting on a person. Reported, never fitted.
+        """
+        pairs = zip(self.stamps, self.stamps[1:])
+        return sum(min((b - a).total_seconds(), IDLE_CEILING_S) for a, b in pairs) / 60
+
+
+def read_sessions(lines: Iterable[str]) -> list[Session]:
+    """Group costed rows into sessions, keeping each subagent run separate.
+
+    A subagent's context is its own, so its turns are not the parent's: the
+    two are separate cost curves and pooling them would flatten both.
+    """
+    grouped: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in csv.DictReader(lines, delimiter="\t"):
+        grouped[(row["session"], row["agent_type"])].append(row)
+
+    sessions = []
+    for rows in grouped.values():
+        rows.sort(key=lambda row: row["timestamp"])
+        costs = [float(row["cost_usd"]) for row in rows]
+        if sum(costs) <= 0 or len(costs) < 2:
+            continue
+        sessions.append(
+            Session(
+                model=st.mode(row["model"] for row in rows),
+                costs=costs,
+                stamps=[datetime.fromisoformat(row["timestamp"]) for row in rows],
+            )
+        )
+    return sessions
+
+
+def well_sampled(sessions: Sequence[Session]) -> list[str]:
+    counts = defaultdict(int)
+    for session in sessions:
+        counts[session.model] += 1
+    return sorted(m for m, n in counts.items() if n >= MIN_SESSIONS)
+
+
+def short(model: str) -> str:
+    return model.removeprefix("claude-")
+
+
+def mdape(predict: Callable[[Session], float], sessions: Sequence[Session]) -> float:
+    return st.median(abs(predict(s) - s.cost) / s.cost for s in sessions) * 100
+
+
+def within_2x(predict: Callable[[Session], float], sessions: Sequence[Session]) -> float:
+    hits = sum(1 for s in sessions if 0.5 <= predict(s) / s.cost <= 2.0)
+    return hits / len(sessions) * 100
+
+
+def best_scale(
+    sessions: Sequence[Session], size: Callable[[Session], float], ceiling: float
+) -> float:
+    """The scale minimising median relative error -- a 1-D search, refined.
+
+    Median rather than mean: session cost spans four orders of magnitude, and
+    a least-squares fit would be set by the handful of $50 sessions.
+    """
+    low, high = 0.0, ceiling
+    best = (0.0, math.inf)
+    for _ in range(5):
+        step = (high - low) / 60
+        for i in range(61):
+            scale = low + i * step
+            error = st.median(abs(scale * size(s) - s.cost) / s.cost for s in sessions)
+            if error < best[1]:
+                best = (scale, error)
+        low, high = best[0] - step, best[0] + step
+    return best[0]
+
+
+def per_model(
+    sessions: Sequence[Session], size: Callable[[Session], float], ceiling: float
+) -> dict[str, float]:
+    return {
+        model: best_scale([s for s in sessions if s.model == model], size, ceiling)
+        for model in well_sampled(sessions)
+    }
+
+
+def rates(sessions: Sequence[Session]) -> None:
+    """$/turn, $/hr, and what an hour of human time buys."""
+    models = well_sampled(sessions)
+    per_turn = per_model(sessions, lambda s: s.turns, 1.0)
+    per_min = per_model(sessions, lambda s: s.gap_minutes, 5.0)
+
+    print("== rates ==")
+    print(
+        f"{'model':<24} {'$/turn':>8} {'$/hr':>7} "
+        f"{'turns per human-min':>20} {'time budget':>12}"
+    )
+    for model in sorted(models, key=lambda m: -per_turn[m]):
+        hourly = per_min[model] * 60
+        print(
+            f"{short(model):<24} {per_turn[model]:>8.4f} {hourly:>7.0f} "
+            f"{HUMAN_RATE_HR / 60 / per_turn[model]:>20.0f} "
+            f"{HUMAN_RATE_HR / hourly:>11.1f}x"
+        )
+    print(
+        f"\n  at ${HUMAN_RATE_HR:.0f}/hr human. 'time budget' is how much longer than"
+        "\n  you the agent may take and still be the cheaper route."
+    )
+
+
+def warmup(sessions: Sequence[Session]) -> None:
+    """Cumulative $/turn against session length, per model.
+
+    Turn 1 pays a cold cache write; turns 2-10 run against a small context
+    and are the cheapest of the session; the rate then climbs to a plateau
+    rather than growing without bound, because compaction caps context.
+    """
+    lengths = (1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
+    print("== warm-up: median cumulative $/turn after N turns ==")
+    print(f"{'model':<24}" + "".join(f"{n:>7}" for n in lengths))
+    for model in well_sampled(sessions):
+        mine = [s for s in sessions if s.model == model]
+        cells = []
+        for n in lengths:
+            totals = [sum(s.costs[:n]) / n for s in mine if s.turns >= n]
+            cells.append(f"{st.median(totals):>7.3f}" if len(totals) >= 5 else f"{'-':>7}")
+        print(f"{short(model):<24}" + "".join(cells))
+    print(
+        "\n  A flat $/turn overcharges short tasks roughly twofold: the plateau"
+        "\n  rate is the wrong rate for the first few dozen turns."
+    )
+
+
+def estimators(sessions: Sequence[Session]) -> None:
+    """Rank candidate estimators, and bound what coarse judgement can reach."""
+    models = well_sampled(sessions)
+    sessions = [s for s in sessions if s.model in models]
+
+    print("== estimators, by accuracy ==")
+    print(f"{'estimator':<46} {'params':>6} {'MdAPE':>7} {'within2x':>9}")
+
+    scored: list[tuple[str, int, float, float]] = []
+
+    def record(name: str, params: int, predict: Callable[[Session], float]) -> None:
+        scored.append((name, params, mdape(predict, sessions), within_2x(predict, sessions)))
+
+    turn_rate = per_model(sessions, lambda s: s.turns, 1.0)
+    record("per-model, flat:  p[m] x turns", len(models), lambda s: turn_rate[s.model] * s.turns)
+
+    # The superlinear exponent is the warm-up curve, folded into one number.
+    powered = {
+        model: best_scale(
+            [s for s in sessions if s.model == model], lambda s: s.turns**1.13, 1.0
+        )
+        for model in models
+    }
+    record(
+        "per-model, superlinear:  p[m] x turns^1.13",
+        len(models),
+        lambda s: powered[s.model] * s.turns**1.13,
+    )
+
+    minute_rate = per_model(sessions, lambda s: s.gap_minutes, 5.0)
+    record(
+        "per-model, wall-clock:  q[m] x minutes",
+        len(models),
+        lambda s: minute_rate[s.model] * s.gap_minutes,
+    )
+
+    blind = best_scale(sessions, lambda s: s.turns, 1.0)
+    record(f"model-blind:  ${blind:.3f} x turns", 1, lambda s: blind * s.turns)
+
+    for name, params, error, hits in sorted(scored, key=lambda row: row[2]):
+        print(f"{name:<46} {params:>6} {error:>6.1f}% {hits:>8.1f}%")
+
+    print("\n== t-shirt sizing: the agent classifies size, correctly ==")
+    for buckets in (2, 3, 4, 5):
+        cuts = st.quantiles([s.turns for s in sessions], n=buckets)
+
+        def bucket(s: Session, cuts: Sequence[float] = cuts) -> int:
+            return sum(1 for cut in cuts if s.turns > cut)
+
+        table: dict[tuple[str, int], list[float]] = defaultdict(list)
+        for s in sessions:
+            table[(s.model, bucket(s))].append(s.cost)
+        medians = {key: st.median(costs) for key, costs in table.items()}
+
+        def predict(s: Session) -> float:
+            return medians[(s.model, bucket(s))]
+
+        edges = " / ".join(f"{cut:.0f}" for cut in cuts)
+        print(
+            f"  {buckets} buckets (turns cut at {edges:<20}) "
+            f"MdAPE {mdape(predict, sessions):>5.1f}%  "
+            f"within2x {within_2x(predict, sessions):>5.1f}%"
+        )
+
+    print("\n== cost of misjudging size by one bucket ==")
+    cuts = st.quantiles([s.turns for s in sessions], n=3)
+
+    def bucket3(s: Session) -> int:
+        return sum(1 for cut in cuts if s.turns > cut)
+
+    table3: dict[tuple[str, int], list[float]] = defaultdict(list)
+    for s in sessions:
+        table3[(s.model, bucket3(s))].append(s.cost)
+    medians3 = {key: st.median(costs) for key, costs in table3.items()}
+    for shift, name in ((0, "correct"), (1, "one size too big"), (-1, "one size too small")):
+        guessed = [
+            (medians3[(s.model, min(2, max(0, bucket3(s) + shift)))], s.cost) for s in sessions
+        ]
+        error = st.median(abs(a - b) / b for a, b in guessed) * 100
+        hits = sum(1 for a, b in guessed if 0.5 <= a / b <= 2.0) / len(guessed) * 100
+        print(f"  {name:<22} MdAPE {error:>6.1f}%  within2x {hits:>5.1f}%")
+    print(
+        "\n  Overestimating is the more expensive error, so a size call in doubt"
+        "\n  belongs in the smaller bucket."
+    )
+
+
+def live_uuids(records: Sequence[dict]) -> set[str]:
+    """The uuids on the branch that survived, walking back from the tip.
+
+    `logicalParentUuid` is what keeps this honest. A compaction writes a root
+    whose `parentUuid` is null, so following `parentUuid` alone reports every
+    pre-compaction era as abandoned -- which inflates the waste figure about
+    sevenfold. The compaction root names its predecessor in the logical
+    field, and following it keeps a summarised era on the live branch where
+    it belongs.
+    """
+    parent = {
+        record["uuid"]: record.get("parentUuid") or record.get("logicalParentUuid")
+        for record in records
+        if record.get("uuid")
+    }
+    node = next((r["uuid"] for r in reversed(records) if r.get("uuid")), None)
+    live: set[str] = set()
+    while node and node not in live:
+        live.add(node)
+        node = parent.get(node)
+    return live
+
+
+def rework(lines: Iterable[str]) -> None:
+    """Spend on branches that were abandoned -- the measurable error rate.
+
+    This counts only errors caught and rewound past. Errors fixed forward,
+    and errors never noticed, are invisible here, so the figure is a floor.
+    """
+    cost: dict[str, float] = defaultdict(float)
+    for row in csv.DictReader(lines, delimiter="\t"):
+        cost[row["request_id"]] += float(row["cost_usd"])
+
+    live_total = dead_total = 0.0
+    sessions = branched = 0
+    wasted_share = []
+    for path in PROJECTS.glob("*/*.jsonl"):
+        records = []
+        for line in path.read_text(errors="replace").splitlines():
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue  # a killed write leaves one torn line; the rest is good
+        if not records:
+            continue
+        live = live_uuids(records)
+
+        # One API response is written as several records, one per content
+        # block, so its cost is shared out among them.
+        blocks: dict[str, int] = defaultdict(int)
+        for record in records:
+            if record.get("type") == "assistant" and record.get("requestId"):
+                blocks[record["requestId"]] += 1
+
+        kept = lost = 0.0
+        for record in records:
+            request = record.get("requestId")
+            if record.get("type") != "assistant" or request not in cost:
+                continue
+            share = cost[request] / blocks[request]
+            if record.get("uuid") in live:
+                kept += share
+            else:
+                lost += share
+        if kept + lost <= 0:
+            continue
+        sessions += 1
+        live_total += kept
+        dead_total += lost
+        if lost > 0.005:
+            branched += 1
+            wasted_share.append(lost / (kept + lost))
+
+    total = live_total + dead_total
+    print("== rework: spend on abandoned branches ==")
+    print(f"  sessions examined      {sessions:>10,}")
+    print(f"  with abandoned work    {branched:>10,}  ({branched / sessions * 100:.0f}%)")
+    print(f"  live-branch spend      {live_total:>10,.2f}")
+    print(f"  abandoned spend        {dead_total:>10,.2f}  ({dead_total / total * 100:.1f}%)")
+    if wasted_share:
+        deciles = st.quantiles(wasted_share, n=10)
+        print(
+            f"  among those: median {st.median(wasted_share) * 100:.0f}% of the session"
+            f" wasted, p90 {deciles[-1] * 100:.0f}%"
+        )
+    print(
+        "\n  A floor, not a rate: only errors caught and rewound past appear."
+        "\n  Errors fixed forward, and errors never noticed, are not counted."
+    )
+
+
+def selfcal(sessions: Sequence[Session]) -> None:
+    """What watching a task's opening turns buys over predicting it cold.
+
+    The rate table is scaffolding. Once enough of a task has been observed,
+    its own running rate predicts the remainder as well as any fitted
+    constant does, and the table can be discarded.
+    """
+    models = well_sampled(sessions)
+    sessions = [s for s in sessions if s.model in models]
+    rate = per_model(sessions, lambda s: s.turns, 1.0)
+
+    print("== self-calibration: knowing the turn count, having watched K turns ==")
+    print(f"{'method':<48} {'MdAPE':>7} {'within2x':>9}")
+    print(
+        f"{'table only:  p[model] x turns':<48} "
+        f"{mdape(lambda s: rate[s.model] * s.turns, sessions):>6.1f}% "
+        f"{within_2x(lambda s: rate[s.model] * s.turns, sessions):>8.1f}%"
+    )
+    for seen in (3, 10, 20):
+        watched = [s for s in sessions if s.turns >= seen + 3]
+
+        def with_table(s: Session, seen: int = seen) -> float:
+            return sum(s.costs[:seen]) + rate[s.model] * (s.turns - seen)
+
+        # 1.6x because the observed turns are the session's cheapest: the
+        # warm-up discount of `PLATEAU` has not worn off by turn 20.
+        def own_rate(s: Session, seen: int = seen) -> float:
+            spent = sum(s.costs[:seen])
+            return spent + (spent / seen) * (s.turns - seen) * 1.6
+
+        print(
+            f"{f'  watched {seen:>2}, table for the rest':<48} "
+            f"{mdape(with_table, watched):>6.1f}% {within_2x(with_table, watched):>8.1f}%"
+        )
+        print(
+            f"{'    ... or its own rate, no table at all':<48} "
+            f"{mdape(own_rate, watched):>6.1f}% {within_2x(own_rate, watched):>8.1f}%"
+        )
+    print(
+        "\n  By 20 observed turns the table stops earning its place: a task's"
+        "\n  own rate predicts its remainder just as well."
+    )
+
+
+ARCHEOLOGY_LIB = (
+    Path.home() / "repo/github.com/bukzor/bukzor-tools/packages/claude-code-archeology/lib"
+)
+
+
+def typed_text(lines: Iterable[str]) -> None:
+    """Spend per character the operator composed.
+
+    Authorship is `claude_code_archeology.provenance`'s job, not this
+    tool's: separating a composed message from a tool result, a harness
+    notice or a relayed agent message is subtle, and duplicating the rule
+    here is how the two drift apart.
+    """
+    assert ARCHEOLOGY_LIB.is_dir(), f"needs the archeology lib at {ARCHEOLOGY_LIB}"
+    sys.path.insert(0, str(ARCHEOLOGY_LIB))
+    from claude_code_archeology.provenance import USER, typed  # noqa: PLC0415
+    from claude_code_archeology.session import Node  # noqa: PLC0415
+
+    characters = messages = 0
+    for path in PROJECTS.glob("*/*.jsonl"):
+        for number, line in enumerate(path.read_text(errors="replace").splitlines()):
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if record.get("type") != "user":
+                continue
+            composed = typed(Node(number, record))
+            if composed and composed.author == USER:
+                characters += len(composed.text)
+                messages += 1
+
+    total = sum(float(row["cost_usd"]) for row in csv.DictReader(lines, delimiter="\t"))
+    # Only an estimate: measured 2.5-3.3 across this corpus. The character
+    # counts either side of it are exact.
+    chars_per_token = 2.9
+    print("== what the operator actually typed ==")
+    print(f"  messages composed      {messages:>12,}")
+    print(f"  characters composed    {characters:>12,}   (mean {characters // messages} each)")
+    print(f"  corpus cost            {total:>12,.2f}")
+    print()
+    print(f"  per 1k typed characters  ${total / characters * 1000:>8.2f}")
+    print(f"  per Mtok of typed text   ${total / characters * chars_per_token * 1e6:>8,.0f}")
+    print(f"  per composed message     ${total / messages:>8.2f}")
+    print(
+        "\n  The per-Mtok figure assumes ~2.9 characters per token; the"
+        "\n  character counts are exact and the conclusion is not sensitive"
+        "\n  to the conversion."
+    )
+
+
+SECTIONS: dict[str, str] = {
+    "--rates": "rates",
+    "--warmup": "warmup",
+    "--estimators": "estimators",
+    "--rework": "rework",
+    "--selfcal": "selfcal",
+    "--typed": "typed",
+}
+
+
+def main() -> None:
+    wanted = sys.argv[1:] or list(SECTIONS)
+    for flag in wanted:
+        assert flag in SECTIONS, f"unknown section {flag!r}; pick from {' '.join(SECTIONS)}"
+
+    lines = sys.stdin.readlines()
+    assert lines, "no input; pipe `claude-tokens | claude-tokens-cost` in"
+    sessions = read_sessions(lines)
+
+    for index, flag in enumerate(wanted):
+        if index:
+            print()
+        match SECTIONS[flag]:
+            case "rates":
+                rates(sessions)
+            case "warmup":
+                warmup(sessions)
+            case "estimators":
+                estimators(sessions)
+            case "rework":
+                rework(lines)
+            case "selfcal":
+                selfcal(sessions)
+            case "typed":
+                typed_text(lines)
+
+
+if __name__ == "__main__":
+    main()

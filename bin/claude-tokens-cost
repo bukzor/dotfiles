@@ -1,0 +1,92 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Add a `cost_usd` column to the token-accounting TSV, at Anthropic list prices.
+
+Reads `claude-tokens` / `claude-tokens-wire` on stdin, writes the same rows
+plus their cost. Subscription usage is priced as if it had gone through the
+API -- these are notional API-equivalent dollars, not a bill.
+
+Every rate here is a multiple of the model's base input price, so the table
+carries one number per model plus its cache-hit multiplier. Verified against
+the published table and, independently, by recovering each rate from
+ccusage's own totals: all five models in use reproduce to four decimals.
+
+Usage: claude-tokens | claude-tokens-cost | claude-tokens-histogram -b cost_usd
+"""
+
+import sys
+from collections.abc import Iterator, Mapping, Sequence
+
+# model -> (base input $/Mtok, cache-hit multiplier)
+#
+# Fable 5.1 is the one model whose cache hits are not 0.1x base -- they are
+# 0.025x. Missing that overstates its cache reads fourfold, which for this
+# workload is most of its bill.
+PRICES = {
+    "claude-opus-5": (5.0, 0.1),
+    "claude-opus-4-8": (5.0, 0.1),
+    "claude-sonnet-5": (2.0, 0.1),
+    "claude-fable-5": (10.0, 0.1),
+    "claude-fable-5-1": (10.0, 0.025),
+    "claude-haiku-4-5-20251001": (1.0, 0.1),
+}
+# Multipliers on the base input price, fixed across models.
+OUTPUT = 5.0
+CACHE_WRITE_5M = 1.25
+CACHE_WRITE_1H = 2.0
+
+
+def cost_of(row: Mapping[str, str]) -> float:
+    """One request's cost in USD.
+
+    Long context is deliberately not surcharged: Claude 4.6 and later bill the
+    full 1M window at standard rates. Recovering the rates empirically found
+    the same thing -- fitting a >200k multiplier drove it to exactly 1.00.
+    """
+    model = row["model"]
+    assert model in PRICES, f"no price for {model!r}; add it to PRICES"
+    base, cache_hit = PRICES[model]
+
+    # Producers that predate the TTL split report only the total; charging it
+    # at the 5m rate is the cheaper, and so the more conservative, guess.
+    write_1h = int(row.get("cache_create_1h") or 0)
+    write_5m = int(row.get("cache_create_5m") or 0)
+    if not write_1h and not write_5m:
+        write_5m = int(row["cache_create"])
+
+    return (
+        base
+        * (
+            int(row["input"])
+            + CACHE_WRITE_5M * write_5m
+            + CACHE_WRITE_1H * write_1h
+            + cache_hit * int(row["cache_read"])
+            + OUTPUT * int(row["output"])
+        )
+        / 1e6
+    )
+
+
+def priced(lines: Sequence[str]) -> Iterator[str]:
+    header = lines[0].rstrip("\n").split("\t")
+    yield "\t".join((*header, "cost_usd"))
+    for line in lines[1:]:
+        if not line.strip():
+            continue
+        cells = line.rstrip("\n").split("\t")
+        yield "\t".join((*cells, f"{cost_of(dict(zip(header, cells))):.6f}"))
+
+
+def main() -> None:
+    lines = sys.stdin.readlines()
+    rows = list(priced(lines))
+    print("\n".join(rows))
+    total = sum(float(row.rsplit("\t", 1)[1]) for row in rows[1:])
+    print(f"${total:,.2f} over {len(rows) - 1:,} requests", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

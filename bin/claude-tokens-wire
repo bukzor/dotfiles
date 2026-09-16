@@ -1,0 +1,203 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Emit one TSV row per Claude Code API response, from the mitmproxy capture.
+
+Same schema as `claude-tokens`, read off the wire instead of the transcripts,
+so the two cross-check directly -- and the capture is the wider net: it sees
+calls no transcript records at all (title generation, warmup pings, quota
+probes, and every turn of a session whose transcript was deleted).
+
+Only responses are read. A response states its own `request-id`, model and
+complete usage, so this needs no request/response pairing -- which matters,
+because the capture shards the two into separate lines with no flow id
+joining them, and pairing them by (model, arrival order) drifts to ~78%
+accuracy over a month. `effort` is therefore joined in from the transcripts
+by request id, and reads `?` for calls no transcript saw. Sourcing effort
+from the wire itself would need `flow2jsonl.py` to emit `flow.id`.
+
+Usage: claude-tokens-wire [--since YYYY-MM-DD] [TRAFFIC_DIR]
+"""
+
+import json
+import subprocess
+import sys
+from collections.abc import Iterator, Mapping, Sequence
+from dataclasses import astuple, dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+
+TRAFFIC = Path.home() / "claude" / "mitmproxy" / "log" / "traffic"
+NA = "-"
+UNKNOWN = "?"
+COLUMNS = (
+    "source",
+    "timestamp",
+    "session",
+    "request_id",
+    "agent_type",
+    "model",
+    "effort",
+    "input",
+    "cache_create",
+    "cache_read",
+    "output",
+    "thinking",
+)
+
+
+@dataclass(frozen=True)
+class Call:
+    timestamp: str
+    session: str
+    request_id: str
+    agent_type: str
+    model: str
+    effort: str
+    input: int
+    cache_create: int
+    cache_read: int
+    output: int
+    thinking: int
+
+    def tsv(self) -> str:
+        return "\t".join(("wire", *(str(field) for field in astuple(self))))
+
+
+def header_of(headers: Sequence[Sequence], name: str) -> str:
+    """One header's value, NA if absent.
+
+    Values arrive JSON-decoded, so a numeric one is an int; str() them back.
+    """
+    wanted = name.lower()
+    for pair in headers:
+        if str(pair[0]).lower() == wanted:
+            return str(pair[1])
+    return NA
+
+
+def sse_events(content: str) -> Iterator[dict]:
+    for line in content.splitlines():
+        if line.startswith("data: "):
+            try:
+                yield json.loads(line[6:])
+            except json.JSONDecodeError:
+                continue
+
+
+def usage_of(content: str) -> tuple[str, dict] | None:
+    """(model, final usage) from a streamed response, None if it carried none.
+
+    `message_delta` restates the whole usage block at end of stream, so the
+    last one is the complete accounting; `message_start` is the only place
+    the model appears.
+    """
+    model = None
+    usage = None
+    for event in sse_events(content):
+        match event.get("type"):
+            case "message_start":
+                model = (event.get("message") or {}).get("model")
+            case "message_delta":
+                usage = event.get("usage") or usage
+            case _:
+                pass
+    if model is None or usage is None:
+        return None
+    return model, usage
+
+
+def call_of(data: Mapping, known: Mapping[str, Sequence[str]]) -> Call | None:
+    """A Call for a response that reported usage, else None.
+
+    Non-streaming replies (`/api/hello`, `count_tokens`) and rejections carry
+    no usage, and are not calls in this sense.
+    """
+    content = data.get("content")
+    if not isinstance(content, str):
+        return None
+    found = usage_of(content)
+    if found is None:
+        return None
+    model, usage = found
+    request_id = header_of(data.get("headers", ()), "request-id")
+    session, agent_type, effort = known.get(request_id, (UNKNOWN, UNKNOWN, UNKNOWN))
+    return Call(
+        timestamp=datetime.fromtimestamp(data["timestamp_start"], UTC).isoformat(),
+        session=session,
+        request_id=request_id,
+        agent_type=agent_type,
+        model=model,
+        effort=effort,
+        input=usage.get("input_tokens", 0),
+        cache_create=usage.get("cache_creation_input_tokens", 0),
+        cache_read=usage.get("cache_read_input_tokens", 0),
+        output=usage.get("output_tokens", 0),
+        thinking=(usage.get("output_tokens_details") or {}).get("thinking_tokens", 0),
+    )
+
+
+def transcript_index() -> dict[str, tuple[str, ...]]:
+    """request id -> (session, agent_type, effort), via `claude-tokens`.
+
+    Effort never crosses the wire in a form a response can be attributed to,
+    so it comes from the client's own record of the same call.
+    """
+    lines = subprocess.run(
+        ["claude-tokens"], capture_output=True, check=True, text=True
+    ).stdout.splitlines()
+    header = lines[0].split("\t")
+    wanted = [header.index(name) for name in ("session", "agent_type", "effort")]
+    request_id = header.index("request_id")
+    rows = (line.split("\t") for line in lines[1:] if line.strip())
+    return {row[request_id]: tuple(row[position] for position in wanted) for row in rows}
+
+
+def read_shards(traffic: Path, since: str) -> Iterator[dict]:
+    """Every capture record, oldest shard first, decompressing as needed."""
+    for shard in sorted(traffic.glob("*.jsonl*")):
+        if shard.name.split(".")[0] < since:
+            continue
+        if shard.suffix == ".zst":
+            text = subprocess.run(
+                ["zstd", "-dc", str(shard)], capture_output=True, check=True
+            ).stdout.decode(errors="replace")
+        else:
+            text = shard.read_text(errors="replace")
+        for line in text.splitlines():
+            try:
+                yield json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+
+def collect(records: Iterator[dict], known: Mapping[str, Sequence[str]]) -> list[Call]:
+    calls = [
+        call
+        for record in records
+        if record.get("phase") == "response"
+        for call in (call_of(record.get("data") or {}, known),)
+        if call is not None
+    ]
+    return sorted(calls, key=lambda call: call.timestamp)
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    since = ""
+    if args and args[0] == "--since":
+        since, args = args[1], args[2:]
+    traffic = Path(args[0]) if args else TRAFFIC
+    assert traffic.is_dir(), traffic
+
+    calls = collect(read_shards(traffic, since), transcript_index())
+    print("\t".join(COLUMNS))
+    print("\n".join(call.tsv() for call in calls))
+    orphans = sum(1 for call in calls if call.effort == UNKNOWN)
+    print(f"{len(calls)} calls; {orphans} have no transcript record", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
