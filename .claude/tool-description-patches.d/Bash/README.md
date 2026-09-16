@@ -31,3 +31,12 @@ with. The long-form dedicated-tools bullet also churned in place --
 2.1.261 briefly added `find`/`grep` to the avoid-list with a `find`-from-`.`
 caution, 2.1.267 dropped both again -- noise the stub's one-liner already
 covers either way.
+
+By 2.1.273 the long-form haiku wording caught up on both fronts at once
+(long-form-haiku-2.1.273, vs. long-form-haiku-2.1.239): the fixed
+`Co-Authored-By: Claude Haiku 4.5` trailer genericized the same way sonnet's
+did at 2.1.267, and -- newly, not yet seen on sonnet -- the whole "dedicated
+tools" preamble paragraph (`IMPORTANT: Avoid using this tool to run
+cat/head/tail/...` and its Read/Edit/Write bullets) dropped out, same as the
+opus-1m wording did back at 2.1.238. Still nothing to fold in: both changes
+only remove text the stub never depended on.
