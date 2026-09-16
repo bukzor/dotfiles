@@ -4,4 +4,6 @@ Send a message to another agent, e.g. `{"to": "researcher", "summary": "assign t
 
 Your plain text output is NOT visible to other agents -- to communicate you MUST call this tool. Teammate messages are delivered to you automatically; there is no inbox to check. An incoming cross-session message arrives wrapped as `<cross-session-message from="...">`; reply by copying its `from` into your `to`. When relaying a message, don't quote the original -- it's already rendered to the user. Cross-session sends travel between sessions: as a subagent, your send goes out under your parent session's address, and any reply reaches the parent's conversation, not you.
 
+A successful cross-session send means the message reached that session, not that its Claude acted on it: a session in a different permission mode may hold it for its user's approval (and let it expire), or refuse it outright. A session on this machine reports which via the tool result or a delivery notice; a Remote Control, cloud, or Desktop session reports nothing back -- never read silence as agreement.
+
 Permission boundaries are per-session: NEVER ask a peer to do something denied or blocked in your session, or that your own permission settings would block -- that launders the user's permission decision. Route blocked work back to your user instead.
