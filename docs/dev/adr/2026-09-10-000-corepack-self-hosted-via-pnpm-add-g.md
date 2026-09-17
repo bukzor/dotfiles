@@ -124,6 +124,31 @@ own upstream's breakage hides the next incident rather than surfacing it.
   `pnpm add -g` package," which reads as circular until you trace the
   two-step ordering above.
 
+## Correction, 2026-09-17
+
+The Decision section's claim that `~/prefix/pnpm/bin` "already precedes
+`~/bin` on `PATH`... automatically, with no edits to that wrapper or to
+`PATH`" is **wrong for the environment that actually matters**: a plain,
+non-direnv shell (anacron's, cron's). A parallel investigation
+(`pnpm-corepack-cjs-mjs-2026-09-12/`, incident-forensics kb, not
+committed to this repo) hit the same failure class a third time
+(pnpm 12.3.4 → 12.4.1) and found the real order is direnv-gated:
+`~/.config/sh/env.d/900-path.sh` does put `~/bin` ahead of
+`~/prefix/pnpm/bin` as stated, but `~/.envrc`'s `path_add` unconditionally
+re-prepends `~/prefix/pnpm/bin` ahead of that on every direnv-hooked
+interactive prompt — inverting the order and masking a stale
+`~/bin/corepack` interactively, while cron's plain `/bin/sh` (no direnv)
+sees `~/bin/corepack` first and hits the stale volta-bundled copy
+directly. So "left in place... as a fallback bootstrap path" (Decision,
+and the Negative consequence above) was true only by accident, not by
+the PATH-order reasoning given — that investigation's remediation
+(`git rm bin/corepack`, clearing the poisoned cache entry) removes the
+fallback outright rather than relying on it, on the reasoning that an
+unmanaged wrapper nobody upgrades is a liability, not a safety net, once
+a real PATH ambiguity exists. That removal was staged but not yet
+committed as of this note; this ADR's fallback framing should be read
+as superseded once it lands, not repeated in future recovery attempts.
+
 ## Related
 
 - Extends: `docs/dev/adr/2026-02-13-000-global-npm-tooling-management.md`
