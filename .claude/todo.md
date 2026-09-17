@@ -77,6 +77,22 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       them and only `cron-health_check.sh` would notice, a day later. Consider
       re-running `corepack enable pnpm --install-directory ~/prefix/pnpm/bin`
       from `bin/pnpm-upgrade-g` when the shim is broken.
+- [x] `pnpm-upgrade-g` had failed every night since 2026-09-07 (root cause:
+      pnpm 12's native binary vs. corepack 0.34.0's hardcoded `bin/pnpm.cjs`
+      assumption, upstream nodejs/corepack#775/#873, pnpm/pnpm#13018, plus a
+      poisoned `~/.cache/node/corepack/v1/pnpm/12.3.4/` entry). Resolved
+      2026-09-10: corepack is now self-hosted via `pnpm add -g corepack`
+      (→0.36.0, shadowing volta's bundled 0.34.0 by PATH order) so it
+      upgrades alongside pnpm itself going forward; poisoned cache cleared;
+      `pnpm-upgrade-g` runs clean end-to-end (also fixed a pnpm-12 `[WARN]`
+      stdout line breaking its `jq` parsing). Deliberately did *not* add
+      self-heal logic to `pnpm-upgrade-g` for this — see
+      `docs/dev/adr/2026-09-10-000-corepack-self-hosted-via-pnpm-add-g.md`.
+      Separately, `cron-status.sh`'s "warn at shell start" turned out not to
+      reach real usage (tmux panes here run 6-17+ days without a shell
+      restart) — fixed by polling the same status files from tmux's
+      status-right instead; see
+      `docs/dev/adr/2026-09-10-001-tmux-status-bar-cron-alerting.md`.
 
 ## Later
 

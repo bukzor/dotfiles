@@ -40,7 +40,12 @@ packages() {
 }
 
 installed() {
-  pnpm ls -g --depth=0 --json | jq -r '.[0].dependencies | keys[]'
+  # pnpm 12's global "--json" output is not clean JSON: the
+  # `[WARN] Using --global skips the package manager check for this
+  # project` line lands on stdout ahead of the JSON regardless of
+  # --loglevel, so it has to be stripped before jq sees it (found
+  # 2026-09-10 chasing the pnpm-12 MODULE_NOT_FOUND incident).
+  pnpm ls -g --depth=0 --json | grep -v '^\[WARN\]' | jq -r '.[0].dependencies | keys[]'
 }
 
 # The failures this catches ran unnoticed for three months: a pnpm upgrade that
