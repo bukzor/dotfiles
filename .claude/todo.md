@@ -72,6 +72,15 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       loop that reports nothing when a file fails. `source_dir` got that
       treatment 2026-08-27; this loop can't use `warn` because `warn.sh`
       loads last. Rename it `00-warn.sh`, or inline an `echo >&2`.
+- [ ] Consider wiring `bin/cron-status` (or its callers) to call `bin/alert`
+      on a failed job, so a cron failure pushes a real-time notification
+      instead of waiting up to 15s for the tmux status-line poll, or being
+      silent entirely outside tmux. `alert` is a push channel (see
+      `docs/dev/user-attention.claims.kb/channels.kb/alert-push.md`) — its
+      coverage is exactly its call sites, and cron currently has none.
+      Awaiting a ruling, not a refactor: autonomous desktop notifications
+      from a nightly cron job is a noise-level judgment call, found
+      2026-09-17 while extending the user-attention ledger to cover `alert`.
 - [ ] corepack's `pnpm`/`pnpx` shims are symlinks into
       `~/.volta/tools/image/node/<version>/`, so a `volta install node` strands
       them and only `cron-health_check.sh` would notice, a day later. Consider
