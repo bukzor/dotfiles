@@ -71,6 +71,7 @@ rather than the wrapper.
   tmux panes; adds a continuously-polled tmux status-line channel
 - Implements: `bin/logrotate-cron`, `.config/sh/rc.d/cron-status.sh`,
   `.config/anacron/cron-health_check.sh`
+- Generalized as: `docs/dev/user-attention.claims.md`
 
 [2025-11-21-000]: 2025-11-21-000-user-space-anacron-for-laptop-scheduling.md
 [2026-08-27-000]: 2026-08-27-000-pnpm-11-global-tooling-mechanism.md

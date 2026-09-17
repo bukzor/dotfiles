@@ -119,6 +119,9 @@ nightly job.
   "fortify alerting instead" are the same directive
 - Implements: `bin/cron-status`, `.config/sh/rc.d/cron-status.sh`,
   `.tmux.conf`
+- Generalized as: `docs/dev/user-attention.claims.md` -- the trigger/poll
+  distinction this decision turned on, made a checkable claim rather than a
+  one-off argument in this file
 
 [2026-08-27-001]: 2026-08-27-001-scheduled-job-health.md
 [2026-09-10-000]: 2026-09-10-000-corepack-self-hosted-via-pnpm-add-g.md
