@@ -84,6 +84,17 @@ and treats quote chars specially (`unmatched single quote`).
 Prefer a parent-shell redirect (`exec 2>&1`) over per-command (`cmd 2>&1`) where
 practical.
 
+### awk: reach for python instead
+
+> [!@bukzor] ruled 2026-09-01, recorded sensatim — "i'd rather see a simple
+> python script over an awk script".
+
+One-field selection (`awk '{print $2}'`) is fine inline. Past that — grouping,
+accumulating, anything with a second variable — write the python instead, even
+throwaway. It reads without a second language in your head, survives being
+edited later, and sidesteps the quoting war between the shell and the awk
+program (`-F'\t'` traces as `'-F\t'` and stops meaning what you wrote).
+
 `rm -r`, never `rm -rf`; `rmdir -p` for empty trees; read a directory before
 removing it.
 
