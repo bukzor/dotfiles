@@ -11,9 +11,22 @@ Read/Edit/Write bullets) from the opus-1m wording, otherwise unchanged from
 rule, so nothing to fold in.
 
 The stub keeps mechanics (state persistence, dedicated-tools rule, timeout,
-run_in_background) plus the git safety line, and defers everything else:
+run_in_background) and defers everything else:
 Bash conventions to must-read.kb/before/running-ANY-Bash-commands.md, git
-conventions to must-read.kb/before/git/. The long form's step-by-step
+conventions to must-read.kb/before/git/.
+
+It used to also keep a "git safety line" (never skip hooks or run
+`reset`/`checkout --`/`clean -f`/`push -f`/`commit --amend` without explicit
+request) as a named exception to that deferral. Dropped 2026-09-18: it was a
+blanket rule duplicating -- and, on a `personal`-caution repo, contradicting
+-- the graded policy in `reference.kb/git/commit.md` (amend/reset freely
+allowed at `solo`/`personal`), and it caused exactly that wrong refusal in
+session. The actual gap was skipping `must-read.kb/before/git/running-ANY-git-command.md`;
+paying tokens on every request for a rule that's wrong on two of three
+caution levels doesn't fix a discipline failure, it just adds a second,
+lower-fidelity source of truth to keep in sync.
+
+The long form's step-by-step
 commit/PR procedure is deliberately dropped, not moved: it teaches bare
 `git commit`/HEREDOC flows and only-commit-when-asked, both of which the
 user's standing config overrides (commit-files/commit-staged, commit
