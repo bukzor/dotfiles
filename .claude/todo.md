@@ -16,6 +16,9 @@ cost-benefit-sweh:
 
 Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 
+- [ ] <https:todo.kb/2026-09-22-000-migrate-config-sh-to-intent-d.md> -- after
+      the three `standing: open` rulings in `docs/dev/design.kb/intent-d.kb/`
+
 - [ ] `claude_code_archeology.session.Session.tips()` counts attachment
       records as tips (671 of them on one real session file, vs ~7 real
       conversation branches) — should filter to user/assistant, matching
