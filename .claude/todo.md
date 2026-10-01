@@ -119,3 +119,14 @@ We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
 - [ ] [todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md](todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md) — may belong under `private.bukzor-llc`
+
+- [ ] Rule on adding a standing lesson to `CLAUDE.md`: mistaking two cases of
+      an unconditional for two special cases of a conditional, and the
+      corollary that even genuine special cases are often worth re-defining
+      into one unconditional case. Raised 2026-10-01 after it recurred three
+      times in one session (empty `replace.md` read as a stipulation rather
+      than deletion-by-definition; `shapes` as "markers or else key"; a write
+      region defined as "search, else match, else body" where the operator's
+      factoring was "the region is search; search defaults to match"). The
+      authority is yours, so it would enter as `[!@bukzor]` -- the agent's
+      offer, awaiting your word on whether it earns standing text.
