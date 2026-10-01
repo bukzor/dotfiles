@@ -1,0 +1,7 @@
+# Whole days a quarantine batch is kept before it is deleted, counted from the
+# sweep date its name records.
+# This alone is the floor on how long anything survives. A file moved into a
+# scratch directory keeps its old mtime, so it can be quarantined by the very
+# next sweep with no wait at all; this is the wait it does get.
+
+30

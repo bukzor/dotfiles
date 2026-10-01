@@ -1,0 +1,6 @@
+# The directory name that marks scratch anywhere below your home directory.
+# Every one found is swept too, unless git tracks a file inside it -- that is
+# what separates your scratch from a vendored directory of the same name.
+# Emptied: no search; sweep only the roots listed in `roots`.
+
+trash

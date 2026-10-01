@@ -1,0 +1,7 @@
+# Names directly inside a root that a sweep never touches, one per line.
+# {boot} expands to the second this kernel booted, so a scratch directory
+# named for the current boot is never moved out from under a running process.
+# The quarantine directory is kept whether or not it is listed here.
+# Emptied: nothing is exempt but the quarantine directory.
+
+boot={boot}

@@ -1,0 +1,4 @@
+# Where a swept entry is parked: a directory directly inside its own root,
+# holding one dated batch per sweep. Cannot be emptied.
+
+lost-and-found
