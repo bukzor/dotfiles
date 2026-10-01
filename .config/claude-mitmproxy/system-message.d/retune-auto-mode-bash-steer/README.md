@@ -39,9 +39,10 @@ the arm, so a reworded body is a search miss under a holding match -- loud. A
 reworded *heading* is a match miss, which is silent, and the steer then rides
 through unpatched. That is the residual exposure.
 
-## The relaxed arm is reconstructed
+## Both arms match text served here
 
-`search.d/relaxed.md` comes from the CLI's compiled template, not from the
-wire; only `strict` has been served here. Should the relaxed arm arrive and
-the reconstruction be off by a character, the search miss is loud -- the
-wanted outcome, since what it reports is that the reconstruction was wrong.
+`search.d/strict.md` and `search.d/relaxed.md` each match, byte for byte, a
+body served to this host -- `strict` throughout, `relaxed` on three sessions
+of 2026-09-16 (v2.1.273). Should upstream reword either arm, the search miss
+is loud -- the wanted outcome, since what it reports is that this directory
+no longer matches the wire.

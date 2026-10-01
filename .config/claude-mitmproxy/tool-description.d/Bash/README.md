@@ -7,13 +7,11 @@ name baked into its commit-trailer example -- hence one upstream.d/ file per
 2.1.238 dropped the long form's "dedicated tools" preamble paragraph (the
 `IMPORTANT: Avoid using this tool to run cat/head/tail/...` block and its
 Read/Edit/Write bullets) from the opus-1m wording, otherwise unchanged from
-2.1.232 -- already redundant with the stub's one-line version of the same
-rule, so nothing to fold in.
+2.1.232 -- already redundant with the harness prompt's own preference line,
+so nothing to fold in.
 
-The stub keeps mechanics (state persistence, dedicated-tools rule, timeout,
-run_in_background) and defers everything else:
-Bash conventions to must-read.kb/before/running-ANY-Bash-commands.md, git
-conventions to must-read.kb/before/git/.
+The stub keeps mechanics (state persistence, timeout, run_in_background) and
+defers everything else to the user's "llm-triggers" system.
 
 It used to also keep a "git safety line" (never skip hooks or run
 `reset`/`checkout --`/`clean -f`/`push -f`/`commit --amend` without explicit
@@ -26,11 +24,19 @@ paying tokens on every request for a rule that's wrong on two of three
 caution levels doesn't fix a discipline failure, it just adds a second,
 lower-fidelity source of truth to keep in sync.
 
+It carries no dedicated-tools line, and none belongs: the harness prompt says
+"Prefer the dedicated file/search tools over shell commands when one fits"
+unconditionally, and the long-form wordings that still ship the preamble say
+it themselves. A version phrased as a permission requirement would be false
+besides -- nothing gates Edit or Write on a prior Read. At 2.1.268, Edit
+succeeds on a file never read this session and outside a previously read line
+range; its only read-shaped failure is the ordinary "String to replace not
+found in file" when the old text is guessed wrong.
+
 The long form's step-by-step
 commit/PR procedure is deliberately dropped, not moved: it teaches bare
 `git commit`/HEREDOC flows and only-commit-when-asked, both of which the
-user's standing config overrides (commit-files/commit-staged, commit
-eagerly). The commit trailer convention lives in
+user's standing config overrides. The commit trailer convention lives in
 reference.kb/git/commit.md.
 
 By 2.1.266-267 upstream itself stopped baking a fixed model name into the
@@ -42,8 +48,8 @@ upstream *into* alignment with our setup rather than out of it; still
 nothing to fold in, since the stub never carried a trailer example to begin
 with. The long-form dedicated-tools bullet also churned in place --
 2.1.261 briefly added `find`/`grep` to the avoid-list with a `find`-from-`.`
-caution, 2.1.267 dropped both again -- noise the stub's one-liner already
-covers either way.
+caution, 2.1.267 dropped both again -- noise either way, since the harness
+prompt carries the preference.
 
 By 2.1.273 the long-form haiku wording caught up on both fronts at once
 (long-form-haiku-2.1.273, vs. long-form-haiku-2.1.239): the fixed
