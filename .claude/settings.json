@@ -1,4 +1,5 @@
 {
+  "cleanupPeriodDays": 3650,
   "permissions": {
     "allow": [
       "WebSearch",
@@ -38,12 +39,13 @@
       "TodoWrite",
       "ExitPlanMode",
       "EnterPlanMode",
+      "AskUserQuestion",
+      "ReportFindings",
       "TaskCreate",
       "TaskUpdate",
       "TaskList",
       "TaskGet",
       "TaskOutput",
-      "TaskStop",
       "Workflow",
       "CronCreate",
       "CronDelete",
@@ -66,6 +68,7 @@
       "Edit(~/.claude/projects/*/memory/**)"
     ],
     "ask": [
+      "SendFeedback",
       "Bash(git push:*)",
       "Bash(pnpm install:*)",
       "Bash(npm install:*)",
@@ -74,10 +77,16 @@
       "Bash(cargo install:*)",
       "Bash(git reset:*)"
     ],
+    "defaultMode": "auto",
     "additionalDirectories": [
       "~/.claude/must-read.kb",
       "~/",
       "~/.claude"
+    ],
+    "questionable": [
+      "SendMessage",
+      "ListAgents",
+      "TaskStop"
     ]
   },
   "disableClaudeAiConnectors": true,
@@ -99,7 +108,10 @@
     "loop": "user-invocable-only",
     "schedule": "user-invocable-only",
     "batch": "user-invocable-only",
-    "debug": "user-invocable-only"
+    "debug": "user-invocable-only",
+    "claude-in-chrome": "user-invocable-only",
+    "artifact-capabilities": "user-invocable-only",
+    "artifact-diagramming": "user-invocable-only"
   },
   "hooks": {
     "PreToolUse": [
@@ -142,33 +154,31 @@
     "typescript-lsp@claude-plugins-official": false
   },
   "effortLevel": "xhigh",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    },
+    "claude-sonnet-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "default",
   "autoMemoryEnabled": false,
   "editorMode": "vim",
   "verbose": true,
   "preferredNotifChannel": "kitty",
-  "autoCompactEnabled": false,
+  "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
   "terminalProgressBarEnabled": false,
-  "skipAutoPermissionPrompt": true,
-  "//hooks-disabled": {
-    "//PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/git_commit_validator.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/python_style_reminder.py"
-          }
-        ]
-      }
-    ]
-  }
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
