@@ -4,6 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
+dependencies = [
+    "chatfs-cli",
+    "llm-claims-kb",
+    "llm-kb",
+]
 
 [dependency-groups]
 dev = [
@@ -19,7 +24,13 @@ dev = [
 members = [
     "repo/github.com/bukzor/bukzor.rust-practice/claude-jsonl-display/python",
     ".",
+    "repo/github.com/bukzor/bukzor-agent-skills/llm-kb",
+    "repo/github.com/bukzor/bukzor-agent-skills/llm-claims-kb",
+    "repo/github.com/bukzor/prototype.chatfs/packages/chatfs-cli",
 ]
 
 [tool.uv.sources]
 bukzor-home = { workspace = true }
+llm-kb = { workspace = true }
+llm-claims-kb = { workspace = true }
+chatfs-cli = { workspace = true, editable = true }
