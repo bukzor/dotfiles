@@ -58,6 +58,32 @@ still catching drift within that scope: write `match.md` broad and stable
 (e.g. the enclosing section heading) and `search.md`/`search.d/` narrow and
 precise (the literal text to strip).
 
+> [!@bukzor] ruled 2026-10-01, recorded sensatim. "Broad and stable" is a claim
+> about *which* text, not just how much of it: "a good `match.md` will match all
+> content that's relevant to the rule and _only_ content that's relevant to the
+> rule _even under future revision_". Build `match` only from strata that survive
+> revision and keep exact prose in `search`, where its exactness is what makes
+> drift loud. Exactness in `search` is a feature; exactness in `match` is a bug.
+>
+> The strata, most to least durable:
+>
+> - **Structure** -- a section heading, the blank line between a heading and its
+>   content, list nesting. Format decisions, changed on a slow clock.
+> - **Identifiers** -- tool names (`Bash`, `Read`, `Edit`, `Write`). Product API,
+>   so renaming one breaks everything; but a reword can route around them ("the
+>   shell", "the dedicated file tools"), which makes them weaker than structure.
+> - **Prose** -- wording, punctuation, whitespace, example lists such as
+>   `cat, head, or sed -n`. Expected to perturb between releases, and observed
+>   doing it: upstream added `find`/`grep` to the Bash avoid-list at 2.1.261 and
+>   dropped both again at 2.1.267.
+>
+> Prose in `match` fails quietly, which is the expensive direction: the rule falls
+> out of scope, the text it was stripping rides through unpatched, and the only
+> detector left is a human noticing the behavior change. Prose in `search` fails
+> loudly, which is what `failed-to-match` is for. Where a coarse-but-specific
+> `match` is wanted, take it from structure, not from a long literal shared
+> between two wordings of the target -- that literal is still prose.
+
 Use `search.d/` (mirroring `match.d/`) when the precise target itself has
 worn multiple wordings across cc_versions you still want one patch to
 recognize — e.g. `strip-doing-tasks-bloat` anchors on the stable `# Doing
