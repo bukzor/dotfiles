@@ -1,7 +1,7 @@
 # pnpm 11 global tooling mechanism
 
 **Date:** 2026-08-27
-**Status:** Accepted
+**Status:** Accepted -- corepack's source superseded by [2026-09-10-000]
 
 ## Context
 
@@ -129,6 +129,8 @@ major.
 
 - Extends: `docs/dev/adr/2026-02-13-000-global-npm-tooling-management.md`
   (decision intact, mechanism superseded)
+- Extended by: [2026-09-10-000] -- corepack's source (was: volta's bundled
+  node) is now `pnpm add -g corepack`
 - Implements: `bin/pnpm-upgrade-g`, `.config/pnpm/config.yaml`,
   `.config/pnpm/global/package.json`
 - Detection of the failure window it caused:
@@ -137,3 +139,4 @@ major.
   (a `grep` with no matches aborted `.profile` under `set -e`)
 
 [2026-02-13-000]: 2026-02-13-000-global-npm-tooling-management.md
+[2026-09-10-000]: 2026-09-10-000-corepack-self-hosted-via-pnpm-add-g.md
