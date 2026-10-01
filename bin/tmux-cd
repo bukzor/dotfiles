@@ -21,7 +21,7 @@ tmux=(
 )
 
 window_number=$(tmux display-message -p '#I')
-i=$((window_number - 2))
+i=$((window_number - 1))
 if (( i < 0 )); then
   i=0
 fi
