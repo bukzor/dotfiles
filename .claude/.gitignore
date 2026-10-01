@@ -25,3 +25,4 @@ mcp-needs-auth-cache.json
 
 # scratch, recoverable (see CLAUDE.md)
 trash/
+feedback/
