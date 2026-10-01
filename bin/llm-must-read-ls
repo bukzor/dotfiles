@@ -1,0 +1,35 @@
+#!/bin/bash
+# show all "must-read" entries relevant to given path(s), default $PWD
+set -euo pipefail
+
+llm_must_read_ls() { # the un-ergonomic core
+  local path="$1"
+  echo "$path:"
+  ( cd "$path" && find . -type f -name '*.md' ) |
+    cut -c3- |
+    sort \
+  ;
+  echo
+}
+
+DEBUG="${DEBUG:-0}"
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+if [[ $# -eq 0 ]]; then
+  set -- "."
+fi
+for path in "$@"; do
+  path=$(cd "$path" && pwd)
+
+  if [[ "$path" == */must-read.kb* ]]; then
+    llm_must_read_ls "$path"
+  fi
+  for subpath in "" "/.claude"; do
+    subpath="$path$subpath/must-read.kb"
+    if [[ -e "$subpath" ]]; then
+      llm_must_read_ls "$subpath"
+    fi
+  done
+done
