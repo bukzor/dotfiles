@@ -1,3 +1,6 @@
 # most of these directories have their own source control (cf. repo/.gitignore);
 # check them individually -- this repo's status says nothing about them
 */
+# also symlinks (which `*/` misses) and loose files
+*
+!.gitignore

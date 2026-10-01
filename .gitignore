@@ -205,3 +205,21 @@ backups/
 # bukzor-tools/packages/bukzor-tmpwatch
 /.config/systemd/user/bukzor-tmpwatch.service
 /.config/systemd/user/bukzor-tmpwatch.timer
+
+# ---------------------------------------------------------------------------
+# Local data and credentials that sit at the top of the worktree
+# ---------------------------------------------------------------------------
+/.elan/
+/.grip/
+/chats/
+/scratch/
+/system.mhtml
+# nested repo: `.git` here is a symlink, which the `.git/` rule doesn't match
+/empty/
+/.config/Thonny/
+/.config/homebrew/
+# credentials
+/.config/stripe/
+# synced skill buckets (data, not config)
+/.claude/skills/synced/
+/.config/systemd/user/timers.target.wants/bukzor-tmpwatch.timer
