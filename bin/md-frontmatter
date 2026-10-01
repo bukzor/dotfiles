@@ -9,18 +9,22 @@ onerror() {
 }
 trap onerror ERR
 
-usage() {
-  cat >&2 <<EOF
+print_usage() {
+  cat <<EOF
 usage: md-frontmatter FILE [FILE...]
 
 Extract YAML frontmatter from markdown file(s) and emit JSONL:
   {"path": "<file>", "@value": <frontmatter>}
 EOF
-  exit 2
 }
 
+case "${1:-}" in
+  -h|--help) print_usage; exit 0 ;;
+esac
+
 if (( $# == 0 )); then
-  usage
+  print_usage >&2
+  exit 2
 fi
 
 if (( DEBUG > 0 )); then

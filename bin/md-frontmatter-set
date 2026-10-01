@@ -9,8 +9,8 @@ onerror() {
 }
 trap onerror ERR
 
-usage() {
-  cat >&2 <<EOF
+print_usage() {
+  cat <<EOF
 usage: md-frontmatter-set < records.jsonl
 
 Reads JSONL on stdin, one record per line:
@@ -30,8 +30,11 @@ splicing the edit into each file's current frontmatter so the rest survives:
     | jq -c '.["@value"].verdict = (.path | split("/")[-2])' \\
     | md-frontmatter-set
 EOF
-  exit 2
 }
+
+case "${1:-}" in
+  -h|--help) print_usage; exit 0 ;;
+esac
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 DIFF_JQ_FILE="$SCRIPT_DIR/md-frontmatter-diff.jq"
@@ -42,7 +45,8 @@ if [[ ! -f "$DIFF_JQ_FILE" ]]; then
 fi
 
 if [[ -t 0 ]]; then
-  usage
+  print_usage >&2
+  exit 2
 fi
 
 if (( DEBUG > 0 )); then
