@@ -1,6 +1,6 @@
 # Monitor: writing watch scripts that actually notify
 
-The tool schema is slimmed at the proxy (`~/.claude/tool-description-patches.d/`);
+The tool schema is slimmed at the proxy (`~/.config/claude-mitmproxy/tool-description.d/`);
 this file carries the guidance that was stripped. Read fully before arming a
 monitor.
 
@@ -76,3 +76,10 @@ shell, no polling). Binary frames surface as placeholders; close ends the
 watch. Prefer this over `command: 'websocat ...'` unless frames need shell
 transformation. Same rate limiting as bash -- subscribe to a filtered feed
 where one exists.
+
+## Pushing notifications
+
+When an event lands that the user would want to act on now -- an error
+appeared, the status they were waiting on flipped -- send a
+PushNotification. Not every event is worth a push; only ones that change
+what the user would do next.

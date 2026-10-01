@@ -1,6 +1,6 @@
 # EndConversation: policy for the last-resort tool
 
-The tool schema is slimmed at the proxy (`~/.claude/tool-description-patches.d/`);
+The tool schema is slimmed at the proxy (`~/.config/claude-mitmproxy/tool-description.d/`);
 this file carries the full policy that was stripped. Read fully before any use
 -- and before issuing the warning that must precede use.
 

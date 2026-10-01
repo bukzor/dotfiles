@@ -1,9 +1,3 @@
----
-name: delegation-routing
-description: |
-  MUST read when: spawning a sub-agent or forking.
----
-
 # Delegation
 
 ## Spawn
@@ -13,6 +7,11 @@ description: |
 - In doubt between neighbors? Prefer the higher tier over the longer
   runtime -- unless the work truly runs >30 min.
 - Spec every spawn: objective, output format, tools, boundaries.
+- Give each agent its own directory and name it sole writer there. Never
+  two agents on one file: the second write silently clobbers the first,
+  and the loser is invisible until you diff. A resumed agent counts as a
+  second writer -- one that reported "failed" can still finish and
+  overwrite. You merge; they don't.
 - Failed spawn: retry once in place with a repaired spec. Failed again?
   Incomplete run -- next runtime up (past `--ge-30min`: `effort-xhigh`, then
   `effort-max`, same model). Wrong approach -- next tier up.
@@ -29,6 +28,15 @@ description: |
   synthesis onto the agent. Prove you understood -- file paths, line
   numbers, what specifically to change.
 - Say when you need a short response ("report in under 200 words").
+- Reusable instruction goes in a file the agent reads, not in the prompt.
+
+  > [!DRAFT] agent-authored 2026-09-04, vetoable -- from a review whose
+  > instructions half existed only in the dispatching session's chat.
+
+  A prompt is unversioned, unreviewable, and gone with the session, so the
+  next run of the same job silently gets a different brief. Put the standing
+  part on disk and let the prompt name the workspace, the task, and what is
+  particular to this run.
 - Trust but verify: a report describes intent, not necessarily what
   happened. Check actual changes before reporting work done.
 

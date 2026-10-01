@@ -43,7 +43,8 @@ Can't name one? You haven't looked.
 - **Alternate Advocate and Skeptic.** Arbiter intervenes at concessions.
 
 - **Tag claims** with short unique ALLCAP labels (e.g. `ZU: zero
-  utility`, `LCD: lowest common denominator`) for back-reference.
+  utility`, `LCD: lowest common denominator`) for back-reference; to the
+  user, only under the coinage rule (CLAUDE.md, Response Protocol).
 
 - **Discard weak arguments without comment.** Focus on the strongest
   plank on each side. Weaker arguments can return if they become
