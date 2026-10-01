@@ -5,3 +5,4 @@ https://github.com/rfjakob/earlyoom/issues/378
 https://github.com/rfjakob/earlyoom/issues/214
 https://github.com/lxc/lxcfs/issues/695
 https://issuetracker.google.com/issues/544148694
+https://github.com/nodejs/corepack/issues/775#issuecomment-5720549030
