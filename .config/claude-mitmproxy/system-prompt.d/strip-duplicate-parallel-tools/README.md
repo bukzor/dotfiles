@@ -10,8 +10,8 @@ Two shapes carry it, so the match/search pairs are per-shape:
 
 - harness (opus-5/fable-5 since v2.1.221, fable-class since v2.1.186):
   a trailing sentence on the "Prefer the dedicated file/search tools"
-  bullet. `search.d/harness.md` has no trailing newline on purpose --
-  the deletion must keep the bullet's first sentence and its newline.
+  bullet. `search.d/harness.md` opens with `$PRE` and `replace.md` is
+  `$PRE`, so the deletion keeps the bullet's first sentence and its newline.
 - long-form (sonnet-5): a whole ~380-char bullet under `# Using your
   tools`, byte-identical v2.1.76 through v2.1.221; its tail rides on
   `$REST` so wording churn there stays in scope.

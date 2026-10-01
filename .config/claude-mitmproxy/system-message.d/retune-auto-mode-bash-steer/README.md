@@ -27,9 +27,7 @@ reads these files gets them back as line-numbered tool results, and those ride
 in a `role: "system"` message too, so the heading appears quoted as often as
 it appears live; a match that short hits the quotation. What separates the
 two is the blank line: in a numbered copy the heading is followed by `2\t`.
-The hole rather than the body verbatim keeps the match one line long and keeps
-a single trailing newline at the end of the file, where an end-of-file fixer
-cannot quietly change what it means.
+The hole rather than the body verbatim keeps the match one line long.
 
 `match` only answers "is this message in scope?" -- it does not localize the
 rewrite. `search` is matched over the whole body and takes its leftmost hit,

@@ -82,8 +82,8 @@ LINES-type placeholders.
 ### Templates match whole lines
 
 Every template matches whole lines: its first line must start at a line start
-and its last line must run to a line end (a template that begins or ends with
-`\n` already says so for that edge). A template whose edge falls mid-line
+and its last line must run to a line end (a template that begins with `\n`
+already says where it starts). A template whose edge falls mid-line
 declares it with a placeholder -- `$PRE` ahead of the literal for text before
 it on the line, `$PLATFORM`-style holes after it -- so the file reads the way
 it matches. Without that, a rule matches a quoted or indented copy of its own
@@ -92,6 +92,31 @@ included), and matches text its own replacement just wrote.
 
 A hole that absorbs a mid-line edge is captured, so `replace.md` has to
 re-emit it (`$PRE`) or it deletes what the hole covered.
+
+### Files and trailing newlines
+
+> [!@bukzor] ruled 2026-10-01, recorded sensatim. "I believe all files should
+> be treated identically whether they have a trailing newline or not. The
+> trailing newline behavior is too unpredictable in too many software for it to
+> be load-bearing."
+
+Every file in this dialect is read by stripping one trailing newline if there
+is one, and written by appending one (`textfile`), so a file with and without
+its final newline is the same file, and an editor or end-of-file fixer cannot
+change what a rule means. A template therefore never ends in the line break of
+its last line: that break belongs to the body, and the template matches up to
+it. To make a template end in a blank line, end the file in two newlines.
+
+Two consequences. A rule whose rewritten text is empty -- an empty `replace.md`,
+or a `$PRE`-style one over nothing -- deletes lines, and a deleted line takes
+one line break with it: the one that follows, or at end-of-body the one that
+precedes. And a `replace.md` holding a lone newline is the empty replacement,
+not a blank-line insertion; write the blank line as content if one is wanted.
+
+The convention governs files, not wire text. A body arrives from the network
+with whatever trailing newline upstream sent, and the end-of-line anchor
+absorbs it; "strings in memory have no trailing newline" is true only of
+strings that came from disk.
 
 `$NAME` in `replace.md` re-emits what the search's same-named
 placeholder captured — how a rewrite keeps dynamic content it can't

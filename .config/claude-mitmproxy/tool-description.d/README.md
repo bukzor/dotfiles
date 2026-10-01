@@ -22,7 +22,8 @@ carried moves to `~/.claude/must-read.kb/`, loaded only when relevant.
 | `README.md`       | no       | Why / what moved where                                 |
 
 At apply time the tool's live description is compared to the accepted
-upstream texts (modulo trailing newline). On mismatch the stub is still
+upstream texts (each file read with one trailing newline stripped, like every
+file in these directories -- `textfile`). On mismatch the stub is still
 applied, but a `changed-upstream` incident is captured under
 `~/claude/mitmproxy/log/patch-failures/` -- loud once per distinct upstream text,
 like a syspatch drift. Triage: diff the captured body against the accepted
