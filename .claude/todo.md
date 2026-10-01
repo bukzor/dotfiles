@@ -19,6 +19,13 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
 - [ ] <https:todo.kb/2026-09-22-000-migrate-config-sh-to-intent-d.md> -- after
       the three `standing: open` rulings in `docs/dev/design.kb/intent-d.kb/`
 
+- [ ] Decide how `llm.kb-validate` and `llm-claims-kb-*` reach `PATH` now that
+      `llm-kb`/`llm-claims-kb` are out of the home workspace (`2e57761`).
+      `~/.venv/bin` supplies them today; the next `uv sync` in `~` removes
+      them. Candidate: `uv tool install --editable` from
+      `bukzor-agent-skills`. Owner's ruling first. Also: should `chatfs-cli`
+      stay a home workspace member? See the 2026-10-01-000 devlog.
+
 - [ ] `claude_code_archeology.session.Session.tips()` counts attachment
       records as tips (671 of them on one real session file, vs ~7 real
       conversation branches) — should filter to user/assistant, matching
