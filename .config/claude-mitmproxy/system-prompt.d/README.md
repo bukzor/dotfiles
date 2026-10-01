@@ -79,6 +79,20 @@ unique name when you don't care. Trailing digits vary the name without
 changing its type — `$LINES1` and `$LINES2` are two independent
 LINES-type placeholders.
 
+### Templates match whole lines
+
+Every template matches whole lines: its first line must start at a line start
+and its last line must run to a line end (a template that begins or ends with
+`\n` already says so for that edge). A template whose edge falls mid-line
+declares it with a placeholder -- `$PRE` ahead of the literal for text before
+it on the line, `$PLATFORM`-style holes after it -- so the file reads the way
+it matches. Without that, a rule matches a quoted or indented copy of its own
+target (replayed tool results ride in `role: "system"` messages, rule files
+included), and matches text its own replacement just wrote.
+
+A hole that absorbs a mid-line edge is captured, so `replace.md` has to
+re-emit it (`$PRE`) or it deletes what the hole covered.
+
 `$NAME` in `replace.md` re-emits what the search's same-named
 placeholder captured — how a rewrite keeps dynamic content it can't
 know ahead of time (session paths, branch names); see

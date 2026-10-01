@@ -1,1 +1,1 @@
- - Platform:
+ - Platform:$PLATFORM

@@ -25,14 +25,19 @@ survive, should upstream ever add one.
 steer text. The heading alone is not enough to scope it. Any session that
 reads these files gets them back as line-numbered tool results, and those ride
 in a `role: "system"` message too, so the heading appears quoted as often as
-it appears live; a match that short hits the quotation and deletes the steer
-body out of the transcript a reader is looking at. What separates the two is
-the blank line: in a quoted copy the heading is followed by `2\t`. The hole
-rather than the body verbatim keeps the match one line long and keeps a single
-trailing newline at the end of the file, where an end-of-file fixer cannot
-quietly change what it means. This is the collision
-`.claude/ideas.kb/2026-08-20-000-Audit-heading-anchored-match-md-templates-for-self-referential-collision-risk.md`
-describes.
+it appears live; a match that short hits the quotation. What separates the
+two is the blank line: in a numbered copy the heading is followed by `2\t`.
+The hole rather than the body verbatim keeps the match one line long and keeps
+a single trailing newline at the end of the file, where an end-of-file fixer
+cannot quietly change what it means.
+
+`match` only answers "is this message in scope?" -- it does not localize the
+rewrite. `search` is matched over the whole body and takes its leftmost hit,
+so what keeps a quoted copy of a steer arm from being deleted in place of
+the live one is that every template matches whole lines (the patch README):
+a numbered, `>`-quoted or indented copy never starts at a line start. An
+unnumbered verbatim copy of the arm, with the arm at a genuine line start in
+both places, is not excluded by that; the leftmost one still wins.
 
 Loudness follows from the split: `match` finds the envelope, `search` picks
 the arm, so a reworded body is a search miss under a holding match -- loud. A

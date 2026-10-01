@@ -1,3 +1,3 @@
  - Additional working directories:
 $LINES
- - Platform:
+ - Platform:$PLATFORM
