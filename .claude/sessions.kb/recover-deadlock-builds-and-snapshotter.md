@@ -36,15 +36,22 @@ backup so future truncations are non-destructive.
 
 ## Key facts for future claude
 
+Current as of 2026-11-02 (session f0dc40e6): the repo's README is the
+authoritative map; the file names in "Outcome" above are historical.
+
+- Steps are `bin/dlbuilds-*` (validate, cp, capture, commit, push, snapshot,
+  restore [FILE], restore-ref REF, stat, ls, game-running). `dlbuilds-validate`
+  is a `[project.scripts]` entry point in the repo's own uv venv.
+- The runit service runs from a dedicated clone,
+  `~/.local/share/bukzor.deadlock-data` (`/etc/service/deadlock-builds` links
+  there), under `uv run --locked`. Deploy = push. The dev checkout no longer
+  receives snapshots until `git pull`.
+- `DLBUILDS_LIVE=FILE` substitutes a fake live save for safe testing.
 - Live save: `/mnt/c/Program Files (x86)/Steam/userdata/37093539/1422450/remote/cfg/cached_hero_builds.kv3`
-- Restore = `~/repo/github.com/bukzor/bukzor.deadlock-data/restore.sh` (Steam closed).
 - Recovery backups + snapshotter log: `~/deadlock-builds-recovery/`.
-- Snapshotter validation reuses the **deadlock project venv**
-  (`/home/bukzor/claude/deadlock/.venv/bin/python`) for `keyvalues3`. If that
-  venv is deleted, the gate fails and snapshots stop *safely* (skips, never
-  commits garbage).
 - KV3→JSONL is lossless; JSONL→KV3 re-encoding is NOT byte-faithful (game-load
   fidelity unproven) — that's why the repo stores raw `.kv3`, not JSONL.
+- Repo-local follow-ups: `~/repo/github.com/bukzor/bukzor.deadlock-data/.claude/todo.md`.
 
 ## Open follow-ups
 
@@ -52,7 +59,7 @@ backup so future truncations are non-destructive.
       (services auto-start with a working PATH). Live session already fixed.
 - [ ] Root-cause the recurring Deadlock crashes (separate problem; snapshotter
       only makes them non-destructive, doesn't prevent them).
-- [ ] Optional: give the data repo its own venv (`uv`) with `keyvalues3` so the
+- [x] Optional: give the data repo its own venv (`uv`) with `keyvalues3` so the
       snapshotter is self-contained and independent of the deadlock project.
 - [ ] Optional (deferred by user): JSONL diffable view + git history of builds;
       user trusts the raw binaries and declined for now.
