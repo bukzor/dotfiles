@@ -29,32 +29,23 @@ main ↔ svelte is a two-lineage problem again.
       parametrized by ref pair, covers this merge too
 - [ ] commit or park the uncommitted state in buck-win10's `~` — sub-agent
       units, wave 1 (parallel), in `2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/`:
-    - [ ] [000 WSL shell settings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-000-wsl-shell-settings.md)
-    - [ ] [001 misc config review](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-001-misc-config-review.md)
-    - [ ] [002 untracked triage](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-002-untracked-triage.md)
-    - [ ] [003 `.claude/` uncommitted](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-003-claude-dir-uncommitted.md)
-    - [ ] WSL shell settings sit in files both lineages retired: `.sh_env`
-          (`MAKEFLAGS`, npm-global + nix `PATH`, `BROWSER=wslbrowse` under
-          `WSL_DISTRO_NAME`, `RBENV_ROOT`), `.sh_advanced_rc`,
-          `.sh_plugins.d/{command-not-found,run-time}.sh`, plus the nix hook
-          in `.profile` and `.zshrc` edits. Author them as WSL-guarded
-          `.config/sh/**` pieces, land on svelte + main; nothing goes into the
-          retired files.
+    - [x] [000 WSL shell settings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-000-wsl-shell-settings.md)
+    - [x] [001 misc config review](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-001-misc-config-review.md)
+    - [x] [002 untracked triage](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-002-untracked-triage.md)
+    - [x] [003 `.claude/` uncommitted](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-003-claude-dir-uncommitted.md)
     - [x] `.config/windows/**` AppData bind mount persisted as runit service
           `windows-appdata` in the new per-host tree `.config/runit/buck-win10/`
           (`/etc/service` now links there); drifted settings committed —
           `8a0b0b2`, `a624d07` (2026-11-10)
-    - [ ] review the rest: `.gitconfig`, `.gitignore`, `.gitignore_global`,
-          `.hgignore_global`, `bin/brew`, `bin/yesno`,
-          `setup/alpine/homebrew.sh`, `TODO.md`, `.config/gh/config.yml`,
-          `.config/kitty/kitty-gruvbox-theme` (submodule bump),
-          `.claude/settings.json`, `.claude/reference.kb/python/style.md`
-    - [ ] triage untracked: `bin/wsl-id-un`, `bin/wslbrowse`,
-          `.config/{anthropic,fish/conf.d,nix,wslu}/`, `setup/wsl.help`,
-          `.zkbd/xterm-256color-*`, `docs/games/`, `project/`,
-          `router-debug/`, `claude/`, `.vscode-server/`,
-          `.local/share/bukzor.deadlock-data/`
+    - [ ] user rulings on the units' Open Questions (000: 6, 001: 6, 002: 4,
+          003: 1); still dirty in `~` pending them: `docs/games/`, `project/`,
+          `router-debug/`, `setup/wsl.help`, `.zkbd/xterm-256color-{:0,alpine-linux-musl}`,
+          the two empty submodule checkouts
 - [ ] in `dotfiles--main`: `git merge wsl-buck-win10`, resolving
+    - [ ] retired shell files (`.sh_env`, `.sh_advanced_rc`,
+          `.sh_plugins.d/*`; wsl `a271b48`): take main's delete — their
+          content lives in svelte `f74b93f`'s `.config/sh` pieces
+    - [ ] `.gitignore`, `.config/.gitignore` (wsl `80721c6`): take main's side
     - [ ] `.claude/{.gitignore,CLAUDE.md,commands/curl.md,settings.json}`
           (add/add): take main's side; 004's claude-config theme does the real
           merge against svelte
