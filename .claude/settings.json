@@ -60,7 +60,8 @@
       "Bash(uv pip install:*)",
       "Bash(pip install:*)",
       "Bash(cargo install:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(sudo:*)"
     ],
     "additionalDirectories": [
       "~/.claude/must-read.kb",
