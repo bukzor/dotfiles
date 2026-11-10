@@ -29,6 +29,11 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
 - [ ] `bin/alert`: a symlink on main, a regular file on svelte (last changed
       2026-09-10)
     - [ ] authored / [ ] svelte / [ ] main
+- [ ] new since the wsl-buck-win10 fold (main `30895e0`, 2026-11-10):
+      `.envrc` and `bin/alternatives/.gitignore` are main ↔ svelte add/add;
+      `bin/brew` carries buck-win10's ruby26 `PATH` in a shared file (guard
+      it, or move it to a host piece)
+    - [ ] authored / [ ] svelte / [ ] main
 
 - [ ] unit tests first, where appropriate (vague reminder): the merged bin/ scripts
       are the testable surface (brew-desc, colortest17x17, osc52) — a smoke

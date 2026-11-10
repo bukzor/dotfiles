@@ -45,19 +45,19 @@ main ↔ svelte is a two-lineage problem again.
           > `Bash(sudo:*)` belongs in `ask`, and wsl's other `settings.json`
           > drift is incidental.
     - [x] [004 apply the rulings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-004-apply-wave-1-rulings.md) (wave 2)
-- [ ] in `dotfiles--main`: `git merge wsl-buck-win10` — wave 3,
+- [x] in `dotfiles--main`: `git merge wsl-buck-win10` — wave 3,
       [005 merge](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-005-merge-into-main.md); resolving
-    - [ ] retired shell files (`.sh_env`, `.sh_advanced_rc`,
+    - [x] retired shell files (`.sh_env`, `.sh_advanced_rc`,
           `.sh_plugins.d/*`; wsl `a271b48`): take main's delete — their
           content lives in svelte `f74b93f`'s `.config/sh` pieces
-    - [ ] `.gitignore`, `.config/.gitignore` (wsl `80721c6`): take main's side
-    - [ ] `.claude/{.gitignore,CLAUDE.md,commands/curl.md,settings.json}`
+    - [x] `.gitignore`, `.config/.gitignore` (wsl `80721c6`): take main's side
+    - [x] `.claude/{.gitignore,CLAUDE.md,commands/curl.md,settings.json}`
           (add/add): take main's side; 004's claude-config theme does the real
           merge against svelte
-    - [ ] `.gitmodules`: main's entries plus wsl's `.claude/sessions.kb` one
+    - [x] `.gitmodules`: main's entries plus wsl's `.claude/sessions.kb` one
           (byte-identical to svelte's, so 004's `.gitmodules` theme gets it for
           free); the gitlink itself merges clean
-    - [ ] `.sh_plugins.d/command-not-found.sh` (rename/delete): accept main's
+    - [x] `.sh_plugins.d/command-not-found.sh` (rename/delete): accept main's
           delete; the WSL hook (`bin/command-not-found-hook/`) gets a
           `.config/sh` hookup
 - [ ] on main, reconcile the `.claude/` the merge brought in against svelte's
@@ -82,12 +82,12 @@ main ↔ svelte is a two-lineage problem again.
           > linking github:bukzor to the Steam account is acceptable.
     - [ ] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
           allow-by-default ignore scheme won in 004
-- [ ] push main
+- [x] push main — merge `30895e0` (2026-11-10); the reconcile pushes its own commits
 
 ## Success Criteria
 
-- [ ] `git rev-list main..wsl-buck-win10` is empty
-- [ ] buck-win10's `~` has no uncommitted or unparked state
+- [x] `git rev-list main..wsl-buck-win10` is empty
+- [x] buck-win10's `~` has no uncommitted or unparked state (2026-11-10; the `sessions.kb` gitlink drifts by design)
 
 ## Notes
 
