@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by:
   - ./2026-11-10-006-claude-additions-to-svelte.md
 required-reading:
@@ -50,8 +50,54 @@ workspace, except the four paths above; this handoff file.
 
 ## Steps
 
+- [x] classify with `~/trash/fold-007/classify.sh` (257 paths, all adds):
+      80 same, 32 take-svelte, 133 svelte-deleted, 12 opt-in `.gitignore`,
+      0 never-on-svelte
+- [x] main commit: take svelte's content (32)
+- [x] main commit: delete svelte-deleted (133)
+- [x] main commit: drop opt-in `.gitignore`s (12)
+- [x] checks; Final report; `status: done`; commit this file on svelte
+
 ## Decisions
+
+- Opt-in `.gitignore`s are their own class, checked before the others: none
+  of the 12 was ever on svelte, so they'd otherwise have read as
+  never-on-svelte. Their `skills/synced/` ignore is in svelte's root
+  `.gitignore`.
+- Provenance check beyond the brief: main's blob for all 133 deleted paths,
+  and 28 of the 32 taken ones, is a blob svelte once had at that path, so
+  nothing wsl-local was lost. The 4 others are svelte's newer form:
+  `python/style.md` (006's TypeGuard port), `sessions.kb`
+  (`88129c2 -> 8e94206`), `llm-chat-librarian` and `llm-discourse-graph`
+  (trailing `/`). The one wsl-local edit, `todo.md`'s orphaned-design-rule
+  item, was `[x]` and its goal met by 006, so svelte's copy is taken.
+- Took svelte's mode and object with `update-index --cacheinfo` (a
+  symlink, a `100755` hook, and a gitlink are among them).
 
 ## Open Questions
 
+None.
+
 ## Final report
+
+`main`, pushed after each (`30895e0..937c97d`), counterpart
+`svelte-crostini` `083c6d9`:
+
+| class | count | main commit |
+|---|---|---|
+| take svelte's content | 32 | `88b457a` |
+| svelte deleted/renamed | 133 | `3a137d2` |
+| wsl `0d5ea82` opt-in `.gitignore`s | 12 | `937c97d` |
+| already svelte's | 80 | none needed |
+
+Checks:
+- Every merge-added `.claude/` path is now absent from main or identical
+  (mode and object) to svelte's.
+- `merge-tree`, `origin/main` vs `origin/svelte-crostini` (`083c6d9`):
+  **60 before, 28 after** (61 and 29 output lines: `bin/alert` prints a
+  second `bin/alert~<rev>` entry). `.claude/` conflicts: 36 to 4. The
+  other 24 are unchanged, path for path.
+- Remaining `.claude/` conflicts are exactly 004's four: `.gitignore`,
+  `CLAUDE.md`, `commands/curl.md`, `settings.json`. None unexplained.
+
+No deviations from the brief. Scratch: `~/trash/fold-007/`.
