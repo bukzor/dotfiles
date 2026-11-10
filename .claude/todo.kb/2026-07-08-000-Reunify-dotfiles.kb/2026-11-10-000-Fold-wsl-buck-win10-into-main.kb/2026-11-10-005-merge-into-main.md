@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by:
   - ./2026-11-10-004-apply-wave-1-rulings.md
 required-reading:
@@ -60,8 +60,47 @@ workspace except this file.
 
 ## Steps
 
+- [x] clone `dotfiles--main`; baseline `merge-tree` counts
+- [x] `git merge --no-commit origin/wsl-buck-win10`; resolve the 13 conflicts
+- [x] review auto-merged files and pure additions
+- [x] commit merge; push `main`; post-push checks
+- [x] Final report; `status: done`; commit this file on svelte
+
 ## Decisions
+
+- Unlisted conflicts, main's side after confirming the intent lives
+  elsewhere: `.gitignore_global` (delete) and `.hgignore_global` — the
+  `settings.local.json` ignore is in main's `.gitignore` and svelte's
+  `.config/git/ignore`; `.profile` — nix hook is svelte `env.d/400-nix.sh`.
+- `.sh_plugins.d/command-not-found.sh` merged *clean* (wsl renamed it from
+  `brew-command-not-found.sh`, which main deleted), so it was not among the
+  13; removed it anyway, per the parent's ruling.
+- `.zshrc` auto-merged wsl's `PNPM_HOME` block; took main's `.zshrc`. And
+  `.npmrc` (wsl add) dropped. Both ruled out (000:1, "recommendations
+  stand"); 004 assumed they lived only in retired files, but they did not.
+- Kept as merged: `gh` `git_protocol: ssh` (ruling), kitty bump,
+  `.ssh/authorized_keys` (+4 public keys, incl. buck-win10), `TODO.md`,
+  `bin/brew` (exit fix + ruby26 `PATH`), `bin/yesno`, all wsl additions
+  (WSL helpers, runit, Windows Terminal, `setup/alpine/`, `.claude/`).
+- Merge committed with plain `git commit -F`: `commit-staged` does not
+  make merge commits, and this fresh clone's index is this unit's alone.
 
 ## Open Questions
 
+None blocking. For the main ↔ svelte convergence (not this unit):
+`.envrc` and `bin/alternatives/.gitignore` are new main ↔ svelte add/add
+conflicts; `bin/brew`'s ruby26 `PATH` is host-local on a shared file.
+
 ## Final report
+
+- `main` `30895e0` (pushed, `59082f3..30895e0`): merge of
+  `wsl-buck-win10` `fa3f7c7`; message lists each resolution.
+- `git rev-list origin/main..origin/wsl-buck-win10`: empty (count 0).
+- `merge-tree` conflicts, `origin/main` vs `origin/svelte-crostini`
+  (`1e2a85b`): **28 before** (not 26: svelte moved since the plan),
+  **60 after**. +31 `.claude/` add/add, +`.claude/sessions.kb` gitlink,
+  +`.envrc`, +`bin/alternatives/.gitignore`; −`.config/gh/config.yml`,
+  −`bin/yesno` (now identical). The `.claude/` rise is the parent's
+  predicted resurfacing; its reconcile step clears it.
+- Workspace: `~/repo/github.com/bukzor/dotfiles--main/` on `main`, clean.
+  Scratch: `~/trash/fold-005-*`.
