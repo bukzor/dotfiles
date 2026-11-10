@@ -30,11 +30,15 @@ Default arguments (if none provided):
 
 2. **Identify the session.**
 
-   If `$ARGUMENTS` resolves to an existing file (taskfile, plan, brief):
+   If `$ARGUMENTS` is itself a sessions.kb entry: it is the session. Read
+   it, then the plan or taskfile it names; skip the lookup below.
+
+   If `$ARGUMENTS` resolves to another existing file (taskfile, plan, brief):
    - Read it; it is the primary brief.
    - Read any files listed under its frontmatter `requires:` before
      acting (and any transitive `requires:`).
-   - `grep -Rl <basename> ~/.claude/sessions.kb/` (entries sit in `<host>.kb/` subdirs).
+   - `grep -Rls <basename> ~/.claude/sessions.kb/` (entries sit in `<host>.kb/`
+     subdirs; `-s` hides other hosts' dangling links).
      - 1 match: read that entry; continue the session.
      - 0 matches: create a new entry
      - 2+ matches: ask the user which to use.
