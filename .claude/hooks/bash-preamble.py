@@ -102,15 +102,16 @@ def wrap_command(cmd):
     True
     >>> "echo hi" in result
     True
-    >>> result.startswith("bash <<")
+    >>> result.startswith("nice -n 10 bash <<")
     True
     >>> result.endswith(MARKER)
     True
     """
     return f"""\
-bash <<'{MARKER}'
-export PS4='+$ '
+nice -n 10 bash <<'{MARKER}'
+export PS4='+ $ '
 set -euo pipefail
+shopt -s failglob
 set -x
 {cmd}
 {{ set +x; }} 2>/dev/null

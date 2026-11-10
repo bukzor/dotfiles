@@ -1,7 +1,8 @@
 ---
-requires:
-  - ~/.claude/reference.kb/git/commit.md
-  - ./running-ANY-git-command.md
+triggers:
+  - read:
+      - ~/.claude/reference.kb/git/commit.md
+      - ./running-ANY-git-command.md
 ---
 
 # Before committing
@@ -24,7 +25,8 @@ with explicit paths — never bare `git commit`.
 - Review the full diff
   - Verify it matches intent
   - Catch your own mistakes
-  - Notice if other agents' changes got mixed in
+  - Notice if other agents' changes got mixed in — to commit around them,
+    `./staging-part-of-a-file--git-add-p.md`
 - Double-check docs still accurate after code changes
 - If (CLAUDE.md depends on) `Skill(llm-subtask)`: update todo files
 - If `Skill(llm-collab)`: update devlog if session-notable

@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/rust/tooling.md
+triggers:
+  - read: ~/.claude/reference.kb/rust/tooling.md
 ---
 
 # Rust programming

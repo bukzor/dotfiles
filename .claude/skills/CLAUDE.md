@@ -1,8 +1,3 @@
---- # workaround: anthropics/claude-code#13003
-depends:
-    - skills/llm-subtask
----
-
 # Skills Directory
 
 User-maintained skills loaded via `Skill("name")` tool.

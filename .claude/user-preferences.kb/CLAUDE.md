@@ -1,8 +1,3 @@
----
-requires:
-  - Skill(llm-kb)
----
-
 # User Preferences Collection
 
 Cross-platform LLM interaction preferences. Each item is a preference document

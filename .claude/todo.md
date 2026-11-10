@@ -14,6 +14,43 @@ cost-benefit-sweh:
       mostly preventing future-me from re-deriving the build.
 ---
 
+Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
+
+- [ ] <https:todo.kb/2026-09-22-000-migrate-config-sh-to-intent-d.md> -- after
+      the three `standing: open` rulings in `docs/dev/design.kb/intent-d.kb/`
+
+- [ ] Decide how `llm.kb-validate` and `llm-claims-kb-*` reach `PATH` now that
+      `llm-kb`/`llm-claims-kb` are out of the home workspace (`2e57761`).
+      `~/.venv/bin` supplies them today; the next `uv sync` in `~` removes
+      them. Candidate: `uv tool install --editable` from
+      `bukzor-agent-skills`. Owner's ruling first. Also: should `chatfs-cli`
+      stay a home workspace member? See the 2026-10-01-000 devlog.
+
+- [ ] `claude_code_archeology.session.Session.tips()` counts attachment
+      records as tips (671 of them on one real session file, vs ~7 real
+      conversation branches) — should filter to user/assistant, matching
+      `tip_of()`'s approach; also `claude-branch-list --branches-only`
+      doesn't print each branch's tip uuid, which is exactly what
+      `claude-branch-extract` needs as input — found while rebuilding
+      branch_extract.py 2026-07-24
+- [ ] `claude-search` reports a JSONL line number but nothing in
+      `claude-code-archeology` renders the records *around* one — reading a
+      hit's context means writing a throwaway parser every time (did it again
+      2026-08-21; that copy is `~/.claude/trash/peek.py`). Add a range view:
+      `claude-jsonl-peek FILE --range LO HI`, or `--around N` on
+      `claude-jsonl-display`.
+- [ ] Verify (or drop) the belief that an older Claude Code version had a
+      rewind/resume picker capable of switching among sibling branches of
+      a branched chat — user recalls this from ~a year ago; 2.1.219's
+      picker cannot (confirmed via binary inspection, `MessageSelector` in
+      `docs/dev/devlog/2026-07-24-000-Claude-Code-branch-recovery--extract-by-leaf--not-by-carve.md`)
+      but older builds weren't inspected — would need an old release
+      tarball/changelog to check
+- [ ] Add a `/must-read` command for llm-kb's `skill.kb/must-read.kb/` (must-read-kb-skill.md's other follow-up; the `skill.kb/must-read.kb/` dir itself already exists) — deferred
+- [ ] Finish yaml-date-jsonschema's remaining follow-ups in `bukzor-agent-skills/llm-kb`: `finish-debolding-cleanup` (still ~40 bold instances across 8 files beyond `references/pattern-guide.md`, which is now fixed — not actually done despite earlier belief), `auto-migrate-scripts-for-kb-dirs`, `schema-migrate-string-pattern-to-date`
+- [ ] Resolve `todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md`'s D6 held-review items: `bin/CLAUDE.md` (deleted uncommitted by another session — restore or finish rename?), `claudesh`/`finder.sh`/`scratch/python/`/`empty/` triage, `.envrc`/`profile.env` review, `.claude/claude-alignment-2026-04-29.{jsonschema.yaml,kb/}` commit-or-trash — NOTE: `bin/colortest17x17*` and `.zsh_profile` (formerly listed here too) are resolved: colortest17x17 merged clean in reunify task 004 (2026-07-13, no stray variant found), `.zsh_profile` deleted on both branches by reunify task 005 (2026-07-12, dead debug artifact)
+- [ ] [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md) — converge svelte-crostini ↔ main to identical content, merge, live on main
+- [ ] [todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md](todo.kb/2026-06-03-001-commit-accumulated-dotfiles-changes.md) — overlaps reunify 006's "commit/park uncommitted state" step; fold in or close when 006 runs
 - [ ] Build versioned `~/.terminfo` into the dotfiles repo
   - [ ] Decide repo layout (track `.tinfo` source vs. compiled `~/.terminfo/t/*` blob; symlink vs. deploy step)
   - [ ] Pin `tmux.tinfo` from upstream `tmux/tmux` at the tag matching brewed tmux (currently 3.5a)
@@ -22,16 +59,70 @@ cost-benefit-sweh:
   - [ ] Document the upgrade flow: bump brew tmux → bump tag → re-fetch + re-`tic`
   - [ ] Verify: `infocmp tmux-256color` resolves to the `~/.terminfo` copy
   - Goal: pin terminfo to the tmux binary version so brewed-tmux + distro-ncurses can't drift.
-- [x] Commit or discard `~/.claude/design-rules.kb/mirror-the-sources-distinctions.md`:
-      written by session 558ed5b6 on 2026-11-05 ("yes, write it"), left
-      untracked when that session died in a crash
-      - Goal: no orphaned design rule; the other files in that dir are tracked.
+- [ ] [todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md](todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md) — dogfood via chatfs, file the `--help` wart upstream, decide from the patch queue
+- [ ] Delete `~/trash/git-localhost-store-dotfiles-copy/` (6.7M) once the
+      packaged `git-localhost-store` has run a while without regret. It is
+      the retired dotfiles copy of the tool plus untracked May-2026 migration
+      artifacts, kept only for recovery; the installed system was verified
+      before it was moved aside (2026-08-10).
+
+- [ ] Delete `~/trash/pnpm-global-5-retired/` (820M) and `~/trash/pnpm-stubs/`
+      once corepack-provided pnpm has run a few days without regret. The dir
+      is pnpm 10's global root; the stubs are the four bin shims that pointed
+      into it. Both were verified replaced before being moved aside
+      (2026-08-27).
+- [ ] Remove `~/prefix/npm/` — an empty scaffold (`lib/.gitkeep`) for a prefix
+      nothing reads: `.npmrc` was deleted 2026-08-27 (pnpm 11 reads `.npmrc`
+      for auth/registry only) and `npm` here is a shim to pnpm.
+- [ ] `.config/sh/functions.sh` still sources `functions.d/*.sh` with a bare
+      loop that reports nothing when a file fails. `source_dir` got that
+      treatment 2026-08-27; this loop can't use `warn` because `warn.sh`
+      loads last. Rename it `00-warn.sh`, or inline an `echo >&2`.
+- [ ] Consider wiring `bin/cron-status` (or its callers) to call `bin/alert`
+      on a failed job, so a cron failure pushes a real-time notification
+      instead of waiting up to 15s for the tmux status-line poll, or being
+      silent entirely outside tmux. `alert` is a push channel (see
+      `docs/dev/user-attention.claims.kb/channels.kb/alert-push.md`) — its
+      coverage is exactly its call sites, and cron currently has none.
+      Awaiting a ruling, not a refactor: autonomous desktop notifications
+      from a nightly cron job is a noise-level judgment call, found
+      2026-09-17 while extending the user-attention ledger to cover `alert`.
+- [ ] corepack's `pnpm`/`pnpx` shims are symlinks into
+      `~/.volta/tools/image/node/<version>/`, so a `volta install node` strands
+      them and only `cron-health_check.sh` would notice, a day later. Consider
+      re-running `corepack enable pnpm --install-directory ~/prefix/pnpm/bin`
+      from `bin/pnpm-upgrade-g` when the shim is broken.
+- [x] `pnpm-upgrade-g` had failed every night since 2026-09-07 (root cause:
+      pnpm 12's native binary vs. corepack 0.34.0's hardcoded `bin/pnpm.cjs`
+      assumption, upstream nodejs/corepack#775/#873, pnpm/pnpm#13018, plus a
+      poisoned `~/.cache/node/corepack/v1/pnpm/12.3.4/` entry). Resolved
+      2026-09-10: corepack is now self-hosted via `pnpm add -g corepack`
+      (→0.36.0, shadowing volta's bundled 0.34.0 by PATH order) so it
+      upgrades alongside pnpm itself going forward; poisoned cache cleared;
+      `pnpm-upgrade-g` runs clean end-to-end (also fixed a pnpm-12 `[WARN]`
+      stdout line breaking its `jq` parsing). Deliberately did *not* add
+      self-heal logic to `pnpm-upgrade-g` for this — see
+      `docs/dev/adr/2026-09-10-000-corepack-self-hosted-via-pnpm-add-g.md`.
+      Separately, `cron-status.sh`'s "warn at shell start" turned out not to
+      reach real usage (tmux panes here run 6-17+ days without a shell
+      restart) — fixed by polling the same status files from tmux's
+      status-right instead; see
+      `docs/dev/adr/2026-09-10-001-tmux-status-bar-cron-alerting.md`.
 
 ## Later
 
 We haven't (yet) decided where to place these in the task queue.
 Please read and consider slotting them.
 
-- [ ] [todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md](todo.kb/2026-05-15-000-rename-outmoded-d-dirs-to-kb-case-by-case-eval.md)
-- [x] [todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md](todo.kb/2026-06-03-000-migrate-topic-reference-docs-from-must-readkb-to-referencekb.md)
-- [x] [todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md](todo.kb/2026-05-16-001-claude-jsonl-display-handle-remaining-attachment-subtypes.md)
+- [ ] [todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md](todo.kb/2026-06-27-000-hoist-polyglot-monorepo-architecture-convention--values-to-personal-global-scope.md) — may belong under `private.bukzor-llc`
+
+- [ ] Rule on adding a standing lesson to `CLAUDE.md`: mistaking two cases of
+      an unconditional for two special cases of a conditional, and the
+      corollary that even genuine special cases are often worth re-defining
+      into one unconditional case. Raised 2026-10-01 after it recurred three
+      times in one session (empty `replace.md` read as a stipulation rather
+      than deletion-by-definition; `shapes` as "markers or else key"; a write
+      region defined as "search, else match, else body" where the operator's
+      factoring was "the region is search; search defaults to match"). The
+      authority is yours, so it would enter as `[!@bukzor]` -- the agent's
+      offer, awaiting your word on whether it earns standing text.

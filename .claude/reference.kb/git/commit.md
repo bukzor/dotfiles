@@ -1,6 +1,6 @@
 ---
-requires:
-  - ~/.claude/reference.kb/git/conventions.md
+triggers:
+  - read: ~/.claude/reference.kb/git/conventions.md
 ---
 
 # Git commit tooling
@@ -32,6 +32,14 @@ git commit-staged paths... -- -m "message"
 
 Works regardless of how changes got staged — by you, another agent, or prior
 work. Commits exactly the staged state at those paths, nothing more.
+
+**Rename pairs — pass both sides.** If a path is staged as half of a rename
+(e.g. from a `git mv` or an editor rename), passing only the new path commits
+an add without the matching delete — the old path's staged removal is left
+behind, uncommitted, and HEAD ends up with both old and new versions of the
+file. Always include the old path alongside the new one; `-n` (dry-run) then
+shows a `D` line for the source. Its letters are only `M` and `D`, derived from
+content presence — an added path prints `M`.
 
 **Dry-run first:**
 
@@ -101,6 +109,9 @@ Behavior depends on the repo's `git-caution` level.
 
 Reflog makes all local operations recoverable.
 
+Ordinary (non-force) `push` is not a caution-gated action at `solo`/`personal`:
+push freely, don't ask. Only the force variants consult the table.
+
 **Amending your own commits from this session needs no verification.** Verify
 authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
 (session start, unfamiliar repo, shared branch).
@@ -108,27 +119,70 @@ authorship (`git log -1 --format='%an %ae'`) only when context is ambiguous
 Use `git commit-staged paths... -- --amend --no-edit` for the last commit,
 `git commit-staged paths... -- --fixup SHA` for older commits.
 
+> [!DRAFT] agent-authored 2026-09-03, vetoable — from an incident that day.
+>
+> **`--amend` is not path-scoped.** The paths constrain staging; the amend
+> reuses HEAD's whole tree. If a parallel session moved HEAD since you last
+> looked, amending absorbs its commit into yours and drops its message.
+> Re-read HEAD immediately before every amend.
+
+**No commit exists to repair another (unpushed, `solo`/`personal`):**
+squash until each commit reads as written right the first time. If
+message and content disagree, fix whichever is the bug.
+
 ### Commit Message Format
 
-Use heredoc to prevent shell escaping failures:
+Single-quote the message — a prose body is full of backticks and `$`, which
+double quotes substitute. `'"'"'` for a literal apostrophe. See
+`../bash-conventions.md`.
 
 ```bash
 bash <<'BASH'
-git -C <directory> add path/to/file1 path/to/dir/
-git -C <directory> commit-staged \
+git -C <directory> commit-files \
   path/to/file1 \
   path/to/dir/ \
   -- \
-  -m "Short summary usable as PR title
+  -m 'Short summary usable as PR title
 
 Describe the change in more detail, usable as PR description.
 Focus on why over what.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>'
 BASH
 ```
+
+### Rewording a pushed commit
+
+`git commit-tree` reuses the original's own tree and parent, so only the message
+changes. Chain a second onto `$new` to reach the commit above it; force-push per
+the caution table.
+
+```bash
+new=$(GIT_AUTHOR_DATE="$(git log --format=%aI -1)" \
+      GIT_COMMITTER_DATE="$(git log --format=%cI -1)" \
+      git commit-tree 'HEAD^{tree}' -p HEAD^ -m 'new message')
+git update-ref refs/heads/main "$new" "$(git rev-parse HEAD)"   # old-value guard
+git diff-tree <old-sha> HEAD                                    # no output = identical trees
+```
+
+### History surgery: verify with plumbing only
+
+Porcelain `git diff` can report clean while trees differ: `diff.relative`
+(set where the worktree root sits above cwd, e.g. the dotfiles repo rooted
+at `~`) silently drops paths outside the cwd subtree. Verify with
+`git diff-tree`, and prove a replayed commit with
+`git diff-tree -p <a> <b> | git patch-id --stable` against the original.
+
+Two path semantics coexist: pathspec arguments (`diff`, `reset`, `ls-tree`)
+resolve cwd-relative, while `<rev>:<path>` and `update-index --cacheinfo`
+are root-relative — the same string can address two different paths, turning
+an edit into a silent no-op that porcelain then hides. Inspect parentage and
+trees in a separate command before every ref mutation, and guard it
+(`update-ref` with old-value). (Worked instance: 2026-08-29, three user
+commits swallowed by a `reset --soft`+amend fixup; two repairs "verified
+clean" by porcelain before plumbing exposed them.)
 
 ### Recovery: Accidental Index Inclusion
 

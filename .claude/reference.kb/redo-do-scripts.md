@@ -1,8 +1,3 @@
----
-requires:
-  - ~/.claude/reference.kb/bash-conventions.md
----
-
 # redo (`.do`) scripts
 
 Authoritative on authoring redo `*.do` build scripts.

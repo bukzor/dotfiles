@@ -70,14 +70,17 @@ result = process_data(data)   # Let it raise if there's a bug
 
 ## Control Flow
 
-### Exhaustive Case Analysis
+### Explicit else, never implicit
 
-When branching on finite value sets (enums, literals), use explicit else that raises:
+When every branch produces a value, end with an explicit `else` — never `return`
+early and fall through to a bare trailing statement. A two-way `bool` else just
+returns the other value.
+
+A finite set that could *gain members* (enums, literals) must raise in the else,
+so a new case fails loudly:
 
 - `match`/`case` with `case _: raise AssertionError(value)`
 - `if`/`elif`/`else` with `else: raise AssertionError(value)`
-
-Never implicit else (early return). The unreachable raise catches bugs when the set grows.
 
 ## Code Structure
 
@@ -85,6 +88,15 @@ Never implicit else (early return). The unreachable raise catches bugs when the 
 - Break complex functions into small, well-named helper functions
 - Each function should be easily understandable in isolation
 - Prefer composition over deeply nested logic
+
+## Docstrings
+
+State intent and acceptance criteria — what the unit guarantees and what its
+output looks like — not the mechanism (the body shows that; restating it rots).
+
+- Keep design rationale: the non-obvious *why*, which the code can't recover.
+- Cut: other units' use of the result, context the reader already has, example
+  values, history (→ `~/.claude/design-rules.kb/comments-target-a-cold-reader.md`).
 
 ## Type Annotations
 

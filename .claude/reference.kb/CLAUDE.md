@@ -2,7 +2,7 @@
 
 Authoritative reference knowledge, kept out of the trigger system. Each file is
 the single authority on one clearly-scoped topic, pulled in on demand via
-`requires:` from a `must-read.kb/before/` trigger.
+`triggers:` from a `must-read.kb/before/` trigger.
 
 Distinct from its neighbors:
 - `design-rules.kb` — API & type *design* principles
