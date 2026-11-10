@@ -35,13 +35,10 @@ main ↔ svelte is a two-lineage problem again.
           in `.profile` and `.zshrc` edits. Author them as WSL-guarded
           `.config/sh/**` pieces, land on svelte + main; nothing goes into the
           retired files.
-    - [ ] `.config/windows/**` shows as deleted because its bind mount of
-          Windows `AppData` (`bin/windows-dotfiles-setup`) doesn't survive a
-          WSL restart; the files are intact in `AppData`, and Windows
-          Terminal's `settings.json` there has drifted from the committed copy.
-
-          > [!@bukzor] 2026-11-10: keep the mechanism — persist the mount,
-          > commit the drifted settings.
+    - [x] `.config/windows/**` AppData bind mount persisted as runit service
+          `windows-appdata` in the new per-host tree `.config/runit/buck-win10/`
+          (`/etc/service` now links there); drifted settings committed —
+          `50bbcad`, `ccba818` (2026-11-10)
     - [ ] review the rest: `.gitconfig`, `.gitignore`, `.gitignore_global`,
           `.hgignore_global`, `bin/brew`, `bin/yesno`,
           `setup/alpine/homebrew.sh`, `TODO.md`, `.config/gh/config.yml`,
