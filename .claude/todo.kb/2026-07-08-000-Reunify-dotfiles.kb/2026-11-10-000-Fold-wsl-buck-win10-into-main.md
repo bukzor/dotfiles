@@ -68,14 +68,13 @@ main ↔ svelte is a two-lineage problem again.
     - [ ] `settings.json`: wsl's diff is mostly lag behind svelte; carry only
           real local intent (e.g. `model`)
     - [ ] `skills/llm-chat-librarian` symlink targets differ — pick one
-    - [ ] `sessions.kb/`: a plain directory on wsl, the
-          `bukzor.claude-sessions` submodule on svelte. That repo now has
-          `buck-win10.kb/`, with this host's untracked entries migrated
-          (`f9c5c03`). Of wsl's tracked entries, all but
-          `recover-deadlock-builds-and-snapshotter.md` moved there in 2026-07
-          and have since closed; that one names a Steam ID and the repo is
-          public, so where it goes is the user's call. Then replace the
-          directory with the submodule (on main, via the merge).
+    - [x] `sessions.kb/` is now the `bukzor.claude-sessions` submodule on wsl
+          too (`4795ca9`), with this host's live entries under
+          `buck-win10.kb/` (`f9c5c03`, `838f45d`); main gets it via the merge
+          (2026-11-10)
+
+          > [!@bukzor] 2026-11-10: a Steam ID in a public repo is fine —
+          > linking github:bukzor to the Steam account is acceptable.
     - [ ] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
           allow-by-default ignore scheme won in 004
 - [ ] push main
