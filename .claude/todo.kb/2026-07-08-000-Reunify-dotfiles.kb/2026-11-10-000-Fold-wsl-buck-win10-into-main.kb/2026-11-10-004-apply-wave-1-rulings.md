@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -64,3 +64,62 @@ Settle and report: anything here that turned out not to be as described.
   `.config/gh/config.yml`, `.claude/settings.json`
 - write-only, uncommitted: `~/claude/deadlock/docs/games/`, `~/claude/router-debug/`
 - this handoff file
+
+## Steps
+
+- [x] 000:1–3: confirm svelte gained none of the dropped settings
+- [x] trash `setup/wsl.help`, `.zkbd/xterm-256color-:0`
+- [x] wsl: zkbd `alpine-linux-musl` → relative symlink; commit
+- [x] command-not-found-hook without `has`: wsl commit, svelte commit, smoke test
+- [x] submodules: verify inner HEAD = gitlink; `reset --hard`
+- [x] gh: wsl blank `browser:`; svelte `git_protocol: ssh`
+- [x] wsl: `git revert a60d2a6` (delta)
+- [x] move `docs/games/deadlock/*.txt`; trash `.swp`; `project/` to trash; `router-debug/` move
+- [x] `Bash(sudo:*)` → `ask`: svelte and wsl
+- [x] final report; `status: done`; commit this file
+
+## Decisions
+
+- Hook's brew fallback probes `/opt/homebrew/bin/brew` then
+  `/home/linuxbrew/.linuxbrew/bin/brew`, not `command -v brew`: that finds
+  the `bin/brew` wrapper, which offers to install Homebrew on every typo.
+  Also fixed: `$"…"` bashism, message to stderr, exit 127 (was 0) when brew
+  is absent; Alpine falls through if `apk add` fails.
+- Delta revert's message amended (unpushed) to add reason and counterpart.
+
+## Open Questions
+
+- `~/claude/router-debug`: its Claude Code session history is keyed to the
+  old cwd (`~/.claude/projects/-home-bukzor-router-debug/`); resuming there
+  needs that dir renamed too. Not in scope; left as is.
+
+## Final report
+
+All as described; 000:1–3 confirmed (no `PNPM_HOME`, npm-global, `RBENV_ROOT`,
+`run-time`, or `.npmrc` on svelte). `~` is clean in scope; the only dirty
+path left is `.claude/sessions.kb` (gitlink `88129c2`→`8e94206`, submodule
+clean and pushed; outside this unit, a peer's).
+
+`wsl-buck-win10` (pushed, `30910fb..fa3f7c7`): `85cf413` zkbd musl symlink,
+`7af7568` command-not-found-hook, `7da3fe6` gh `browser:` blank, `1a48ad6`
+revert of `a60d2a6` (live `.gitconfig` has no delta), `fa3f7c7` sudo → ask.
+
+`svelte-crostini` (pushed): `73c11f5` command-not-found-hook (byte-identical
+to `7af7568`), `8e91565` gh `git_protocol: ssh`, `de216c6` sudo deny → ask.
+
+Smoke tests (foreground, `timeout`-bounded): hook direct (Alpine path and a
+simulated non-Alpine copy), live `.sh_plugins.d` hookup in bash and zsh, and
+svelte's `rc.d` hookup with the hook present (bash, zsh) and absent from
+`PATH` (bash): all rc 127, no fork loop.
+
+Submodules: inner HEAD equalled the gitlink in both (`b60d532`, `04221c1`),
+only staged deletions; `reset --hard` restored them, both clean.
+
+Moves, uncommitted (pass on to the deadlock peer): `~/docs/games/deadlock/
+{deadlock.txt,melee.txt}` → `~/claude/deadlock/docs/games/` (untracked
+there); `~/router-debug` → `~/claude/router-debug`. Emptied dirs removed:
+`~/docs/games/`, `~/project/`.
+
+In `~/trash/fold-004/`: `setup/wsl.help`, `.zkbd/xterm-256color-:0`, the old
+header-only `.zkbd/xterm-256color-alpine-linux-musl`, `docs/games/deadlock/
+.deadlock.txt.swp`, `family-bug-tracker/`, `smoke/` (test copy of the hook).
