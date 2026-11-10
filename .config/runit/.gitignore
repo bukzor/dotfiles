@@ -1,0 +1,2 @@
+# runsv creates this, root-owned, in every service dir
+supervise/

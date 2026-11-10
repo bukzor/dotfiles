@@ -1,0 +1,22 @@
+#!/bin/bash
+# runit service: keep Windows AppData bind-mounted at ~/.config/windows, so
+# the home repo can track selected Windows app configs (see the .gitignore
+# files inside AppData). Retries until /mnt/c is up after a WSL start, and
+# re-mounts if the mount goes away.
+set -euo pipefail
+exec 2>&1
+
+SRC=/mnt/c/Users/worki/AppData
+DST=/home/bukzor/.config/windows
+INTERVAL=60
+
+while true; do
+  if ! mountpoint -q "$DST"; then
+    if mount --bind "$SRC" "$DST"; then
+      echo "mounted $SRC -> $DST"
+    else
+      echo "mount failed; retrying in ${INTERVAL}s"
+    fi
+  fi
+  sleep "$INTERVAL"
+done
