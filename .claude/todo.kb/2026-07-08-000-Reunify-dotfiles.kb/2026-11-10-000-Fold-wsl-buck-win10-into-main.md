@@ -20,7 +20,7 @@ additions on top. Live `~` on buck-win10 also holds ~24 uncommitted modified
 files and several untracked WSL-specific paths.
 
 It shares history with main, so it merges into main with an ordinary merge:
-5 conflicts as of 2026-11-10 (against svelte: 95, no merge base). Once merged,
+6 conflicts as of 2026-11-10 (against svelte: 95, no merge base). Once merged,
 main ↔ svelte is a two-lineage problem again.
 
 ## Implementation Steps
@@ -53,6 +53,9 @@ main ↔ svelte is a two-lineage problem again.
     - [ ] `.claude/{.gitignore,CLAUDE.md,commands/curl.md,settings.json}`
           (add/add): take main's side; 004's claude-config theme does the real
           merge against svelte
+    - [ ] `.gitmodules`: main's entries plus wsl's `.claude/sessions.kb` one
+          (byte-identical to svelte's, so 004's `.gitmodules` theme gets it for
+          free); the gitlink itself merges clean
     - [ ] `.sh_plugins.d/command-not-found.sh` (rename/delete): accept main's
           delete; the WSL hook (`bin/command-not-found-hook/`) gets a
           `.config/sh` hookup

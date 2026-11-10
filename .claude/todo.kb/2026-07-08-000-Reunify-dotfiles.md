@@ -15,7 +15,7 @@ Working agreements (topology, workspaces, sync rule):
 
 ## Status (2026-11-10)
 
-`git merge-tree` conflict counts: main + svelte 26, main + wsl-buck-win10 5.
+`git merge-tree` conflict counts: main + svelte 26, main + wsl-buck-win10 6.
 The main ↔ svelte surface is task 004's four open themes plus the svelte-side
 drift since 2026-07-13 that main never received (both listed in 004).
 
