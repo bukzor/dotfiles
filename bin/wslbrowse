@@ -1,0 +1,11 @@
+#!/bin/bash
+# wslbrowse - open a URL (or file) in the Windows default browser from WSL.
+#
+# Replacement for wslview, which in wslu 3.2.4 opens File Explorer instead of a
+# browser: it expects `wslpath -w ""` to fail and fall back to the URL, but on
+# this WSL build that returns "." (cwd), so it runs `Start "."`.
+#
+# Uses Windows' canonical URL/file protocol handler, which dispatches to the
+# default browser. Args are passed through without a shell, so `&` in query
+# strings is safe.
+exec rundll32.exe url.dll,FileProtocolHandler "$@"

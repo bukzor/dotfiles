@@ -19,7 +19,7 @@ if ! [ -d "$BREWDIR" ]; then
     fi
   else
     echo 'Homebrew not installed.' >&2
-    return 1
+    exit 1
   fi
 fi
 
@@ -31,7 +31,8 @@ fi
 BEFORE="$BREWDIR/.before"
 touch "$BEFORE"
 
-$BREW "$@"
+PATH="$HOME/prefix/ruby26/bin:$PATH" \
+  $BREW "$@"
 
 if [ "$BREWDIR/opt" -nt "$BEFORE" ] || [ "$BREWDIR/Cellar" -nt "$BEFORE" ]; then
   brew-handle-gnubin

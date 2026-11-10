@@ -1,0 +1,21 @@
+#!/bin/bash
+# Display tool scores sorted by value (descending)
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+TOOLS_DIR="$(dirname "$0")/.."
+
+cat "$TOOLS_DIR"/*.score.yaml |
+  yq --output-format json |
+  jq 'to_entries | sort_by(-.value.value) | from_entries' -c |
+  yq --prettyPrint

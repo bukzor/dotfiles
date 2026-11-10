@@ -1,3 +1,9 @@
+## 2025-09-11
+
+- [ ] unicode checkmark emoji are getting the wrong column count in vim, makes it
+  near impossible to edit correctly
+- [ ] git tab-completion is taking 10-30 seconds
+
 ## 2021-01-25
 basic environment reset for shell login
   * PATH, HOME, USER, MANPATH should be set

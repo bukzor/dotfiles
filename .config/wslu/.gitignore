@@ -1,0 +1,3 @@
+# wslu's runtime cache (codepage, launcher path, timestamp), not config
+*
+!.gitignore

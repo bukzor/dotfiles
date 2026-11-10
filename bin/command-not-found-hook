@@ -1,0 +1,31 @@
+#!/bin/sh
+# Unknown-command handler; .config/sh/rc.d/command-not-found.sh hooks it up.
+# It runs on every typo, so it tests each backend's binary directly rather
+# than lean on shell libraries (`has`, ~/.sh_lib) that may be gone, and never
+# goes through the interactive bin/brew wrapper.
+cmd="$1"
+apk_cnf=/usr/libexec/command-not-found
+
+if [ -e /etc/alpine-release ] &&
+   { [ -x "$apk_cnf" ] || sudo apk add command-not-found; }; then
+  exec "$apk_cnf" "$cmd"
+fi
+
+# Based on http://www.linuxjournal.com/content/bash-command-not-found
+# Ask brew only on a terminal (not in a pipe or Midnight Commander), or in CI.
+if [ -t 2 ] || [ "${CI:-}" = true ]; then
+  case "$cmd" in
+    -h|--help|--usage|-\?) ;;
+    *)
+      for brew in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+        if [ -x "$brew" ]; then
+          "$brew" which-formula --explain "$cmd"
+          break
+        fi
+      done
+      ;;
+  esac
+fi
+
+echo "$cmd: command not found" >&2
+exit 127

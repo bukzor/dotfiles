@@ -10,3 +10,7 @@
 [submodule "data/gcloud"]
 	path = data/gcloud
 	url = git@github.com:bukzor/gcloud-data.git
+[submodule ".claude/sessions.kb"]
+	path = .claude/sessions.kb
+	url = git@github.com:bukzor/bukzor.claude-sessions.git
+	branch = main

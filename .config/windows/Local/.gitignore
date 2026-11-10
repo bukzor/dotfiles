@@ -1,0 +1,6 @@
+*
+!.gitignore
+!Packages/
+!Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/
+!Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/
+!Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json

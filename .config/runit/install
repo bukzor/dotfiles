@@ -1,0 +1,32 @@
+#!/bin/bash
+# Point /etc/service (runsvdir's scan dir, and sv's default) at this host's
+# service tree: ~/.config/runit/<hostname>/. Idempotent. A pre-existing real
+# /etc/service directory is moved aside, not deleted.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+TREE="$(cd -P "$(dirname "$0")" && pwd)/$(hostname)"
+LINK=/etc/service
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+if [[ ! -d "$TREE" ]]; then
+  echo >&2 "no service tree for this host: $TREE"
+  exit 1
+fi
+
+if [[ -d "$LINK" && ! -L "$LINK" ]]; then
+  sudo mv "$LINK" "$LINK.orig.$(date +%Y%m%d%H%M%S)"
+fi
+sudo ln -sfn "$TREE" "$LINK"
+ls -l "$LINK"

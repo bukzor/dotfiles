@@ -1,0 +1,8 @@
+ReadMcpResourceTool:
+  enablement: 0.017
+  turn_efficiency: 5.0
+  accuracy_boost: 9.0
+  penalty: 0.476
+  benefit: 0.401
+  cost: 0.329
+  value: 1.22

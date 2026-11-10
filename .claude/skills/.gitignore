@@ -1,0 +1,5 @@
+# un-ignore non-hidden files
+![!.]*
+
+# claude-code account-synced skills cache
+synced/
