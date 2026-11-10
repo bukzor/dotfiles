@@ -1,5 +1,4 @@
 {
-  "model": "opus[1m]",
   "permissions": {
     "allow": [
       "WebSearch",
@@ -46,13 +45,13 @@
       "TaskOutput",
       "TaskStop",
       "Bash(rm -rf:*)",
-      "Bash(sudo:*)",
       "Bash(dd:*)",
       "Bash(mkfs:*)",
       "Bash(git add -A:*)",
       "Bash(git add --all:*)",
       "Bash(git add .:*)",
-      "Write(~/.claude/projects/*/memory/**)"
+      "Edit(~/.claude/projects/*/memory/**)",
+      "Edit(~/.claude/projects/*/memory/**)"
     ],
     "ask": [
       "Bash(git push:*)",
@@ -69,6 +68,7 @@
       "~/.claude"
     ]
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -88,19 +88,26 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "medium",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high",
+      "autoCompactWindow": "auto"
+    }
+  },
+  "autoCompactWindow": 300000,
   "autoMemoryEnabled": false,
   "editorMode": "vim",
   "verbose": true,
   "preferredNotifChannel": "kitty",
-  "autoCompactEnabled": false,
+  "autoCompactEnabled": true,
   "terminalProgressBarEnabled": false,
   "skipAutoPermissionPrompt": true,
   "//hooks-disabled": {
     "//PreToolUse": [
       {
-        "matcher": "Bash",
-        "hooks": [
+        "//matcher": "Bash",
+        "//hooks": [
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/git_commit_validator.py"
@@ -108,8 +115,8 @@
         ]
       },
       {
-        "matcher": "Write|Edit|NotebookEdit",
-        "hooks": [
+        "//matcher": "Write|Edit|NotebookEdit",
+        "//hooks": [
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/python_style_reminder.py"
