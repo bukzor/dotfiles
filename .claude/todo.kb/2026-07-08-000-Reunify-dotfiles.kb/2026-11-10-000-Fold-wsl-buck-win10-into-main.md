@@ -69,10 +69,13 @@ main ↔ svelte is a two-lineage problem again.
           real local intent (e.g. `model`)
     - [ ] `skills/llm-chat-librarian` symlink targets differ — pick one
     - [ ] `sessions.kb/`: a plain directory on wsl, the
-          `bukzor.claude-sessions` submodule on svelte. Only
-          `recover-deadlock-builds-and-snapshotter.md` is missing from that
-          repo (the rest moved there in 2026-07 and have since closed); move it
-          under a `buck-win10` host dir, parallel to `penguin.kb/`
+          `bukzor.claude-sessions` submodule on svelte. That repo now has
+          `buck-win10.kb/`, with this host's untracked entries migrated
+          (`f9c5c03`). Of wsl's tracked entries, all but
+          `recover-deadlock-builds-and-snapshotter.md` moved there in 2026-07
+          and have since closed; that one names a Steam ID and the repo is
+          public, so where it goes is the user's call. Then replace the
+          directory with the submodule (on main, via the merge).
     - [ ] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
           allow-by-default ignore scheme won in 004
 - [ ] push main
