@@ -1,5 +1,5 @@
 # What protocol to use when performing git operations. Supported values: ssh, https
-git_protocol: https
+git_protocol: ssh
 # What editor gh should run when creating issues, pull requests, etc. If blank, will refer to environment.
 editor:
 # When to interactively prompt. This is a global config that cannot be overridden by hostname. Supported values: enabled, disabled
@@ -12,4 +12,5 @@ aliases:
 # The path to a unix socket through which send HTTP connections. If blank, HTTP traffic will be handled by net/http.DefaultTransport.
 http_unix_socket:
 # What web browser gh should use when opening URLs. If blank, will refer to environment.
-browser:
+browser: wslbrowse
+version: "1"
