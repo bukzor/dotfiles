@@ -41,10 +41,11 @@ All three are clones of `github.com/bukzor/dotfiles`; working agreements
   tree is live config and someone else's work in progress.
 - `~/repo/github.com/bukzor/dotfiles--svelte-crostini/` — `svelte-crostini`
   workspace. This kb lives here.
-- `main` — no workspace yet; a later unit creates `dotfiles--main`. Units in
-  this wave never write main. Something main needs gets authored on svelte
-  (or committed on `wsl-buck-win10`, which merges into main) and its commit
-  id goes in your Final report for the merge unit to carry.
+- `main` — workspace `~/repo/github.com/bukzor/dotfiles--main/`, created by
+  unit 005 (the merge). Only a unit whose brief says so writes main.
+  Otherwise, something main needs gets authored on svelte (or committed on
+  `wsl-buck-win10`, which merges into main) and its commit id goes in your
+  Final report.
 
 ## Every agent, every task
 

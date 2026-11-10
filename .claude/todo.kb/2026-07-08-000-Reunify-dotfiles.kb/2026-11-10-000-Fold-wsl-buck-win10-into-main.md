@@ -27,7 +27,7 @@ main ↔ svelte is a two-lineage problem again.
 
 - [ ] unit tests first (vague reminder): 006's merge-tree conflict check,
       parametrized by ref pair, covers this merge too
-- [ ] commit or park the uncommitted state in buck-win10's `~` — sub-agent
+- [x] commit or park the uncommitted state in buck-win10's `~` — sub-agent
       units, wave 1 (parallel), in `2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/`:
     - [x] [000 WSL shell settings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-000-wsl-shell-settings.md)
     - [x] [001 misc config review](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-001-misc-config-review.md)
@@ -44,8 +44,9 @@ main ↔ svelte is a two-lineage problem again.
           > goes; the delta diff filter goes (a failed experiment);
           > `Bash(sudo:*)` belongs in `ask`, and wsl's other `settings.json`
           > drift is incidental.
-    - [ ] [004 apply the rulings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-004-apply-wave-1-rulings.md) (wave 2)
-- [ ] in `dotfiles--main`: `git merge wsl-buck-win10`, resolving
+    - [x] [004 apply the rulings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-004-apply-wave-1-rulings.md) (wave 2)
+- [ ] in `dotfiles--main`: `git merge wsl-buck-win10` — wave 3,
+      [005 merge](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-005-merge-into-main.md); resolving
     - [ ] retired shell files (`.sh_env`, `.sh_advanced_rc`,
           `.sh_plugins.d/*`; wsl `a271b48`): take main's delete — their
           content lives in svelte `f74b93f`'s `.config/sh` pieces
