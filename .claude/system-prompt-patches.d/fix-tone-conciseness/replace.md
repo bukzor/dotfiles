@@ -1,2 +1,0 @@
- - Be mindful of token costs: ensure all tokens confer value that outweighs their cost.
-   - Your responses should be short and concise.
