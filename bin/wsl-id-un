@@ -1,0 +1,4 @@
+#!/bin/bash
+# wsl-id-un - get Windows username from WSL
+
+cmd.exe /c "echo %USERNAME%" 2>/dev/null | head -1 | tr -d '\r\n'
