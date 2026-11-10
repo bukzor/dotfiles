@@ -108,6 +108,14 @@ output looks like — not the mechanism (the body shows that; restating it rots)
 - Prefer recursive structural types (`JsonValue`, `JsonObj`) over `Any` for JSON data — enforce narrowing at each access step
 - Always prefer immutable covariant types (e.g. `Mapping`, not `dict`) for read-only data
 - No `# E:` comments or `# type:` directives in source or test files
+- Prefer `TypeGuard`/`TypeIs` over `cast` for narrowing — a guard function checks
+  the value at runtime, so the narrowing is verified rather than asserted blindly.
+  Reserve `cast` for cases a guard genuinely can't express.
+  ```python
+  def _is_str_mapping(value: object) -> TypeGuard[Mapping[str, object]]:
+      return isinstance(value, Mapping)
+  assert _is_str_mapping(root), type(root)  # root now Mapping[str, object]
+  ```
 
 ## Project Template
 
