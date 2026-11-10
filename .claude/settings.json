@@ -59,7 +59,6 @@
       "EnterWorktree",
       "ExitWorktree",
       "Bash(rm -rf:*)",
-      "Bash(sudo:*)",
       "Bash(dd:*)",
       "Bash(mkfs:*)",
       "Bash(git add -A:*)",
@@ -75,7 +74,8 @@
       "Bash(uv pip install:*)",
       "Bash(pip install:*)",
       "Bash(cargo install:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(sudo:*)"
     ],
     "defaultMode": "auto",
     "additionalDirectories": [
