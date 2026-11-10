@@ -152,3 +152,11 @@ fi
 if [ -e "$HOME/private-dotfiles/.zshrc" ]; then
     source "$HOME/private-dotfiles/.zshrc"
 fi
+
+# pnpm
+export PNPM_HOME="/home/bukzor/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

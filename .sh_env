@@ -55,6 +55,7 @@ fi
 warn() { echo "[1;33mWARNING: [22m$*[0m" >&2; }
 abspath() { (cd "$1" && pwd); } # absolute, but avoid dereferencing symlinks
 if has nproc; then
+  export MAKEFLAGS="-j$(($(nproc) * 3))"
   export HOMEBREW_MAKE_JOBS="$(($(nproc) * 3))"
 else
   warn "please brew install coreutils"
@@ -62,6 +63,9 @@ fi
 
 # set PATH so it includes user's personal bin if it exists (or is created)
 export PATH=~/.local/bin:~/private-dotfiles/bin:~/bin:"$PATH"
+export PATH=~/prefix/npm-global/bin:"$PATH"
+export PATH=~/.nix-profile/bin:"$PATH"
+
 export GOPATH=~/prefix/gopath
 export GDK_SCALE=2
 export VOLTA_HOME="$HOME/.volta"
@@ -108,6 +112,11 @@ export PAGER=less
 if echo "$OSTYPE" | grep -q '^darwin'; then
   export BROWSER='open'
   export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+elif [ -n "$WSL_DISTRO_NAME" ]; then
+  # wslview (wslu 3.2.4) opens File Explorer instead of a browser, because it
+  # expects `wslpath -w ""` to fail but this WSL build returns "." (cwd).
+  # ~/bin/wslbrowse calls the Windows default-browser handler directly.
+  export BROWSER=wslbrowse
 fi
 
 #unmap CTRL-S and CTRL-Q
@@ -164,6 +173,7 @@ esac
 export PREFIX
 PREFIX="$(abspath "$HOME/../..")"
 export GEM_HOME=~/prefix/rubygems
+export RBENV_ROOT=~/prefix/rbenv
 export REPO=$HOME/repo
 
 # ask terminfo whether we have a color terminal
@@ -219,6 +229,8 @@ fi
 ## if has pyenv; then
 ##   eval "$(pyenv init -)"
 ## fi
+
+
 
 # added by travis gem
 trysource ~/.travis/travis.sh

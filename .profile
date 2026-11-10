@@ -31,3 +31,5 @@ elif [ "$ZSH_VERSION" ]; then
 else
   . "$HOME"/.sh_rc
 fi
+
+if [ -e /home/bukzor/.nix-profile/etc/profile.d/nix.sh ]; then . /home/bukzor/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer

@@ -78,8 +78,7 @@ source_dir ~/.sh_plugins.d
 trysource ~/private-dotfiles/.sh_advanced_rc
 
 
-DIRENV="$HOMEBREW_PREFIX/bin/direnv"
-if ! [[ -x "$DIRENV" ]]; then
+if ! has direnv; then
   cat >&2 <<'EOF'
 NOTE: `direnv` is not installed. To fix:
 
@@ -88,10 +87,10 @@ NOTE: `direnv` is not installed. To fix:
 EOF
 fi
 _direnv_hook() {
-  if [[ -x "$DIRENV" ]]; then
+  if has direnv; then
     trap -- '' SIGINT;
     # They don't support 'export sh'. Weird.
-    eval "$("$DIRENV" export bash)";
+    eval "$(direnv export bash)";
     trap - SIGINT;
   fi
 }
