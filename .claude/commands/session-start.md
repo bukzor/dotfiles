@@ -34,7 +34,7 @@ Default arguments (if none provided):
    - Read it; it is the primary brief.
    - Read any files listed under its frontmatter `requires:` before
      acting (and any transitive `requires:`).
-   - Grep `~/.claude/sessions.kb/*.md` for the file's basename.
+   - `grep -Rl <basename> ~/.claude/sessions.kb/` (entries sit in `<host>.kb/` subdirs).
      - 1 match: read that entry; continue the session.
      - 0 matches: create a new entry
      - 2+ matches: ask the user which to use.
