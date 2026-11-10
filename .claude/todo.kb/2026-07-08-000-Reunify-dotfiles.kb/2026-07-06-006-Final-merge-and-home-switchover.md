@@ -5,15 +5,15 @@ status: open
 
 # Final merge and home switchover
 
-**Priority:** Low now, High once 000-005 complete (strictly last)
+**Priority:** Low now, High once everything else is done (strictly last)
 **Complexity:** Low (if the identical-content ideal held)
-**Branch:** main (merge commit), then live `~`
-**Context:** disjoint histories (no merge base) — main 625 commits, svelte 329
+**Branch:** main (merge commit), then each host's live `~`
+**Context:** disjoint histories (no merge base) — main 640 commits, svelte 615 (2026-11-10)
 
 ## Problem Statement
 
 Merge svelte-crostini into main with zero conflicts, make main the living branch on
-this machine, retire svelte-crostini.
+every host, retire svelte-crostini and wsl-buck-win10.
 
 ## Implementation Steps
 
@@ -23,27 +23,32 @@ this machine, retire svelte-crostini.
       (shape: run-once `X_check.sh` for merge-tree; the merged-tree suite
       run is `./.local/share/redo/do test` in a scratch checkout — zero
       installs — see ../2026-07-07-000)
-- [ ] preflight: `git merge-tree main svelte-crostini` (or a scratch worktree merge)
-      shows zero conflicts; `git diff main svelte-crostini --stat` shows only
-      expected one-sided paths
-- [ ] commit/park any uncommitted state in live `~` (gh/config.yml, etc.)
-- [ ] in the clone (~/repo/github.com/bukzor/dotfiles--main-reunify):
-      `git merge --allow-unrelated-histories svelte-crostini` on main
-- [ ] review merged tree vs live `~` (`git diff main svelte-crostini` empty;
+- [ ] preflight: `git merge-tree main svelte-crostini` shows zero conflicts;
+      `git diff main svelte-crostini --stat` shows only expected one-sided paths
+- [ ] commit/park uncommitted state in each host's live `~` (penguin: see
+      `../2026-06-03-001-commit-accumulated-dotfiles-changes.md`)
+- [ ] in `dotfiles--main`: `git merge --allow-unrelated-histories svelte-crostini`
+- [ ] review the merged tree (`git diff main svelte-crostini` empty;
       spot-check resurrected main-only survivors)
 - [ ] push main
-- [ ] in live `~` repo: fetch, `git checkout main`, working-tree diff review
-- [ ] smoke test: new login shell, bash -i, zsh -i, vim, tmux
-- [ ] set origin default branch = main (already is); delete/archive svelte-crostini
-      after a comfort period
+- [ ] per host (penguin, buck-win10), in live `~`: note the pre-switch commit id,
+      fetch, `git checkout main`, working-tree diff review
+- [ ] smoke test on each host: new login shell, bash -i, zsh -i, vim, tmux,
+      and `~/bin/has` + `~/bin/bootstamp` (they need `.sh_lib/functions-cli.sh`,
+      which only main carries)
+- [ ] CI: `fetch-depth: 0` (the deferred 2026-07-07-000 item), if the merge-tree
+      check runs in CI
+- [ ] after a comfort period: delete svelte-crostini and wsl-buck-win10 (origin
+      default branch is already main)
+- [ ] `arch-svelte` (2022, one unique commit: Arch-era pacman shims, vim-plug
+      `.vimrc`, Pipfile) — tag as `archive/arch-svelte` or delete (user)
 
 ## Success Criteria
 
-- [ ] `~` is on main; `git -C ~ status` clean; all daily tools work
-- [ ] one lineage; no orphan branches carrying unique content
+- [ ] every host's `~` is on main; `git -C ~ status` clean; all daily tools work
+- [ ] one lineage; no branches carrying unique content
 
 ## Notes
 
-The switchover changes live dotfiles in place — do it at a low-stakes moment and
-keep the pre-switch commit id noted for instant rollback
-(`git checkout svelte-crostini` restores everything).
+The switchover changes live dotfiles in place — do it at a low-stakes moment.
+Rollback is `git checkout <pre-switch branch>` in that host's `~`.

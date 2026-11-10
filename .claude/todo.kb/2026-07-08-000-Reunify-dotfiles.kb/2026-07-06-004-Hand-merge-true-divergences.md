@@ -12,13 +12,23 @@ status: open
 
 ## Problem Statement
 
-~21 files where both branches genuinely evolved. Each needs a human-judgment merge;
+Files where both branches genuinely evolved. Each needs a human-judgment merge;
 the result must land byte-identical on both branches (the pre-merge ideal).
 
 ## Implementation Steps
 
 Author merged content per theme; per theme: `- [ ] merged content authored`,
-`- [ ] applied+committed on svelte (~)`, `- [ ] applied+committed on main (clone)`.
+`- [ ] applied+committed on svelte`, `- [ ] applied+committed on main`.
+
+- [ ] svelte-side drift since 2026-07-13: main's copy is an older svelte
+      version (its blob is in svelte's history), so fast-forward main to
+      svelte's — mechanical, no authoring: `.bashrc`, `.gitignore`,
+      `.profile_test.sh`, `.tmux.conf`, `bin/.gitignore`, `bin/tmux-cd`,
+      `.config/sh/env.d/{300-homebrew,700-tmpdir}.sh`,
+      `.config/sh/functions.d/{path,path_test,source_dir}.sh`
+- [ ] `bin/alert`: a symlink on main, a regular file on svelte (last changed
+      2026-09-10)
+    - [ ] authored / [ ] svelte / [ ] main
 
 - [ ] unit tests first, where appropriate (vague reminder): the merged bin/ scripts
       are the testable surface (brew-desc, colortest17x17, osc52) — a smoke
@@ -26,7 +36,8 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
       startup, tmux -f … validity) beats nothing
       (shape: run-once `X_check.sh`, skip-if-absent — see ../2026-07-07-000)
 - [ ] claude config: .claude/CLAUDE.md, .claude/settings.json,
-      .claude/commands/curl.md, .claude/.gitignore
+      .claude/commands/curl.md, .claude/.gitignore — after the wsl-buck-win10
+      fold, which carries its .claude/ additions to both sides
     - [ ] authored / [ ] svelte / [ ] main
 - [x] git config: .gitconfig, .gitignore, .config/git/ignore, .config/.gitignore,
       repo/.gitignore, bin/.gitignore, .vim/.gitignore — done 2026-07-13.
@@ -150,7 +161,6 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
   concurrent-edit heuristic, not a permission gate — a narrow, additive,
   non-preempting slice needed by an earlier task doesn't have to wait for
   a later one's turn.
-- `.bashrc`/`.profile` are OWNED BY todo 000 — do not touch here.
 - macOS-vs-crostini differences resolve via OSTYPE guards (pattern in main's .sh_env),
   not by picking a side.
 - vim lazy-lock.json: prefer svelte's (currently exercised plugin set); reconcile

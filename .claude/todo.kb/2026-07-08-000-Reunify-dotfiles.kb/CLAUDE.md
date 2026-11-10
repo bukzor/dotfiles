@@ -4,44 +4,49 @@ Applies to every task file in this directory. Read before acting on any of them.
 
 ## Goal
 
-Converge the two disjoint dotfiles lineages (no common ancestor) to identical
-content, then `git merge --allow-unrelated-histories` and live on main.
+One lineage, living on main. Three branches carry live config:
 
-## Topology (two repos, no worktrees)
+- `svelte-crostini` and `main` — disjoint histories (no common ancestor).
+  Converge to identical content, then `git merge --allow-unrelated-histories`.
+- `wsl-buck-win10` — forked from main's history (2023, `4b003ef`). Folds into
+  main with an ordinary merge, before main and svelte converge.
 
-- **`~` is the master working location** — the home repo, checked out on
-  `svelte-crostini`, live config. Sessions start here. svelte-crostini commits
-  happen here and ONLY here.
-- **main operations** happen in the dedicated clone at
-  `~/repo/github.com/bukzor/dotfiles--main-reunify` (main checked out). main
-  commits happen there and ONLY there. (Not the general-purpose
-  `~/repo/github.com/bukzor/dotfiles` clone, which floats between branches
-  for ad hoc use and must never carry reunify commits.)
-- Same remote (`github.com/bukzor/dotfiles`) — sync via push/fetch.
-- zsh-support and other historical heads: no checkout; read via
-  `git show origin/zsh-support:<path>` from either repo.
+## Topology
+
+> [!@bukzor] 2026-11-10: each branch gets a workspace at
+> `~/repo/github.com/bukzor/dotfiles--${branch}/`, created only when edits
+> need it. A host's live `~` is the workspace for its own branch; no second
+> checkout of it.
+
+Hosts (situational — rewrite when a host is added or retired):
+
+| Host | live `~` | workspaces for other branches |
+|---|---|---|
+| penguin (Chromebook, crostini) | `svelte-crostini` | `dotfiles--main` |
+| buck-win10 (WSL) | `wsl-buck-win10` | `dotfiles--main`, `dotfiles--svelte-crostini` |
+
+- One remote (`github.com/bukzor/dotfiles`); sync via push/fetch. No worktrees.
+- The general-purpose `~/repo/github.com/bukzor/dotfiles` clone floats between
+  branches for ad hoc use and never carries reunify commits.
+- Retired heads are deleted once fully contained elsewhere; read them by
+  commit id (e.g. the 2017 zsh setup: `git show 381ee8a:<path>`).
 
 ## Rules
 
-- **Single-writer per branch** (see Topology). Two writable checkouts of one
-  branch would fork silently.
-- **File ownership:** `.profile`, `.bashrc`, `~/.config/sh/**` belong to
-  tasks 000-unification and 005-zsh-port. Task 004 (hand-merges) must not
-  touch them. Tasks 001/002 escalate surprises to 004 rather than deciding.
+> [!DRAFT] 2026-11-10: a branch can now be writable on two hosts, so one
+> writer at a time: fetch and fast-forward before editing, push right after
+> each commit, never leave a workspace holding unpushed commits.
+
 - **Hand-merged content is authored once**, then applied to each branch —
   never merged independently per branch.
 - **Mechanical batches run as parallel subagents** where the task file says
-  so (001's two directions; 003's per-directory sweeps after keep/delete
-  decisions are made). Decisions themselves stay with the user.
+  so. Decisions themselves stay with the user.
 - Every convergence commit names its counterpart branch in the message.
 - Tests before work: each task file opens with a "unit tests" item. The
-  harness is live (redo; `X_test.sh` shell-matrix + run-once `X_check.sh`):
-  conventions and remaining foundations work in 2026-07-07-000; built by
-  `../2026-07-07-001-shell-function-unit-testing-and-ci-regression-harness.md`
-  (done).
+  harness is live (redo; `X_test.sh` shell-matrix + run-once `X_check.sh`);
+  conventions in 2026-07-07-000.
 
 ## Execution order
 
-Defined by [../2026-07-08-000-Reunify-dotfiles.md](../2026-07-08-000-Reunify-dotfiles.md)
-(not by filename sort): CI foundations first, then 000 → (001, 002, 003
-parallelizable) → 005 → 004 → 006 strictly last.
+Defined by [../2026-07-08-000-Reunify-dotfiles.md](../2026-07-08-000-Reunify-dotfiles.md),
+not by filename sort.

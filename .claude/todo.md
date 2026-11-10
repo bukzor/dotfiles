@@ -60,10 +60,6 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
   - [ ] Verify: `infocmp tmux-256color` resolves to the `~/.terminfo` copy
   - Goal: pin terminfo to the tmux binary version so brewed-tmux + distro-ncurses can't drift.
 - [ ] [todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md](todo.kb/2026-07-26-000-Evaluate-sub--patch-upstream--hard-fork--or-write-my-own.md) — dogfood via chatfs, file the `--help` wart upstream, decide from the patch queue
-- [ ] Restore `.sh_lib/functions-cli.sh` — tracked on `main` and
-      `origin/main`, absent on `svelte-crostini`, which leaves `~/bin/has`
-      and `~/bin/bootstamp` dangling (found 2026-08-10). Belongs to
-      [todo.kb/2026-07-08-000-Reunify-dotfiles.md](todo.kb/2026-07-08-000-Reunify-dotfiles.md).
 - [ ] Delete `~/trash/git-localhost-store-dotfiles-copy/` (6.7M) once the
       packaged `git-localhost-store` has run a while without regret. It is
       the retired dotfiles copy of the tool plus untracked May-2026 migration
