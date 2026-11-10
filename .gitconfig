@@ -3,7 +3,6 @@
     email = buck.2019@gmail.com
 [core]
     excludesfile = ~/.gitignore_global
-        ###pager = delta
 [init]
     defaultBranch = main
 [color]
@@ -84,9 +83,3 @@
     path = ./private-dotfiles/.gitconfig
 
 # vim:sts=4:sw=4:et:
-[interactive]
-	diffFilter = delta --color-only
-[delta]
-	navigate = true
-	light = false
-	side-by-side = true
