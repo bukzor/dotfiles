@@ -15,3 +15,5 @@ foo.*
 
 # built stuff
 venv/
+
+**/.claude/settings.local.json

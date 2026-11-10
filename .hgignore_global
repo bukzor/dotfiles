@@ -25,3 +25,5 @@ log
 *.log.*
 
 terraform.tfstate.*.backup
+
+**/.claude/settings.local.json
