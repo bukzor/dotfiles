@@ -35,8 +35,11 @@ main ↔ svelte is a two-lineage problem again.
           in `.profile` and `.zshrc` edits. Author them as WSL-guarded
           `.config/sh/**` pieces, land on svelte + main; nothing goes into the
           retired files.
-    - [ ] `.config/windows/**` is deleted in the working tree but committed —
-          intent unknown (user)
+    - [ ] `.config/windows/**` shows as deleted because its bind mount of
+          Windows `AppData` (`bin/windows-dotfiles-setup`) doesn't survive a
+          WSL restart; the files are intact in `AppData`, and Windows
+          Terminal's `settings.json` there has drifted from the committed copy.
+          Persist the mount and commit, or retire the mechanism (user)
     - [ ] review the rest: `.gitconfig`, `.gitignore`, `.gitignore_global`,
           `.hgignore_global`, `bin/brew`, `bin/yesno`,
           `setup/alpine/homebrew.sh`, `TODO.md`, `.config/gh/config.yml`,
@@ -57,20 +60,20 @@ main ↔ svelte is a two-lineage problem again.
 - [ ] on main, reconcile the `.claude/` the merge brought in against svelte's
       (left alone, it resurfaces as 006 conflicts). Of the 95 wsl ↔ svelte
       conflicts, 65 are stale copies (wsl's blob appears in svelte's history)
-      → svelte's version; 49 wsl-only paths are files svelte has since deleted
-      → drop. Genuine additions, authored once and landed on both:
+      → svelte's version; 135 of the 216 wsl-only paths are files svelte has
+      since deleted or renamed (e.g. `docs/default-context/tools.d/` →
+      `tools.kb/`) → drop. Genuine additions, authored once and landed on both:
     - [ ] `reference.kb/data-format-selection.md` +
           `must-read.kb/before/choosing-a-data-file-format.md`
-    - [ ] `system-prompt-patches.d/strip-doing-tasks-bloat/`
     - [ ] `reference.kb/python/style.md` (uncommitted edit)
     - [ ] `settings.json`: wsl's diff is mostly lag behind svelte; carry only
           real local intent (e.g. `model`)
     - [ ] `skills/llm-chat-librarian` symlink targets differ — pick one
     - [ ] `sessions.kb/`: a plain directory on wsl, the
-          `bukzor.claude-sessions` submodule on svelte. Move entries missing
-          from that repo (at least `recover-deadlock-builds-and-snapshotter.md`)
-          into it under a `buck-win10` host dir, parallel to `penguin.kb/`
-    - [ ] `docs/default-context/` (78 files, never on svelte) — keep or drop (user)
+          `bukzor.claude-sessions` submodule on svelte. Only
+          `recover-deadlock-builds-and-snapshotter.md` is missing from that
+          repo (the rest moved there in 2026-07 and have since closed); move it
+          under a `buck-win10` host dir, parallel to `penguin.kb/`
     - [ ] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
           allow-by-default ignore scheme won in 004
 - [ ] push main
