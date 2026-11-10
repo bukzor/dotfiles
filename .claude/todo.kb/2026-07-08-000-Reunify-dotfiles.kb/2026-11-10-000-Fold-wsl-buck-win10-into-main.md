@@ -27,7 +27,12 @@ main ↔ svelte is a two-lineage problem again.
 
 - [ ] unit tests first (vague reminder): 006's merge-tree conflict check,
       parametrized by ref pair, covers this merge too
-- [ ] commit or park the uncommitted state in buck-win10's `~`
+- [ ] commit or park the uncommitted state in buck-win10's `~` — sub-agent
+      units, wave 1 (parallel), in `2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/`:
+    - [ ] [000 WSL shell settings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-000-wsl-shell-settings.md)
+    - [ ] [001 misc config review](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-001-misc-config-review.md)
+    - [ ] [002 untracked triage](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-002-untracked-triage.md)
+    - [ ] [003 `.claude/` uncommitted](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-003-claude-dir-uncommitted.md)
     - [ ] WSL shell settings sit in files both lineages retired: `.sh_env`
           (`MAKEFLAGS`, npm-global + nix `PATH`, `BROWSER=wslbrowse` under
           `WSL_DISTRO_NAME`, `RBENV_ROOT`), `.sh_advanced_rc`,
