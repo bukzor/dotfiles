@@ -37,10 +37,14 @@ main ↔ svelte is a two-lineage problem again.
           `windows-appdata` in the new per-host tree `.config/runit/buck-win10/`
           (`/etc/service` now links there); drifted settings committed —
           `8a0b0b2`, `a624d07` (2026-11-10)
-    - [ ] user rulings on the units' Open Questions (000: 6, 001: 6, 002: 4,
-          003: 1); still dirty in `~` pending them: `docs/games/`, `project/`,
-          `router-debug/`, `setup/wsl.help`, `.zkbd/xterm-256color-{:0,alpine-linux-musl}`,
-          the two empty submodule checkouts
+    - [x] user rulings on the units' Open Questions (2026-11-10)
+
+          > [!@bukzor] 2026-11-10: the units' recommendations stand, except:
+          > gh `git_protocol` is ssh on every host; `project/family-bug-tracker`
+          > goes; the delta diff filter goes (a failed experiment);
+          > `Bash(sudo:*)` belongs in `ask`, and wsl's other `settings.json`
+          > drift is incidental.
+    - [ ] [004 apply the rulings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-004-apply-wave-1-rulings.md) (wave 2)
 - [ ] in `dotfiles--main`: `git merge wsl-buck-win10`, resolving
     - [ ] retired shell files (`.sh_env`, `.sh_advanced_rc`,
           `.sh_plugins.d/*`; wsl `a271b48`): take main's delete — their
@@ -64,8 +68,9 @@ main ↔ svelte is a two-lineage problem again.
     - [ ] `reference.kb/data-format-selection.md` +
           `must-read.kb/before/choosing-a-data-file-format.md`
     - [ ] `reference.kb/python/style.md` (uncommitted edit)
-    - [ ] `settings.json`: wsl's diff is mostly lag behind svelte; carry only
-          real local intent (e.g. `model`)
+    - [ ] `settings.json`: take svelte's. The only intent in wsl's diff was
+          `Bash(sudo:*)` deny → ask, which unit 004 lands on svelte (ruling above);
+          `model`, `effortLevel`, `autoCompactWindow` were incidental
     - [ ] `skills/llm-chat-librarian` symlink targets differ — pick one
     - [x] `sessions.kb/` is now the `bukzor.claude-sessions` submodule on wsl
           too (`4795ca9`), with this host's live entries under

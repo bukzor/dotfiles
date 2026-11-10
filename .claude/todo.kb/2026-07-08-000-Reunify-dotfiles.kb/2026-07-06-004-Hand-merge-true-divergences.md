@@ -93,6 +93,9 @@ Author merged content per theme; per theme: `- [ ] merged content authored`,
           main's theme/scratch/gcloud-data submodules, checking `scratch`'s two
           different remotes for which is current)
         - [ ] authored / [ ] svelte / [ ] main
+    - [ ] `.themes/`: main's `gruvbox-dark-gtk` submodule (jmattheis) vs.
+          svelte's `Gruvbox-GTK` (Fausto-Korpsvart, 2025-10-22) → svelte's
+          (fold unit 001's recommendation, accepted 2026-11-10)
     - [ ] .vimrc — diff main's 526-line monolithic file against svelte's 19
           `.vimrc.d/*.vim` files (actively maintained, most recent edit
           2026-05-12); port anything main has that svelte's modular set lacks,
