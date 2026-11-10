@@ -40,8 +40,8 @@ every host, retire svelte-crostini and wsl-buck-win10.
       check runs in CI
 - [ ] after a comfort period: delete svelte-crostini and wsl-buck-win10 (origin
       default branch is already main)
-- [ ] `arch-svelte` (2022, one unique commit: Arch-era pacman shims, vim-plug
-      `.vimrc`, Pipfile) — tag as `archive/arch-svelte` or delete (user)
+- [x] `arch-svelte` (2022, one unique commit) archived as tag
+      `archive/arch-svelte`, branch deleted — 2026-11-10
 
 ## Success Criteria
 

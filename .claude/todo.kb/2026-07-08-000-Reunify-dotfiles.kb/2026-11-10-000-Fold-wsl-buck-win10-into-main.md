@@ -39,7 +39,9 @@ main ↔ svelte is a two-lineage problem again.
           Windows `AppData` (`bin/windows-dotfiles-setup`) doesn't survive a
           WSL restart; the files are intact in `AppData`, and Windows
           Terminal's `settings.json` there has drifted from the committed copy.
-          Persist the mount and commit, or retire the mechanism (user)
+
+          > [!@bukzor] 2026-11-10: keep the mechanism — persist the mount,
+          > commit the drifted settings.
     - [ ] review the rest: `.gitconfig`, `.gitignore`, `.gitignore_global`,
           `.hgignore_global`, `bin/brew`, `bin/yesno`,
           `setup/alpine/homebrew.sh`, `TODO.md`, `.config/gh/config.yml`,
