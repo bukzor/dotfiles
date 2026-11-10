@@ -38,7 +38,7 @@ main ↔ svelte is a two-lineage problem again.
     - [x] `.config/windows/**` AppData bind mount persisted as runit service
           `windows-appdata` in the new per-host tree `.config/runit/buck-win10/`
           (`/etc/service` now links there); drifted settings committed —
-          `50bbcad`, `ccba818` (2026-11-10)
+          `8a0b0b2`, `a624d07` (2026-11-10)
     - [ ] review the rest: `.gitconfig`, `.gitignore`, `.gitignore_global`,
           `.hgignore_global`, `bin/brew`, `bin/yesno`,
           `setup/alpine/homebrew.sh`, `TODO.md`, `.config/gh/config.yml`,
