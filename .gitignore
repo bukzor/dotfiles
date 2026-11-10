@@ -9,6 +9,7 @@
 #     ./Library/CloudStorage/.gitignore
 !**/
 !**/.gitignore
+!.envrc
 
 # hacking
 tmp/
@@ -23,6 +24,10 @@ trash/
 .opam/
 .git/
 .local/share/pnpm
+.local/share/bukzor.deadlock-data/
+.vscode-server/
+# per-session working repos; svelte-crostini's claude/.gitignore does the same
+/claude/
 
 # dontcare:
 .fzf/

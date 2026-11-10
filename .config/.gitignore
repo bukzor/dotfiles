@@ -5,3 +5,6 @@
 cros-garcon.conf
 nextjs-nodejs/
 weston.ini
+
+# credentials
+anthropic/
