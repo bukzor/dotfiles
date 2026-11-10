@@ -65,14 +65,21 @@ main ↔ svelte is a two-lineage problem again.
       conflicts, 65 are stale copies (wsl's blob appears in svelte's history)
       → svelte's version; 135 of the 216 wsl-only paths are files svelte has
       since deleted or renamed (e.g. `docs/default-context/tools.d/` →
-      `tools.kb/`) → drop. Genuine additions, authored once and landed on both:
+      `tools.kb/`) → drop. Wave 4,
+      [006 svelte additions](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-006-claude-additions-to-svelte.md);
+      wave 5, [007 main reconcile](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-007-reconcile-main-claude-dir.md).
+      Genuine additions, authored once and landed on both:
     - [ ] `reference.kb/data-format-selection.md` +
           `must-read.kb/before/choosing-a-data-file-format.md`
     - [ ] `reference.kb/python/style.md` (uncommitted edit)
     - [ ] `settings.json`: take svelte's. The only intent in wsl's diff was
           `Bash(sudo:*)` deny → ask, which unit 004 lands on svelte (ruling above);
           `model`, `effortLevel`, `autoCompactWindow` were incidental
-    - [ ] `skills/llm-chat-librarian` symlink targets differ — pick one
+    - [ ] `skills/llm-chat-librarian` symlink targets differ only by a
+          trailing `/` → svelte's (no slash, like its siblings)
+    - [ ] `design-rules.kb/mirror-the-sources-distinctions.md`,
+          `skills/subagent-handoffs` (wsl `f559249`, `691ab61`); `sessions.kb`
+          gitlink (svelte is behind wsl's)
     - [x] `sessions.kb/` is now the `bukzor.claude-sessions` submodule on wsl
           too (`4795ca9`), with this host's live entries under
           `buck-win10.kb/` (`f9c5c03`, `838f45d`); main gets it via the merge
