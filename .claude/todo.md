@@ -22,7 +22,7 @@ cost-benefit-sweh:
   - [ ] Document the upgrade flow: bump brew tmux → bump tag → re-fetch + re-`tic`
   - [ ] Verify: `infocmp tmux-256color` resolves to the `~/.terminfo` copy
   - Goal: pin terminfo to the tmux binary version so brewed-tmux + distro-ncurses can't drift.
-- [ ] Commit or discard `~/.claude/design-rules.kb/mirror-the-sources-distinctions.md`:
+- [x] Commit or discard `~/.claude/design-rules.kb/mirror-the-sources-distinctions.md`:
       written by session 558ed5b6 on 2026-11-05 ("yes, write it"), left
       untracked when that session died in a crash
       - Goal: no orphaned design rule; the other files in that dir are tracked.
