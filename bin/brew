@@ -19,7 +19,7 @@ if ! [ -d "$BREWDIR" ]; then
     fi
   else
     echo 'Homebrew not installed.' >&2
-    return 1
+    exit 1
   fi
 fi
 
