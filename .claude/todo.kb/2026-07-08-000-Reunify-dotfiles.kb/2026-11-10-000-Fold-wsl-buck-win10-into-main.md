@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 ---
 
 # Fold wsl-buck-win10 into main
@@ -25,8 +25,8 @@ main ↔ svelte is a two-lineage problem again.
 
 ## Implementation Steps
 
-- [ ] unit tests first (vague reminder): 006's merge-tree conflict check,
-      parametrized by ref pair, covers this merge too
+- unit tests: not written here (units 005 and 007 checked `merge-tree`
+  counts by hand); 006's merge-tree check, parametrized by ref pair, owes it.
 - [x] commit or park the uncommitted state in buck-win10's `~` — sub-agent
       units, wave 1 (parallel), in `2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/`:
     - [x] [000 WSL shell settings](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-000-wsl-shell-settings.md)
@@ -60,7 +60,7 @@ main ↔ svelte is a two-lineage problem again.
     - [x] `.sh_plugins.d/command-not-found.sh` (rename/delete): accept main's
           delete; the WSL hook (`bin/command-not-found-hook/`) gets a
           `.config/sh` hookup
-- [ ] on main, reconcile the `.claude/` the merge brought in against svelte's
+- [x] on main, reconcile the `.claude/` the merge brought in against svelte's
       (left alone, it resurfaces as 006 conflicts). Of the 95 wsl ↔ svelte
       conflicts, 65 are stale copies (wsl's blob appears in svelte's history)
       → svelte's version; 135 of the 216 wsl-only paths are files svelte has
@@ -69,15 +69,15 @@ main ↔ svelte is a two-lineage problem again.
       [006 svelte additions](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-006-claude-additions-to-svelte.md);
       wave 5, [007 main reconcile](2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/2026-11-10-007-reconcile-main-claude-dir.md).
       Genuine additions, authored once and landed on both:
-    - [ ] `reference.kb/data-format-selection.md` +
+    - [x] `reference.kb/data-format-selection.md` +
           `must-read.kb/before/choosing-a-data-file-format.md`
-    - [ ] `reference.kb/python/style.md` (uncommitted edit)
-    - [ ] `settings.json`: take svelte's. The only intent in wsl's diff was
+    - [x] `reference.kb/python/style.md` (uncommitted edit)
+    - [x] `settings.json`: take svelte's. The only intent in wsl's diff was
           `Bash(sudo:*)` deny → ask, which unit 004 lands on svelte (ruling above);
           `model`, `effortLevel`, `autoCompactWindow` were incidental
-    - [ ] `skills/llm-chat-librarian` symlink targets differ only by a
+    - [x] `skills/llm-chat-librarian` symlink targets differ only by a
           trailing `/` → svelte's (no slash, like its siblings)
-    - [ ] `design-rules.kb/mirror-the-sources-distinctions.md`,
+    - [x] `design-rules.kb/mirror-the-sources-distinctions.md`,
           `skills/subagent-handoffs` (wsl `f559249`, `691ab61`); `sessions.kb`
           gitlink (svelte is behind wsl's)
     - [x] `sessions.kb/` is now the `bukzor.claude-sessions` submodule on wsl
@@ -87,7 +87,7 @@ main ↔ svelte is a two-lineage problem again.
 
           > [!@bukzor] 2026-11-10: a Steam ID in a public repo is fine —
           > linking github:bukzor to the Steam account is acceptable.
-    - [ ] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
+    - [x] per-directory `.gitignore` opt-ins (`0d5ea82`): drop — svelte's
           allow-by-default ignore scheme won in 004
 - [x] push main — merge `30895e0` (2026-11-10); the reconcile pushes its own commits
 
@@ -100,3 +100,11 @@ main ↔ svelte is a two-lineage problem again.
 
 buck-win10's `~` switches to main at 006 with penguin, not before: until 004
 lands, main's `.claude/` is behind the live one.
+
+## Record
+
+Done 2026-11-10, coordinated as sub-agent units 000–007
+(`2026-11-10-000-Fold-wsl-buck-win10-into-main.kb/`). Ranges: `main`
+`59082f3..937c97d` (merge `30895e0`); `wsl-buck-win10` `5742bdb..fa3f7c7`;
+`svelte-crostini` `427db21..cae83ca`. Main ↔ svelte afterwards: 28
+`merge-tree` conflicts, 4 of them `.claude/` (004's "claude config" item).
