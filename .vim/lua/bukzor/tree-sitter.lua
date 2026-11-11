@@ -15,7 +15,7 @@ M.ensure_installed = {
   "latex",
 }
 
-M.au_highlight = "BukzorTreesitterHighlight"
+M.augroup = "BukzorTreesitter"
 
 local max_filesize = 100 * 1024 -- 100 KB
 
@@ -24,12 +24,21 @@ local function too_big(bufnr)
   return ok and stats and stats.size > max_filesize
 end
 
--- TODO: register a local jinja2 parser once one exists, e.g.:
--- vim.api.nvim_create_autocmd("User", { pattern = "TSUpdate", callback = function()
---   require("nvim-treesitter.parsers").jinja2 = {
---     install_info = { path = "~/projects/tree-sitter-jinja2" },
---   }
--- end })
+-- Locally-checked-out grammars, registered only on hosts that have the
+-- checkout. (TODO: add jinja2 here once ~/projects/tree-sitter-jinja2 exists.)
+M.local_parsers = {
+  sql_bigquery = "~/repo/tree-sitter-sql-bigquery",
+}
+
+local function register_local_parsers()
+  local parsers = require("nvim-treesitter.parsers")
+  for lang, path in pairs(M.local_parsers) do
+    path = vim.fs.normalize(path)
+    if vim.uv.fs_stat(path) then
+      parsers[lang] = { install_info = { path = path } }
+    end
+  end
+end
 
 -- Auto-install a missing parser (mirrors the old `auto_install = true`) and
 -- turn on highlighting for any filetype with an available tree-sitter parser
@@ -49,19 +58,28 @@ local function on_filetype(args)
 end
 
 function M.init()
-  vim.opt.runtimepath:append(M.treesitter_dir)
+  -- prepend, to avoid https://github.com/nvim-treesitter/nvim-treesitter/issues/3092
+  vim.opt.runtimepath:prepend(M.treesitter_dir)
+
+  vim.api.nvim_create_augroup(M.augroup, { clear = true })
+  -- nvim-treesitter fires User TSUpdate whenever it (re)loads its parser
+  -- table, so register before setup() can load it.
+  vim.api.nvim_create_autocmd("User", {
+    group = M.augroup,
+    pattern = "TSUpdate",
+    callback = register_local_parsers,
+  })
   require("nvim-treesitter").setup({ install_dir = M.treesitter_dir })
 
-  vim.api.nvim_create_augroup(M.au_highlight, { clear = true })
   vim.api.nvim_create_autocmd("FileType", {
-    group = M.au_highlight,
+    group = M.augroup,
     pattern = "*",
     callback = on_filetype,
   })
 end
 
 function M.unload()
-  local ok, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_highlight)
+  local ok, err = pcall(vim.api.nvim_del_augroup_by_name, M.augroup)
   if not ok and err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
     error(err)
   end
