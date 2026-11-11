@@ -1,42 +1,184 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 3650,
   "permissions": {
     "allow": [
-      "Read(~/.claude/context/**/CLAUDE.*.md)",
-      "Bash(cp -i:*)",
-      "Bash(mv -i:*)",
-      "Bash(mkdir:*)",
-      "Bash(rmdir:*)",
-      "Bash(chmod:*)",
+      "WebSearch",
+      "WebFetch(domain:*)",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(find:*)",
+      "Bash(which:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(less:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(uname:*)",
+      "Bash(mkdir -p:*)",
       "Bash(ps:*)",
-      "Bash(alert:*)",
-      "Bash(namei:*)"
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git config --get:*)",
+      "Bash(git add:*)",
+      "Bash(chmod:*)",
+      "Bash(pnpm list:*)",
+      "Bash(npm list:*)",
+      "Bash(uv pip list:*)",
+      "Bash(pip list:*)",
+      "Bash(cargo --version:*)",
+      "Bash(rustc --version:*)",
+      "Bash(python --version:*)",
+      "Bash(node --version:*)"
     ],
     "deny": [
       "TodoWrite",
-      "MultiEdit",
-      "NotebookEdit"
+      "ExitPlanMode",
+      "EnterPlanMode",
+      "AskUserQuestion",
+      "ReportFindings",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "TaskOutput",
+      "Workflow",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "ScheduleWakeup",
+      "RemoteTrigger",
+      "Artifact",
+      "DesignSync",
+      "NotebookEdit",
+      "PushNotification",
+      "EnterWorktree",
+      "ExitWorktree",
+      "Bash(rm -rf:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(git add -A:*)",
+      "Bash(git add --all:*)",
+      "Bash(git add .:*)",
+      "Edit(~/.claude/projects/*/memory/**)"
     ],
+    "ask": [
+      "SendFeedback",
+      "Bash(git push:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm install:*)",
+      "Bash(uv pip install:*)",
+      "Bash(pip install:*)",
+      "Bash(cargo install:*)",
+      "Bash(git reset:*)",
+      "Bash(sudo:*)"
+    ],
+    "defaultMode": "auto",
     "additionalDirectories": [
-      "~/.claude/context"
+      "~/.claude/must-read.kb",
+      "~/",
+      "~/.claude"
+    ],
+    "questionable": [
+      "SendMessage",
+      "ListAgents",
+      "TaskStop"
     ]
   },
-  "model": "sonnet[1m]",
-  "//hooks": {
-    "SessionStart": [
+  "disableClaudeAiConnectors": true,
+  "skillOverrides": {
+    "update-config": "user-invocable-only",
+    "verify": "user-invocable-only",
+    "code-review": "user-invocable-only",
+    "run": "user-invocable-only",
+    "keybindings-help": "user-invocable-only",
+    "fewer-permission-prompts": "user-invocable-only",
+    "simplify": "user-invocable-only",
+    "security-review": "user-invocable-only",
+    "review": "user-invocable-only",
+    "init": "user-invocable-only",
+    "claude-api": "user-invocable-only",
+    "dataviz": "user-invocable-only",
+    "artifact-design": "user-invocable-only",
+    "deep-research": "user-invocable-only",
+    "loop": "user-invocable-only",
+    "schedule": "user-invocable-only",
+    "batch": "user-invocable-only",
+    "debug": "user-invocable-only",
+    "claude-in-chrome": "user-invocable-only",
+    "artifact-capabilities": "user-invocable-only",
+    "artifact-diagramming": "user-invocable-only"
+  },
+  "hooks": {
+    "PreToolUse": [
       {
-        "matcher": "startup",
-        "// HAY PROBLEMA": "this thing is showing up in *every* turn, when using --verbose. see: https://github.com/anthropics/claude-code/issues/5557",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/SessionStart.extra-context.sh"
+            "command": "\"$HOME\"/.claude/hooks/bash-preamble.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/claude/mitmproxy/lib/claude_mitmproxy/binpatch.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME\"/.claude/hooks/session-rename.py"
           }
         ]
       }
     ]
   },
-  "feedbackSurveyState": {
-    "lastShownTime": 1754083893860
-  }
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": false,
+    "pyright-lsp@claude-plugins-official": false,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": false
+  },
+  "effortLevel": "xhigh",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    },
+    "claude-sonnet-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "default",
+  "autoMemoryEnabled": false,
+  "editorMode": "vim",
+  "verbose": true,
+  "preferredNotifChannel": "kitty",
+  "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
+  "terminalProgressBarEnabled": false,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
 }
