@@ -6,7 +6,7 @@
 	url = https://github.com/morhetz/gruvbox.git
 [submodule "scratch"]
 	path = repo/scratch
-	url = /home/bukzor/scratch/
+	url = git@github.com:bukzor/scratch.git
 [submodule ".config/nvim-dap-lua/lua/plenary"]
 	path = .config/nvim-dap-lua/pack/submodule/start/munge/plenary
 	url = https://github.com/nvim-lua/plenary.nvim
@@ -19,6 +19,12 @@
 [submodule ".claude/skills/anthropic-skills"]
 	path = repo/anthropic-skills
 	url = https://github.com/anthropics/skills.git
+[submodule ".config/kitty/kitty-gruvbox-theme"]
+	path = .config/kitty/kitty-gruvbox-theme
+	url = https://github.com/wdomitrz/kitty-gruvbox-theme.git
+[submodule "data/gcloud"]
+	path = data/gcloud
+	url = git@github.com:bukzor/gcloud-data.git
 [submodule ".claude/sessions.kb"]
 	path = .claude/sessions.kb
 	url = git@github.com:bukzor/bukzor.claude-sessions.git
