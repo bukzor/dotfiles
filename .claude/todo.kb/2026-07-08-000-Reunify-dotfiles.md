@@ -42,3 +42,7 @@ in their `dotfiles--${branch}` workspaces (see the agreements).
 
 Delete this file and `2026-07-08-000-Reunify-dotfiles.kb/` when every item above is
 checked and 006's switchover is done on every host.
+
+> [!@bukzor] 2026-11-11: keep every task's sub-agent handoff files
+> (`*.kb/` beside a task file) until this whole plan is done; they go with
+> this directory, not at each task's close.

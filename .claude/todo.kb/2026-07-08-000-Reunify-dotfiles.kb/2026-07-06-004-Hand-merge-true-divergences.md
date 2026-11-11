@@ -20,6 +20,17 @@ the result must land byte-identical on both branches (the pre-merge ideal).
 Author merged content per theme; per theme: `- [ ] merged content authored`,
 `- [ ] applied+committed on svelte`, `- [ ] applied+committed on main`.
 
+Remaining themes run as sub-agent units, wave 1 (parallel), in
+`2026-07-06-004-Hand-merge-true-divergences.kb/` (2026-11-11). Each unit's
+checks stand in for the "unit tests first" item below:
+
+- [ ] [000 svelte drift fast-forward](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-000-svelte-drift-fast-forward.md)
+- [ ] [001 `bin/alert`, `bin/brew`, `bin/alternatives/.gitignore`, `.envrc`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-001-bin-and-envrc.md)
+- [ ] [002 claude config](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-002-claude-config.md)
+- [ ] [003 vim lua + plugins](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-003-vim-lua-and-plugins.md)
+- [ ] [004 `.vimrc` → `.vimrc.d/`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-004-vimrc-into-vimrc-d.md)
+- [ ] [005 kitty, `.themes/`, submodules](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-005-kitty-themes-submodules.md)
+
 - [ ] svelte-side drift since 2026-07-13: main's copy is an older svelte
       version (its blob is in svelte's history), so fast-forward main to
       svelte's — mechanical, no authoring: `.bashrc`, `.gitignore`,
