@@ -1,2 +1,5 @@
-# everything here is necessarily host-specific stuff
-./
+# host-local overrides
+*
+
+# the array of possible choices
+!alternatives
