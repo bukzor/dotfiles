@@ -24,6 +24,20 @@ err=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
   }
 assert_eq "sourcing .profile emits no errors (regression: not found)" "" "$err"
 
+# Regression: every anacron job runs `set -e; . ~/.profile; <job>`, and two
+# separate aborts have shipped that way -- a `grep` matching nothing, and
+# `$(command -v brew)` evaluated before PATH is built -- each killing every
+# scheduled job for months. Clean stderr does not cover it: a failed command
+# substitution says nothing at all, it just exits non-zero.
+# shellcheck disable=SC2086  # TEST_SH may carry args ("busybox ash")
+if err=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
+  ${TEST_SH:-sh} -c 'set -e; . "$HOME/.profile"' 2>&1 >/dev/null); then
+  errexit=ok
+else
+  errexit="aborted: $err"
+fi
+assert_eq "sourcing .profile survives errexit (regression: cron jobs)" ok "$errexit"
+
 # shellcheck disable=SC2086  # TEST_SH may carry args ("busybox ash")
 got=$(env -i HOME="$tmphome" USER="${USER:-$(whoami)}" PATH=/usr/bin:/bin \
   ${TEST_SH:-sh} -c '. "$HOME/.profile" 2>/dev/null; printf %s "$PATH"')

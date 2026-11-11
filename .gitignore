@@ -100,9 +100,12 @@ package/
 .solargraph/
 .terraform.d/
 .vscode/
+.vscode-server/
 /.config/google-chrome-for-testing/
 /.config/pulse/
 /node_modules/
+# recreated empty by `corepack use`; ~/package.json declares no dependencies
+/pnpm-lock.yaml
 
 # Misc transient
 .sqlite_history
@@ -197,3 +200,28 @@ _viminfo
 *.did
 *.did.tmp
 *.redo.tmp
+backups/
+
+# written by bukzor-tmpwatch-install; the source of truth is the unit files in
+# bukzor-tools/packages/bukzor-tmpwatch
+/.config/systemd/user/bukzor-tmpwatch.service
+/.config/systemd/user/bukzor-tmpwatch.timer
+
+# ---------------------------------------------------------------------------
+# Local data and credentials that sit at the top of the worktree
+# ---------------------------------------------------------------------------
+/.elan/
+/.grip/
+/chats/
+/scratch/
+/system.mhtml
+# nested repo: `.git` here is a symlink, which the `.git/` rule doesn't match
+/empty/
+/.config/Thonny/
+/.config/homebrew/
+# credentials
+/.config/stripe/
+/.config/anthropic/
+# synced skill buckets (data, not config)
+/.claude/skills/synced/
+/.config/systemd/user/timers.target.wants/bukzor-tmpwatch.timer

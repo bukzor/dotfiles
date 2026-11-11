@@ -49,11 +49,11 @@ __sh_functions_d_path__append() { # NOTE: kept in place if present, first wins, 
 }
 
 __sh_functions_d_path__remove() { # remove any/all matching entries
-  grep -Fx -v "$1"
+  awk -v entry="$1" '$0 != entry'
 }
 
 __sh_functions_d_path__cleanup() {
-  grep . |
+  awk '$0 != ""' |
     tr '\n' ':' |
     sed 's/:*$//' \
     ;
