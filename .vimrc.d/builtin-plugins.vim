@@ -9,3 +9,6 @@ let g:loaded_tarPlugin=1
 let g:loaded_tohtml=1
 let g:loaded_tutor=1
 let g:loaded_zipPlugin=1
+
+" netrw: plain sorted listing, no special-cased suffixes
+let g:netrw_sort_sequence = '*'

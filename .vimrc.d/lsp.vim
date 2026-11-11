@@ -21,3 +21,9 @@ set omnifunc=ale#completion#OmniFunc
   endtry
   let g:ale_floating_preview = 1
 " }
+
+if has('nvim')
+  " detach all LSP clients from this buffer, and clear its diagnostics
+  command! LspDetach lua for _, c in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+    \ vim.lsp.buf_detach_client(0, c.id) end; vim.diagnostic.reset(nil, 0)
+endif

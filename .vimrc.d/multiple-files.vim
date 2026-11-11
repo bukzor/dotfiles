@@ -5,6 +5,11 @@ set hidden
 nmap <TAB> <Cmd>bn<CR>
 nmap <S-TAB> <Cmd>bp<CR>
 set autoread            "auto-reload files, if there's no conflict
+" ...which only happens on a check: do one on entering a buffer, and on fg
+augroup checktime
+  autocmd!
+  autocmd BufEnter,VimResume * if getcmdwintype() == '' | checktime | endif
+augroup END
 set shortmess+=IA       "no intro message, no swap-file message
 set shortmess-=F        "allow for debugging echo
 
@@ -35,3 +40,9 @@ endif
 "tab switching: ctrl+pageup/pagedown
 nnoremap <C-PageUp> <Cmd>tabp<CR>
 nnoremap <C-PageDown> <Cmd>tabN<CR>
+
+" quickfix (and Trouble) windows: five lines tall
+augroup qf_height
+  autocmd!
+  autocmd FileType qf,Trouble 5wincmd_
+augroup END

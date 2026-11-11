@@ -15,13 +15,13 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.pxi         set filetype=pyrex
     autocmd BufNewFile,BufRead *.md          set filetype=markdown
     autocmd BufNewFile,BufRead *.proto       set filetype=proto
-    autocmd BufNewFile,BufRead *.hcl         set filetype=terraform
     autocmd BufNewFile,BufRead *.tfvars      set filetype=terraform
     autocmd BufNewFile,BufRead *.scm         set filetype=lisp
     autocmd BufNewFile,BufRead *.wgsl        set filetype=wgsl
     autocmd BufNewFile,BufRead *.go.erb      set filetype=go.eruby
     autocmd BufNewFile,BufRead *.sls         set filetype=sls.yaml.jinja
     autocmd BufNewFile,BufRead *.log         set filetype=log
+    autocmd BufNewFile,BufRead *.sshconfig   set filetype=sshconfig
 
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead Brewfile      set filetype=ruby
@@ -31,3 +31,10 @@ augroup extra_filetypes
 
     autocmd FileType go set ts=2
 augroup end
+
+if has('nvim')
+  " redo scripts (*.do): detect from their first line (shebang)
+  lua vim.filetype.add({ extension = { ['do'] = function(_, bufnr)
+    \ return vim.filetype.match({ contents = vim.api.nvim_buf_get_lines(bufnr, 0, 1, false) })
+    \ end } })
+endif

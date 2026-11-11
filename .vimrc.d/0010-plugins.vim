@@ -9,6 +9,16 @@
     endif
     unlet s:want
 
+    " editorconfig: built into nvim; an optional package in vim 9.0.1799+
+    if !has('nvim') | silent! packadd! editorconfig | endif
+
+    " OCaml: merlin's vim plugin ships with opam
+    if executable('opam')
+      let s:merlin = trim(system('opam var share')) .. '/merlin/vim'
+      if isdirectory(s:merlin) | exe 'set rtp+=' .. fnameescape(s:merlin) | endif
+      unlet s:merlin
+    endif
+
     " Load all plugins now.
     " Plugins need to be added to runtimepath before helptags can be generated.
     packloadall
