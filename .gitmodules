@@ -1,9 +1,24 @@
+[submodule ".vim/bundle/vim-sensible"]
+	path = .vim/pack/github/start/vim-sensible
+	url = https://github.com/tpope/vim-sensible
+[submodule ".vim/bundle/gruvbox"]
+	path = .vim/pack/github/start/gruvbox
+	url = https://github.com/morhetz/gruvbox.git
 [submodule "scratch"]
-	path = scratch
+	path = repo/scratch
 	url = git@github.com:bukzor/scratch.git
-[submodule ".themes/gruvbox-dark-gtk"]
-	path = .themes/gruvbox-dark-gtk
-	url = https://github.com/jmattheis/gruvbox-dark-gtk
+[submodule ".config/nvim-dap-lua/lua/plenary"]
+	path = .config/nvim-dap-lua/pack/submodule/start/munge/plenary
+	url = https://github.com/nvim-lua/plenary.nvim
+[submodule ".config/nvim-dap-lua/pack/submodule/start/lazy"]
+	path = .config/nvim-dap-lua/pack/submodule/start/lazy
+	url = https://github.com/folke/lazy.nvim
+[submodule ".themes/Gruvbox-GTK"]
+	path = .themes/Gruvbox-GTK
+	url = https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme
+[submodule ".claude/skills/anthropic-skills"]
+	path = repo/anthropic-skills
+	url = https://github.com/anthropics/skills.git
 [submodule ".config/kitty/kitty-gruvbox-theme"]
 	path = .config/kitty/kitty-gruvbox-theme
 	url = https://github.com/wdomitrz/kitty-gruvbox-theme.git
