@@ -20,65 +20,86 @@ end
 function M.config()
   local wk = M.reset()
 
-  wk.register({
-    A = nil,
-    ["K"] = { vim.lsp.buf.hover, "Hover" },
-    ["<C-K>"] = { vim.lsp.buf.signature_help, "Signature Help" },
-    ["<leader>"] = {
-      q = { "<cmd>TroubleToggle document_diagnostics<cr>", "Quickfix List" },
-      e = { vim.diagnostic.open_float, "Error Detail" },
-      a = { vim.lsp.buf.code_action, "Code Actions" },
-      l = {
-        name = "Language Server",
-        i = { "<cmd>TroubleToggle document_diagnostics<cr>", "Info (doc)" },
-        I = {
-          "<cmd>TroubleToggle workspace_diagnostics<cr>",
-          "Info (workspace)",
-        },
-        r = { "<cmd>TroubleToggle lsp_references<cr>", "References" },
-        s = { vim.lsp.buf.document_symbol, "Symbol (doc)" },
-        S = { vim.lsp.buf.workspace_symbol, "Symbol (workspace)" },
-        ---nnoremap <Leader>lS  :LspStatus<CR>
-        R = { vim.lsp.buf.rename, "Rename Variable" },
-        w = {
-          name = "Workspace",
-          a = { vim.lsp.buf.add_workspace_folder, "Add Folder" },
-          r = { vim.lsp.buf.remove_workspace_folder, "Remove Folder" },
-          l = {
-            function()
-              print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-            end,
-            "List Folders",
-          },
-        },
-      },
-    },
-    ["["] = {
-      name = "Previous",
-      d = { vim.diagnostic.goto_prev, "Prev Diagnostic" },
-      e = { vim.diagnostic.goto_next, "Prev Error" },
-    },
-    ["]"] = {
-      name = "Next",
-      d = { vim.diagnostic.goto_next, "Next Diagnostic" },
-      e = { vim.diagnostic.goto_next, "Next Error" },
-    },
-    g = {
-      name = "Goto",
-      d = { vim.diagnostic.definition, "Definition" },
-      D = { vim.diagnostic.declaration, "Declaration" },
-      t = { vim.lsp.buf.type_definition, "Type Declaration" },
-      i = { vim.lsp.buf.implementation, "Implementation" },
-      -- p = {  -- nvim lsp doesn't seem to have a "peek"
-      --   name = "Peek",
-      --   nnoremap <Leader>lpD :LspPeekDeclaration<CR>
-      --   nnoremap <Leader>lpi :LspPeekImplementation<CR>
-      -- }
-    },
-    p = {
-      name = "Plugin",
-    },
-  }, { mode = { "n", "v" } })
+  -- TODO steal from:
+  --    https://www.lunarvim.org/docs/beginners-guide/keybinds-overview
+
+  -- which-key v3 spec is flat (children don't inherit parent lhs).
+  -- This helper prepends `prefix` to each child's lhs so we can write
+  -- groups without repeating the prefix on every line.
+  local function group(prefix, name, children)
+    local spec = { mode = { "n", "v" }, { prefix, group = name } }
+    for _, c in ipairs(children) do
+      c[1] = prefix .. c[1]
+      spec[#spec + 1] = c
+    end
+    wk.add(spec)
+  end
+
+  wk.add({
+    mode = { "n", "v" },
+    { "K", vim.lsp.buf.hover, desc = "Hover" },
+    { "<C-K>", vim.lsp.buf.signature_help, desc = "Signature Help" },
+    { "<leader>q", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Quickfix List" },
+    { "<leader>e", vim.diagnostic.open_float, desc = "Error Detail" },
+    { "<leader>a", vim.lsp.buf.code_action, desc = "Code Actions" },
+  })
+
+  -- labels for the VimL mappings in ~/.vimrc.d/finger-savers.vim
+  wk.add({
+    { "<leader>f", group = "File" },
+    { "<leader>bd", desc = "Buffer Delete (keep window)" },
+    { "<leader>fd", desc = "File Directory" },
+    { "<leader>fx", desc = "File Executable" },
+    { "<leader>fp", desc = "File Paste (filename)" },
+    { "<leader>ga", desc = "Git Add (this file)" },
+    { "<leader>cq", desc = "Claude Quote (buffer or selection)", mode = { "n", "x" } },
+  })
+
+  group("<leader>l", "Language Server", {
+    { "i", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Info (doc)" },
+    { "I", "<cmd>Trouble diagnostics toggle<cr>", desc = "Info (workspace)" },
+    { "r", "<cmd>Trouble lsp_references toggle<cr>", desc = "References" },
+    { "s", vim.lsp.buf.document_symbol, desc = "Symbol (doc)" },
+    { "S", vim.lsp.buf.workspace_symbol, desc = "Symbol (workspace)" },
+    { "R", vim.lsp.buf.rename, desc = "Rename Variable" },
+  })
+
+  group("<leader>lw", "Workspace", {
+    { "a", vim.lsp.buf.add_workspace_folder, desc = "Add Folder" },
+    { "r", vim.lsp.buf.remove_workspace_folder, desc = "Remove Folder" },
+    { "l", function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, desc = "List Folders" },
+  })
+
+  local function diag_prev() vim.diagnostic.jump({ count = -1 }) end
+  local function diag_next() vim.diagnostic.jump({ count = 1 }) end
+  local function err_prev() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end
+  local function err_next() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end
+  local function warn_prev() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN }) end
+  local function warn_next() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.WARN }) end
+
+  group("[", "Previous", {
+    { "d", diag_prev, desc = "Prev Diagnostic" },
+    { "e", err_prev, desc = "Prev Error" },
+    { "w", warn_prev, desc = "Prev Warning" },
+  })
+
+  group("]", "Next", {
+    { "d", diag_next, desc = "Next Diagnostic" },
+    { "e", err_next, desc = "Next Error" },
+    { "w", warn_next, desc = "Next Warning" },
+  })
+
+  group("g", "Goto", {
+    { "d", vim.lsp.buf.definition, desc = "Definition" },
+    { "D", vim.lsp.buf.declaration, desc = "Declaration" },
+    { "t", vim.lsp.buf.type_definition, desc = "Type Declaration" },
+    { "i", vim.lsp.buf.implementation, desc = "Implementation" },
+    -- p (peek): nvim lsp has no peek equivalents
+    --   <Leader>lpD :LspPeekDeclaration
+    --   <Leader>lpi :LspPeekImplementation
+  })
 end
 
 ---TODO:
