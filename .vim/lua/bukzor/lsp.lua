@@ -15,7 +15,6 @@ M.mason_install = {
     "jsonnet_ls",    -- jsonnet
     "tflint",        -- terraform
     "terraformls",   -- terraform-ls: terraform
-    "ts_ls",         -- typescript
     "vimls",         -- vim
     "clangd",        -- c/c++
     "gopls",         -- golang
@@ -39,23 +38,27 @@ M.mason_install = {
   },
 }
 
+-- Prettier-family filetypes: the project's own oxfmt if it has one (see
+-- setup_conform), else prettierd.
+local prettier = { "oxfmt", "prettierd", stop_after_first = true }
+
 -- conform.nvim formatter pipeline per filetype (run in list order).
 M.conform_formatters_by_ft = {
   python = { "isort", "black" },
-  javascript = { "prettierd" },
-  javascriptreact = { "prettierd" },
-  typescript = { "prettierd" },
-  typescriptreact = { "prettierd" },
-  vue = { "prettierd" },
-  svelte = { "prettierd" },
-  css = { "prettierd" },
-  scss = { "prettierd" },
-  less = { "prettierd" },
-  html = { "prettierd" },
-  json = { "prettierd" },
-  jsonc = { "prettierd" },
-  yaml = { "prettierd" },
-  markdown = { "prettierd" },
+  javascript = prettier,
+  javascriptreact = prettier,
+  typescript = prettier,
+  typescriptreact = prettier,
+  vue = prettier,
+  svelte = prettier,
+  css = prettier,
+  scss = prettier,
+  less = prettier,
+  html = prettier,
+  json = prettier,
+  jsonc = prettier,
+  yaml = prettier,
+  markdown = prettier,
   go = { "gofmt" },
 }
 
@@ -217,6 +220,11 @@ function M.setup_mason_lspconfig()
     -- gates enable_server() on membership.
     automatic_enable = M.mason_install.lspconfig,
   })
+
+  -- TypeScript 7's own server (`tsc --lsp`), resolved per project from
+  -- node_modules/.bin -- so not a mason package. Replaces ts_ls, which needs
+  -- the tsserver.js that TypeScript 7 no longer ships.
+  vim.lsp.enable("tsc")
 end
 
 function M.setup_mason_tool_installer()
@@ -237,6 +245,19 @@ end
 function M.setup_conform()
   require("conform").setup({
     formatters_by_ft = M.conform_formatters_by_ft,
+    formatters = {
+      -- Only where the file's project installs oxfmt. conform would also take
+      -- any oxfmt on PATH (direnv puts a project's node_modules/.bin there),
+      -- which would override prettierd in projects that never chose oxfmt.
+      oxfmt = {
+        condition = function(_, ctx)
+          for dir in vim.fs.parents(ctx.filename) do
+            if vim.uv.fs_stat(dir .. "/node_modules/.bin/oxfmt") then return true end
+          end
+          return false
+        end,
+      },
+    },
     -- Format on save: use conform's formatters; fall back to attached LSP
     -- formatter (e.g. rust_analyzer for rust, gopls for go-the-LSP, lua_ls).
     format_on_save = function(bufnr)

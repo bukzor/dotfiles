@@ -1,5 +1,5 @@
 ---
-last-tested: "2026-05-05"
+last-tested: "2026-11-13"
 result: pass
 scope: conform.nvim
 ---
@@ -34,15 +34,20 @@ nvim --headless /tmp/test.go \
 
 ```
 py: { "isort", "black" }
-ts: { "prettierd" }
+ts: { "oxfmt", "prettierd" }
 go: { "gofmt" }
 ```
+
+Prettier-family filetypes list both but run one (`stop_after_first`): oxfmt
+only when a parent of the file has `node_modules/.bin/oxfmt`, else prettierd.
+`list_formatters_to_run(0)` shows which; for `/tmp/test.ts` it is
+`prettierd`, inside a project that installs oxfmt it is `oxfmt`.
 
 For filetypes with no entry in `formatters_by_ft` (e.g. `rust`, `lua`),
 `list_formatters_for_buffer` returns `{}` and format-on-save falls through to
 LSP via `lsp_format = "fallback"`.
 
-## Last result (2026-05-05)
+## Last result (2026-11-13)
 
-Python returned `{ "isort", "black" }` as expected. (Other filetypes not
-re-checked this session — wiring uses the same code path.)
+All three as expected. `list_formatters_to_run` gave `prettierd` for a `.ts`
+outside any project and `oxfmt` in `my-own-shadertoy` (which installs it).
