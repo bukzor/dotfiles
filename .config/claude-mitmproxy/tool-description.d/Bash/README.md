@@ -59,3 +59,14 @@ tools" preamble paragraph (`IMPORTANT: Avoid using this tool to run
 cat/head/tail/...` and its Read/Edit/Write bullets) dropped out, same as the
 opus-1m wording did back at 2.1.238. Still nothing to fold in: both changes
 only remove text the stub never depended on.
+
+2.1.286-2.1.311 (2026-11-13 triage): the foreground `timeout` line gained
+"for a foreground command" (2.1.296) and `run_in_background` a background
+`timeout` (default 600000-1800000, max 7200000; 2.1.286-309, gone again by
+2.1.311, so volatile and not carried). Folded in: 2.1.311's narrower `cd`
+persistence (main session only, only when it ends inside the working
+directories -- the stub's old "persists between calls" was wrong outside
+that), "don't poll the output file", and the `@name` notification warning
+(2.1.309) -- a real side effect on someone else, which nothing else in the
+config covers. Haiku's long form (2.1.287) gained only the foreground
+qualifier.

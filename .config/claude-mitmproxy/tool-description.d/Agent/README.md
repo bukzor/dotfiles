@@ -14,3 +14,13 @@ via the Bash tool became "the Grep tool" (long-form-no-fork-2.1.257) --
 a dedicated Grep tool now exists upstream where before there wasn't one;
 nothing in the stub or must-read.kb names the old wording, so nothing to
 fold in.
+
+2.1.309-2.1.323 (2026-11-13 triage): every wording now carries a "When to
+use" essay leaning against spawning ("when in doubt, don't spawn"; a fresh
+agent's costs; don't delegate a check you could run inline). Not folded: the
+stub and `must-read.kb/when/spawning-a-sub-agent--delegating-a-task.md` are
+the operator's delegation policy, and this text pulls the other way -- a
+ruling for the operator, not a drift fix. The mechanics all three wordings
+share (fork, SendMessage, isolation) are unchanged. Opus 2.1.323 says agent
+types are listed "in messages from the system" where the stub says
+`<system-reminder>`; same list, same place.
