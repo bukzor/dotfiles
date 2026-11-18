@@ -16,7 +16,7 @@ trap onerror ERR
 # assigned it, else the title its program declares, else the command running.
 origin() {
   if [[ "${TMUX_PANE:-}" ]]; then
-    tmux display-message -p -t "$TMUX_PANE" '#S:#I #{window_name}'
+    tmux display-message -p -t "$TMUX_PANE" 'tmux #S:#I #{window_name}'
   else
     echo "$HOSTNAME $PWD"
   fi
