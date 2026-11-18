@@ -11,17 +11,22 @@ why:
 
 `bin/alert` is invoked by whatever command wants attention -- an LLM
 tool call finishing, a long-running build, a backgrounded job -- and
-tries three transports in order until one succeeds: `notify-send`
+tries four transports in order until one succeeds: `notify-send`
 (dbus, crostini's route to the ChromeOS notification center),
-`notify_hterm` (OSC 777 written to each tmux client's tty), then the
-terminal bell. `alert-slack` is deliberately excluded from the
+`alert-wsl` (a Windows toast via `powershell.exe`, WSL's route --
+added 2026-11-18, `86c7bda`), `notify_hterm` (OSC 777 written to each
+tmux client's tty), then the terminal bell. `notify_hterm` succeeds
+whenever a writable client tty exists, whether or not the terminal
+renders OSC 777 (Windows Terminal rendering it: untested), so it can mask the bell on
+any non-hterm terminal. `alert-slack` is deliberately excluded from the
 fallback chain -- leaving the machine is a decision, not a fallback
 (commit `d47ccda`).
 
 Its population is `PUSH_BOUNDED_BY_CALLSITES`'s: whoever calls
 `alert`, not any structural set of sessions. Real usage so far
 (`~/.local/state/alert.jsonl`, 3 entries, all 2026-09-10) shows only
-the `notify-send` transport exercised in practice.
+the `notify-send` transport exercised in practice; on buck-win10 (WSL)
+it is `wsl` from 2026-11-18.
 
 The title identifies the caller by reading `#{window_name}` back out
 of tmux, deferring to whatever the window-naming precedence ladder
