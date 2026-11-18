@@ -14,6 +14,9 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022, macos-latest]
         rev: [stable, nightly, v0.9.5, v0.10.0]
+        exclude:
+          - os: windows-2022  # nvim 0.9.5 segfaults on Windows loading this config
+            rev: v0.9.5
         include:
           - os: ubuntu-22.04
             install-rg: sudo apt-get update && sudo apt-get install -y ripgrep
