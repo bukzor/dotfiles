@@ -16,6 +16,6 @@ askable after the fact: not just "did this fire" but "from where, by
 what path, and did it reach a live transport."
 
 `bin/alert` logs every call to `~/.local/state/alert.jsonl` regardless
-of which of its three transports succeeded, precisely for this reason
+of which transport succeeded, precisely for this reason
 (commit `f2b773d`, rationale in
 `docs/dev/devlog/2026-09-10-001-tmux-window-naming--a-precedence-ladder--not-a-program-list.md`).
