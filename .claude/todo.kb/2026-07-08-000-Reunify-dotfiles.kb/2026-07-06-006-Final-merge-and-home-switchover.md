@@ -64,8 +64,8 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [claude leftovers: `.claude/local`, npm-global copy, Windows prefs, `gcpenv`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-013-claude-and-shell-leftovers.md)
 - [x] [Neovim CI on Windows (and macOS) back](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-014-nvim-ci-coverage.md)
 - [x] [untracked strays in both homes](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-015-untracked-strays.md)
-- [ ] user: where your data in `~` and the Windows home should live (unit 015 OQs 1-4);
-      then `git status` is clean on buck-win10
+- [x] where the user data in `~` and the Windows home lives (unit 015 OQs 1-4)
+      > [!@bukzor] 2026-11-18: leave them (in place, untracked, not ignored).
 - [ ] [!DRAFT] 2026-11-18: keep `installMethod: native` (as penguin); once no session runs it,
       trash the pnpm and `~/prefix/npm-global` copies of `claude` (unit 011 OQ 2)
 - [ ] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md); coordinator: merge svelte-crostini into main after each plan commit, so 009's ancestor check passes
