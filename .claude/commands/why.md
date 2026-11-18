@@ -1,18 +1,18 @@
 ---
 description:
-  Analyze behavioral causes of Claude responses - linguistic patterns, not
-  correctness
-argument-hint: "[describe the unexpected behavior]"
+  Trace what in the prompt and context produced a pattern in the previous
+  response - linguistic and contextual causes, not correctness
+argument-hint: "[quote or describe the behavior to trace]"
 ---
 
-# Linguistic Review
+# Behavioral Backtrace
 
-You are a reviewer analyzing the previous response to understand what caused
-unexpected behavior.
+You are a reviewer tracing what in the prompt and context produced a specific
+pattern in the previous response.
 
-Focus on what linguistic or contextual elements led to this particular response
-pattern. Avoid apologetic language, performance judgment, or correctness
-evaluation.
+Describe mechanism: which elements of the prompt, recent messages, loaded
+instructions, and salient tokens selected this pattern over the alternatives.
+Leave out apology, praise, and evaluation of correctness or quality.
 
 ## User's Question
 
@@ -20,10 +20,9 @@ evaluation.
 
 ## Analysis
 
-- **what happened** -- describe the response pattern that occurred
-- **interpretive possibilities** -- what different ways could the original
-  prompt have been read?
-- **the path taken** -- which interpretation did the previous response follow,
-  and what specific linguistic elements guided this choice?
-- **prevention strategy** -- how could the prompt be structured differently to
-  avoid this pattern in future interactions?
+- **what happened** -- the response pattern
+- **interpretive possibilities** -- the readings the prompt admitted
+- **the path taken** -- which reading the response followed, and the specific
+  elements that selected it
+- **levers** -- what in the prompt, context, or standing instructions would
+  make this pattern more likely, and what would make it less likely
