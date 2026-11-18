@@ -45,6 +45,19 @@ every host, retire svelte-crostini and wsl-buck-win10.
 - [x] `arch-svelte` (2022, one unique commit) archived as tag
       `archive/arch-svelte`, branch deleted — 2026-11-10
 
+Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
+
+> [!@bukzor] 2026-11-18: mitmproxy `binpatch.py` hook: skip it where absent,
+> *and visibly warn*. The rest: infer intent, tentative judgments, unblock.
+
+- [ ] [`settings.json`: guard the mitmproxy hook](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-003-guard-mitmproxy-hook.md)
+- [ ] [ignores: `private-dotfiles/`, untracked noise; `.gitmodules` for the private gitlinks](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-004-ignores-and-gitmodules.md)
+- [ ] [host fixes: ssh pin, Nix, `init.templateDir`, prettier, rust-analyzer](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-005-buck-win10-host-fixes.md)
+- [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
+      push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
+- [ ] [!DRAFT] keep `dotfiles--main` on buck-win10 until 006 closes: units
+      editing live `~` would expose half-finished edits to every session
+
 ## Success Criteria
 
 - [ ] every host's `~` is on main; `git -C ~ status` clean; all daily tools work

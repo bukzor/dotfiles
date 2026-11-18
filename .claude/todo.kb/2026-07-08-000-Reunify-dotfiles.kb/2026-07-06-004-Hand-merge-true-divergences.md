@@ -83,6 +83,18 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
     - [x] authored / [x] svelte (`9cb75f1`) / [x] main (`59082f3`)
 - [ ] vim: .vim/lazy-lock.json, .vim/lua/bukzor/{lsp,plugins,tree-sitter,which-key}.lua,
       .vim/pack/invented-here/start/diffmode/plugin/diffmode.vim
+    > [!@bukzor] 2026-11-18: on the open questions left in this plan, infer
+    > intent and put tentative judgments in place; the recommendations at
+    > hand look okay.
+    > [!DRAFT] 2026-11-18, applying that: units 003 + mason-ra — port mason
+    > `PATH = "append"` (plus `rustup component add rust-analyzer` per host),
+    > drop main's rust_analyzer block, drop avante and nvim-cmp, keep
+    > svelte's `diffmode.vim`. Unit 004/vimrc's OQs as recommended: port
+    > folding, `winwidth`, `.bq.sql`, `*`/`#`, `j`/`k`, `<C-s>`, and undotree
+    > plus surround; drop the rest; fix 0010's `helptags ALL`; delete main's
+    > dead `plug.vim`. Wave 3:
+    > [vim lua](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-002-vim-lua-rulings.md),
+    > [vimrc.d](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-003-vimrc-d-rulings.md).
     - [ ] authored / [ ] svelte / [ ] main
 - [x] terminal: .tmux.conf — done 2026-07-13, union of real functionality
       (main's display-time/base-index/ctrl-hold binding layer,
