@@ -11,15 +11,16 @@ why:
 
 `bin/alert` is invoked by whatever command wants attention -- an LLM
 tool call finishing, a long-running build, a backgrounded job -- and
-tries four transports in order until one succeeds: `notify-send`
-(dbus, crostini's route to the ChromeOS notification center),
-`alert-wsl` (a Windows toast via `powershell.exe`, WSL's route --
-added 2026-11-18, `86c7bda`), `notify_hterm` (OSC 777 written to each
-tmux client's tty), then the terminal bell. `notify_hterm` succeeds
-whenever a writable client tty exists, whether or not the terminal
-renders OSC 777 (Windows Terminal silently drops it -- tested 2026-11-18),
-so it masks the bell on
-any non-hterm terminal. `alert-slack` is deliberately excluded from the
+tries three notification transports in order until one succeeds:
+`notify-send` (dbus, crostini's route to the ChromeOS notification
+center), `alert-wsl` (a Windows toast via `powershell.exe`, WSL's route
+-- added 2026-11-18, `86c7bda`), then `notify_hterm` (OSC 777 written
+to each tmux client's tty). `notify_hterm` succeeds whenever a writable
+client tty exists, rendered or not (Windows Terminal silently drops it
+-- tested 2026-11-18), so its success proves nothing. Independently,
+every alert rings the bell inside its tmux pane, so the window stays
+flagged in the status bar after the notification is dismissed.
+`alert-slack` is deliberately excluded from the
 fallback chain -- leaving the machine is a decision, not a fallback
 (commit `d47ccda`).
 

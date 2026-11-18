@@ -22,14 +22,28 @@ origin() {
   fi
 }
 
-# hterm shows OSC 777 as a Chrome notification. Written to the terminal's own
-# tty rather than our stdout: the sender is usually a pipe (an LLM tool call, a
-# backgrounded job) with no terminal of its own.
+# hterm shows OSC 777 as a Chrome notification; other terminals (Windows
+# Terminal, tested) silently drop it, and nothing tells us which one is
+# attached, so a successful write proves nothing. Written to the terminal's
+# own tty rather than our stdout: the sender is usually a pipe (an LLM tool
+# call, a backgrounded job) with no terminal of its own.
 # shellcheck disable=SC2016  # $1/$2 are the inner bash's arguments
 notify_hterm() {
   tmux list-clients -F '#{client_tty}' |
     exists -w |
       xargs -d'\n' -r -I{} bash -ec 'TERM=xterm alert-hterm "$1" >"$2"' - "$1" {}
+}
+
+# Rung on every alert, not only as a fallback: the notification is gone once
+# dismissed, but tmux's bell flag marks the window in the status bar until I
+# visit it. Rung inside the pane rather than on stdout, for the same pipe
+# reason; tmux also passes it on to the terminal.
+ring_bell() {
+  if [[ "${TMUX_PANE:-}" ]]; then
+    printf '\a' >"$(tmux display-message -p -t "$TMUX_PANE" '#{pane_tty}')"
+  else
+    printf '\a'
+  fi
 }
 
 # A notification is gone the moment it's dismissed, and the urgent ones arrive
@@ -63,7 +77,8 @@ fi
 title="$(origin)"
 title="${title/$HOME/\~}"
 
-# First transport that works wins. Slack stays a manual `alert-slack` call --
+# First notification transport that works wins; the bell rings regardless.
+# Slack stays a manual `alert-slack` call --
 # an alert leaving the machine is a decision, not a fallback.
 if command -v notify-send >/dev/null &&
     notify-send --urgency=critical --app-name=alert "$title" "$body"; then
@@ -73,8 +88,8 @@ elif command -v powershell.exe >/dev/null && alert-wsl "$title" "$body"; then
 elif notify_hterm "$body"; then
   transport=hterm
 else
-  printf '\a'
   transport=bell
 fi
+ring_bell
 
 log_alert "$transport"
