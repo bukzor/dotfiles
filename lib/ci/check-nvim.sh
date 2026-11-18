@@ -6,6 +6,6 @@ echo "==> Neovim version:"
 nvim --version
 
 echo "==> Running acceptance tests with plenary..."
-nvim --headless -c "PlenaryBustedDirectory $ROOT/tests/neovim/ {minimal_init='$ROOT/.config/nvim/init.lua'}"
+timeout 120 nvim --headless -c "PlenaryBustedDirectory $ROOT/tests/neovim/ {minimal_init='$ROOT/.config/nvim/init.lua'}"
 
 echo "✓ All Neovim tests passed"
