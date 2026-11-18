@@ -34,6 +34,9 @@ checks stand in for the "unit tests first" item below:
 Wave 1 reviewed 2026-11-18: main ↔ svelte at 5 conflicts, exactly the held
 files. Wave 2 applies the user's rulings on 002/003's Open Questions.
 
+- [ ] wave 2: [mason `PATH=append` + rust_analyzer settings: still needed?](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-000-mason-and-rust-analyzer-history.md)
+      — the user questioned 003's OQ 3-4 (2026-11-18); 003's other files wait on it
+
 - [x] svelte-side drift since 2026-07-13 (unit 000)
 - [x] `bin/alert` (unit 001)
 - [x] new since the wsl-buck-win10 fold: `.envrc`, `bin/alternatives/.gitignore`, `bin/brew` (unit 001)
