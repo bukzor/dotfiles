@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -56,8 +56,63 @@ one line in the parent plan; moves within `~`; this handoff file.
 
 ## Steps
 
+- [x] 1 delete dead `.vim/autoload/{plug,bukzor/mason}.vim` on main
+- [x] 2 move signature help off `<C-K>`
+- [x] 3 penguin checklist line; rename key; `.ssh/.gitignore`
+- [x] 4 drop `data/gcloud-private` gitlink on main
+- [x] 5 port `.config/pnpm/config.yaml`; fix pnpm on login PATH
+- [x] 6 move `~` junk to `~/trash/home-junk/`
+- [x] push; pull `~`; status; merge-tree 0 conflicts
+
 ## Decisions
+
+- Signature help → `gK`: pairs with `K` (hover), is LazyVim's key for
+  it, and is unbound in vim 9.2's `index.txt`, nvim 0.11's LSP defaults
+  (`gr*`, `gO`, `i_CTRL-S`) and every plugin under `~/.local/share/nvim/lazy`.
+- `.ssh/.gitignore` gains `/id_*.pub` after `!*.pub.*`. It also matches
+  svelte's `id_ed25519_abby-tablet.pub`, which stays tracked (ignores
+  never touch tracked paths). The key file also lands on main, so both
+  branches match.
+- pnpm: both branches' `env.d/900-path.sh` already put `~/prefix/pnpm/bin`
+  on PATH. The directory held no pnpm because this host never bootstrapped
+  svelte's mechanism (ADRs 2026-08-27-000 and 2026-09-10-000), so no shell
+  file needed a change. The fix was a host install. pnpm 10 (which ignores
+  `config.yaml`) ran `pnpm add -g corepack` with svelte's dirs passed as
+  flags. corepack's own `pnpm` bin then runs pnpm 12.21.0, which reads
+  `config.yaml`. Under pnpm 12, `pnpm add -g --allow-build=bun corepack prettier`
+  reinstalled both into `global/v11`, using `pnpm-upgrade-g`'s flag list so a
+  later upgrade run lands in the same dir. pnpm 10's `global/5` went to
+  `~/trash/pnpm-bootstrap/`.
 
 ## Open Questions
 
+1. `~/.ssh/id_rsa.pub` (`worki@buck-win10`) is a real file, not a link,
+   and no tracked `id_*.pub.*` holds it. The new ignore hides it.
+   Recommend tracking it as `.ssh/id_rsa.pub.worki.buck-win10` and making
+   the plain name a link, as `id_ed25519.pub` already is.
+2. corepack 0.36.0 warns that it wants node `^24.15.0`, and Alpine's node
+   here is 24.14.1. It works anyway. Check again after `apk upgrade`.
+3. `~/package.json` here has no `packageManager` pin, so corepack runs
+   its default pnpm (12.21.0). The pin arrives with 008's `package.json`.
+
 ## Final report
+
+- main: `63209a9` (delete `plug.vim`, `bukzor/mason.vim`; no callers),
+  `7978b36` (which-key `gK`), `9d0c945` (`.ssh` key and ignore),
+  `5b58306` (drop `data/gcloud-private`), `c0370d0` (`config.yaml`).
+  svelte: `1d80013` (which-key), `5bb3900` (parent plan: penguin
+  `ln -s` step), `2e2828c` (`.ssh`). All pushed. `git diff origin/main
+  origin/svelte-crostini` is empty for which-key.lua, `.ssh/.gitignore`,
+  both key paths and `config.yaml`.
+- which-key.lua parses (vim 9.2 `+lua` `loadfile`). No nvim here: `gK` is untested live.
+- In `env -i` `bash -l` and `zsh -l`, `pnpm --version` prints 12.21.0
+  (`~/prefix/pnpm/bin/pnpm`), and `pnpm bin -g` is `~/prefix/pnpm/bin`.
+  `prettier` still works; `~/package.json` is byte-unchanged. In a clean
+  `bash -l`, svelte's `redo -k test` is all green, `pnpm starts` included.
+- Moved all six junk paths into `~/trash/home-junk/`.
+- `~` pulled to `c0370d0`. `git -C ~ status --short` shows 7 entries:
+  `.claude/sessions.kb`, `.aws`, `.azure`, `.boon/` (new, not mine),
+  `deadlock-builds-recovery/`, `package.json`, `willy-practice.txt`.
+- `merge-tree --write-tree --allow-unrelated-histories origin/main
+  origin/svelte-crostini` exits 0 with 0 CONFLICT lines (tree `f70f342`).
+  The plain `.ssh/id_ed25519.pub` clash from 004's OQ2 is gone.
