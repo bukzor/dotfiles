@@ -38,7 +38,7 @@ function M.config()
   wk.add({
     mode = { "n", "v" },
     { "K", vim.lsp.buf.hover, desc = "Hover" },
-    { "<C-K>", vim.lsp.buf.signature_help, desc = "Signature Help" },
+    { "gK", vim.lsp.buf.signature_help, desc = "Signature Help" },
     { "<leader>q", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Quickfix List" },
     { "<leader>e", vim.diagnostic.open_float, desc = "Error Detail" },
     { "<leader>a", vim.lsp.buf.code_action, desc = "Code Actions" },
