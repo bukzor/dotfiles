@@ -7,4 +7,6 @@
 #
 # The tool ships in github.com/bukzor/bukzor-tools (`uv tool install .`),
 # not in these dotfiles; this hook no-ops when it isn't installed.
-( (upstream-replies --rc)& )
+if has upstream-replies; then
+  ( (upstream-replies --rc 2>/dev/null)& )
+fi
