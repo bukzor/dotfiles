@@ -46,7 +46,17 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
 - [ ] claude config: .claude/CLAUDE.md, .claude/settings.json,
       .claude/commands/curl.md, .claude/.gitignore — after the wsl-buck-win10
       fold, which carries its .claude/ additions to both sides
-    - [ ] authored / [ ] svelte / [ ] main
+    - [x] `settings.json`, `.gitignore`, `commands/curl.md` (unit 002:
+          svelte `d0dc11b`, main `472e485`)
+    - [ ] `CLAUDE.md`: main takes svelte's, once main's two surviving rules
+          land on both branches.
+          > [!@bukzor] 2026-11-12: unit 002's Open Questions ruled as
+          > recommended -- drop Message Precedence and `/compact` behavior;
+          > "Clean" means fix properly becomes one `design-rules.kb/` file;
+          > "never trust bulk operations" (validate against source: counts,
+          > `uniq -c`, `comm -3`, `yq | jq`) becomes a section of
+          > `reference.kb/bulk-edits.md`.
+        - [ ] authored / [ ] svelte / [ ] main
 - [x] git config: .gitconfig, .gitignore, .config/git/ignore, .config/.gitignore,
       repo/.gitignore, bin/.gitignore, .vim/.gitignore — done 2026-07-13.
       Resolved the ignore-scheme question flagged as deferred in 000/CI-
