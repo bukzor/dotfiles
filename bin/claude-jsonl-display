@@ -1,0 +1,714 @@
+#!/usr/bin/env python3
+"""Make Claude Code transcripts more readable.
+
+Reads JSONL records from stdin and renders them as a structured, role-labeled
+transcript on stderr. The final `result.result` (if any) is written to stdout
+so a downstream pipeline can capture it independently of the rendered log.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import signal
+import sys
+from dataclasses import dataclass
+from typing import Any, Callable, Generator, Iterable, NamedTuple, TextIO, TypeGuard
+
+
+Content = dict[str, Any]
+
+
+class Output(NamedTuple):
+    # `text` should be uniform Text by the time anything calls `print` —
+    # `normalize_outputs` lowers shorthand to Text in the pipeline.
+    text: Text
+    dest: TextIO = sys.stderr
+
+    def print(self, *, use_color: bool) -> None:
+        print(render(self.text, use_color), file=self.dest)
+
+
+def normalize_outputs(
+    items: Iterable[tuple[Output, State]],
+) -> Generator[tuple[Output, State], None, None]:
+    """Pipeline stage: lower each Output's shorthand spans to uniform Text."""
+    for output, state in items:
+        yield Output(as_text(output.text), output.dest), state
+
+
+@dataclass(frozen=True)
+class State:
+    """Track conversation state for numbering messages"""
+
+    role: str
+    msg_num: int
+    sub_num: int
+
+    def __str__(self) -> str:
+        if self.sub_num > 0:
+            sub_num = f".{self.sub_num}"
+        else:
+            sub_num = ""
+        return f"[{self.msg_num}{sub_num}]"
+
+
+type Formatter = Callable[[Content, State], Text]
+
+
+# ANSI color codes
+class Color:
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+
+    class Bright:
+        RED = "\033[91m"
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        BLUE = "\033[94m"
+        MAGENTA = "\033[95m"
+        CYAN = "\033[96m"
+
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+    to_bright = {
+        RED: Bright.RED,
+        GREEN: Bright.GREEN,
+        YELLOW: Bright.YELLOW,
+        BLUE: Bright.BLUE,
+        MAGENTA: Bright.MAGENTA,
+        CYAN: Bright.CYAN,
+    }
+
+
+class colorize(NamedTuple):
+    """A run of text, optionally styled with an ANSI code.
+
+    Constructor doubles as the tagging operation; lowercase name reads as a
+    verb at call sites (cf. `tuple`, `partial`, `namedtuple`). `code=None`
+    means "no styling, render text as-is" — the natural value for spans that
+    formatters produce as bare strings before lowering.
+    """
+
+    text: str
+    code: str | None = None
+
+
+Text = list[colorize]
+"""Homogeneous IR. Formatters construct with shorthand (mixing bare strings
+and colorize spans); `normalize_outputs` lowers to this uniform shape before
+any consumer touches it."""
+
+
+def as_text(spans: Iterable[colorize | str]) -> Text:
+    """Promote bare strings to `colorize(text)` so consumers see uniform Text."""
+    return [s if isinstance(s, colorize) else colorize(s) for s in spans]
+
+
+def render(text: Text, use_color: bool) -> str:
+    """Flatten Text into a string, applying ANSI codes when `use_color`."""
+    return "".join(
+        f"{span.code}{span.text}{Color.RESET}" if span.code and use_color
+        else span.text
+        for span in text
+    )
+
+
+def is_content_list(val: Any) -> TypeGuard[list[Content]]:
+    """TypeGuard to check if value is a list of dicts with string keys"""
+    if not isinstance(val, list):
+        return False
+    for item in val:  # type: ignore[reportUnknownVariableType]
+        if not isinstance(item, dict):
+            return False
+        for k in item.keys():  # type: ignore[reportUnknownVariableType]
+            if not isinstance(k, str):
+                return False
+    return True
+
+
+def format_boxed_message(
+    label: str,
+    text: str,
+    state: State | str,
+    color: str,
+) -> Text:
+    """Format a message with a boxed header and colored border"""
+    parts: Text = [colorize(f"┌─ {state} {label}", Color.to_bright[color])]
+    for line in text.split("\n"):
+        parts += ["\n", colorize("│ ", color), line]
+    return parts
+
+
+def as_content_list(content: Any) -> list[Content]:
+    """Coerce a single content block (or string) into a list of content blocks."""
+    if not is_content_list(content):
+        if isinstance(content, str):
+            content = [{"type": "text", "text": content}]
+        else:
+            content = [content]
+        assert is_content_list(content), content
+    return content
+
+
+def format_unknown(
+    label: str,
+    data: Any,
+    state: State,
+    color: str = Color.RED,
+) -> Text:
+    """Format unknown/unexpected data with a clear error indicator"""
+    json_str = json.dumps(data, indent=2)
+    return format_boxed_message(f"UNKNOWN ({label})", json_str, state, color)
+
+
+def update_state(content: Content, state: State) -> State:
+    """Update role and message counters. Turn number increments when role changes between user and assistant."""
+    item_type = content.get("type")
+
+    # Determine the role of this message
+    if item_type == "user":
+        content = content["message"]["content"]
+        # User text messages are user role; tool results are part of assistant turn
+        if isinstance(content, str) or (
+            is_content_list(content) and content and content[0]["type"] != "tool_result"
+        ):
+            new_role = "user"
+        else:
+            new_role = "assistant"
+    elif item_type == "assistant":
+        new_role = "assistant"
+    elif item_type == "attachment":
+        # Attachments (e.g. hook events) belong to the surrounding assistant
+        # turn — advance the sub-number so the box header doesn't repeat.
+        return State(state.role, state.msg_num, state.sub_num + 1)
+    else:
+        # system, stream_event, result don't change role
+        return state
+
+    # Increment turn number when role changes, otherwise increment sub-number
+    if new_role != state.role and state.role != "":
+        return State(new_role, state.msg_num + 1, 0)
+    elif state.role == "":
+        # First message with a role
+        return State(new_role, 1, 0)
+    else:
+        return State(new_role, state.msg_num, state.sub_num + 1)
+
+
+def format_stream_event(content: Content) -> Text:
+    """Format stream event messages"""
+    event_type = content["event"]["type"]
+    if event_type == "message_start":
+        return [colorize("⏵ Message starting...", Color.YELLOW)]
+    elif event_type == "message_stop":
+        return [colorize("⏹ Message complete", Color.YELLOW)]
+    else:
+        raise ValueError(f"Unknown stream event type: {event_type}")
+
+
+def format_snapshot(content: Content) -> Text:
+    """Format file history snapshot message"""
+    snapshot = content["snapshot"]
+    tracked = snapshot["trackedFileBackups"]
+    num_files = len(tracked)
+
+    if num_files == 0:
+        return [colorize("▸ Snapshot (no files)", Color.CYAN)]
+    elif num_files <= 3:
+        files = ", ".join(tracked.keys())
+        return [colorize(f"▸ Snapshot: {files}", Color.CYAN)]
+    else:
+        files = list(tracked.keys())[:3]
+        files_str = ", ".join(files)
+        return [colorize(f"▸ Snapshot: {files_str}... ({num_files} files)", Color.CYAN)]
+
+
+def format_system(content: Content) -> Text:
+    """Format system/session start message"""
+    tools = ", ".join(content["tools"])
+    return [
+        colorize("## SESSION START", Color.BOLD),
+        f"\n## Session: {content['session_id']}"
+        f"\n## Model: {content['model']}"
+        f"\n## CWD: {content['cwd']}"
+        f"\n## Tools: {tools}",
+    ]
+
+
+def format_user_message(content: Content, state: State) -> Text:
+    """Format a single user message content block"""
+    content_type = content["type"]
+
+    if content_type == "text":
+        text = content["text"]
+        # Special case for user interruption
+        if text.startswith("[Request interrupted by user"):
+            return [colorize(f"✗ {state} {text}", Color.RED)]
+        else:
+            return format_boxed_message("USER", text, state, Color.BLUE)
+    elif content_type == "tool_result":
+        is_error = content.get("is_error", False)
+        result_content = content["content"]
+        if isinstance(result_content, list):
+            text_parts: list[str] = []
+            for item in result_content:
+                if isinstance(item, dict) and 'text' in item:
+                    text_parts.append(item['text'])
+                else:
+                    text_parts.append(json.dumps(item, indent=2))
+            result_content = "\n".join(text_parts)
+        if is_error:
+            return format_boxed_message(
+                "Tool Result ❌ ERROR", result_content, state, Color.RED
+            )
+        else:
+            return format_boxed_message(
+                "Tool Result ✓", result_content, state, Color.GREEN
+            )
+    else:
+        return format_unknown("user_content", content, state)
+
+
+def format_tool_use(content: Content, state: State) -> Text:
+    """Format a tool use block"""
+    tool_name = content["name"]
+    tool_input = content["input"]
+
+    parts: Text = [
+        colorize(f"╔═ {state} Tool Call: {tool_name}", Color.Bright.MAGENTA)
+    ]
+    for key, value in tool_input.items():
+        parts += ["\n", colorize(f"║ {key}: |", Color.MAGENTA)]
+        if isinstance(value, str):
+            value_str = value
+        else:
+            value_str = json.dumps(value, indent=2)
+        for line in value_str.split("\n"):
+            parts += ["\n", colorize("║   ", Color.MAGENTA), line]
+
+    return parts
+
+
+def format_assistant_message(content: Content, state: State) -> Text:
+    """Format a single assistant message content block"""
+    content_type = content["type"]
+
+    if content_type == "text":
+        return format_boxed_message("ASSISTANT", content["text"], state, Color.CYAN)
+    elif content_type == "tool_use":
+        return format_tool_use(content, state)
+    elif content_type == "thinking":
+        return format_boxed_message(
+            "THINKING 💭", content["thinking"], state, Color.YELLOW
+        )
+    else:
+        return format_unknown("assistant_content", content, state)
+
+
+def format_result(content: Content) -> tuple[Text, Text]:
+    """Format session result/end message. Returns (stderr_output, stdout_result)."""
+    duration = content["duration_ms"]
+    num_turns = content["num_turns"]
+    cost = content["total_cost_usd"]
+    is_error = content["is_error"]
+    permission_denials = content["permission_denials"]
+    result_content = content["result"]
+
+    status_span = (
+        colorize("❌ ERROR", Color.Bright.RED)
+        if is_error
+        else colorize("✓ SUCCESS", Color.Bright.GREEN)
+    )
+
+    parts: Text = [
+        colorize("## SESSION END", Color.BOLD),
+        f"\n## Duration: {duration}ms ({num_turns} turns)"
+        f"\n## Cost: ${cost}"
+        f"\n## Status: ",
+        status_span,
+    ]
+    if len(permission_denials) > 0:
+        parts.append(f"\n## Permission denials: {len(permission_denials)}")
+
+    return parts, [colorize(result_content)]
+
+
+def format_summary(content: Content) -> Text:
+    """Format summary message"""
+    return [colorize(f"▸ Summary: {content['summary']}", Color.CYAN)]
+
+
+_HOOK_MARKER = {
+    "hook_success": ("⊕", "GREEN"),
+    "hook_non_blocking_error": ("⊘", "YELLOW"),
+    "hook_blocking_error": ("⊖", "RED"),
+    "hook_failure": ("⊖", "RED"),
+}
+
+
+def format_hook_attachment(att: Content, state: State, att_type: str) -> Text:
+    """One-line summary for hook event records."""
+    hook_name = att.get("hookName", "?")
+    exit_code = att.get("exitCode", "?")
+    duration = att.get("durationMs", "?")
+    stderr = (att.get("stderr") or "").strip()
+
+    decision = ""
+    rewrote_input = False
+    stdout = att.get("stdout") or ""
+    if stdout:
+        try:
+            parsed = json.loads(stdout)
+        except (json.JSONDecodeError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            hso = parsed.get("hookSpecificOutput") or {}
+            decision = hso.get("permissionDecision", "") or ""
+            rewrote_input = "updatedInput" in hso
+
+    marker, color_name = _HOOK_MARKER.get(att_type, ("⊘", "YELLOW"))
+    color = getattr(Color, color_name)
+
+    summary: list[str] = [f"hook {hook_name}"]
+    if decision:
+        summary.append(f"→ {decision}")
+    if rewrote_input:
+        summary.append("(input rewritten)")
+    summary.append(f"[exit={exit_code}, {duration}ms]")
+
+    parts: Text = [colorize(f"{marker} {state} {' '.join(summary)}", color)]
+    if stderr:
+        for line in stderr.split("\n"):
+            parts += ["\n", colorize("│ ", color), line]
+    return parts
+
+
+def format_command_permissions(att: Content, state: State) -> Text:
+    tools = att.get("allowedTools") or []
+    body = ", ".join(tools) if tools else "(none)"
+    return [colorize(f"▸ {state} Command permissions: {body}", Color.CYAN)]
+
+
+def format_edited_text_file(att: Content, state: State) -> Text:
+    filename = att.get("filename", "?")
+    snippet = att.get("snippet") or ""
+    return format_boxed_message(f"EDITED {filename}", snippet, state, Color.CYAN)
+
+
+def format_skill_listing(att: Content, state: State) -> Text:
+    count = att.get("skillCount", 0)
+    note = "initial" if att.get("isInitial") else "updated"
+    return [colorize(f"▸ {state} Skill listing ({note}): {count} skills", Color.CYAN)]
+
+
+def format_deferred_tools_delta(att: Content, state: State) -> Text:
+    added = len(att.get("addedNames") or [])
+    removed = len(att.get("removedNames") or [])
+    readded = len(att.get("readdedNames") or [])
+    pending = len(att.get("pendingMcpServers") or [])
+    bits: list[str] = []
+    if added:
+        bits.append(f"+{added}")
+    if removed:
+        bits.append(f"-{removed}")
+    if readded:
+        bits.append(f"re-added {readded}")
+    if pending:
+        bits.append(f"pending MCP: {pending}")
+    if not bits:
+        bits.append("(no change)")
+    return [colorize(f"▸ {state} Deferred tools delta: {' '.join(bits)}", Color.CYAN)]
+
+
+def format_nested_memory(att: Content, state: State) -> Text:
+    path = att.get("displayPath") or att.get("path", "?")
+    # `content` is a {path, type, content, ...} envelope; the file text is one level in.
+    inner = att.get("content")
+    body = inner.get("content", "") if isinstance(inner, dict) else ""
+    return format_boxed_message(f"NESTED MEMORY {path}", body, state, Color.CYAN)
+
+
+def format_queued_command(att: Content, state: State) -> Text:
+    prompt = (att.get("prompt") or "").strip()
+    mode = att.get("commandMode", "?")
+    return format_boxed_message(f"QUEUED [{mode}]", prompt, state, Color.BLUE)
+
+
+def _diagnostic_line(uri: str, d: Content) -> str:
+    sev = d.get("severity", "?")
+    start = (d.get("range") or {}).get("start") or {}
+    line, char = start.get("line", "?"), start.get("character", "?")
+    tag_bits = [b for b in (d.get("source"), d.get("code")) if b]
+    tag = f" [{' '.join(str(b) for b in tag_bits)}]" if tag_bits else ""
+    return f"{sev} {uri}:{line}:{char}{tag} {d.get('message', '')}"
+
+
+def format_diagnostics(att: Content, state: State) -> Text:
+    files = att.get("files") or []
+    severities = {
+        d.get("severity", "")
+        for f in files for d in (f.get("diagnostics") or [])
+    }
+    if "Error" in severities:
+        marker, color = "⊖", Color.RED
+    elif "Warning" in severities:
+        marker, color = "⊘", Color.YELLOW
+    else:
+        marker, color = "▸", Color.CYAN
+    total = sum(len(f.get("diagnostics") or []) for f in files)
+    parts: Text = [colorize(
+        f"{marker} {state} Diagnostics: {total} across {len(files)} file(s)",
+        color,
+    )]
+    for f in files:
+        uri = f.get("uri", "?")
+        for d in (f.get("diagnostics") or []):
+            parts += ["\n", colorize("│ ", color), _diagnostic_line(uri, d)]
+    return parts
+
+
+def format_agent_listing_delta(att: Content, state: State) -> Text:
+    added = len(att.get("addedTypes") or [])
+    removed = len(att.get("removedTypes") or [])
+    if att.get("isInitial"):
+        return [colorize(f"▸ {state} Agent listing (initial): {added} agents", Color.CYAN)]
+    bits: list[str] = []
+    if added:
+        bits.append(f"+{added}")
+    if removed:
+        bits.append(f"-{removed}")
+    if not bits:
+        bits.append("(no change)")
+    return [colorize(f"▸ {state} Agent listing delta: {' '.join(bits)}", Color.CYAN)]
+
+
+def format_date_change(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Date change → {att.get('newDate', '?')}", Color.CYAN)]
+
+
+def format_auto_mode(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Auto mode ({att.get('reminderType', '?')})", Color.CYAN)]
+
+
+def format_auto_mode_exit(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Auto mode exit", Color.CYAN)]
+
+
+def _plan_mode_suffix(att: Content) -> str:
+    path = att.get("planFilePath", "?")
+    exists = "exists" if att.get("planExists") else "new"
+    return f"{path} ({exists})"
+
+
+def format_plan_mode(att: Content, state: State) -> Text:
+    sub = " [subagent]" if att.get("isSubAgent") else ""
+    return [colorize(f"▸ {state} Plan mode{sub}: {_plan_mode_suffix(att)}", Color.CYAN)]
+
+
+def format_plan_mode_exit(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Plan mode exit: {_plan_mode_suffix(att)}", Color.CYAN)]
+
+
+def format_ultrathink_effort(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Ultrathink effort", Color.CYAN)]
+
+
+def format_file(att: Content, state: State) -> Text:
+    display = att.get("displayPath") or att.get("filename", "?")
+    file_data = (att.get("content") or {}).get("file") or {}
+    return format_boxed_message(
+        f"FILE {display}", file_data.get("content", ""), state, Color.BLUE,
+    )
+
+
+def format_already_read_file(att: Content, state: State) -> Text:
+    display = att.get("displayPath") or att.get("filename", "?")
+    return [colorize(f"▸ {state} Already read: {display}", Color.CYAN)]
+
+
+def format_task_reminder(att: Content, state: State) -> Text:
+    return [colorize(f"▸ {state} Task reminder ({att.get('itemCount', 0)} items)", Color.CYAN)]
+
+
+_ATTACHMENT_FORMATTERS: dict[str, Callable[[Content, State], Text]] = {
+    "command_permissions": format_command_permissions,
+    "edited_text_file": format_edited_text_file,
+    "skill_listing": format_skill_listing,
+    "deferred_tools_delta": format_deferred_tools_delta,
+    "nested_memory": format_nested_memory,
+    "queued_command": format_queued_command,
+    "diagnostics": format_diagnostics,
+    "agent_listing_delta": format_agent_listing_delta,
+    "date_change": format_date_change,
+    "auto_mode": format_auto_mode,
+    "auto_mode_exit": format_auto_mode_exit,
+    "plan_mode": format_plan_mode,
+    "plan_mode_exit": format_plan_mode_exit,
+    "ultrathink_effort": format_ultrathink_effort,
+    "file": format_file,
+    "already_read_file": format_already_read_file,
+    "task_reminder": format_task_reminder,
+}
+
+
+def format_attachment(content: Content, state: State) -> Text:
+    """Format an attachment record (hook events, etc.)."""
+    att = content.get("attachment")
+    if not isinstance(att, dict):
+        return format_unknown("attachment", content, state)
+
+    att_type = att.get("type")
+    if not isinstance(att_type, str):
+        return format_unknown(f"attachment/{att_type}", content, state)
+    if att_type.startswith("hook_"):
+        return format_hook_attachment(att, state, att_type)
+    if (fn := _ATTACHMENT_FORMATTERS.get(att_type)) is not None:
+        return fn(att, state)
+    return format_unknown(f"attachment/{att_type}", content, state)
+
+
+def format_turn(
+    formatter: Formatter, content: Content, state: State
+) -> Generator[tuple[Output, State], None, None]:
+    """Format a user or assistant turn (may contain multiple content blocks)"""
+    contents = as_content_list(content["message"]["content"])
+    for content in contents:
+        try:
+            yield Output(formatter(content, state)), state
+        except:
+            raise ValueError(json.dumps(content, indent=2))
+        state = State(state.role, state.msg_num, state.sub_num + 1)
+
+
+def format_item(
+    content: Content, state: State
+) -> Generator[tuple[Output, State], None, None]:
+    """Format a single transcript content, yielding (Output, state) tuples"""
+    item_type = content.get("type")
+
+    if item_type == "stream_event":
+        yield Output(format_stream_event(content)), state
+
+    elif item_type == "system":
+        subtype = content.get('subtype', '')
+        if subtype == 'local_command':
+            yield Output(format_boxed_message("local command", content['content'], state, Color.BLUE)), state
+        elif subtype == 'init':
+            yield Output(format_system(content)), state
+        else:
+            yield Output(format_unknown(f"system/{subtype}", content, state)), state
+
+    elif item_type == "user":
+        yield from format_turn(format_user_message, content, state)
+
+    elif item_type == "assistant":
+        yield from format_turn(format_assistant_message, content, state)
+
+    elif item_type == "result":
+        stderr_output, stdout_result = format_result(content)
+        yield Output(stderr_output), state
+        yield Output(stdout_result, dest=sys.stdout), state
+
+    elif item_type == "file-history-snapshot":
+        yield Output(format_snapshot(content)), state
+
+    elif item_type == "summary":
+        yield Output(format_summary(content)), state
+
+    elif item_type == "attachment":
+        yield Output(format_attachment(content, state)), state
+
+    elif item_type == "progress":
+        pass  # hook progress events — no useful display content
+
+    else:
+        yield Output(format_unknown("item_type", content, state)), state
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="claude-jsonl-display",
+        description=(
+            "Render Claude Code JSONL transcripts as readable text. "
+            "Reads JSONL from stdin; rendered transcript goes to stderr, "
+            "the final result.result (if any) to stdout."
+        ),
+        epilog=(
+            "Color is on by default and disabled automatically when "
+            "$CLAUDECODE or $NO_COLOR is set. Pass --color to force-enable."
+        ),
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--color",
+        action="store_true",
+        help="force ANSI color even if $CLAUDECODE or $NO_COLOR is set",
+    )
+    group.add_argument(
+        "--no-color",
+        action="store_true",
+        help="disable ANSI color",
+    )
+    return parser.parse_args(argv)
+
+
+def should_use_color(args: argparse.Namespace) -> bool:
+    if args.color:
+        return True
+    if args.no_color:
+        return False
+    if os.environ.get("CLAUDECODE"):
+        return False
+    if os.environ.get("NO_COLOR"):  # https://no-color.org/
+        return False
+    return True
+
+
+def main():
+    # Restore default SIGPIPE handler (terminate on broken pipe, e.g., piping to head)
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
+    args = parse_args(sys.argv[1:])
+    use_color = should_use_color(args)
+
+    state = State("", 0, 0)
+
+    for line_num, line in enumerate(sys.stdin, 1):
+        line = line.strip()
+        if not line:
+            continue
+
+        try:
+            content = json.loads(line)
+        except json.JSONDecodeError as error:
+            print(f"WARN: unable to decode json (line {line_num}):", error, file=sys.stderr)
+            print(" ", repr(line), file=sys.stderr)
+            continue
+
+        try:
+            state = update_state(content, state)
+
+            for output, state in normalize_outputs(format_item(content, state)):
+                output.print(use_color=use_color)
+        except Exception:
+            sys.stderr.flush()
+            print(
+                f"\n{'='*60}\n"
+                f"ERROR processing JSONL record (line {line_num}):\n"
+                f"  type={content.get('type', '?')}\n"
+                f"  subtype={content.get('subtype', '')}\n"
+                f"{'='*60}",
+                file=sys.stderr,
+            )
+            raise
+
+
+if __name__ == "__main__":
+    main()

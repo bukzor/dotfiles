@@ -1,0 +1,85 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rustdoc-json"
+
+usage() {
+  local code="${1:-1}"
+  cat >&2 <<EOF
+Usage: rustdoc-json CRATE [VERSION]
+
+Fetch rustdoc JSON from docs.rs and cache locally.
+Outputs path to cached JSON file.
+
+Examples:
+  rustdoc-json git2           # fetch latest, print path
+  rustdoc-json git2 0.19.0    # fetch specific version
+  jq '.index' "\$(rustdoc-json git2)"  # query the JSON
+
+Cache: $CACHE_DIR/
+EOF
+  exit "$code"
+}
+
+resolve_version() {
+  local crate="$1"
+  local version="$2"
+
+  if [[ "$version" == "latest" ]]; then
+    curl -s "https://crates.io/api/v1/crates/${crate}" | jq -r '.crate.max_version'
+  else
+    echo "$version"
+  fi
+}
+
+fetch_json() {
+  local crate="$1"
+  local version
+  version="$(resolve_version "$crate" "$2")"
+  local cache_file="$CACHE_DIR/${crate}-${version}.json"
+
+  if [[ ! -f "$cache_file" ]]; then
+    mkdir -p "$CACHE_DIR"
+    curl -sL "https://docs.rs/crate/${crate}/${version}/json" | zstd -d > "$cache_file"
+  fi
+
+  echo "$cache_file"
+}
+
+# Parse args
+CRATE=""
+VERSION="latest"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --help|-h) usage 0 ;;
+    -*)
+      echo >&2 "Unknown option: $1"
+      usage
+      ;;
+    *)
+      if [[ -z "$CRATE" ]]; then
+        CRATE="$1"
+      else
+        VERSION="$1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+[[ -n "$CRATE" ]] || usage
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+fetch_json "$CRATE" "$VERSION"

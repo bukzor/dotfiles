@@ -1,0 +1,3 @@
+#!/bin/sh
+
+printf '%s/.claude/projects/%s\n' ~ "$(claude-path "$@")"

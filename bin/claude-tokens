@@ -1,0 +1,170 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+"""Emit one TSV row per Claude Code API request, from the local transcripts.
+
+Scans `~/.claude/projects/` -- both session transcripts and the subagent
+transcripts nested under them -- and writes the shared token-accounting TSV
+(see `claude-tokens-histogram`, which consumes it) to stdout.
+
+Rows are deduplicated on (requestId, message.id). This is load-bearing, not
+defensive: Claude Code writes one record *per content block* of a response,
+each repeating that response's full `usage`, so a naive sum multiplies every
+multi-block turn by its block count.
+
+Usage: claude-tokens [--since YYYY-MM-DD] [PROJECTS_DIR]
+"""
+
+import json
+import sys
+from collections.abc import Iterator, Mapping
+from dataclasses import astuple, dataclass
+from pathlib import Path
+
+PROJECTS = Path.home() / ".claude" / "projects"
+COLUMNS = (
+    "source",
+    "timestamp",
+    "session",
+    "request_id",
+    "agent_type",
+    "model",
+    "effort",
+    "input",
+    "cache_create",
+    "cache_create_1h",
+    "cache_create_5m",
+    "cache_read",
+    "output",
+    "thinking",
+)
+NA = "-"
+# Records the harness writes with no API call behind them.
+SYNTHETIC_MODEL = "<synthetic>"
+
+
+@dataclass(frozen=True)
+class Row:
+    source: str
+    timestamp: str
+    session: str
+    request_id: str
+    agent_type: str
+    model: str
+    effort: str
+    input: int
+    cache_create: int
+    cache_create_1h: int
+    cache_create_5m: int
+    cache_read: int
+    output: int
+    thinking: int
+
+    def tsv(self) -> str:
+        return "\t".join(str(field) for field in astuple(self))
+
+
+def agent_type_of(path: Path) -> str:
+    """The subagent type a transcript ran as, or NA for a top-level session.
+
+    Subagent transcripts live at `<session>/subagents/agent-<id>.jsonl`; the
+    agent type is only in the `.meta.json` beside them, never in the records.
+    """
+    if path.parent.name != "subagents":
+        return NA
+    meta = path.with_suffix(".meta.json")
+    if not meta.exists():
+        return "?"
+    return json.loads(meta.read_text()).get("agentType", "?")
+
+
+def row_of(record: Mapping, agent_type: str) -> Row | None:
+    """A Row for an assistant record that reports real API usage, else None."""
+    if record.get("type") != "assistant":
+        return None
+    message = record.get("message") or {}
+    usage = message.get("usage")
+    model = message.get("model")
+    if not usage or model == SYNTHETIC_MODEL:
+        return None
+    return Row(
+        source="transcript",
+        timestamp=record.get("timestamp", NA),
+        session=record.get("sessionId", NA),
+        request_id=record.get("requestId", NA),
+        agent_type=agent_type,
+        model=model or NA,
+        # perTurnEffort is a one-turn override of the session's effort; when
+        # set it is what the request actually ran at.
+        effort=record.get("perTurnEffort") or record.get("effort") or NA,
+        input=usage.get("input_tokens", 0),
+        cache_create=usage.get("cache_creation_input_tokens", 0),
+        # Split by TTL because they are priced apart: a 1h write costs 2x the
+        # base input rate, a 5m write 1.25x.
+        cache_create_1h=(usage.get("cache_creation") or {}).get(
+            "ephemeral_1h_input_tokens", 0
+        ),
+        cache_create_5m=(usage.get("cache_creation") or {}).get(
+            "ephemeral_5m_input_tokens", 0
+        ),
+        cache_read=usage.get("cache_read_input_tokens", 0),
+        output=usage.get("output_tokens", 0),
+        thinking=(usage.get("output_tokens_details") or {}).get("thinking_tokens", 0),
+    )
+
+
+def parse(path: Path) -> Iterator[tuple[str, Row]]:
+    """Yield (dedup key, Row) for each usage-bearing record in one transcript.
+
+    A killed session can leave one truncated final line; that line is skipped
+    rather than failing the file, per the append-only format's own guarantee
+    that nothing before it is affected.
+    """
+    agent_type = agent_type_of(path)
+    for line in path.read_text(errors="replace").splitlines():
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        row = row_of(record, agent_type)
+        if row is None:
+            continue
+        key = f"{record.get('requestId')}\t{(record['message'] or {}).get('id')}"
+        yield key, row
+
+
+def transcripts(projects: Path) -> list[Path]:
+    return sorted(projects.glob("*/*.jsonl")) + sorted(
+        projects.glob("*/*/subagents/agent-*.jsonl")
+    )
+
+
+def collect(paths: list[Path], since: str) -> list[Row]:
+    seen: dict[str, Row] = {}
+    for path in paths:
+        for key, row in parse(path):
+            if row.timestamp >= since:
+                seen.setdefault(key, row)
+    return sorted(seen.values(), key=lambda row: row.timestamp)
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    since = ""
+    if args and args[0] == "--since":
+        since = args[1]
+        args = args[2:]
+    projects = Path(args[0]) if args else PROJECTS
+    assert projects.is_dir(), projects
+
+    paths = transcripts(projects)
+    rows = collect(paths, since)
+    print("\t".join(COLUMNS))
+    print("\n".join(row.tsv() for row in rows))
+    print(f"{len(rows)} requests from {len(paths)} transcripts", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
