@@ -77,7 +77,11 @@ raw_i=$(with_pty "$full" 2>&1 | tr -d '\r') || :
 got_i=$(echo "$raw_i" | sed -n -E '/^(PS1|compdef|OSTYPE)=/p')
 case "$got_i" in
   *PS1=set*compdef=1*) ;;
-  *) printf '%s\n' "zsh -i transcript:" "$raw_i" >&2 ;;
+  *)
+    printf '%s\n' "zsh -i transcript:" "$raw_i" >&2
+    echo "compaudit (system fpath):" >&2
+    env -i PATH=/usr/bin:/bin zsh -fc 'autoload -U compaudit; compaudit' >&2 || :
+    ;;
 esac
 
 ps1_i=$(echo "$got_i" | sed -n 's/^PS1=//p')
