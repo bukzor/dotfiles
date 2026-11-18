@@ -1,0 +1,37 @@
+#!/bin/bash
+# Usage: alert-wsl <title> <body>
+# A Windows toast, from inside WSL. Fails (so `alert` falls through) wherever
+# powershell.exe isn't reachable.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+# Shown under PowerShell's identity: a toast needs a registered AppUserModelID,
+# and this one ships with every Windows install.
+# shellcheck disable=SC2016  # PowerShell's $, not ours
+script='
+$ErrorActionPreference = "Stop"
+$N = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime]
+$xml = $N::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+$text = $xml.GetElementsByTagName("text")
+[void]$text.Item(0).AppendChild($xml.CreateTextNode($env:ALERT_TITLE))
+[void]$text.Item(1).AppendChild($xml.CreateTextNode($env:ALERT_BODY))
+$N::CreateToastNotifier("{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe").Show(
+  [Windows.UI.Notifications.ToastNotification]::new($xml))
+'
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+# Text crosses into Windows via WSLENV, not argv: no quoting to get wrong.
+export ALERT_TITLE="$1" ALERT_BODY="$2"
+export WSLENV="${WSLENV:+$WSLENV:}ALERT_TITLE:ALERT_BODY"
+exec powershell.exe -NoProfile -NonInteractive -Command "$script"
