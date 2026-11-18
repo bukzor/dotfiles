@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -35,8 +35,35 @@ Same ssh workaround as unit 001.
 
 ## Steps
 
+- [x] look up the hook output contract
+- [x] guard the hook in `settings.json`; commit and push on main and svelte
+- [x] `git -C ~ pull --ff-only`; prove absent and present cases; `jq .`
+
 ## Decisions
+
+- Warning channel: top-level `systemMessage` ("Warning message shown to the
+  user"; SessionStart does not discard it), per
+  <https://code.claude.com/docs/en/hooks.md> § JSON output, fetched
+  2026-11-18. Not stderr, not `additionalContext` (that goes to Claude).
+- `exec` the script when present, so its stdin, stdout and exit code pass
+  through unchanged.
+- Test `-e`, not `-x`: a present but non-executable script still fails
+  loudly (126) instead of being skipped as if absent.
+- The path is interpolated into the JSON unescaped; a `"` or `\` in `$HOME`
+  would break it. Not worth the extra code.
 
 ## Open Questions
 
 ## Final report
+
+- main `4df8d7d`, svelte-crostini `cff69b9`: the guarded hook command.
+  `git diff origin/main origin/svelte-crostini -- .claude/settings.json`
+  is empty; `jq .` parses both.
+- `~` fast-forwarded `b422b1b..4df8d7d`.
+- Live proofs, command extracted with `jq` from `~/.claude/settings.json`:
+  - absent (real `HOME`): exit 0, stdout
+    `{"systemMessage": "mitmproxy binpatch skipped: /home/bukzor/claude/mitmproxy/lib/claude_mitmproxy/binpatch.py not found"}`,
+    which `jq` parses.
+  - present (stub on `HOME=~/trash/003/stubhome`): the stub ran, got the
+    hook payload on stdin, exit 0.
+- Not checked: a real Claude Code session start rendering the warning.
