@@ -2,6 +2,12 @@
 
 let mapleader = '\'
 
+" ctrl+S saves (~/.config/sh/rc.d/no-tty-pause.sh frees it from flow control);
+" in insert mode this shadows nvim's default signature help
+nnoremap <C-S> <Cmd>update<CR>
+xnoremap <C-S> <Cmd>update<CR>
+inoremap <C-S> <Cmd>update<CR>
+
 " buffer delete, but without closing the window
 nnoremap <Leader>bd <Cmd>bn \| bd#<CR>
 " goto directory

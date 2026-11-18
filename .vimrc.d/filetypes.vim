@@ -22,6 +22,7 @@ augroup extra_filetypes
     autocmd BufNewFile,BufRead *.sls         set filetype=sls.yaml.jinja
     autocmd BufNewFile,BufRead *.log         set filetype=log
     autocmd BufNewFile,BufRead *.sshconfig   set filetype=sshconfig
+    autocmd BufNewFile,BufRead *.bq.sql      set filetype=sql_bigquery
 
     autocmd BufNewFile,BufRead .envrc        set filetype=bash
     autocmd BufNewFile,BufRead Brewfile      set filetype=ruby
