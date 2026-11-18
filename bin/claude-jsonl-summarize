@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+usage() {
+  echo >&2 "Usage: claude-jsonl-summarize <file.jsonl> [file.jsonl ...]"
+  echo >&2 "Converts jsonl to log (if needed), then generates a summary.md via claude --print."
+  echo >&2 "Prints the summary.md path(s) on stdout."
+  exit 1
+}
+
+if (( $# == 0 )); then
+  usage
+fi
+
+summarize_one() {
+  local jsonl="$1"
+  local log="${jsonl%.jsonl}.log"
+  local summary="${jsonl%.jsonl}.summary.md"
+
+  if [[ -e "$summary" && "$summary" -nt "$log" && "$summary" -nt "$jsonl" ]]; then
+    echo >&2 "skip (up to date): $summary"
+    echo "$summary"
+    return
+  fi
+
+  # ensure .log exists and is current
+  claude-jsonl-to-log "$jsonl"
+
+  local log_wc
+  log_wc="$(wc -l < "$log")"
+
+  echo >&2 "summarizing: $log ($log_wc lines) -> $summary"
+  CLAUDECODE='' claude --print \
+    --model haiku \
+    -p "Read and summarize this session log ($log_wc lines): $log
+
+Write a concise markdown summary to stdout. Include:
+- What happened (arc)
+- Who drove what (user vs LLM)
+- Key outcomes
+
+Be concise. Attribute decisions to the correct party." \
+    > "$summary.tmp" 2>/dev/null
+  mv "$summary.tmp" "$summary"
+  echo "$summary"
+}
+export -f summarize_one
+
+# shellcheck disable=SC2016 # $1 is for the child bash
+printf '%s\0' "$@" |
+  xargs -r0 -n1 -P10 bash -c 'summarize_one "$1"' --

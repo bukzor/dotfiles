@@ -1,0 +1,198 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Aggregate open Claude tasks across projects.
+
+Scans ~/repo and ~/.claude for:
+- */.claude/todo.md
+- */.claude/todo.kb/*.md
+- */.claude/sessions.kb/*.md
+
+Counts open `- [ ]` items per file, reads frontmatter `status:` if present,
+filters out `status: done`. Default: mtime histogram + sample.
+"""
+from __future__ import annotations
+
+import argparse
+import re
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOTS = [Path.home() / "repo", Path.home() / ".claude"]
+
+# Path-parts semantic matcher avoids the `**/.claude/X/*.md` glob bug, where
+# patterns requiring an inner `.claude/` directory miss files at the root case
+# (e.g. `~/.claude/todo.md` itself, when the scan root IS `~/.claude`).
+
+OPEN_RE = re.compile(r"^\s*- \[ \]", re.MULTILINE)
+FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+STATUS_RE = re.compile(r"^status:\s*(\S+)", re.MULTILINE)
+HOME = str(Path.home())
+
+
+@dataclass
+class TodoFile:
+    path: Path
+    mtime: float
+    open_count: int
+    status: str | None
+
+    @property
+    def age_days(self) -> int:
+        return int((datetime.now(timezone.utc).timestamp() - self.mtime) / 86400)
+
+    @property
+    def disp(self) -> str:
+        return str(self.path).replace(HOME, "~", 1)
+
+
+def parse_status(text: str) -> str | None:
+    m = FRONTMATTER_RE.match(text)
+    if not m:
+        return None
+    s = STATUS_RE.search(m.group(1))
+    return s.group(1) if s else None
+
+
+def matches(path: Path) -> bool:
+    """True if the path is a tracked artifact: todo.md, todo.kb/*.md,
+    sessions.kb/*.md, or commits.kb/*.md (under .claude/ where applicable)."""
+    name = path.name
+    parts = path.parts
+    if name == "CLAUDE.md":
+        return False
+    if not name.endswith(".md"):
+        return False
+    # Templates and dotfile-named docs are not active threads.
+    if name.startswith("."):
+        return False
+    # .claude/todo.md — must have .claude/ ancestor (anywhere in parts)
+    if name == "todo.md" and ".claude" in parts:
+        return True
+    # .claude/todo.kb/*.md — must have todo.kb/ as parent AND .claude/ ancestor
+    if (len(parts) >= 2 and parts[-2] == "todo.kb"
+            and ".claude" in parts[:-2]):
+        return True
+    # sessions.kb/*.md — dir name is the marker; anywhere
+    if len(parts) >= 2 and parts[-2] == "sessions.kb":
+        return True
+    # commits.kb/*.md — Task files; dir name is the marker; anywhere
+    if len(parts) >= 2 and parts[-2] == "commits.kb":
+        return True
+    return False
+
+
+def scan() -> list[TodoFile]:
+    """Walk ROOTS, match files semantically, dedupe via canonical paths
+    (so symlinks like ~/.claude/skills/X -> ~/repo/.../X count once)."""
+    out: list[TodoFile] = []
+    seen: set[Path] = set()
+    for root in ROOTS:
+        if not root.exists():
+            continue
+        for path in root.rglob("*.md"):
+            if not matches(path):
+                continue
+            try:
+                canonical = path.resolve()
+            except OSError:
+                canonical = path
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            try:
+                text = path.read_text()
+            except (OSError, UnicodeDecodeError):
+                continue
+            open_count = len(OPEN_RE.findall(text))
+            # sessions.kb entries exist only as long as their thread is live;
+            # file-existence is the open-ness signal, not checkboxes.
+            is_session = "sessions.kb" in path.parts
+            if not is_session and open_count == 0:
+                continue
+            status = parse_status(text)
+            if status == "done":
+                continue
+            out.append(TodoFile(
+                path=path,
+                mtime=path.stat().st_mtime,
+                open_count=open_count,
+                status=status,
+            ))
+    return out
+
+
+def fmt_row(f: TodoFile) -> str:
+    count_str = f"{f.open_count:3d}" if f.open_count else "  -"
+    sigil = f" [{f.status}]" if f.status else ""
+    return f"  {count_str}  {f.age_days:4d}d{sigil}  {f.disp}"
+
+
+def cmd_histogram(files: list[TodoFile], sample: int) -> None:
+    buckets: dict[str, list[TodoFile]] = {
+        "<7d": [], "7-30d": [], "30-90d": [], ">90d": [],
+    }
+    for f in files:
+        age = f.age_days
+        if age < 7:
+            buckets["<7d"].append(f)
+        elif age < 30:
+            buckets["7-30d"].append(f)
+        elif age < 90:
+            buckets["30-90d"].append(f)
+        else:
+            buckets[">90d"].append(f)
+    total_opens = sum(f.open_count for f in files)
+    print(f"# {len(files)} files, {total_opens} open items\n")
+    for label, items in buckets.items():
+        items.sort(key=lambda f: f.mtime, reverse=True)
+        opens = sum(f.open_count for f in items)
+        print(f"## {label}: {len(items)} files, {opens} open items")
+        for f in items[:sample]:
+            print(fmt_row(f))
+        if len(items) > sample:
+            print(f"  ... +{len(items) - sample} more")
+        print()
+
+
+def cmd_list(files: list[TodoFile], args: argparse.Namespace) -> None:
+    if args.status:
+        files = [f for f in files if f.status == args.status]
+    if args.max_age is not None:
+        files = [f for f in files if f.age_days <= args.max_age]
+    if args.min_age is not None:
+        files = [f for f in files if f.age_days >= args.min_age]
+    files.sort(key=lambda f: f.mtime, reverse=True)
+    for f in files:
+        print(fmt_row(f))
+    if not files:
+        print("(no files match)")
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__)
+    sub = p.add_subparsers(dest="cmd")
+
+    hp = sub.add_parser("histogram", help="Mtime distribution + sample (default)")
+    hp.add_argument("--sample", type=int, default=10, help="Files shown per bucket (default 10)")
+
+    lp = sub.add_parser("list", help="Filtered listing")
+    lp.add_argument("--status", help="Filter by frontmatter status (active, blocked, open, ...)")
+    lp.add_argument("--max-age", type=int, help="Max age in days")
+    lp.add_argument("--min-age", type=int, help="Min age in days")
+
+    args = p.parse_args()
+    files = scan()
+
+    if args.cmd == "list":
+        cmd_list(files, args)
+    else:
+        sample = getattr(args, "sample", 10)
+        cmd_histogram(files, sample)
+
+
+if __name__ == "__main__":
+    main()

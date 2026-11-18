@@ -1,0 +1,8 @@
+Skill:
+  enablement: 0.085
+  turn_efficiency: 5.0
+  accuracy_boost: 1.19
+  penalty: 0.744
+  benefit: 0.129
+  cost: 3.01
+  value: 0.0429

@@ -1,0 +1,72 @@
+Two upstream families ride concurrently: a ~1.3k harness form (opus/fable)
+and the classic ~10k long form (fable/sonnet sessions), each with the model
+name baked into its commit-trailer example -- hence one upstream.d/ file per
+(family, model) wording. A new model name or a 1M-context marker will trip
+`changed-upstream`; just add the new wording.
+
+2.1.238 dropped the long form's "dedicated tools" preamble paragraph (the
+`IMPORTANT: Avoid using this tool to run cat/head/tail/...` block and its
+Read/Edit/Write bullets) from the opus-1m wording, otherwise unchanged from
+2.1.232 -- already redundant with the harness prompt's own preference line,
+so nothing to fold in.
+
+The stub keeps mechanics (state persistence, timeout, run_in_background) and
+defers everything else to the user's "llm-triggers" system.
+
+It used to also keep a "git safety line" (never skip hooks or run
+`reset`/`checkout --`/`clean -f`/`push -f`/`commit --amend` without explicit
+request) as a named exception to that deferral. Dropped 2026-09-18: it was a
+blanket rule duplicating -- and, on a `personal`-caution repo, contradicting
+-- the graded policy in `reference.kb/git/commit.md` (amend/reset freely
+allowed at `solo`/`personal`), and it caused exactly that wrong refusal in
+session. The actual gap was skipping `must-read.kb/before/git/running-ANY-git-command.md`;
+paying tokens on every request for a rule that's wrong on two of three
+caution levels doesn't fix a discipline failure, it just adds a second,
+lower-fidelity source of truth to keep in sync.
+
+It carries no dedicated-tools line, and none belongs: the harness prompt says
+"Prefer the dedicated file/search tools over shell commands when one fits"
+unconditionally, and the long-form wordings that still ship the preamble say
+it themselves. A version phrased as a permission requirement would be false
+besides -- nothing gates Edit or Write on a prior Read. At 2.1.268, Edit
+succeeds on a file never read this session and outside a previously read line
+range; its only read-shaped failure is the ordinary "String to replace not
+found in file" when the old text is guessed wrong.
+
+The long form's step-by-step
+commit/PR procedure is deliberately dropped, not moved: it teaches bare
+`git commit`/HEREDOC flows and only-commit-when-asked, both of which the
+user's standing config overrides. The commit trailer convention lives in
+reference.kb/git/commit.md.
+
+By 2.1.266-267 upstream itself stopped baking a fixed model name into the
+commit/PR trailer example, switching to "the attribution lines given in the
+conversation's system-reminder, when one is present" (harness-fable-2.1.266,
+harness-opus-2.1.267, long-form-sonnet-2.1.267) -- the same mechanism the
+user's own attribution system-reminder already supplies, so this drift moved
+upstream *into* alignment with our setup rather than out of it; still
+nothing to fold in, since the stub never carried a trailer example to begin
+with. The long-form dedicated-tools bullet also churned in place --
+2.1.261 briefly added `find`/`grep` to the avoid-list with a `find`-from-`.`
+caution, 2.1.267 dropped both again -- noise either way, since the harness
+prompt carries the preference.
+
+By 2.1.273 the long-form haiku wording caught up on both fronts at once
+(long-form-haiku-2.1.273, vs. long-form-haiku-2.1.239): the fixed
+`Co-Authored-By: Claude Haiku 4.5` trailer genericized the same way sonnet's
+did at 2.1.267, and -- newly, not yet seen on sonnet -- the whole "dedicated
+tools" preamble paragraph (`IMPORTANT: Avoid using this tool to run
+cat/head/tail/...` and its Read/Edit/Write bullets) dropped out, same as the
+opus-1m wording did back at 2.1.238. Still nothing to fold in: both changes
+only remove text the stub never depended on.
+
+2.1.286-2.1.311 (2026-11-13 triage): the foreground `timeout` line gained
+"for a foreground command" (2.1.296) and `run_in_background` a background
+`timeout` (default 600000-1800000, max 7200000; 2.1.286-309, gone again by
+2.1.311, so volatile and not carried). Folded in: 2.1.311's narrower `cd`
+persistence (main session only, only when it ends inside the working
+directories -- the stub's old "persists between calls" was wrong outside
+that), "don't poll the output file", and the `@name` notification warning
+(2.1.309) -- a real side effect on someone else, which nothing else in the
+config covers. Haiku's long form (2.1.287) gained only the foreground
+qualifier.

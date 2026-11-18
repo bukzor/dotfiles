@@ -1,0 +1,51 @@
+#!/bin/bash
+# Detach the LXCFS FUSE overlays, exposing the real kernel /proc.
+#
+# LXCFS exists to report container-scoped values. This container has no memory,
+# cpu, or cpuset limit, so every number it serves already equals the kernel's --
+# while adding failure modes that have twice taken down earlyoom: a u64-wrapped
+# SwapFree, and ENOTCONN once the host-side daemon dies. Detaching is pure
+# subtraction, but only while the container stays unlimited: if a limit ever
+# appears, LXCFS starts carrying information the kernel files lack, and this
+# refuses rather than hiding it.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+HERE="$(dirname "$(readlink -f "$0")")"
+MEMORY_LIMIT_FILE=/sys/fs/cgroup/memory/memory.limit_in_bytes
+# cgroup v1 spells "no limit" as a page-aligned LLONG_MAX, not a round number.
+UNLIMITED_MIN=$(( 1 << 62 ))
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+mounts="$(findmnt -rno TARGET -t fuse.lxcfs || : "already detached is the desired steady state: $?")"
+if [ -z "$mounts" ]; then
+  exit 0
+fi
+
+if [ ! -r "$MEMORY_LIMIT_FILE" ]; then
+  "$HERE"/notify "LXCFS left mounted: $MEMORY_LIMIT_FILE is gone, so container limits cannot be checked"
+  exit 0
+fi
+
+memory_limit="$(<"$MEMORY_LIMIT_FILE")"
+if (( memory_limit < UNLIMITED_MIN )); then
+  "$HERE"/notify "LXCFS left mounted: container now has a $memory_limit byte memory limit that only LXCFS reports"
+  exit 0
+fi
+
+echo "$mounts" | xargs -d'\n' -r sudo umount --lazy --
+# earlyoom keeps /proc/meminfo open, so it reads the detached inode until restarted.
+sudo systemctl restart earlyoom
+
+"$HERE"/notify "Detached $(echo "$mounts" | wc -l) LXCFS mounts and restarted earlyoom"

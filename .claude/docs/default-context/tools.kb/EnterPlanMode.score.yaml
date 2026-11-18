@@ -1,0 +1,8 @@
+EnterPlanMode:
+  enablement: 0.035
+  turn_efficiency: 2.0
+  accuracy_boost: 1.09
+  penalty: 0.892
+  benefit: 0.00827
+  cost: 3.13
+  value: 0.00264

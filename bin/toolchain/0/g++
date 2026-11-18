@@ -1,0 +1,8 @@
+#!/bin/sh
+clang \
+  --start-no-unused-arguments \
+  -Wl,--allow-shlib-undefined \
+  -stdlib=libc++ \
+  --end-no-unused-arguments \
+  "$@" \
+;

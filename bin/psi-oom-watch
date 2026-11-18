@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""Kill the biggest memory hog when the whole machine stalls on memory.
+
+earlyoom watches a *level* -- MemAvailable -- and so is blind to the failure
+this machine actually has: a reclaim livelock where MemAvailable stays healthy
+while nothing makes progress. This watches a *rate* instead. `full avg10` in
+/proc/pressure/memory is the fraction of the last 10s during which *every*
+runnable task was stalled waiting on memory; it is unaffected by how much
+"available" page cache the kernel is thrashing.
+
+/proc/pressure is not among the files lxcfs overlays, so this signal survives
+both lxcfs failure modes that have taken earlyoom down.
+
+One signal, one job: the memory *level* stays earlyoom's, deliberately. Two
+independent killers on this machine is a worse failure mode than a slightly
+mistuned threshold on either.
+
+Everything here is bounded on purpose. It kills nothing without --dry-run
+removed, refuses to act more than KILL_BUDGET times an hour, refuses to kill
+anything too small to matter, and stands down entirely while DISABLE_FLAG
+exists. A watchdog that runs as root at Nice=-20 with Restart=always is the
+last process you can stop by hand, so it must be the one that stops itself.
+
+A dry run is a faithful simulation, not a mute one: it consults every bound
+and spends budget exactly as the armed daemon would, skipping only the kill
+itself. Restraint that only appears in the untested mode is not restraint.
+
+Reasoning and threshold derivation:
+  crostini-health remediations.kb/psi-oom-watch.md
+"""
+
+import ctypes
+import os
+import signal
+import sys
+import time
+
+PSI_PATH = "/proc/pressure/memory"
+DISABLE_FLAG = "/etc/psi-oom-watch.off"  # exists -> observe, never act
+
+INTERVAL = 1.0  # seconds between samples
+TERM_PSI = 20.0  # full avg10 at or above this ...
+TERM_HOLD = 20.0  # ... held this long -> SIGTERM the biggest hog
+KILL_PSI = 60.0  # full avg10 at or above this ...
+KILL_HOLD = 10.0  # ... held this long -> SIGKILL it
+LOG_PSI = 5.0  # log every sample at or above this, act on none of them
+COOLDOWN = 60.0  # after acting, let the machine recover before judging again
+REPORT = 3600.0  # heartbeat: peak pressure since the last one, matching earlyoom -r
+
+# Bounds on our own authority. A watchdog that keeps killing because its
+# thresholds are wrong is worse than the freeze it was installed to prevent:
+# it survives reboots, outranks everything, and takes the machine with it.
+# Past the budget we go quiet and keep logging -- noise, not damage.
+KILL_BUDGET = 3  # actions ...
+BUDGET_WINDOW = 3600.0  # ... per this many seconds
+MIN_VICTIM_MIB = 100  # below this, killing cannot relieve memory pressure
+
+# Killing any of these makes things worse, not better.
+PROTECTED = frozenset(
+    (
+        "systemd",
+        "systemd-journal",
+        "systemd-logind",
+        "systemd-udevd",
+        "dbus-daemon",
+        "sshd",
+        "monit",
+        "earlyoom",
+        "psi-oom-watch",
+        "garcon",
+        "sommelier",
+        "cros-garcon",
+        "init",
+    )
+)
+
+
+def log(message):
+    print(message, flush=True)
+
+
+def lock_memory():
+    """mlockall(MCL_CURRENT|MCL_FUTURE), so our own pages are never the ones
+    being refaulted in the storm we exist to break. Needs CAP_IPC_LOCK."""
+    try:
+        libc = ctypes.CDLL("libc.so.6", use_errno=True)
+        if libc.mlockall(1 | 2) != 0:
+            log("warning: mlockall failed: {}".format(os.strerror(ctypes.get_errno())))
+    except OSError as error:
+        log("warning: mlockall unavailable: {}".format(error))
+
+
+def read_full_avg10(fd):
+    """Parse `full avg10=N` without allocating a file object per tick."""
+    for line in os.pread(fd, 256, 0).decode().splitlines():
+        if line.startswith("full "):
+            return float(line.split()[1].split("=")[1])
+    raise ValueError("no `full` line in " + PSI_PATH)
+
+
+def biggest_hog():
+    """(pid, name, rss_kb) of the largest resident non-protected process."""
+    worst = None
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        pid = int(entry)
+        if pid == 1 or pid == os.getpid():
+            continue
+        try:
+            with open("/proc/{}/status".format(pid)) as status:
+                name = None
+                rss = None
+                for line in status:
+                    if line.startswith("Name:"):
+                        name = line.split(maxsplit=1)[1].strip()
+                    elif line.startswith("VmRSS:"):
+                        rss = int(line.split()[1])
+                        break
+        except (OSError, ValueError, IndexError):
+            continue  # process exited, or a kernel thread with no VmRSS
+        if rss is None or name in PROTECTED:
+            continue
+        if worst is None or rss > worst[2]:
+            worst = (pid, name, rss)
+    if worst is not None and worst[2] < MIN_VICTIM_MIB * 1024:
+        return None  # nothing here is big enough for killing it to help
+    return worst
+
+
+def act(sig, psi, held, dry_run):
+    """Signal the biggest hog, or say why nobody was signalled.
+
+    Returns whether this counted against the kill budget. A dry run counts:
+    the restraint the log shows must be the restraint the armed daemon would
+    have shown, or the log is not evidence about the armed daemon."""
+    victim = biggest_hog()
+    if victim is None:
+        log(
+            "full avg10 {:.2f} for {:.0f}s, but no process is over {} MiB -- "
+            "not acting".format(psi, held, MIN_VICTIM_MIB)
+        )
+        return False
+    pid, name, rss = victim
+    log(
+        "full avg10 {:.2f} held {:.0f}s -- {} {} to {} (pid {}, {} MiB rss)".format(
+            psi,
+            held,
+            "would send" if dry_run else "sending",
+            signal.Signals(sig).name,
+            name,
+            pid,
+            rss // 1024,
+        )
+    )
+    if dry_run:
+        return True
+    try:
+        os.kill(pid, sig)
+    except OSError as error:
+        log("kill failed: {}".format(error))
+        return False
+    return True
+
+
+def report(psi_path):
+    """Print what we see and who would die, then exit. No action taken."""
+    fd = os.open(psi_path, os.O_RDONLY)
+    try:
+        log("full avg10 {:.2f}".format(read_full_avg10(fd)))
+    finally:
+        os.close(fd)
+    victim = biggest_hog()
+    if victim is None:
+        log("no eligible victim")
+    else:
+        log("next victim: {} (pid {}, {} MiB rss)".format(victim[1], victim[0], victim[2] // 1024))
+
+
+def main():
+    args = sys.argv[1:]
+    # --psi-path exists so the decision logic can be driven from a scripted
+    # file. The alternative is proving it against a real livelock, and this
+    # machine has already demonstrated it does not survive one of those.
+    psi_path = args[args.index("--psi-path") + 1] if "--psi-path" in args else PSI_PATH
+    if "--report" in args:
+        return report(psi_path)
+    dry_run = "--dry-run" in args
+    lock_memory()
+    fd = os.open(psi_path, os.O_RDONLY)
+    log(
+        "watching {} full avg10: SIGTERM at {:.0f}/{:.0f}s, SIGKILL at {:.0f}/{:.0f}s{}".format(
+            psi_path, TERM_PSI, TERM_HOLD, KILL_PSI, KILL_HOLD,
+            " (dry run)" if dry_run else "",
+        )
+    )
+
+    term_since = kill_since = None
+    quiet_until = 0.0
+    spent = []  # monotonic timestamps of actions taken, within BUDGET_WINDOW
+    peak = 0.0
+    next_report = time.monotonic() + REPORT
+
+    while True:
+        now = time.monotonic()
+        psi = read_full_avg10(fd)
+        peak = max(peak, psi)
+
+        # A journal with nothing in it is ambiguous -- no pressure, or no
+        # daemon? The heartbeat resolves that, and its peaks are the dataset
+        # these thresholds were guessed without.
+        if now >= next_report:
+            log("hourly: peak full avg10 {:.2f}, now {:.2f}".format(peak, psi))
+            peak = 0.0
+            next_report = now + REPORT
+
+        term_since = now if (psi >= TERM_PSI and term_since is None) else term_since
+        kill_since = now if (psi >= KILL_PSI and kill_since is None) else kill_since
+        if psi < TERM_PSI:
+            term_since = None
+        if psi < KILL_PSI:
+            kill_since = None
+
+        if psi >= LOG_PSI:
+            log("full avg10 {:.2f}".format(psi))
+
+        due = None
+        if now >= quiet_until:
+            if kill_since is not None and now - kill_since >= KILL_HOLD:
+                due = (signal.SIGKILL, now - kill_since)
+            elif term_since is not None and now - term_since >= TERM_HOLD:
+                due = (signal.SIGTERM, now - term_since)
+
+        if due is not None:
+            sig, held = due
+            spent = [t for t in spent if now - t < BUDGET_WINDOW]
+            if os.path.exists(DISABLE_FLAG):
+                log("{} exists -- standing down at full avg10 {:.2f}".format(DISABLE_FLAG, psi))
+            elif len(spent) >= KILL_BUDGET:
+                log(
+                    "budget spent ({} actions in the last hour) -- refusing to act "
+                    "at full avg10 {:.2f}. Something is wrong with these thresholds; "
+                    "fix them rather than raising the budget.".format(len(spent), psi)
+                )
+            elif act(sig, psi, held, dry_run):
+                spent.append(now)
+
+            # Whether or not we acted, wait before judging the situation again.
+            term_since = kill_since = None
+            quiet_until = now + COOLDOWN
+
+        time.sleep(INTERVAL)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass

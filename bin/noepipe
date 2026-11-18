@@ -1,0 +1,16 @@
+#!/bin/bash
+# Usage: noepipe CMD [ARGS]...
+# Run CMD; treat exit 141 (SIGPIPE) as success. Other exits pass through.
+set -uo pipefail
+
+if (( $# == 0 )); then
+  echo >&2 "Usage: $(basename "$0") CMD [ARGS]..."
+  exit 2
+fi
+
+"$@"
+ec=$?
+if (( ec == 141 )); then
+  exit 0
+fi
+exit "$ec"

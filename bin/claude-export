@@ -1,0 +1,86 @@
+#!/bin/bash
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+SNAPSHOT_DIR="$HOME/.claude/shell-snapshots"
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: claude-export VAR=value
+       claude-export VAR value
+
+Export a variable to the current Claude Code session.
+The variable persists across Bash() tool calls.
+
+Only works within a Claude Code session (CLAUDECODE=1).
+EOF
+  exit 1
+}
+
+if [[ "${CLAUDECODE:-}" != "1" ]]; then
+  echo >&2 "claude-export: not in a Claude Code session"
+  exit 1
+fi
+
+if (( ${DEBUG:-0} > 0 )); then
+  set -x
+fi
+
+# Find snapshot path via session ID (race-free, nesting-independent)
+get_snapshot_path() {
+  local sid snapshot_path
+  sid=$(cut -d' ' -f6 /proc/self/stat)
+  snapshot_path=$(ps -o cmd= --sid "$sid" | sed -n 's/.*source \([^ ]*snapshot[^ ]*\.sh\).*/\1/p')
+
+  if [[ -z "$snapshot_path" ]]; then
+    echo >&2 "claude-export: could not find snapshot in session $sid"
+    echo >&2 "  processes: $(ps -o cmd= --sid "$sid" | tr '\n' ';')"
+    return 1
+  fi
+
+  if [[ ! -f "$snapshot_path" ]]; then
+    echo >&2 "claude-export: snapshot file not found: $snapshot_path"
+    return 1
+  fi
+
+  echo "$snapshot_path"
+}
+
+# Parse arguments
+if (( $# == 0 )); then
+  usage
+fi
+
+if (( $# == 1 )); then
+  # VAR=value form
+  if [[ "$1" != *=* ]]; then
+    usage
+  fi
+  var="${1%%=*}"
+  value="${1#*=}"
+elif (( $# == 2 )); then
+  # VAR value form
+  var="$1"
+  value="$2"
+else
+  usage
+fi
+
+# Validate variable name
+if [[ ! "$var" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+  echo >&2 "claude-export: invalid variable name: $var"
+  exit 1
+fi
+
+snapshot_path=$(get_snapshot_path)
+
+# Append export statement
+printf 'export %s=%q\n' "$var" "$value" >> "$snapshot_path"
+
+echo >&2 "claude-export: $var exported to session"

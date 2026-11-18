@@ -1,0 +1,9 @@
+[Unit]
+Description=Auto-install crontab on change
+
+[Service]
+ExecStart=/bin/bash -c 'while inotifywait -e modify ~/.config/cron/crontab; do crontab ~/.config/cron/crontab; done'
+Restart=always
+
+[Install]
+WantedBy=default.target

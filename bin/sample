@@ -1,0 +1,23 @@
+#!/bin/bash
+# Usage: sample N [FILES]...
+# Sample N lines from FILES (or stdin if none given), preserving original order.
+set -euo pipefail
+
+usage() {
+    cat >&2 <<EOF
+Usage: $(basename "$0") N [FILES]...
+
+Sample N lines from FILES (or stdin if none given), preserving original order.
+EOF
+}
+
+case ${1-} in
+    -h|--help) usage; exit 0 ;;
+    "") usage; exit 2 ;;
+    -*) echo "$(basename "$0"): unknown option: $1" >&2; usage; exit 2 ;;
+esac
+
+n=$1
+shift
+
+shuf "$@" | head -n "$n" | sort

@@ -1,0 +1,8 @@
+AskUserQuestion:
+  enablement: 0.14
+  turn_efficiency: 2.0
+  accuracy_boost: 1.04
+  penalty: 0.949
+  benefit: 0.0149
+  cost: 0.541
+  value: 0.0275

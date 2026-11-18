@@ -1,0 +1,88 @@
+#!/bin/bash
+set -euo pipefail
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+BIN_DIR=$(cd -- "$SCRIPT_DIR/.." && pwd)
+UNDER_TEST="$BIN_DIR/md-frontmatter"
+
+TESTDIR=$(mktemp -d)
+trap 'rm -rf "$TESTDIR"' EXIT
+
+pass=0
+fail=0
+check() {
+  local name=$1 expected=$2 actual=$3
+  if [[ "$expected" == "$actual" ]]; then
+    echo "PASS: $name"
+    pass=$((pass+1))
+  else
+    echo "FAIL: $name"
+    diff -u <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") || true
+    fail=$((fail+1))
+  fi
+}
+
+# === extract: FM with comments and mixed types ===
+cat > "$TESTDIR/fm.md" <<'EOF'
+---
+title: Hello
+tags:
+  - a
+  - b
+date: 2026-01-01
+---
+
+# Body
+EOF
+got=$("$UNDER_TEST" "$TESTDIR/fm.md")
+expected="{\"path\":\"$TESTDIR/fm.md\",\"@value\":{\"title\":\"Hello\",\"tags\":[\"a\",\"b\"],\"date\":\"2026-01-01\"}}"
+check "extract: typical frontmatter" "$expected" "$got"
+
+# === extract: file with no frontmatter emits @value: null ===
+echo "no frontmatter here" > "$TESTDIR/nofm.md"
+got=$("$UNDER_TEST" "$TESTDIR/nofm.md")
+expected="{\"path\":\"$TESTDIR/nofm.md\",\"@value\":null}"
+check "extract: no-FM emits null" "$expected" "$got"
+
+# === extract: file starting with non-FM content that yq would otherwise parse as YAML ===
+# E.g., a markdown file whose first line is a bare word (valid YAML scalar) — must NOT be treated as frontmatter
+cat > "$TESTDIR/yaml-looking.md" <<'EOF'
+hello
+===
+
+This is a markdown setext heading, not frontmatter.
+EOF
+got=$("$UNDER_TEST" "$TESTDIR/yaml-looking.md")
+expected="{\"path\":\"$TESTDIR/yaml-looking.md\",\"@value\":null}"
+check "extract: yaml-parseable markdown is NOT frontmatter" "$expected" "$got"
+
+# === extract: empty frontmatter block ===
+cat > "$TESTDIR/empty-fm.md" <<'EOF'
+---
+---
+
+body
+EOF
+got=$("$UNDER_TEST" "$TESTDIR/empty-fm.md")
+expected="{\"path\":\"$TESTDIR/empty-fm.md\",\"@value\":null}"
+check "extract: empty fenced block emits null" "$expected" "$got"
+
+# === extract: multiple files emit JSONL ===
+got=$("$UNDER_TEST" "$TESTDIR/fm.md" "$TESTDIR/nofm.md" | wc -l)
+check "extract: JSONL one line per file" "2" "$got"
+
+echo
+echo "=== md-frontmatter: $pass passed, $fail failed ==="
+exit $(( fail > 0 ))

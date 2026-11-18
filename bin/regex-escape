@@ -1,0 +1,7 @@
+#!/bin/sh
+# escape the input on stdin such that it will be treated literally in a regex
+# (in a sed command)
+
+sed -r '
+  s/[][)(}{#@|/.*?]/\\&/g
+'

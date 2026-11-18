@@ -1,0 +1,390 @@
+#!/usr/bin/env python3
+"""Which OSS package already ships an executable (or file) by this name?
+
+Asks several ecosystems' package indexes at once. Two query shapes:
+
+    oss-which weir             # executable basename -- every source
+    oss-which /usr/bin/weir    # full path -- only sources that index paths
+
+Sources, and what each actually knows:
+
+    debian      local apt-file Contents indexes (whatever suites apt has)
+    alpine      pkgs.alpinelinux.org contents search (edge, x86_64)
+    brew        formulae.brew.sh "executables" field + cask binary artifacts
+    nix         search.nixos.org "package_programs" (nixos-unstable)
+    repology    project *names* across 400+ repos -- breadth, not filesystem
+    registries  npm / PyPI / crates.io, which also land binaries on PATH
+    github      repos whose name is exactly the query
+
+Only the first four answer "is this executable name taken"; the rest answer
+the softer "is anyone using this name", which is what actually bites when
+you go to publish.
+
+Exits 1 when a packaged executable of that name exists, 0 when the name is
+free of one -- so `oss-which foo || echo available` works in a script.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import NamedTuple
+
+UA = "oss-which (+https://github.com/bukzor)"
+CACHE = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "oss-which"
+TTL = 7 * 86400
+
+# Sources that index full paths, not just command names.
+PATH_CAPABLE = ("debian", "alpine")
+# Sources that prove an *executable* of this name exists, vs. merely the name.
+EXECUTABLE_SOURCES = ("debian", "alpine", "brew", "nix")
+
+
+class Hit(NamedTuple):
+    source: str
+    package: str
+    detail: str
+
+
+class Unavailable(Exception):
+    """This source cannot answer here -- missing tool, unsupported query."""
+
+
+def fetch(url: str, *, data: bytes | None = None, headers: dict[str, str] = {}) -> bytes:
+    req = urllib.request.Request(url, data=data)
+    req.add_header("User-Agent", UA)  # pkgs.alpinelinux.org 502s without one
+    for key, value in headers.items():
+        req.add_header(key, value)
+    with urllib.request.urlopen(req, timeout=60) as response:
+        return response.read()
+
+
+def fetch_json(url: str, **kwargs):
+    return json.loads(fetch(url, **kwargs))
+
+
+def stale(path: Path) -> bool:
+    return not path.exists() or time.time() - path.stat().st_mtime > TTL
+
+
+# --- sources ---------------------------------------------------------------
+
+
+def debian(query: str, refresh: bool) -> list[Hit]:
+    if shutil.which("apt-file") is None:
+        raise Unavailable("apt-file not installed")
+    if "/" in query:
+        pattern = re.escape(query) + "$"
+    else:
+        pattern = r"/(s?bin|libexec)/" + re.escape(query) + "$"
+    # apt-file exits 1 on no match, which is not an error here.
+    result = subprocess.run(
+        ["apt-file", "search", "-x", pattern], capture_output=True, text=True
+    )
+    if result.returncode > 1:
+        raise Unavailable(result.stderr.strip() or f"apt-file exit {result.returncode}")
+    hits = []
+    for line in result.stdout.splitlines():
+        package, _, path = line.partition(": ")
+        hits.append(Hit("debian", package, path.strip()))
+    return hits
+
+
+ALPINE_ROW = re.compile(
+    r'<td style="white-space: pre-wrap;">([^<]*)</td>.*?'
+    r'<a href="/package/([^/]+)/([^/]+)/([^/]+)/([^"]+)">',
+    re.S,
+)
+
+
+def alpine(query: str, refresh: bool) -> list[Hit]:
+    path, _, name = query.rpartition("/")
+    url = "https://pkgs.alpinelinux.org/contents?" + urllib.parse.urlencode(
+        {
+            "file": name,
+            "path": path,
+            "name": "",
+            "branch": "edge",
+            "repo": "",
+            "arch": "x86_64",
+        }
+    )
+    html = fetch(url).decode()
+    hits = [
+        Hit("alpine", match[4], f"{match[0]}  [{match[1]}/{match[2]}]")
+        for match in ALPINE_ROW.findall(html)
+    ]
+    if "/" in query:
+        return hits
+    # Alpine matches on basename alone, so a completion or doc file of the same
+    # name comes back too; keep only the ones that are actually on a PATH.
+    on_path = re.compile(r"/(s?bin|libexec)/" + re.escape(query) + "$")
+    return [hit for hit in hits if on_path.search(hit.detail.split("  [")[0])]
+
+
+def brew_index(refresh: bool) -> Path:
+    """exe<TAB>package<TAB>kind, distilled from the 50MB of brew API JSON."""
+    index = CACHE / "brew.tsv"
+    if not (refresh or stale(index)):
+        return index
+    lines = []
+    for formula in fetch_json("https://formulae.brew.sh/api/formula.json"):
+        for exe in formula.get("executables") or ():
+            lines.append(f"{exe}\t{formula['full_name']}\tformula")
+    for cask in fetch_json("https://formulae.brew.sh/api/cask.json"):
+        for artifact in cask.get("artifacts") or ():
+            if not isinstance(artifact, dict):
+                continue
+            for binary in artifact.get("binary") or ():
+                # a binary artifact is [source_path, {"target": command_name}]
+                name = binary.get("target", "") if isinstance(binary, dict) else binary
+                if name:
+                    lines.append(f"{Path(name).name}\t{cask['token']}\tcask")
+    CACHE.mkdir(parents=True, exist_ok=True)
+    index.write_text("\n".join(sorted(set(lines))) + "\n")
+    return index
+
+
+def brew(query: str, refresh: bool) -> list[Hit]:
+    if "/" in query:
+        raise Unavailable("brew indexes command names, not paths")
+    hits = []
+    for line in brew_index(refresh).read_text().splitlines():
+        exe, package, kind = line.split("\t")
+        if exe == query:
+            hits.append(Hit("brew", package, kind))
+    return hits
+
+
+def nix_backend(refresh: bool) -> dict:
+    """search.nixos.org ships its elasticsearch creds to the browser."""
+    cached = CACHE / "nix-backend.json"
+    if not (refresh or stale(cached)):
+        return json.loads(cached.read_text())
+    page = fetch("https://search.nixos.org/packages").decode()
+    bundle = re.search(r'src="(/static/js/index\.[^"]+\.js)"', page)
+    if not bundle:
+        raise Unavailable("could not locate search.nixos.org js bundle")
+    source = fetch("https://search.nixos.org" + bundle[1]).decode()
+
+    def field(name: str, pattern: str) -> str:
+        match = re.search(pattern, source)
+        if not match:
+            raise Unavailable(f"could not extract {name} from search.nixos.org")
+        return match[1]
+
+    backend = {
+        "user": field("username", r'elasticsearchUsername:"([^"]+)"'),
+        "password": field("password", r'elasticsearchPassword:"([^"]+)"'),
+        "schema": field("schema", r'elasticsearchMappingSchemaVersion:parseInt\("(\d+)"\)'),
+    }
+    CACHE.mkdir(parents=True, exist_ok=True)
+    cached.write_text(json.dumps(backend))
+    return backend
+
+
+def nix(query: str, refresh: bool) -> list[Hit]:
+    if "/" in query:
+        raise Unavailable("nix indexes command names, not paths")
+    backend = nix_backend(refresh)
+    auth = base64.b64encode(
+        f"{backend['user']}:{backend['password']}".encode()
+    ).decode()
+    body = json.dumps(
+        {
+            "query": {"term": {"package_programs": query}},
+            "size": 20,
+            "_source": ["package_attr_name", "package_programs", "package_description"],
+        }
+    ).encode()
+    url = (
+        f"https://search.nixos.org/backend/latest-{backend['schema']}"
+        "-nixos-unstable/_search"
+    )
+    response = fetch_json(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json", "Authorization": f"Basic {auth}"},
+    )
+    return [
+        Hit(
+            "nix",
+            hit["_source"]["package_attr_name"],
+            (hit["_source"].get("package_description") or "")[:70],
+        )
+        for hit in response["hits"]["hits"]
+    ]
+
+
+def repology(query: str, refresh: bool) -> list[Hit]:
+    if "/" in query:
+        raise Unavailable("repology indexes project names, not paths")
+    try:
+        packages = fetch_json(f"https://repology.org/api/v1/project/{query}")
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return []
+        raise
+    repos = sorted({package["repo"] for package in packages})
+    if not repos:
+        return []
+    return [Hit("repology", query, f"{len(packages)} packages in: {', '.join(repos)}")]
+
+
+def registries(query: str, refresh: bool) -> list[Hit]:
+    if "/" in query:
+        raise Unavailable("registries index project names, not paths")
+    hits = []
+
+    def probe(url: str):
+        try:
+            return fetch_json(url)
+        except urllib.error.HTTPError as error:
+            if error.code in (403, 404):
+                return None
+            raise
+
+    npm = probe(f"https://registry.npmjs.org/{query}")
+    if npm:
+        latest = npm["dist-tags"]["latest"]
+        commands = npm["versions"][latest].get("bin") or {}
+        commands = {commands: True} if isinstance(commands, str) else commands
+        which = f"bin={','.join(commands)}" if commands else "no bin"
+        hits.append(Hit("npm", f"{query} {latest}", f"{which}  {npm.get('description', '')[:60]}"))
+
+    pypi = probe(f"https://pypi.org/pypi/{query}/json")
+    if pypi:
+        info = pypi["info"]
+        hits.append(Hit("pypi", f"{query} {info['version']}", (info.get("summary") or "")[:70]))
+
+    crate = probe(f"https://crates.io/api/v1/crates/{query}")
+    if crate:
+        info = crate["crate"]
+        hits.append(
+            Hit(
+                "crates",
+                f"{query} {info['max_version']}",
+                f"{(info.get('description') or '')[:60]}  dl={info['downloads']}",
+            )
+        )
+    return hits
+
+
+def github(query: str, refresh: bool) -> list[Hit]:
+    if "/" in query:
+        raise Unavailable("github search indexes repo names, not paths")
+    if shutil.which("gh") is None:
+        raise Unavailable("gh not installed")
+    found = {}
+    # Two passes: best-match ranking buries new repos, recency buries popular ones.
+    for sort in ("stars", "updated"):
+        result = subprocess.run(
+            ["gh", "search", "repos", query, "--match", "name", "--limit", "100",
+             "--sort", sort, "--json", "fullName,stargazersCount,language,description"],
+            capture_output=True, text=True,
+        )
+        if result.returncode:
+            raise Unavailable(result.stderr.strip().splitlines()[-1:] or "gh failed")
+        for repo in json.loads(result.stdout):
+            if repo["fullName"].rpartition("/")[2] == query:
+                found[repo["fullName"]] = repo
+    ranked = sorted(found.values(), key=lambda r: -r["stargazersCount"])[:8]
+    return [
+        Hit(
+            "github",
+            repo["fullName"],
+            f"{repo['stargazersCount']}*  {repo['language'] or '-'}  "
+            f"{(repo['description'] or '')[:60]}",
+        )
+        for repo in ranked
+    ]
+
+
+SOURCES = {
+    "debian": debian,
+    "alpine": alpine,
+    "brew": brew,
+    "nix": nix,
+    "repology": repology,
+    "registries": registries,
+    "github": github,
+}
+
+
+# --- driver ----------------------------------------------------------------
+
+
+def search(query: str, names: list[str], refresh: bool) -> int:
+    def run(name):
+        try:
+            return SOURCES[name](query, refresh)
+        except Unavailable as error:
+            return [Hit(name, "-- skipped", str(error))]
+        except Exception as error:  # a flaky source must not sink the run
+            return [Hit(name, "-- ERROR", f"{type(error).__name__}: {error}")]
+
+    with ThreadPoolExecutor(max_workers=len(names)) as pool:
+        results = dict(zip(names, pool.map(run, names)))
+
+    print(f"== {query}")
+    executables = 0
+    mentions = 0
+    for name in names:
+        hits = results[name]
+        if not hits:
+            print(f"  {name:<11} --")
+            continue
+        for hit in hits:
+            print(f"  {hit.source:<11} {hit.package:<28} {hit.detail}")
+            if hit.package.startswith("--"):
+                continue
+            if name in EXECUTABLE_SOURCES:
+                executables += 1
+            else:
+                mentions += 1
+
+    if executables:
+        verdict = f"TAKEN: {executables} packaged executable(s) named {query!r}"
+    elif mentions:
+        verdict = f"free as an executable name, but {mentions} project(s) already use {query!r}"
+    else:
+        verdict = f"free: nothing found named {query!r}"
+    print(f"  {'VERDICT':<11} {verdict}")
+    return 1 if executables else 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("query", nargs="+", help="executable name, or absolute path")
+    parser.add_argument(
+        "-s", "--source", action="append", choices=sorted(SOURCES),
+        help="limit to this source (repeatable); default is all",
+    )
+    parser.add_argument(
+        "-r", "--refresh", action="store_true", help="rebuild cached indexes first"
+    )
+    args = parser.parse_args()
+
+    names = args.source or list(SOURCES)
+    if any("/" in query for query in args.query):
+        names = [name for name in names if name in PATH_CAPABLE] or list(PATH_CAPABLE)
+
+    return max(search(query, names, args.refresh) for query in args.query)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

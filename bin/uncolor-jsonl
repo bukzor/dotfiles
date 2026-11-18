@@ -1,0 +1,12 @@
+#!/usr/bin/env -S jq -cf
+
+# Recursively remove ANSI escape sequences from all strings
+# Equivalent to: s/\x1b[^[:alpha:]]*[[:alpha:]]//g
+
+walk(
+  if type == "string" then
+    gsub("\u001b[^a-zA-Z]*[a-zA-Z]"; "")
+  else
+    .
+  end
+)

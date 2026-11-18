@@ -1,0 +1,60 @@
+#!/bin/bash
+# use homebrew: clang-16 and any installed headers / libs; avoid system linkage
+set -eEuo pipefail
+
+BREW=/opt/homebrew
+LINUXBREW=/home/linuxbrew/.linuxbrew
+
+
+if [[ "${DEBUG:-}" ]]; then
+  set -x
+fi
+
+
+: "sysroot requires that absolute paths are valid with respect to the sysroot,"
+: "so we have to do some symlink trickery"
+ln -sf ../.. -T "$BREW"/"$BREW"
+ln -sf ../.. -T "$BREW"/"$LINUXBREW"
+
+config=(
+  --start-no-unused-arguments
+
+  # use homebrew for everything:
+  --sysroot="$BREW"     # pretend that /opt/homebrew is /
+  -rtlib=compiler-rt    # use clang's crtbegin-x86_64.o
+
+  # dynamic linkage
+  -Wl,--dynamic-linker="$BREW/lib/ld.so"  # use homebrew'd ld.so
+  -Wl,--rpath="$BREW"/lib                 # remember the .so dir
+
+  # gcc compat:
+  -Wl,--allow-shlib-undefined
+  -stdlib=libc++
+)
+
+if [[ "${DEBUG:-}" ]]; then
+  config+=(
+    -v
+    -Wl,--verbose
+  )
+fi
+
+config+=(
+  --end-no-unused-arguments   # dont freak out when the above defaults go unused
+)
+
+exec clang-16 "${config[@]}" "$@"
+
+unused=( # this is all taken care of by --sysroot
+  -nostdinc                               # don't use /include /usr/include
+  -I"$BREW"/lib/clang/16/include          # find stddef.h here
+  -I"$BREW"/include                       # find #include "lzma.h" here
+  -B"$BREW"/lib                           # find Scrt1.o here
+  -L"$BREW"/lib                           # find liblzma, libc, ld-linux here
+)
+
+useless=(
+  -Wl,--sysroot="//./"  # prefixed to libc and ld-linux
+  -Wl,-nostdlib  # noop?
+  -frtlib-add-rpath  # noop?
+)

@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+systemctl --user daemon-reload
+for unit in ~/.config/systemd/user/*.{service,timer,socket}; do
+    [ -f "$unit" ] || continue
+    name=$(basename "$unit")
+    systemctl --user enable "$name"
+    systemctl --user restart "$name"
+done

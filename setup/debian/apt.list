@@ -1,0 +1,13 @@
+# I use these all the time
+tmux
+vim
+
+# super useful for debian
+aptitude
+apt-file
+
+# basic OSS tooling
+podman
+uidmap  # `newuidmap` required by podman
+clang
+

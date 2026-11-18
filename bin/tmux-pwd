@@ -1,0 +1,3 @@
+#!/bin/sh
+set -x
+tmux display-message -p '#{session_path}'

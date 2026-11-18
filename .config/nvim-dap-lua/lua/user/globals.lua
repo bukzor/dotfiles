@@ -1,0 +1,1 @@
+noop = function() end

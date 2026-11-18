@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export NVIM_APPNAME="${NVIM_APPNAME:-"$(basename "$0")"}"
+
+exec -a "$NVIM_APPNAME" nvim "$@"

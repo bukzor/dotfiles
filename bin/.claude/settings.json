@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./claude-jsonl-display)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

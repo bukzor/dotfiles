@@ -1,0 +1,12 @@
+# Directory names the search never descends into, one per line. This buys
+# speed and nothing else: a git repository's interior is recognized and
+# skipped whether or not it is named here.
+# Emptied: descend everywhere.
+
+.git
+.cache
+.npm
+.rustup
+.venv
+node_modules
+target

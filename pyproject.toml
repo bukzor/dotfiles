@@ -1,0 +1,30 @@
+[project]
+name = "bukzor.home"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "chatfs-cli",
+]
+
+[dependency-groups]
+dev = [
+    "bukzor-home",
+    # "pix2tex>=0.1.4",  # pulls in torch/nvidia
+    "pyyaml>=6.0.3",
+    "ruamel-yaml>=0.18.15",
+    "pudb>=2025.1.5",
+    "pynvim>=0.6.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "repo/github.com/bukzor/bukzor.rust-practice/claude-jsonl-display/python",
+    ".",
+    "repo/github.com/bukzor/prototype.chatfs/packages/chatfs-cli",
+]
+
+[tool.uv.sources]
+bukzor-home = { workspace = true }
+chatfs-cli = { workspace = true, editable = true }

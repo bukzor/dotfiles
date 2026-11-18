@@ -1,0 +1,6 @@
+# Contains OAuth tokens and refresh tokens — never commit
+config/default.toml
+
+# Transient local state
+logs/
+metrics.json

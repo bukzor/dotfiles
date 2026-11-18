@@ -1,0 +1,113 @@
+#!/bin/bash
+set -euo pipefail
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+# Helper function to get absolute path
+abspath() {
+  realpath -Lm "$1"
+}
+
+# Merge and symlink: make src -> dst symlink, handling all cases
+# Args: src dst [description]
+merge_and_symlink() {
+  local src="$1"
+  local dst="$2"
+  local desc="${3:-}"
+  set -x
+
+  # Already linked - nothing to do
+  if [[ -L "$src" ]] && [[ "$(readlink "$src")" == "$dst" ]]; then
+    echo "✓ Symlink already exists${desc:+ ($desc)}"
+    return
+  fi
+
+  # Handle src if it exists (move or merge into dst)
+  if [[ -e "$src" ]]; then
+    if [[ -e "$dst" ]]; then
+      # Both exist - merge src into dst
+      [[ -n "$desc" ]] && echo "⚠ Both exist, merging $desc..."
+      if [[ -n "$(ls -A "$src")" ]]; then
+        find "$src" -mindepth 1 -maxdepth 1 -print0 |
+          xargs -r0 mv -i -t "$dst"
+      fi
+      rmdir "$src"
+      [[ -n "$desc" ]] && echo "✓ Merged $desc"
+    else
+      # Only src exists - move to dst
+      mv "$src" "$dst"
+      [[ -n "$desc" ]] && echo "✓ Moved $desc"
+    fi
+  fi
+
+  # Ensure dst exists (for "neither exists" case)
+  if [[ ! -e "$dst" ]]; then
+    mkdir -p "$dst"
+  fi
+  # At this point, dst exists and src doesn't (or has been removed/merged)
+
+  ln -s "$dst" "$src"
+  echo "✓ Created symlink${desc:+ ($desc)}"
+}
+
+# Usage/help text
+usage() {
+  cat <<EOF
+Usage: claude-workspace-merge <source-dir> <dest-dir>
+
+Create symlinks to share Claude Code conversation history between directories.
+
+Arguments:
+  source-dir  Directory that will become a symlink
+  dest-dir    Real directory (will be created if needed; merged if both exist)
+
+This tool creates:
+1. Filesystem symlink: source-dir -> dest-dir
+2. Claude history symlink: ~/.claude/projects/source -> ~/.claude/projects/dest
+
+The tool is idempotent and safe to run multiple times.
+EOF
+  exit 0
+}
+
+# Check arguments
+if [[ $# -ne 2 ]] || [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
+  usage
+fi
+
+# Step 1: Path Resolution
+src=$(abspath "$1")
+dst=$(abspath "$2")
+
+# If source == dest, nothing to do
+if [[ "$src" == "$dst" ]]; then
+  echo "✓ Source and destination are the same, nothing to do"
+  exit 0
+fi
+
+# If source is already a symlink, error with helpful message
+if [[ -L "$1" ]]; then
+  real_src=$(readlink -f "$1")
+  echo >&2 "Error: Source is already a symlink"
+  echo >&2 "  Current: $1 -> $real_src"
+  echo >&2 "  Suggestion: claude-workspace-merge \"$real_src\" \"$2\""
+  exit 1
+fi
+
+# Step 2: Filesystem Directory Symlink
+merge_and_symlink "$src" "$dst"
+
+# Step 3: Claude Project Directory Symlink
+src_claude="$HOME/.claude/projects/$(claude-path "$src")"
+dst_claude="$HOME/.claude/projects/$(claude-path "$dst")"
+merge_and_symlink "$src_claude" "$dst_claude" "Claude history"
+
+echo ""
+echo "✓ Success! Both paths now share the same Claude conversation history:"
+echo "  Source: $src"
+echo "  Dest:   $dst"

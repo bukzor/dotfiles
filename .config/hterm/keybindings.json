@@ -1,0 +1,4 @@
+{
+  "$comment": "Shift-Enter inserts newline for claude-code under Chrome OS",
+  "Shift-Enter": "'\n'"
+}

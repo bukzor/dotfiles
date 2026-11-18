@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -z "${1:-}" ]; then
+  echo "Usage: claude-uncolor <session-uuid>" >&2
+  echo "Removes ANSI escape sequences from Claude session files" >&2
+  exit 1
+fi
+
+uuid="$1"
+
+find ~/.claude -name "*${uuid}*" -type f \( -name '*.json' -o -name '*.jsonl' \) | while read -r f; do
+  cp "$f" "$f.bak"
+  uncolor-jsonl < "$f.bak" > "$f"
+  echo "processed: $f"
+done
