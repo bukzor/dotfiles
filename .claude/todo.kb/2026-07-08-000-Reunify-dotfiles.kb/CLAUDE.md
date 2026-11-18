@@ -23,7 +23,7 @@ Hosts (situational — rewrite when a host is added or retired):
 | Host | live `~` | workspaces for other branches |
 |---|---|---|
 | penguin (Chromebook, crostini) | `svelte-crostini` | `dotfiles--main` |
-| buck-win10 (WSL) | `wsl-buck-win10` | `dotfiles--main`, `dotfiles--svelte-crostini` |
+| buck-win10 (WSL) | `main` (since 2026-11-18) | `dotfiles--main`, `dotfiles--svelte-crostini` |
 
 - One remote (`github.com/bukzor/dotfiles`); sync via push/fetch. No worktrees.
 - The general-purpose `~/repo/github.com/bukzor/dotfiles` clone floats between

@@ -46,8 +46,8 @@ Workspaces (both clones of `github.com/bukzor/dotfiles`; agreements in
 - `~/repo/github.com/bukzor/dotfiles--svelte-crostini/` — `svelte-crostini`
   (this kb lives here)
 
-Never touch `~`: it is this host's live `wsl-buck-win10` checkout, already
-folded into main.
+Never touch `~`: it is this host's live `main` checkout (since 2026-11-18).
+Units edit main in `dotfiles--main` only.
 
 ## Every agent, every task
 

@@ -31,7 +31,7 @@ every host, retire svelte-crostini and wsl-buck-win10.
 - [ ] review the merged tree (`git diff main svelte-crostini` empty;
       spot-check resurrected main-only survivors)
 - [ ] push main
-- [ ] buck-win10, brought ahead of the merge: [switch `~` to main, retire `wsl-buck-win10`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-000-switch-buck-win10-home-to-main.md)
+- [x] buck-win10, brought ahead of the merge: [switch `~` to main, retire `wsl-buck-win10`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-000-switch-buck-win10-home-to-main.md) — done 2026-11-18 (pre-switch `fa3f7c7`); open questions there
 - [ ] per host (penguin, buck-win10), in live `~`: note the pre-switch commit id,
       fetch, `git checkout main`, working-tree diff review
 - [ ] smoke test on each host: new login shell, bash -i, zsh -i, vim, tmux,
