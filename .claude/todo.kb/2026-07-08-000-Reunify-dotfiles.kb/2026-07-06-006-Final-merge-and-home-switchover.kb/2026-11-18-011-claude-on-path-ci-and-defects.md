@@ -51,6 +51,16 @@ exception: your handoff file still lives there.
    Fix it the cheapest correct way: a guard, a conditional include, or
    installing it there too. Explain why.
 
+6. **`lint-lua.yml`: a smoke test, not deleted** (added 2026-11-18).
+   > [!@bukzor] 2026-11-18: much prefer a non-failing stub to deletion;
+   > better, a very simple Lua smoke test.
+
+   Unit 010 deleted it (main `208ca09`). Bring it back as a small workflow
+   that runs on push, for example `luac -p` (or `luajit -bl`) over every
+   tracked `*.lua`. Keep it minimal, and give it the same timeout as item
+   2. Prove two things: a deliberately broken `.lua` fails it locally, and
+   its first CI run on main passes.
+
 Afterwards: `git -C ~ pull --ff-only` and `git -C /mnt/c/Users/worki pull
 --ff-only` (WSL git for the latter, as unit 010 did).
 
