@@ -27,10 +27,10 @@ every host, retire svelte-crostini and wsl-buck-win10.
       `git diff main svelte-crostini --stat` shows only expected one-sided paths
 - [ ] commit/park uncommitted state in each host's live `~` (penguin: see
       `../2026-06-03-001-commit-accumulated-dotfiles-changes.md`)
-- [ ] in `dotfiles--main`: `git merge --allow-unrelated-histories svelte-crostini`
+- [x] in `dotfiles--main`: `git merge --allow-unrelated-histories svelte-crostini` — main `ff853dc`, 2026-11-18
 - [ ] review the merged tree (`git diff main svelte-crostini` empty;
       spot-check resurrected main-only survivors)
-- [ ] push main
+- [x] push main
 - [x] buck-win10, brought ahead of the merge: [switch `~` to main, retire `wsl-buck-win10`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-000-switch-buck-win10-home-to-main.md) — done 2026-11-18 (pre-switch `fa3f7c7`); open questions there
 - [ ] per host (penguin, buck-win10), in live `~`: note the pre-switch commit id,
       fetch, `git checkout main`, working-tree diff review
@@ -55,7 +55,9 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [host fixes: ssh pin, Nix, `init.templateDir`, prettier, rust-analyzer](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-005-buck-win10-host-fixes.md)
 - [x] [`claude-tokens-cost` prices; `breakdown.md` frontmatter](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-006-claude-tokens-prices-and-breakdown.md) — [!DRAFT] keep main-only `breakdown.md` (works now, merges clean)
 - [x] [pre-merge follow-ups: dead vim autoloads, `<C-K>`, penguin's key name, gcloud-private, pnpm, junk in `~`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-007-pre-merge-followups.md)
-- [ ] [the merge, and buck-win10's `~` taking it](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-008-merge-and-buck-win10-pull.md)
+- [x] [the merge, and buck-win10's `~` taking it](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-008-merge-and-buck-win10-pull.md)
+- [ ] [buck-win10 post-merge: Windows-home checkout, pnpm 10, orphans, CI](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-010-buck-win10-post-merge-cleanup.md)
+- [ ] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md); coordinator: merge svelte-crostini into main after each plan commit, so 009's ancestor check passes
 - [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
 - [ ] penguin, after pulling: `ln -s id_ed25519.pub.bukzor.chromebook ~/.ssh/id_ed25519.pub`

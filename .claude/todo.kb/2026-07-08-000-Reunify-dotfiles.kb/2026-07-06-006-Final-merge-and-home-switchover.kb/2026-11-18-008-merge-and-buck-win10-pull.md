@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by:
   - ./2026-11-18-006-claude-tokens-prices-and-breakdown.md
   - ./2026-11-18-007-pre-merge-followups.md
@@ -59,8 +59,66 @@ in `~`; this handoff file.
 
 ## Steps
 
+- [x] 1 `final-merge_check.sh` on main; merged-tree suite in a scratch
+      checkout; the check failing on a conflicting scratch pair
+- [x] 2 merge, review, push main
+- [x] 3 `~`: `.aws`/`.azure` layout, `package.json` aside, ignored-file
+      collisions backed up; pull; `id_rsa.pub` tracked and linked; smoke test
+
 ## Decisions
+
+- Check: root `final-merge_check.sh`, shaped like `mechanical-fast-forwards_check.sh`.
+  Asserts `merge-tree --write-tree` exits 0 *and* prints no `CONFLICT` line
+  (a fatal merge-tree error can't pass as "0 conflicts"). Skips when
+  `origin/<other>` is gone, so the `merged/` rename won't turn it red.
+- Merged-tree suite runs in a clean `env -i bash -l`. In the agent's stale
+  PATH, pnpm 10 (`~/prefix/npm-global/bin`) fails `pnpm starts` on the merged
+  `package.json`'s pnpm 12.8.1 pin (see OQ 3); the tree is not at fault.
+- `.aws`, `.azure`: plain directories holding the tracked `.gitignore`, no
+  links. The Windows-side dirs hold only that same `.gitignore`
+  (`diff -r` identical), and no AWS or Azure CLI exists on either side, so
+  there is nothing to link. A dangling per-file link (`.aws/config`) would
+  show untracked under the opt-out `.gitignore`.
+- Collision sweep before pulling: of 823 incoming paths, only `.aws/.gitignore`,
+  `.azure/.gitignore`, `package.json` existed in `~` (no ignored file overwritten).
 
 ## Open Questions
 
+1. `/mnt/c/Users/worki` (Windows `$HOME`) is itself a `svelte-crostini`
+   checkout of dotfiles, missing from the topology table. Recommend deciding
+   its fate (switch to main, or retire) before 009 renames `svelte-crostini`.
+2. `~/.aws`/`~/.azure` no longer share with Windows. If a CLI is ever
+   installed, point it at Windows by env (`AWS_CONFIG_FILE`,
+   `AWS_SHARED_CREDENTIALS_FILE`, `AZURE_CONFIG_DIR`) in a host env file.
+3. Shells started before the pull still resolve pnpm 10 from
+   `~/prefix/npm-global/bin`, which fails in `~` on the 12.8.1 pin ("Failed
+   to switch pnpm", ENOEXEC). Fresh login shells get 12.8.1. Recommend
+   removing that pnpm 10 (`npm-global` also holds `claude`; keep that).
+4. Old `package.json` dependency `@anthropic-ai/claude-code ^1.0.67` leaves
+   `~/node_modules/` and `~/pnpm-lock.yaml` (2025-09) orphaned. Recommend
+   trash.
+5. CI on main now runs svelte's workflows: `lint-lua.yml` fails (known
+   broken, 2026-07-07-000); Check sh/Vim/Neovim were still queued at handoff.
+
 ## Final report
+
+- main (`dotfiles--main`, pushed): `0390a5a` check script; merge
+  **`ff853dc`** (parents `0390a5a`, `fd57095`); `5a36dab` `.ssh/id_rsa.pub.worki.buck-win10`.
+- Check: green on pre-merge main and on the merged scratch tree; on a
+  scratch pair with an `.inputrc` add/add it fails both asserts and the
+  suite exits 1 (`CONFLICT (add/add): Merge conflict in .inputrc`).
+- Merged-tree suite (`do -c test`, scratch clone): 150 ok, 0 not ok;
+  dash absent here (7 skips). Scratch merge tree `466aba0` == pushed tree.
+- Review: `diff-tree origin/svelte-crostini ff853dc` is 319 `A` paths, every
+  one main-only and byte-unchanged from `0390a5a`; main side gained 821 `A`, no M/D.
+- `~`: pre-pull **`c0370d0`**, now `5a36dab`. Moved to `~/trash/merge-008/`:
+  `aws.symlink`, `azure.symlink`, `package.json` (had the claude-code dep,
+  no `packageManager` pin), `id_rsa.pub` (now a link, `cmp`-identical,
+  matches `ssh-keygen -y id_rsa`). `git status`: only the pre-existing
+  `.claude/sessions.kb`, `.boon/`, `deadlock-builds-recovery/`, `willy-practice.txt`.
+- Smoke (`env -i`): `bash -l` (pnpm 12.8.1, `has`, `bootstamp`), `bash -i`,
+  `bash -li`, `zsh -i`, `zsh -li` under a pty: no stray output; vim 9.2
+  `:messages` empty; `tmux -f ~/.tmux.conf` loads. nvim, kitty absent here.
+- Rollback, `~`: `git -C ~ reset --keep c0370d0`, then move the four
+  trash items back. Rollback, merge: `git push --force-with-lease=main:5a36dab
+  origin 0390a5a:main`, then re-apply `5a36dab` if wanted.
