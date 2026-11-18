@@ -12,13 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-22.04, macos-latest, windows-2022]
         rev: [stable, nightly, v0.9.5, v0.10.0]
         include:
           - os: ubuntu-22.04
             install-rg: sudo apt-get update && sudo apt-get install -y ripgrep
 
-          - os: macos-12
+          - os: macos-latest
             install-rg: brew update && brew install ripgrep
 
           - os: windows-2022
@@ -36,4 +36,5 @@ jobs:
         run: ${{ matrix.install-rg }}
 
       - name: Run acceptance tests
-        run: ~/lib/ci/check-nvim.sh
+        shell: bash
+        run: ./lib/ci/check-nvim.sh

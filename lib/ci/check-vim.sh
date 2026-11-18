@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 
 echo "==> Vim version:"
 vim --version | head -n 2
@@ -10,6 +11,6 @@ if [ ! -d "$HOME/.vim/plugged/vim-themis" ]; then
 fi
 
 echo "==> Running acceptance tests with themis..."
-"$HOME/.vim/plugged/vim-themis/bin/themis" "$HOME/tests/vim/"
+"$HOME/.vim/plugged/vim-themis/bin/themis" "$ROOT/tests/vim/"
 
 echo "✓ All Vim tests passed"

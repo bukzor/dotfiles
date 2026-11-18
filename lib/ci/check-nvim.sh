@@ -1,10 +1,11 @@
 #!/bin/bash
 set -euo pipefail
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 
 echo "==> Neovim version:"
 nvim --version
 
 echo "==> Running acceptance tests with plenary..."
-nvim --headless -c "PlenaryBustedDirectory $HOME/tests/neovim/ {minimal_init='$HOME/.config/nvim/init.lua'}"
+nvim --headless -c "PlenaryBustedDirectory $ROOT/tests/neovim/ {minimal_init='$ROOT/.config/nvim/init.lua'}"
 
 echo "✓ All Neovim tests passed"
