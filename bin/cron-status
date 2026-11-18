@@ -1,0 +1,35 @@
+#!/bin/sh
+# Scheduled jobs whose last recorded exit status was non-zero. Shared logic
+# behind two alerting channels that see different sessions:
+#   - .config/sh/rc.d/cron-status.sh warns once, at interactive shell start
+#   - tmux's status-right (this script's --tmux mode) refreshes every
+#     status-interval, so it still reaches panes that live for days, which
+#     shell-start warnings never do (see docs/dev/adr/2026-09-10-001).
+#
+# Usage:
+#   cron-status            one "<code> <job> <log>" line per failure
+#   cron-status --tmux     compact tmux status-line segment; empty when clean
+set -eu
+
+cron_dir="$HOME/.local/state/cron"
+
+failures() {
+  for cron_file in "$cron_dir"/*.status; do
+    [ -e "$cron_file" ] || continue # glob matched nothing
+    cron_code=''
+    read -r cron_code < "$cron_file" || :
+    if [ -n "$cron_code" ] && [ "$cron_code" != 0 ]; then
+      cron_job=${cron_file##*/}
+      cron_job=${cron_job%.status}
+      echo "$cron_code $cron_job $cron_dir/$cron_job.log"
+    fi
+  done
+}
+
+if [ "${1:-}" = "--tmux" ]; then
+  jobs=$(failures | awk '{print $2}' | paste -sd, -)
+  [ -n "$jobs" ] && printf '#[fg=red,bold]cron:%s#[default] ' "$jobs"
+  exit 0
+fi
+
+failures
