@@ -30,11 +30,11 @@ request to address them is the ruling the claude-mark fix was waiting on.
 
 Wave 1 (parallel, disjoint files):
 
-- [ ] [alert log: warn on failure, bounded size](2026-11-18-000-alert-and-window-name-followups.kb/2026-11-18-000-alert-log.md)
-- [ ] [window name: pin the claude mark, test narrow](2026-11-18-000-alert-and-window-name-followups.kb/2026-11-18-001-window-name-truncation.md)
+- [x] [alert log: warn on failure, bounded size](2026-11-18-000-alert-and-window-name-followups.kb/2026-11-18-000-alert-log.md)
+- [x] [window name: pin the claude mark, test narrow](2026-11-18-000-alert-and-window-name-followups.kb/2026-11-18-001-window-name-truncation.md)
 
 Coordinator, after wave 1:
 
-- [ ] review both units' commits; cherry-pick to `svelte-crostini`; push both
+- [x] review both units' commits; cherry-pick to `svelte-crostini`; push both
 - [ ] update the sessions.kb entry's follow-ups
 - [ ] `tmux source ~/.tmux.conf` on the live server once the user approves
