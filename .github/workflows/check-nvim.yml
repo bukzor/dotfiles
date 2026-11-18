@@ -17,6 +17,10 @@ jobs:
         exclude:
           - os: windows-2022  # nvim 0.9.5 segfaults on Windows loading this config
             rev: v0.9.5
+          # macOS runners schedule slowly here (one job at a time): stable only
+          - {os: macos-latest, rev: nightly}
+          - {os: macos-latest, rev: v0.9.5}
+          - {os: macos-latest, rev: v0.10.0}
         include:
           - os: ubuntu-22.04
             install-rg: sudo apt-get update && sudo apt-get install -y ripgrep
