@@ -59,7 +59,26 @@ installs for item 1; `gh run cancel`; the two pulls; this handoff file.
 
 ## Steps
 
+- [x] 1 native `claude` in `~/.local/bin`; fresh `bash -l`/`zsh -l` find it
+- [ ] 2 CI: `timeout-minutes`, hanging test, cancel stale runs
+- [ ] 3 `upstream-replies.sh` silent when tool absent
+- [ ] 4 rename `docs/ideas/never?`
+- [ ] 5 `init.templateDir` on the Windows home
+- [ ] pulls: `~`, `/mnt/c/Users/worki`
+
 ## Decisions
+
+- Penguin's mechanism is the native installer: unit 003 recorded
+  `~/.local/bin/claude` -> `~/.local/share/claude/versions/2.1.207` there,
+  and `900-path.sh` already puts `~/.local/bin` on PATH. Nothing in the pnpm
+  manifest or `d1b633a` (which only sets `ANTHROPIC_BASE_URL`) installs it.
+  So: ran `claude.ai/install.sh` here, no repo change. 2.1.327 installed.
+- The installer deleted the tracked dangling symlink `.claude/local`
+  (-> `../.local/share/claude-code`, "force xdg", `0acda47`) as an old local
+  install; restored with `git checkout`. It also set `~/.claude.json`
+  `installMethod` from `global` to `native` (backup:
+  `~/trash/merge-011/claude.json.before-native-install`).
+  `~/.local/share/pnpm/claude` (2.1.316, the running sessions') untouched.
 
 ## Open Questions
 
