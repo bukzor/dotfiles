@@ -58,6 +58,8 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [ ] [the merge, and buck-win10's `~` taking it](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-008-merge-and-buck-win10-pull.md)
 - [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
+- [ ] penguin, after pulling: `ln -s id_ed25519.pub.bukzor.chromebook ~/.ssh/id_ed25519.pub`
+      (pulling unit 007's rename deletes penguin's plain `id_ed25519.pub`)
 - [ ] [!DRAFT] keep `dotfiles--main` on buck-win10 until 006 closes: units
       editing live `~` would expose half-finished edits to every session
 
