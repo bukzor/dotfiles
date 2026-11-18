@@ -28,8 +28,13 @@ Hosts (situational — rewrite when a host is added or retired):
 - One remote (`github.com/bukzor/dotfiles`); sync via push/fetch. No worktrees.
 - The general-purpose `~/repo/github.com/bukzor/dotfiles` clone floats between
   branches for ad hoc use and never carries reunify commits.
-- Retired heads are deleted once fully contained elsewhere; read them by
-  commit id (e.g. the 2017 zsh setup: `git show 381ee8a:<path>`).
+> [!@bukzor] 2026-11-18: a branch that no longer represents work to do is
+> renamed to `merged/<name>`, locally and on the remote, not deleted.
+
+- [!DRAFT] 2026-11-18: a branch that is fully contained elsewhere but still checked out as a
+  host's live `~` (`wsl-buck-win10` until 006) is still in use, so it keeps
+  its name. Heads deleted before that ruling are read by commit id (e.g.
+  the 2017 zsh setup: `git show 381ee8a:<path>`).
 
 ## Rules
 

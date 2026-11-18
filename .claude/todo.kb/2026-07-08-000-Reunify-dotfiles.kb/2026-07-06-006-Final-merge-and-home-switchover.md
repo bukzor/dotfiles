@@ -38,8 +38,9 @@ every host, retire svelte-crostini and wsl-buck-win10.
       which only main carries)
 - [ ] CI: `fetch-depth: 0` (the deferred 2026-07-07-000 item), if the merge-tree
       check runs in CI
-- [ ] after a comfort period: delete svelte-crostini and wsl-buck-win10 (origin
-      default branch is already main)
+- [ ] once no host's `~` checks it out: rename svelte-crostini and
+      wsl-buck-win10 to `merged/…`, locally and on origin (rule in
+      [CLAUDE.md](CLAUDE.md); origin's default branch is already main)
 - [x] `arch-svelte` (2022, one unique commit) archived as tag
       `archive/arch-svelte`, branch deleted — 2026-11-10
 

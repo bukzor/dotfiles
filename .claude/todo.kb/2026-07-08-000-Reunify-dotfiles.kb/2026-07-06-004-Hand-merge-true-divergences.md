@@ -24,27 +24,19 @@ Remaining themes run as sub-agent units, wave 1 (parallel), in
 `2026-07-06-004-Hand-merge-true-divergences.kb/` (2026-11-11). Each unit's
 checks stand in for the "unit tests first" item below:
 
-- [ ] [000 svelte drift fast-forward](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-000-svelte-drift-fast-forward.md)
-- [ ] [001 `bin/alert`, `bin/brew`, `bin/alternatives/.gitignore`, `.envrc`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-001-bin-and-envrc.md)
-- [ ] [002 claude config](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-002-claude-config.md)
-- [ ] [003 vim lua + plugins](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-003-vim-lua-and-plugins.md)
-- [ ] [004 `.vimrc` → `.vimrc.d/`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-004-vimrc-into-vimrc-d.md)
-- [ ] [005 kitty, `.themes/`, submodules](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-005-kitty-themes-submodules.md)
+- [x] [000 svelte drift fast-forward](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-000-svelte-drift-fast-forward.md)
+- [x] [001 `bin/alert`, `bin/brew`, `bin/alternatives/.gitignore`, `.envrc`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-001-bin-and-envrc.md)
+- [x] [002 claude config](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-002-claude-config.md) — `.claude/CLAUDE.md` held on its Open Questions
+- [x] [003 vim lua + plugins](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-003-vim-lua-and-plugins.md) — four files held on its Open Questions
+- [x] [004 `.vimrc` → `.vimrc.d/`](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-004-vimrc-into-vimrc-d.md)
+- [x] [005 kitty, `.themes/`, submodules](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-11-005-kitty-themes-submodules.md)
 
-- [ ] svelte-side drift since 2026-07-13: main's copy is an older svelte
-      version (its blob is in svelte's history), so fast-forward main to
-      svelte's — mechanical, no authoring: `.bashrc`, `.gitignore`,
-      `.profile_test.sh`, `.tmux.conf`, `bin/.gitignore`, `bin/tmux-cd`,
-      `.config/sh/env.d/{300-homebrew,700-tmpdir}.sh`,
-      `.config/sh/functions.d/{path,path_test,source_dir}.sh`
-- [ ] `bin/alert`: a symlink on main, a regular file on svelte (last changed
-      2026-09-10)
-    - [ ] authored / [ ] svelte / [ ] main
-- [ ] new since the wsl-buck-win10 fold (main `30895e0`, 2026-11-10):
-      `.envrc` and `bin/alternatives/.gitignore` are main ↔ svelte add/add;
-      `bin/brew` carries buck-win10's ruby26 `PATH` in a shared file (guard
-      it, or move it to a host piece)
-    - [ ] authored / [ ] svelte / [ ] main
+Wave 1 reviewed 2026-11-18: main ↔ svelte at 5 conflicts, exactly the held
+files. Wave 2 applies the user's rulings on 002/003's Open Questions.
+
+- [x] svelte-side drift since 2026-07-13 (unit 000)
+- [x] `bin/alert` (unit 001)
+- [x] new since the wsl-buck-win10 fold: `.envrc`, `bin/alternatives/.gitignore`, `bin/brew` (unit 001)
 
 - [ ] unit tests first, where appropriate (vague reminder): the merged bin/ scripts
       are the testable surface (brew-desc, colortest17x17, osc52) — a smoke
@@ -99,25 +91,25 @@ checks stand in for the "unit tests first" item below:
       version (base64's default 76-col line-wrap breaks the OSC-52 escape
       for any payload longer than a couple dozen bytes) — smoke-tested.
     - [x] authored / [x] svelte (`dce294f`) / [x] main (`1579524`)
-- [ ] escalated from 002 (stale-seed adjudication turned out mostly *not*
+- [x] escalated from 002 (stale-seed adjudication turned out mostly *not*
       stale-seed — see that task file's per-item notes for full findings):
-    - [ ] .config/kitty/kitty.conf + .gitmodules (linked: main's kitty.conf
+    - [x] .config/kitty/kitty.conf + .gitmodules (linked: main's kitty.conf
           `include`s a theme from main-only submodule `kitty-gruvbox-theme`) —
           union: main's font/theme/ligature/scrollback/keybind customization +
           svelte's `linux_display_server x11` (crostini-specific, don't drop) +
           a merged submodule set (svelte's session.kb/vim-plugin submodules +
           main's theme/scratch/gcloud-data submodules, checking `scratch`'s two
           different remotes for which is current)
-        - [ ] authored / [ ] svelte / [ ] main
-    - [ ] `.themes/`: main's `gruvbox-dark-gtk` submodule (jmattheis) vs.
+        - [x] authored / [x] svelte (`b7d49b5`) / [x] main (`ec53378`)
+    - [x] `.themes/`: main's `gruvbox-dark-gtk` submodule (jmattheis) vs.
           svelte's `Gruvbox-GTK` (Fausto-Korpsvart, 2025-10-22) → svelte's
           (fold unit 001's recommendation, accepted 2026-11-10)
-    - [ ] .vimrc — diff main's 526-line monolithic file against svelte's 19
+    - [x] .vimrc — diff main's 526-line monolithic file against svelte's 19
           `.vimrc.d/*.vim` files (actively maintained, most recent edit
           2026-05-12); port anything main has that svelte's modular set lacks,
           discard the rest. Do not just take main's file — it would silently
           disable all 19 modular files by replacing the loader.
-        - [ ] authored / [ ] svelte / [ ] main
+        - [x] authored / [x] svelte (`6d1e067`) / [x] main (`b1876c4`)
     - [x] .vim/init.lua (symlink) + its target: svelte's `init-nvim.lua`
           (rewritten 2026-05-05, "nvim 0.11 modernization") already beats main's
           stale `nvim-init.lua` (2023-05-25) — no content merge needed, just
