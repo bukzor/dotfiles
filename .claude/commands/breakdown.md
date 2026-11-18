@@ -1,7 +1,6 @@
 ---
-argument-hint: "<task description>" [token-limit]
+argument-hint: '"<task description>" [token-limit]'
 description: Break down complex tasks into manageable sub-projects with deliverables
-model: claude-3-5-sonnet-20241022
 ---
 
 # Task Breakdown Expert
