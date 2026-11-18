@@ -42,7 +42,9 @@ Key questions:
   touched closeable? Closeable means its plan's success criteria pass and
   the user has said they're satisfied on review; passing tests aren't
   enough, and neither is your own judgment. If so, close it per that
-  skill's Procedure, Close. If not, keep it: open files are the resume
+  skill's Procedure, Close. If the plan lives in a `todo.kb/`, run
+  `todo clear` (`Skill(llm-subtask)`) next to remove the plan file
+  itself. If it isn't closeable, keep it: open files are the resume
   state and done files are waiting for review. The sessions.kb entry
   should point at it either way.
 
