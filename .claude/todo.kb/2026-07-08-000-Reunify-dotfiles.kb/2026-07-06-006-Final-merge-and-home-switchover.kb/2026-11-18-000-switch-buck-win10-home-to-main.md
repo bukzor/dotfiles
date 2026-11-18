@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []  # main's .claude/CLAUDE.md is svelte's since 6bfc6f4
 required-reading:
   - ./CLAUDE.md
@@ -60,8 +60,61 @@ Rollback, if a smoke test breaks something you can't fix inside this scope:
 
 ## Steps
 
+- [x] preflight: pre-switch `fa3f7c7`; lists in `~/trash/switch-to-main/`
+- [x] switch `~` to main (`6bfc6f4`)
+- [x] rename branch locally and on origin; prune the 3 other clones
+- [x] review `git -C ~ status`
+- [x] smoke test
+
 ## Decisions
+
+- Stayed on main despite github ssh breaking (OQ1): not a listed smoke
+  test, a no-file workaround exists, and a peer had already edited on main.
+- Pushed the rename with `GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes'`
+  (env only; no file touched). `id_ed25519` is not authorized on GitHub.
 
 ## Open Questions
 
+1. **GitHub ssh is broken in `~` on main.** Main's
+   `.ssh/config.d/github.sshconfig` pins `IdentityFile ~/.ssh/sentry-github`,
+   absent here, so ssh stops trying default keys. Options: (a) local
+   untracked `~/.ssh/config.d/local.sshconfig` adding `IdentityFile
+   ~/.ssh/id_rsa` for github.com (IdentityFile accumulates); (b) drop the
+   pin from the tracked file, on both branches. Recommend (b): the pin names
+   a key from a past employer.
+2. **Nix dropped from PATH.** The old `.profile` and live `.zshenv` sourced
+   `~/.nix-profile/etc/profile.d/nix.sh`; main sources neither, so `direnv`
+   (which main's `rc.d/direnv.sh` hooks) and `nix` vanish. Keep nix?
+3. **Untracked secrets.** `private-dotfiles/ant/{admin-key,claude-code.credentials.json}`
+   are untracked and not ignored in a public repo. Ignore `private-dotfiles/` first.
+4. Proposed ignore entries (no ignore file edited), by top-level directory:
+   - `.local/` (32934 files), all under `.local/share/`: `pnpm/`, `direnv/`,
+     `uv/`, `delta/`, `apktool/`, `bukzor.deadlock-data/`, `applications/`,
+     `man/` (git-partial's generated `git-commit-*.1`)
+   - `prefix/` (2631): `prefix/` (brew, npm-global, rbenv, ruby26)
+   - `claude/` (7 dirs), `deadlock-builds-recovery/`: scratch, ignore
+   - host-local: `.aws`, `.azure`, `winhome` (symlinks into `/mnt/c`),
+     `.nix-profile`, `.nix-channels`, `.nix-defexpr/`, `.ash_history`
+   - `.ssh/*.pub` (`id_ed25519.pub`, `id_rsa.pub`): track or ignore? user call
+   - stray files: `apk.dot*`, `install.sh`, `rustup.sh`, `package*.json`,
+     `willy-practice.txt`: move to `~/trash/` rather than ignore
+   - `.themes/gruvbox-dark-gtk/`: old gitlink git couldn't rmdir (main has
+     `.themes/Gruvbox-GTK`); delete or ignore. (`scratch/`, same case, is ignored.)
+   - `bin/alert-wsl`: a peer session's new file, theirs to commit
+
 ## Final report
+
+- Pre-switch commit `fa3f7c7`. Clobbered: only `.zshenv` (it differed: the
+  Nix installer line), backed up to `~/trash/switch-to-main/clobbered/.zshenv`;
+  `data/gcloud` (plain dir where main has a gitlink, untouched) copied too.
+  Deleted by checkout: 171 blobs + 2 gitlinks, listed in `deleted.paths`.
+- `~` on local `main` tracking `origin/main` (`6bfc6f4`). `.claude/sessions.kb`
+  left modified. `bin/alert` shows modified: a peer session's edit at 16:06,
+  after the switch, not mine.
+- `merged/wsl-buck-win10` at `fa3f7c7`, local and origin, upstream set;
+  `origin/wsl-buck-win10` deleted; `dotfiles`, `dotfiles--main`,
+  `dotfiles--svelte-crostini` pruned.
+- Smoke, all pass (clean `env -i`; `~/trash/switch-to-main/smoke-*.txt`):
+  bash/zsh login + interactive (also under a pty), vim, tmux `-L`, `has`,
+  `bootstamp`, `jq`, `/etc/service` (4 services), `findmnt` (9p drvfs).
+- Not smoke-listed but broken: GitHub ssh, nix PATH (Open Questions 1-2).
