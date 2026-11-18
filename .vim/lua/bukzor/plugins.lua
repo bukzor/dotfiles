@@ -131,6 +131,16 @@ function M.config()
         config = require("bukzor.aerial").setup,
       },
 
+      -- browse the undo tree
+      {
+        "mbbill/undotree",
+        cmd = "UndotreeToggle",
+        keys = { { "<Leader>u", "<Cmd>UndotreeToggle<CR>", desc = "Undo Tree" } },
+      },
+
+      -- ys/cs/ds: add, change, delete surrounding quotes and brackets
+      "tpope/vim-surround",
+
       -- inline LSP hints handled by built-in `vim.lsp.inlay_hint` (nvim 0.10+);
       -- see lsp.lua M.on_attach_lspconfig.
 

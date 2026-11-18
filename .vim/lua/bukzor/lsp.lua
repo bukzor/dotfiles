@@ -166,6 +166,9 @@ end
 function M.setup_mason()
   require("mason").setup({
     log_level = mason_log_level,
+    -- A project's own tools (e.g. a .venv basedpyright put on PATH by direnv)
+    -- win over mason's copies, which resolve only as a fallback.
+    PATH = "append",
     ui = {
       icons = {
         package_installed = "✓",
