@@ -22,6 +22,9 @@ nnoremap <C-J> <C-W>j
 nnoremap <C-K> <C-W>k
 nnoremap <C-L> <C-W>l
 
+"the focused split widens to at least 86 columns
+set winwidth=86
+
 if has('nvim')
   "bindings for switching windows while in :terminal
   tnoremap <C-W> <C-\><C-N><C-W>
