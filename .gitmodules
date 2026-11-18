@@ -29,3 +29,6 @@
 	path = .claude/sessions.kb
 	url = git@github.com:bukzor/bukzor.claude-sessions.git
 	branch = main
+[submodule "docs/private"]
+	path = docs/private
+	url = git@github.com:bukzor/bukzor-docs.git
