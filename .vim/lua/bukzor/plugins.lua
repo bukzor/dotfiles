@@ -1,14 +1,13 @@
-# TODO: https://claude.ai/chat/ad3f7522-2780-4e67-ac6b-f4217de8c4df
 local M = {}
 
-M.LAZY_HOME = vim.fs.normalize(vim.fn.stdpath("config") .. "/pack/lazy/start")
+M.LAZY_HOME = vim.fn.stdpath("config") .. "/pack/lazy/opt"
 
 function M.setup()
-  M.bootstrap()
+  M.bootstrap_lazy()
   M.config()
 end
 
-function M.bootstrap()
+function M.bootstrap_lazy()
   -- https://github.com/folke/lazy.nvim#-installation
   local lazypath = M.LAZY_HOME .. "/lazy.nvim"
   if not vim.loop.fs_stat(lazypath .. "/.git/") then
@@ -31,195 +30,164 @@ function M.config()
   lsp.unload()
   lsp.init()
 
-  ---@type LazyConfig
-  local lazy_config = {
-    root = M.LAZY_HOME,
-    dev = {
-      path = vim.fs.normalize(
-        vim.fn.stdpath("config") .. "/pack/invented-here/start"
-      ),
-    },
-    install = {
-      colorscheme = {
-        "ellisonleao/gruvbox.nvim",
-        "gruvbox",
-        "habamax",
-        "slate",
-      },
-      missing = true, -- automatically install what's missing
-    },
-    checker = {
-      enabled = true,
-      frequency = 7 * 24 * hour, -- once a week
-    },
-    performance = {
-      reset_packpath = false, -- cooperate with vim-plug and local packs
-      rtp = {
-        reset = false,        -- cooperate with vim-plug and local packs
-      },
-    },
-  }
-
-  ---@type LazySpec
-  local lazy_spec = {
-    -- the plugin framework
-    {
+  require("lazy").setup({
+      -- the plugin framework
       "folke/lazy.nvim",
-      opts = {},
-    },
 
-    -- helpfully show keystrokes
-    {
-      "folke/which-key.nvim",
-      opts = {},
-    },
+      -- icons
+      "echasnovski/mini.nvim",
+      "nvim-tree/nvim-web-devicons",
 
-    {
-      "folke/trouble.nvim",
-      dependencies = { "nvim-tree/nvim-web-devicons" },
-      opts = {},
-    },
-
-    -- syntax highlighting (using treesitter)
-    {
-      "nvim-treesitter/nvim-treesitter",
-      config = require("bukzor.tree-sitter").setup,
-      build = ":TSUpdate",
-    },
-
-    -- https://github.com/williamboman/mason-lspconfig.nvim#vim-plug
-    {
-      "williamboman/mason.nvim",
-      build = ":MasonUpdate", -- :MasonUpdate updates registry contents
-      config = lsp.setup_mason,
-    },
-    {
-      "williamboman/mason-lspconfig.nvim",
-      dependencies = {
-        "williamboman/mason.nvim",
-        -- https://github.com/bukzor-sentryio/mason-lspconfig.nvim#setup
-        --"neovim/nvim-lspconfig",
-        -- https://github.com/folke/neoconf.nvim#-setup
-        "folke/neoconf.nvim",
+      -- helpfully show keystrokes
+      {
+        "folke/which-key.nvim",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+        },
+        config = function() require("bukzor.which-key") end,
       },
-      config = lsp.setup_mason_lspconfig,
-    },
 
-    {
-      "neovim/nvim-lspconfig",
-      dependencies = {
+      -- advanced LSP for nvim lua:
+      { "folke/neoconf.nvim", opts = {} },
+      {
+        "folke/lazydev.nvim",
+        ft = "lua",
+        opts = {
+          library = {
+            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+          },
+        },
+      },
+      {
+        "folke/trouble.nvim",
+        opts = { height = 5 },
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+      },
+
+      -- syntax highlighting (using treesitter)
+      -- `main` is the actively maintained rewrite; `master` is archived/locked
+      -- upstream (nvim-treesitter/nvim-treesitter#8475) and its install path
+      -- passes a `tree-sitter generate` flag current tree-sitter CLIs reject.
+      {
+        "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        lazy = false,
+        config = require("bukzor.tree-sitter").setup,
+        build = ":TSUpdate",
+      },
+
+      -- https://github.com/williamboman/mason-lspconfig.nvim#vim-plug
+      {
         "williamboman/mason.nvim",
-        -- https://github.com/bukzor-sentryio/mason-lspconfig.nvim#setup
+        build = ":MasonUpdate", -- :MasonUpdate updates registry contents
+        config = lsp.setup_mason,
+      },
+      {
         "williamboman/mason-lspconfig.nvim",
+        dependencies = {
+          "williamboman/mason.nvim",
+          -- https://github.com/bukzor-sentryio/mason-lspconfig.nvim#setup
+          --"neovim/nvim-lspconfig",
+          -- https://github.com/folke/neoconf.nvim#-setup
+          "folke/neoconf.nvim",
+        },
+        config = lsp.setup_mason_lspconfig,
       },
-      config = lsp.setup_lspconfig,
-    },
-    { -- https://github.com/folke/neoconf.nvim#-setup
-      "folke/neoconf.nvim",
-      cmd = "Neoconf",
-      opts = {},
-    },
 
-    -- advanced neovim-lua lsp autoconfiguration
-    {
-      "folke/lazydev.nvim",
-      ft = "lua", -- only load on lua files
-      opts = {
-        library = {
-          -- https://github.com/folke/lazydev.nvim?tab=readme-ov-file#%EF%B8%8F-configuration
+      {
+        "neovim/nvim-lspconfig",
+        dependencies = {
+          -- https://github.com/folke/neoconf.nvim#-setup
+          "folke/neoconf.nvim",
+        },
+        config = lsp.setup_lspconfig,
+      },
+
+      -- Mason-side installer for non-LSP tools (formatters, linters).
+      {
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        dependencies = { "williamboman/mason.nvim" },
+        config = lsp.setup_mason_tool_installer,
+      },
+
+      -- Formatter framework with format-on-save.
+      {
+        "stevearc/conform.nvim",
+        event = { "BufWritePre" },
+        cmd = { "ConformInfo" },
+        config = lsp.setup_conform,
+      },
+
+      -- Linter framework: runs CLI linters and surfaces them as diagnostics.
+      {
+        "mfussenegger/nvim-lint",
+        event = { "BufReadPre", "BufNewFile" },
+        config = lsp.setup_nvim_lint,
+      },
+
+      -- LSP code outline
+      {
+        "stevearc/aerial.nvim",
+        config = require("bukzor.aerial").setup,
+      },
+
+      -- browse the undo tree
+      {
+        "mbbill/undotree",
+        cmd = "UndotreeToggle",
+        keys = { { "<Leader>u", "<Cmd>UndotreeToggle<CR>", desc = "Undo Tree" } },
+      },
+
+      -- ys/cs/ds: add, change, delete surrounding quotes and brackets
+      "tpope/vim-surround",
+
+      -- inline LSP hints handled by built-in `vim.lsp.inlay_hint` (nvim 0.10+);
+      -- see lsp.lua M.on_attach_lspconfig.
+
+      -- Lean theorem prover: infoview, unicode abbreviations. Spawns its own
+      -- LSP via `lake serve` (repo-pinned toolchain), so no mason entry.
+      {
+        "Julian/lean.nvim",
+        event = { "BufReadPre *.lean", "BufNewFile *.lean" },
+        -- lean.nvim self-activates on lean buffers; setup() is deprecated
+        init = function()
+          vim.g.lean_config = {
+            mappings = true, -- <LocalLeader>-prefixed; see :help lean-mappings
+          }
+        end,
+      },
+
+      -- render ANSI escape sequences as colors (view-only via concealer)
+      {
+        "0xferrous/ansi.nvim",
+        opts = {
+          auto_enable = true,
+          filetypes = { "log" },
         },
       },
     },
-    { "Bilal2453/luvit-meta", lazy = true }, -- optional `vim.uv` typings
-    {                                        -- optional completion source for require statements and module annotations
-      "hrsh7th/nvim-cmp",
-      opts = function(_, opts)
-        opts.sources = opts.sources or {}
-        table.insert(opts.sources, {
-          name = "lazydev",
-          group_index = 0, -- set group index to 0 to skip loading LuaLS completions
-        })
-      end,
-    },
-
     {
-      "jay-babu/mason-null-ls.nvim",
-      event = { "BufReadPre", "BufNewFile" },
-      dependencies = {
-        "williamboman/mason.nvim",
-        "nvim-lua/plenary.nvim",
-        "nvimtools/none-ls.nvim",
+      root = M.LAZY_HOME,
+      dev = {
+        path = vim.fn.stdpath("config") .. "/pack/invented-here/start",
       },
-      config = lsp.setup_mason_null_ls,
-    },
-
-    -- LSP code outline
-    {
-      "stevearc/aerial.nvim",
-      config = require("bukzor.aerial").setup,
-    },
-
-    -- show LSPs' hints inline
-    {
-      "lvimuser/lsp-inlayhints.nvim",
-      opts = {},
-    },
-
-    --- avante: AI support
-    {
-      "yetone/avante.nvim",
-      event = "VeryLazy",
-      lazy = false,
-      version = false, -- set this if you want to always pull the latest change
-      opts = {
-        -- add any opts here
+      install = {
+        colorscheme = { "gruvbox", "habamax", "slate" },
+        missing = true, -- automatically install what's missing
+      },
+      checker = {
+        enabled = true,
+        frequency = 7 * 24 * hour, -- once a week
+      },
+      performance = {
+        reset_packpath = false, -- cooperate with vim-plug and local packs
+        rtp = {
+          reset = false,        -- cooperate with vim-plug and local packs
+        },
       },
 
-      config = function(self, opts)
-        --print(vim.inspect(self))
-        require("avante_lib").load()
-        require("avante").setup(opts)
-      end,
-
-      -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-      build = "make",
-
-      -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-      dependencies = {
-        "nvim-treesitter/nvim-treesitter",
-        "stevearc/dressing.nvim",
-        "nvim-lua/plenary.nvim",
-        "MunifTanjim/nui.nvim",
-        --- The below dependencies are optional,
-        "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-        --"zbirenbaum/copilot.lua", -- for providers='copilot'
-        --"HakonHarnes/img-clip.nvim", -- support for image pasting
-      },
-    },
-    --- avante optional deps
-    -- { -- for providers='copilot'
-    --   "zbirenbaum/copilot.lua",
-    --   opts = {},
-    -- },
-    -- { -- support for image pasting
-    --   "HakonHarnes/img-clip.nvim",
-    --   event = "VeryLazy",
-    --   opts = {
-    --     -- recommended settings
-    --     default = {
-    --       embed_image_as_base64 = false,
-    --       prompt_for_file_name = false,
-    --       drag_and_drop = {
-    --         insert_mode = true,
-    --       },
-    --       -- required for Windows users
-    --       use_absolute_path = true,
-    --     },
-    --   },
-    -- },
-  }
-
-  require("lazy").setup(lazy_spec, lazy_config)
+    }
+  )
 end
 
 return M

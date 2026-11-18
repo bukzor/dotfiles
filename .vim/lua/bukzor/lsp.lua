@@ -1,63 +1,88 @@
 local M = {}
 
 -- see ~/.local/state/nvim/mason.log
-local mason_log_level = vim.log.levels.DEBUG
+local mason_log_level = vim.log.levels.DEBUG;
 
 -- mason is in charge of installing various tools
 M.mason_install = {
-  -- lspconfig configures many language servers
+  -- LSP servers, registered with mason-lspconfig
   -- full list: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
   lspconfig = {
     "rust_analyzer", -- rust
     "lua_ls",        -- lua
-    -- I want to install this one myself
-    "pyright",       -- python
-    "pylsp",         -- python
-    -- FIXME: none of these are valid
-    --- "jq",            -- jq
-    --- "jqls",          -- jq
-    --- "jqlsp",         -- jq
-    --- "jq-ls",         -- jq
-    --- "jq-lsp",        -- jq
-    --- "jq_ls",         -- jq
-    --- "jq_lsp",        -- jq
-    "jsonls",      -- json    -- FIXME: format json with prettier, not jsonls
-    "jsonnet_ls",  -- jsonnet
-    "tflint",      -- terraform
-    "terraformls", -- terraform-ls: terraform
-    --- "tsserver",       -- typescript
-    "vimls",       --vim
-    "clangd",      -- c/c++
-    "gopls",       -- golang
+    "basedpyright",  -- python; see docs/dev/adr/2026-05-08-000-replace-pyright-with-basedpyright.md
+    "jsonls",        -- json
+    "jsonnet_ls",    -- jsonnet
+    "tflint",        -- terraform
+    "terraformls",   -- terraform-ls: terraform
+    "vimls",         -- vim
+    "clangd",        -- c/c++
+    "gopls",         -- golang
   },
-  -- null-ls adapts CLI tools to the LSP protocol
-  -- full list: https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
-  ["null-ls"] = {
-    -- python
-    "black",
-    "isort",
-    -- most web-related files: js ts css html json jsonc markdown yaml
-    "prettierd",
-    -- shell
-    "shellcheck", -- .sh
-    "fish",       -- .fish
-    "zsh",        -- .zsh
-    -- "dotenv_linter", -- .env
-    -- too whiny:
-    -- "editorconfig_checker", -- .editorconfig
-    "gitlint", -- git commit messages
-    --"commitlint",  -- needs configuration
-    "glslc",   -- GLSL
-    "tfsec",   -- terraform
-    "gofmt",   -- golang
+  -- Formatters, driven by conform.nvim, installed via mason-tool-installer.
+  -- Mason package names; see https://mason-registry.dev/registry/list.
+  formatters = {
+    "black",     -- python
+    "isort",     -- python imports
+    "prettierd", -- js/ts/css/html/json/jsonc/markdown/yaml/...
+    -- gofmt ships with the go toolchain itself, not a mason package.
   },
+  -- Linters, driven by nvim-lint, installed via mason-tool-installer.
+  linters = {
+    "shellcheck",    -- sh/bash
+    "dotenv-linter", -- .env files
+    "gitlint",       -- git commit messages
+    "tfsec",         -- terraform security scan
+    -- fish/zsh use the system shell binaries themselves (`-n` syntax check).
+    -- glslc ships via brew `shaderc`, not mason.
+  },
+}
+
+-- Prettier-family filetypes: the project's own oxfmt if it has one (see
+-- setup_conform), else prettierd.
+local prettier = { "oxfmt", "prettierd", stop_after_first = true }
+
+-- conform.nvim formatter pipeline per filetype (run in list order).
+M.conform_formatters_by_ft = {
+  python = { "isort", "black" },
+  javascript = prettier,
+  javascriptreact = prettier,
+  typescript = prettier,
+  typescriptreact = prettier,
+  vue = prettier,
+  svelte = prettier,
+  css = prettier,
+  scss = prettier,
+  less = prettier,
+  html = prettier,
+  json = prettier,
+  jsonc = prettier,
+  yaml = prettier,
+  markdown = prettier,
+  go = { "gofmt" },
+}
+
+-- nvim-lint linters per filetype. Linter names match nvim-lint's internal
+-- module names (underscores), not mason package names (dashes).
+M.lint_linters_by_ft = {
+  sh = { "shellcheck" },
+  bash = { "shellcheck" },
+  fish = { "fish" },
+  zsh = { "zsh" },
+  dotenv = { "dotenv_linter" },
+  gitcommit = { "gitlint" },
+  terraform = { "tfsec" },
+  -- glslc infers shader stage from the on-disk extension
+  -- (.vert/.frag/.comp/.geom/.tesc/.tese). A `.glsl` buffer must declare its
+  -- stage with `#pragma shader_stage(<stage>)` or the lint run errors out.
+  glsl = { "glslc" },
 }
 
 M.au_format = "BukzorLspFormat"
 M.au_loclist = "BukzorLspLocList"
+M.au_lint = "BukzorLint"
+M.au_attach = "BukzorLspAttach"
 M.lsp_attached = nil
-M.lsp_formatting = nil
-M.ensure_installed_by = nil
 
 function M.log(...)
   require("mason-core.log").fmt_debug(...)
@@ -66,9 +91,54 @@ end
 function M.init()
   vim.api.nvim_create_augroup(M.au_format, { clear = true })
   vim.api.nvim_create_augroup(M.au_loclist, { clear = true })
-  vim.api.nvim_create_augroup("END", { clear = true })
+  vim.api.nvim_create_augroup(M.au_lint, { clear = true })
+  vim.api.nvim_create_augroup(M.au_attach, { clear = true })
+
+  -- Per-attach setup runs from LspAttach. Pairing the autocmd with its
+  -- augroup here (rather than in setup_mason_lspconfig) keeps the reset
+  -- pair complete: M.unload() clears the augroup, M.init() reinstalls both
+  -- the group and its handler. We can't put on_attach in
+  -- vim.lsp.config("*", ...) because lspconfig ships per-server
+  -- lsp/<name>.lua files (basedpyright, rust_analyzer, ts_ls, clangd) whose
+  -- own on_attach silently overrides the wildcard.
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = M.au_attach,
+    callback = function(args)
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
+      if client then M.on_attach_lspconfig(client, args.buf) end
+    end,
+  })
+
+  --hi link LspInlayHint NonText
+  --vim.cmd([[
+  --  hi link DiagnosticVirtualTextError Comment
+  --  hi link DiagnosticVirtualTextWarn NonText
+  --  hi link DiagnosticVirtualTextInfo NonText
+  --  hi link DiagnosticVirtualTextHint NonText
+  --]])
+  vim.diagnostic.config({
+    virtual_text = {
+      spacing = 4,
+      prefix = "●",
+      severity = { min = vim.diagnostic.severity.HINT },
+      -- basedpyright (and pyright, and several other servers) emit multi-line
+      -- diagnostic messages where line 2+ restates a slimmer version of line
+      -- 1. nvim collapses newlines into the single-line virt_text, so we get
+      -- the whole brick. Keep just the first line; the float still shows the
+      -- full message.
+      format = function(d)
+        return (d.message:match("^(.-)\n") or d.message)
+      end,
+    },
+    signs = true,
+    underline = true,
+    severity_sort = true,
+    update_in_insert = false,
+    float = { border = "rounded", source = true, header = "" },
+    jump = { float = true, wrap = true },
+  })
+
   M.lsp_attached = {}
-  M.lsp_formatting = {}
 end
 
 function M.setup()
@@ -78,33 +148,27 @@ function M.setup()
   M.setup_mason()
   M.setup_lspconfig()
   M.setup_mason_lspconfig()
-  M.setup_mason_null_ls()
+  M.setup_mason_tool_installer()
+  M.setup_conform()
+  M.setup_nvim_lint()
 end
 
 function M.unload()
-  local err
-  _, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_format)
-  if err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
-    error(err)
-  end
-
-  _, err = pcall(vim.api.nvim_del_augroup_by_name, M.au_loclist)
-  if err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
-    error(err)
-  end
-  local _, _, null_ls_config = pcall(require, "null-ls.config")
-  if null_ls_config ~= nil then
-    null_ls_config.reset() -- otherwise it refuses to be configured
-    require("lsp-inlayhints").reset()
+  for _, group in ipairs({ M.au_format, M.au_loclist, M.au_lint, M.au_attach }) do
+    local ok, err = pcall(vim.api.nvim_del_augroup_by_name, group)
+    if not ok and err ~= nil and not vim.startswith(err, "Vim:E367: No such group: ") then
+      error(err)
+    end
   end
   M.lsp_attached = {}
-  M.lsp_formatting = {}
 end
 
 function M.setup_mason()
   require("mason").setup({
-    PATH = "append", -- let dev-environment tools take precedence
     log_level = mason_log_level,
+    -- A project's own tools (e.g. a .venv basedpyright put on PATH by direnv)
+    -- win over mason's copies, which resolve only as a fallback.
+    PATH = "append",
     ui = {
       icons = {
         package_installed = "✓",
@@ -117,23 +181,17 @@ end
 
 function M.show_loclist()
   vim.diagnostic.setloclist({ open = false })
-  vim.cmd("Trouble diagnostics toggle")
+  vim.cmd("bo lw 5")
 end
 
 function M.setup_lspconfig()
   vim.cmd(":runtime plugin/lspconfig.lua") -- surely there's a better way?
-  -- https://github.com/neovim/nvim-lspconfig/tree/master#suggested-configuration
-  vim.keymap.set("n", "<leader>ll", vim.diagnostic.open_float)
-  vim.keymap.set("n", "[l", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "]l", vim.diagnostic.goto_next)
-  vim.keymap.set("n", "ge", vim.diagnostic.goto_next)
-  vim.keymap.set("n", "gE", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "<leader>lw", M.show_loclist)
 end
 
 function M.on_attach_lspconfig(client, bufnr)
-  require("lsp-inlayhints").on_attach(client, bufnr)
-  M.on_attach_autoformat(client, bufnr)
+  if client:supports_method("textDocument/inlayHint") then
+    vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+  end
 
   -- prevent jittery rendering by just always showing the sign column
   vim.opt_local.signcolumn = "yes:1"
@@ -142,280 +200,120 @@ function M.on_attach_lspconfig(client, bufnr)
   vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
   vim.bo[bufnr].tagfunc = "v:lua.vim.lsp.tagfunc"
   vim.bo[bufnr].formatexpr = ""
-
-  -- Buffer local mappings.
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  local opts = { buffer = bufnr }
-  vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-  vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
-  vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-  vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-  vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-  vim.keymap.set("i", "<c-x><c-s>", vim.lsp.buf.signature_help, opts)
-  vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-  vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
-  vim.keymap.set("n", "<leader>wl", function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, opts)
-  vim.keymap.set("n", "<leader>lR", vim.lsp.buf.rename, opts)
-  vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, opts)
-  vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-  vim.keymap.set("n", "gs", vim.lsp.buf.document_symbol, opts)
-
-  ---TODO:
-  ---" Get current document diagnostics information.
-  ---nnoremap <Leader>li :LspDocumentDiagnostics<CR>
-  ---nnoremap <Leader>lS :LspStatus<CR>
-  ---nnoremap <Leader>lpd :LspPeekDefinition<CR>
-  ---nnoremap <Leader>lD :LspDeclaration<CR>
-  ---nnoremap <Leader>lpD :LspPeekDeclaration<CR>
-  ---nnoremap <Leader>lpi :LspPeekImplementation<CR>
-  ---" Go to the type definition of the word under the cursor, and open in the current window.
-  ---nnoremap <Leader>lt :LspTypeDefinition<CR>
-  ---nnoremap <Leader>lpt :LspPeekTypeDefinition<CR>
-  ---" View type hierarchy of the symbol under the cursor.
-  ---nnoremap <Leader>lT :LspTypeHierarchy<CR>
-  ---" Gets a list of possible commands that can be applied to a file so it can be fixed.
-  ---nnoremap <Leader>la :LspCodeAction<CR>
-  ---nnoremap <Leader>lr :LspReferences<CR>
-  ---augroup lsp_stuff
-  ---  autocmd!
-  ---  autocmd BufEnter,CursorHold,InsertLeave lua vim.lsp.codelens.refresh()
-  ---  autocmd CursorHold  lua vim.lsp.buf.document_highlight()
-  ---  autocmd CursorHoldI lua vim.lsp.buf.document_highlight()
-  ---  autocmd CursorMoved lua vim.lsp.buf.clear_references()
-  ---  autocmd User lsp_buffer_enabled call g:OnLspBufferEnabled()
-  ---augroup END
 end
 
 function M.setup_mason_lspconfig()
-  local mason_lspconfig = require("mason-lspconfig")
-  mason_lspconfig.setup({
-    ensure_installed = M.mason_install["lspconfig"],
-    automatic_enable = {
-      exclude = { "pylsp" },
+  vim.lsp.config("rust_analyzer", {
+    settings = {
+      ["rust-analyzer"] = { diagnostics = { disabled = { "inactive-code" } } },
     },
   })
 
-  -- Since automatic_enable uses vim.lsp.enable(), we need to ensure our
-  -- configurations are applied. Let's do that by setting up each server:
-  for _, server_name in ipairs(mason_lspconfig.get_installed_servers()) do
-    if vim.tbl_contains(M.mason_install.lspconfig, server_name) then
-      M.mason_lspconfig_handler(server_name)
-    end
-  end
-end
-
-function M.mason_lspconfig_handler(server_name) -- default handler (optional)
-  M.lsp_attached[server_name] = "lspconfig"
-  M.log("lspconfig handler: %s", server_name)
-  local setup = {
-    on_attach = M.on_attach_lspconfig,
-    flags = {
-      debounce_text_changes = 200,
-    },
-  }
-  if server_name == "rust_analyzer" then
-    setup["settings"] = {
-      ["rust-analyzer"] = {
-        cargo = {
-          allFeatures = true,
-          allTargets = true,
-          loadOutDirsFromCheck = true,
-          -- loadOutDirsFromCheck = false,
-          runBuildScripts = true,
-        },
-        diagnostics = {
-          enable = true,
-          disabled = { "inactive-code" },
-        },
-        -- See: https://github.com/simrat39/rust-tools.nvim/issues/300
-        -- inlayHints = { locationLinks = false },
-        lruCapacity = 1024,
-        -- checkOnSave = {
-        --   enable = true,
-        --   allFeatures = true,
-        --   allTargets = true,
-        --   command = "clippy",
-        --   -- extraArgs = {
-        --   --   "--no-deps",
-        --   --   "--",
-        --   --   "-W",
-        --   --   "clippy::all",
-        --   -- },
-        -- },
-        completion = {
-          autoimport = {
-            enable = true,
-          },
-        },
-        lens = {
-          enable = true,
-        },
-        rustfmt = {
-          enableRangeFormatting = true,
-        },
-        procMacro = {
-          enable = true,
-          ignored = {
-            ["async-trait"] = { "async_trait" },
-            ["napi-derive"] = { "napi" },
-            ["async-recursion"] = { "async_recursion" },
-          },
-        },
-        assist = {
-          importGranularity = "module",
-          importPrefix = "by_self",
-        },
-      },
-    }
-  elseif server_name == "pylsp" then
-    -- FIXME: ensure-installed pylsp plugins:
-    --   :PylspInstall python-lsp-black
-    --   :PylspInstall -e /Users/buck/repo/mypy
-    -- https://github.com/python-lsp/python-lsp-server/blob/develop/CONFIGURATION.md
-    setup["settings"] = {
-      pylsp = {
-        plugins = {
-          black = {
-            -- https://github.com/python-lsp/python-lsp-black#configuration
-            enabled = true,
-          },
-          mypy = {
-            enabled = false, -- too damn buggy
-          },
-          autopep8 = {
-            enabled = false,
-          },
-          flake8 = {
-            enabled = false,
-          },
-          mccabe = {
-            enabled = true,
-            threshold = 12,
-          },
-          -- preload ?
-          pycodestyle = { -- covered by black+pyright
-            enabled = false,
-          },
-          pyflakes = {
-            enabled = false,
-          },
-          pylint = {
-            enabled = false,
-          },
-          yapf = {
-            enabled = false,
-          },
-        },
-      },
-    }
-  elseif server_name == "jsonls" then
-    setup.init_options = {
-      provideFormatter = false,
-    }
-  elseif server_name == "yamlls" then
-    setup["settings"] = {
-      yaml = {
-        hover = true,
-        validate = true,
-        completion = true,
-        schemaStore = {
-          enable = true,
-          url = "https://www.schemastore.org/api/json/catalog.json",
-        },
-        ---- schemas = {
-        ----   ["http://json-schema.org/draft-07/schema#"] = "*.schema.yaml",
-        ----   -- Add other schemas you want to recognize
-        ---- },
-        -- This is key - it allows the server to use the $schema field in the document
-        customTags = {
-          "!include",
-          "!reference",
-          "tag:yaml.org,2002:str",
-        },
-      },
-    }
+  for _, server_name in ipairs(M.mason_install.lspconfig) do
+    M.lsp_attached[server_name] = "lspconfig"
+    M.log("lspconfig handler: %s", server_name)
   end
 
-  require("lspconfig")[server_name].setup(setup)
+  require("mason-lspconfig").setup({
+    ensure_installed = M.mason_install.lspconfig,
+    -- Whitelist: only enable servers we asked for. With the default `true`,
+    -- mason-lspconfig enables every *installed* package (see
+    -- features/automatic_enable.lua), so orphans from prior installs (e.g.
+    -- pyright after the basedpyright swap) keep attaching. Passing a list
+    -- gates enable_server() on membership.
+    automatic_enable = M.mason_install.lspconfig,
+  })
+
+  -- TypeScript 7's own server (`tsc --lsp`), resolved per project from
+  -- node_modules/.bin -- so not a mason package. Replaces ts_ls, which needs
+  -- the tsserver.js that TypeScript 7 no longer ships.
+  vim.lsp.enable("tsc")
 end
 
-function M.setup_mason_null_ls()
-  -- https://github.com/jay-babu/mason-null-ls.nvim#example-config
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Formatting-on-save#code
-  require("null-ls").setup({ on_attach = M.on_attach_autoformat })
-  require("mason-null-ls").setup({
-    ensure_installed = M.mason_install["null-ls"],
-    automatic_installation = true,
-    -- pending https://github.com/jay-babu/mason-null-ls.nvim/pull/64
-    handlers = { M.null_ls_handler },
+function M.setup_mason_tool_installer()
+  local tools = {}
+  for _, name in ipairs(M.mason_install.formatters) do
+    table.insert(tools, name)
+  end
+  for _, name in ipairs(M.mason_install.linters) do
+    table.insert(tools, name)
+  end
+  require("mason-tool-installer").setup({
+    ensure_installed = tools,
+    auto_update = false,
+    run_on_start = true,
   })
 end
 
-function M.null_ls_handler(source, types)
-  --- if source == "prettierd" then
-  ---   M.log("DEBUG: null-ls disabled: %s", source)
-  ---   return
-  --- end
-
-  -- `types` is a list with "diagnostics" "formatting" etc.
-  local configured_by = M.lsp_attached[source]
-  if configured_by ~= nil then
-    M.log("null-ls handler: %s already configured: %s", source, configured_by)
-  else
-    -- initially copied from mason-null-ls.automatic_setup
-    local null_ls = require("null-ls")
-    vim.tbl_map(function(type)
-      local builtin = null_ls.builtins[type][source]
-      if builtin == nil then
-        M.log("null-ls handler: unknown: %s %s", source, type)
-      else
-        null_ls.register(builtin)
-        M.lsp_attached[source] = "null-ls"
-        M.log("null-ls handler: configured: %s %s", source, type)
+function M.setup_conform()
+  require("conform").setup({
+    formatters_by_ft = M.conform_formatters_by_ft,
+    formatters = {
+      -- Only where the file's project installs oxfmt. conform would also take
+      -- any oxfmt on PATH (direnv puts a project's node_modules/.bin there),
+      -- which would override prettierd in projects that never chose oxfmt.
+      oxfmt = {
+        condition = function(_, ctx)
+          for dir in vim.fs.parents(ctx.filename) do
+            if vim.uv.fs_stat(dir .. "/node_modules/.bin/oxfmt") then return true end
+          end
+          return false
+        end,
+      },
+    },
+    -- Format on save: use conform's formatters; fall back to attached LSP
+    -- formatter (e.g. rust_analyzer for rust, gopls for go-the-LSP, lua_ls).
+    format_on_save = function(bufnr)
+      if vim.bo[bufnr].readonly or not vim.bo[bufnr].modifiable then
+        return
       end
-    end, types)
-  end
+      return { timeout_ms = 1000, lsp_format = "fallback" }
+    end,
+  })
 end
 
-function M.on_attach_autoformat(client, bufnr)
-  if not client.supports_method("textDocument/formatting") then
-    M.log("formatting: no support: %s", client.name)
-    return
-  end
+function M.setup_nvim_lint()
+  local lint = require("lint")
 
-  --- -- FIXME: surely there's a better way to disable jsonls formatting D:
-  --- -- TODO: fix neoconf
-  --- if client.name == "jsonls" then
-  ---   M.log("jsonls formatting disabled")
-  ---   return
-  --- end
+  -- Custom syntax-only linters for shells whose own binaries do the checking.
+  lint.linters.fish = {
+    cmd = "fish",
+    args = { "--no-execute" },
+    stdin = false,
+    append_fname = true,
+    stream = "stderr",
+    ignore_exitcode = true,
+    parser = require("lint.parser").from_pattern(
+      "([^%s]+) %(line (%d+)%): (.+)",
+      { "file", "lnum", "message" },
+      nil,
+      { source = "fish", severity = vim.diagnostic.severity.ERROR }
+    ),
+  }
+  lint.linters.zsh = {
+    cmd = "zsh",
+    args = { "-n" },
+    stdin = false,
+    append_fname = true,
+    stream = "stderr",
+    ignore_exitcode = true,
+    parser = require("lint.parser").from_pattern(
+      "([^:]+):(%d+): (.+)",
+      { "file", "lnum", "message" },
+      nil,
+      { source = "zsh", severity = vim.diagnostic.severity.ERROR }
+    ),
+  }
 
-  if M.lsp_formatting[bufnr] ~= nil then
-    M.log(
-      "formatting: %s: %s (dup: %s)",
-      bufnr,
-      client.name,
-      M.lsp_formatting[bufnr]
-    )
-  end
+  lint.linters_by_ft = M.lint_linters_by_ft
 
-  vim.api.nvim_clear_autocmds({ group = M.au_format, buffer = bufnr })
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    group = M.au_format,
-    buffer = bufnr,
+  vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+    group = M.au_lint,
     callback = function()
-      M.log(
-        "formatting buffer with: %s",
-        vim.inspect(vim.lsp.get_clients({ bufnr = bufnr }))
-      )
-      vim.lsp.buf.format({ bufnr = bufnr })
+      require("lint").try_lint()
     end,
-    desc = "format on save: " .. client.name,
+    desc = "nvim-lint: try_lint on save / read / leave-insert",
   })
-  M.lsp_formatting[bufnr] = client.name
-  M.log("formatting: buffer %s: %s ", bufnr, M.lsp_formatting[bufnr])
 end
 
 function M.update_loclist_if_visible()
@@ -425,5 +323,4 @@ function M.update_loclist_if_visible()
   end
 end
 
-M.init()
 return M
