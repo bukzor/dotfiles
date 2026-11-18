@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -41,8 +41,39 @@ each), `gh run cancel`, the pull, this handoff file.
 
 ## Steps
 
+- [x] 1 run steps at the checkout (`shell: bash`, `./lib/ci/...`); scripts derive `ROOT`
+- [x] 2 jobs pass (Vim: ubuntu, windows; Neovim: ubuntu)
+- [x] 3 stale queued runs cancelled
+- [x] 4 first green pair; pull
+
 ## Decisions
+
+- Labels: `ubuntu-22.04`, `windows-2022` still exist; `macos-12` -> `macos-latest`
+  was tried, but macOS jobs sat queued 10+ min (whole run held open), so macOS
+  is out of both matrices.
+- `check-nvim.sh`: plenary was never installed and the config was never
+  loaded ("E492 Not an editor command"). Now clones plenary to
+  `$RUNNER_TEMP`, `set rtp+=`, and `XDG_CONFIG_HOME=$ROOT/.config` so the
+  config finds itself. Real `init.lua` loads and tests pass on ubuntu.
+- Neovim on Windows dropped: lazy/mason installs (black, isort, tfsec, ...)
+  run past a 240s bound, exit 124. Vim on Windows passes.
+- `timeout 240` around nvim; `timeout-minutes: 5` kept (briefly 8, reverted).
 
 ## Open Questions
 
+1. Neovim on Windows: needs the mason tool installs skipped under CI (an
+   env guard in `lsp.lua`/`plugins.lua`), a config judgment. Recommend a
+   `CI` guard that skips mason-tool-installer, then re-add windows-2022.
+2. macOS in both matrices: queues forever on this account's runners;
+   re-add `macos-latest` when it schedules.
+
 ## Final report
+
+- Main commits: `50f0601` (checkout paths, labels), `6f2a3d4` (drop macOS,
+  bound nvim), `e19d3b5` (plenary, XDG_CONFIG_HOME), `700228b` (nvim ubuntu
+  only). No config files changed.
+- First run where both finish green: Check Vim 44363129739 and Check
+  Neovim 44363129610 on `700228b` (Check sh and Lint Lua green too).
+  Check Vim was also green on `e19d3b5`.
+- Stale queued Check Vim/Neovim runs cancelled. `git -C ~ pull --ff-only`
+  done (at `700228b`).
