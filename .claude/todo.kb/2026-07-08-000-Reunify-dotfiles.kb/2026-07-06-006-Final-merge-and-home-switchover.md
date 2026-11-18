@@ -17,18 +17,18 @@ every host, retire svelte-crostini and wsl-buck-win10.
 
 ## Implementation Steps
 
-- [ ] unit tests first (vague reminder): codify the preflight as a runnable check —
+- [x] unit tests first (vague reminder): codify the preflight as a runnable check —
       merge-tree conflict count == 0, plus the accumulated invariant suites from
       000/001/005 all green on the merged tree before switchover
       (shape: run-once `X_check.sh` for merge-tree; the merged-tree suite
       run is `./.local/share/redo/do test` in a scratch checkout — zero
       installs — see ../2026-07-07-000)
-- [ ] preflight: `git merge-tree main svelte-crostini` shows zero conflicts;
+- [x] preflight: `git merge-tree main svelte-crostini` shows zero conflicts;
       `git diff main svelte-crostini --stat` shows only expected one-sided paths
 - [ ] commit/park uncommitted state in each host's live `~` (penguin: see
       `../2026-06-03-001-commit-accumulated-dotfiles-changes.md`)
 - [x] in `dotfiles--main`: `git merge --allow-unrelated-histories svelte-crostini` — main `ff853dc`, 2026-11-18
-- [ ] review the merged tree (`git diff main svelte-crostini` empty;
+- [x] review the merged tree (`git diff main svelte-crostini` empty;
       spot-check resurrected main-only survivors)
 - [x] push main
 - [x] buck-win10, brought ahead of the merge: [switch `~` to main, retire `wsl-buck-win10`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-000-switch-buck-win10-home-to-main.md) — done 2026-11-18 (pre-switch `fa3f7c7`); open questions there
@@ -37,7 +37,9 @@ every host, retire svelte-crostini and wsl-buck-win10.
 - [ ] smoke test on each host: new login shell, bash -i, zsh -i, vim, tmux,
       and `~/bin/has` + `~/bin/bootstamp` (they need `.sh_lib/functions-cli.sh`,
       which only main carries)
-- [ ] CI: `fetch-depth: 0` (the deferred 2026-07-07-000 item), if the merge-tree
+- [x] [!DRAFT] 2026-11-18: moot. `check-sh.yml` already has `fetch-depth: 0`, and
+      `final-merge_check.sh` skips once svelte-crostini is renamed (unit 008). Was:
+      CI: `fetch-depth: 0` (the deferred 2026-07-07-000 item), if the merge-tree
       check runs in CI
 - [ ] once no host's `~` checks it out: rename svelte-crostini and
       wsl-buck-win10 to `merged/…`, locally and on origin (rule in
@@ -59,6 +61,9 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [`claude` on fresh-shell PATH; CI hang; small main defects](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-011-claude-on-path-ci-and-defects.md)
 - [x] [buck-win10 post-merge: Windows-home checkout, pnpm 10, orphans, CI](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-010-buck-win10-post-merge-cleanup.md)
 - [x] [Check Vim / Check Neovim: retired `macos-12`, `~/lib/ci` paths](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-012-check-vim-nvim-workflows.md)
+- [ ] [claude leftovers: `.claude/local`, npm-global copy, Windows prefs, `gcpenv`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-013-claude-and-shell-leftovers.md)
+- [ ] [Neovim CI on Windows (and macOS) back](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-014-nvim-ci-coverage.md)
+- [ ] [untracked strays in both homes](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-015-untracked-strays.md)
 - [ ] CI coverage lost in unit 012 (its OQs): Neovim on Windows needs mason-tool-installer
       skipped under `CI`; macOS dropped from both matrices until its runners schedule
 - [ ] [!DRAFT] 2026-11-18: keep `installMethod: native` (as penguin); once no session runs it,
