@@ -1,0 +1,18 @@
+name: Lint Lua
+
+on: [push, pull_request]
+
+jobs:
+  parse:
+    name: every tracked *.lua parses
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LuaJIT
+        # LuaJIT, not Lua 5.1: neovim runs LuaJIT, which accepts goto
+        run: sudo apt-get update && sudo apt-get install -y luajit
+
+      - name: Parse
+        run: git ls-files -z '*.lua' | xargs -0 -n1 luajit -bl >/dev/null
