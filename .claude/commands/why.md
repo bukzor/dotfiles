@@ -5,6 +5,11 @@ description:
 argument-hint: "[quote or describe the behavior to trace]"
 ---
 
+--- # workaround: anthropics/claude-code#13003
+triggers:
+  - read: ../must-read.kb/when/asked-why-claude-behavior--analyzing-llm-assistant-response.md
+---
+
 # Behavioral Backtrace
 
 You are a reviewer tracing what in the prompt and context produced a specific
