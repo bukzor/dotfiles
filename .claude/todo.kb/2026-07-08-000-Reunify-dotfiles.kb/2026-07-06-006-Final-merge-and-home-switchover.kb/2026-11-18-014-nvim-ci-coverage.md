@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -40,8 +40,46 @@ setup; `check-nvim.yml`, `check-vim.yaml`, `lib/ci/check-nvim.sh`,
 
 ## Steps
 
+- [x] 1 mason-tool-installer skipped under CI; windows-2022 re-added; green
+- [x] 2 macOS: cause found; re-added (stable only); green
+- [x] 3 `timeout-minutes: 5` kept
+- [x] 4 pull `~`
+
 ## Decisions
+
+- Guard: the plugin's own option, `run_on_start = vim.env.CI == nil`, in
+  `setup_mason_tool_installer` (`.vim/lua/bukzor/lsp.lua`; `.config/nvim` is a
+  symlink to `.vim`). Checked with a stubbed plugin under headless nvim (nix
+  shell): `CI` unset -> `run_on_start=true`; `CI=1` -> `false`. A full local
+  start was not usable (fresh data dir had no plugins installed).
+- Windows needed two more fixes beyond the guard: `check-nvim.sh` passes
+  `ROOT` through `cygpath -m` (plenary's `pwsh` spawn got ENOENT on git-bash
+  `/d/a/...` paths), and `windows-2022` + `v0.9.5` is excluded (nvim 0.9.5
+  segfaults loading this config on Windows; 0.10+ pass).
+- `check-nvim.sh`: `timeout` is optional (absent on macOS; falls back to
+  `gtimeout`, else the job's `timeout-minutes: 5` bounds it).
+- macOS runs `stable` only, in both workflows: its jobs do start and pass,
+  but runners hand them out one at a time (minutes apart), which held
+  full-matrix runs open 10+ min.
 
 ## Open Questions
 
+1. macOS stays `stable`-only; widening to all revs makes each run last 20+ min.
+2. nvim `v0.9.5` on Windows segfaults; left excluded.
+
 ## Final report
+
+- Finding (macOS): Actions are enabled, `allowed_actions: all`, repo public.
+  The stalled jobs were `macos-12` jobs on svelte-crostini's old workflows
+  (label retired, so they never schedule; 12 such stale runs cancelled).
+  `macos-latest` does schedule: first jobs started within ~1 min of a push,
+  later ones trickle in serially. Not a settings/limit fault we could change.
+- Main commits: `0fe71d2` (mason guard, windows back), `cb623b8` (cygpath),
+  `acf1061` (macos-latest), `32abb12` (macOS timeout, exclude win+0.9.5),
+  `f63cd56` (macOS stable only).
+- Green on `f63cd56`: Check Neovim 44369801217, Check Vim 44369801154
+  (ubuntu, windows, macOS all pass). Superseded runs cancelled.
+- Scope note: also touched the two ci workflow/script files only; no config
+  beyond `lsp.lua`. A scratch `nvim` run reverted `.vim/lazy-lock.json`
+  (restored, not committed).
+- `git -C ~ pull --ff-only`: see below.

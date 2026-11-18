@@ -61,11 +61,11 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [`claude` on fresh-shell PATH; CI hang; small main defects](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-011-claude-on-path-ci-and-defects.md)
 - [x] [buck-win10 post-merge: Windows-home checkout, pnpm 10, orphans, CI](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-010-buck-win10-post-merge-cleanup.md)
 - [x] [Check Vim / Check Neovim: retired `macos-12`, `~/lib/ci` paths](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-012-check-vim-nvim-workflows.md)
-- [ ] [claude leftovers: `.claude/local`, npm-global copy, Windows prefs, `gcpenv`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-013-claude-and-shell-leftovers.md)
-- [ ] [Neovim CI on Windows (and macOS) back](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-014-nvim-ci-coverage.md)
-- [ ] [untracked strays in both homes](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-015-untracked-strays.md)
-- [ ] CI coverage lost in unit 012 (its OQs): Neovim on Windows needs mason-tool-installer
-      skipped under `CI`; macOS dropped from both matrices until its runners schedule
+- [x] [claude leftovers: `.claude/local`, npm-global copy, Windows prefs, `gcpenv`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-013-claude-and-shell-leftovers.md)
+- [x] [Neovim CI on Windows (and macOS) back](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-014-nvim-ci-coverage.md)
+- [x] [untracked strays in both homes](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-015-untracked-strays.md)
+- [ ] user: where your data in `~` and the Windows home should live (unit 015 OQs 1-4);
+      then `git status` is clean on buck-win10
 - [ ] [!DRAFT] 2026-11-18: keep `installMethod: native` (as penguin); once no session runs it,
       trash the pnpm and `~/prefix/npm-global` copies of `claude` (unit 011 OQ 2)
 - [ ] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md); coordinator: merge svelte-crostini into main after each plan commit, so 009's ancestor check passes

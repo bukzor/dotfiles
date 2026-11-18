@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -42,8 +42,38 @@ home's `trash/`; the two pulls; this handoff file.
 
 ## Steps
 
+- [x] classify each stray by content and mtime
+- [x] ignore `.boon/`; move Windows scratch; pull both homes; record
+
 ## Decisions
+
+- `.boon/`: tool state (boon, a Deadlock tool: `.install.json` plus ~21MB of
+  downloaded game-data JSON, all written 2026-11-18). Ignored as `/.boon/`.
+- Windows `01-03*.ps1`, `py-diag.ps1` (June-July diagnostics) and
+  `path-backup-before-python-fix.txt` (a PATH dump): agent scratch, moved to
+  `/mnt/c/Users/worki/trash/merge-015/`.
 
 ## Open Questions
 
+User data left in place, none ignored:
+1. `~/willy-practice.txt` (2025-01-05, hand-written practice log). Suggest a
+   private notes home (e.g. `private-dotfiles/` or `docs/private`).
+2. `~/deadlock-builds-recovery/` (recovered build snapshots, plus a root-owned
+   `snapshotter.log`, already covered by `*.log`). Suggest a private repo or
+   `private-dotfiles/`.
+3. Windows `deadlock-levels.tsv` (2026-06-25, level/souls table): data, not
+   scratch. Suggest alongside OQ 2.
+4. Windows `projects/godot/` (two Godot projects, `empty` and
+   `my-first-godot-project`, with `.godot/` caches): user work. Suggest its
+   own repo under `~/repo/`.
+
 ## Final report
+
+- main `2588950` (`.gitignore`: `/.boon/`), pushed after rebasing over
+  peers' 013/014 commits (their dirty `lsp.lua` delayed the rebase ~2 min).
+  `check-ignore -v` confirms the pattern.
+- Both homes pulled ff-only to `0fe71d2`.
+- `git -C ~ status --short`: ` M .claude/sessions.kb`, `?? deadlock-builds-recovery/`,
+  `?? willy-practice.txt`. Windows: `?? deadlock-levels.tsv`, `?? projects/`
+  (`.claude/settings.json` no longer modified).
+- Deviation: `.gitignore` not mirrored to svelte-crostini (brief names main only).

@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -48,8 +48,35 @@ this handoff file. Not the root `.gitignore` (unit 015 owns it).
 
 ## Steps
 
+- [x] 1 `.claude/local` removed on main (`7479348` local, pushed as `c8b3fa7`); no other `.local/share/claude-code` reference (grep). `.local/share/claude-bin` is the osx sed/pgrep shim dir, not that era: kept.
+- [x] 2 npm-global `claude` + `@anthropic-ai` moved to `~/trash/merge-013/` (no live process ran it; 5 ran the pnpm 2.1.316 copy)
+- [x] 3 Windows prefs moved to `.claude/settings.local.json`; `settings.json` restored
+- [x] 4 `bin/gcpenv` checked
+- [x] 5 pulls: `~` and `/mnt/c/Users/worki` fast-forwarded to `c8b3fa7`
+
 ## Decisions
+
+- 3: docs (code.claude.com/docs/en/settings-reference.md, `theme` and `tui`
+  entries) give both keys scope `Any file`; `~/.claude.json` is read for
+  `theme` only as an old-version fallback and not for `tui`. So the host-local
+  home is `.claude/settings.local.json` (settings.md, "Settings files": Project
+  local; already gitignored by `**/.claude/settings.local.json`). In the
+  Windows home the project root is `~`, so it applies to sessions started in
+  the home repo, not elsewhere. Backups in `~/trash/merge-013/`.
+- 4: `bin/gcpenv` works on main (`--help` ok; no-arg path reaches `gcloud`,
+  absent here). No fix.
+- Push: dotfiles--main had a sibling's unstaged edit, so `pull --rebase`
+  refused; cherry-picked my commit onto `origin/main` in a temp worktree and
+  pushed. Local `main` in `dotfiles--main` still holds `7479348` (same
+  patch); its next rebase drops it.
 
 ## Open Questions
 
+1. `.claude/local` on the pnpm install: running sessions (2.1.316) stay on
+   pnpm; retiring it (Unit 011 OQ 2) waits until those end.
+
 ## Final report
+
+Done as above. Commits on main: `c8b3fa7`. No tracked file changed in the
+Windows home (settings.json clean; local file is ignored). `gcpenv`
+unchanged. Not checked: gcpenv against a real gcloud.
