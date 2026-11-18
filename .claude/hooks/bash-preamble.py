@@ -130,7 +130,9 @@ def main():
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": permission,
-                "updatedInput": {"command": wrap_command(cmd)},
+                # A replacement, not a patch: drop a field here and the call
+                # loses it (run_in_background, timeout), silently.
+                "updatedInput": {**input["tool_input"], "command": wrap_command(cmd)},
             }
         },
         sys.stdout,
