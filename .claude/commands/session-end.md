@@ -38,6 +38,16 @@ Key questions:
   brief/register its ruling sitting reads
   (`Skill(review-open-questions)`), not only in a devlog or breadcrumb.
 - If `Skill(llm-design-kb)`: run the maintenance checklist from that skill
+- If `Skill(subagent-handoffs)`: is each handoff collection this session
+  touched closeable? Closeable means its plan's success criteria pass and
+  the user has said they're satisfied on review; passing tests aren't
+  enough, and neither is your own judgment. If so, close it per that
+  skill's Procedure, Close. If not, keep it: open files are the resume
+  state and done files are waiting for review. The sessions.kb entry
+  should point at it either way.
+
+  > [!@bukzor] ruled 2026-11-18: session-end includes appropriate
+  > handoff cleanup. The gate wording is the agent's.
 
 Steps:
 
