@@ -33,6 +33,19 @@ Tentative rulings (user, 2026-11-18: "infer intent, tentative judgments"):
    Questions; `.gitconfig` is shared, so don't edit it.
 4. **Host installs:** `pnpm add -g prettier`, then show that
    `prettier-markdown` works on a sample.
+5. **Added 2026-11-18,** from the Open Questions of
+   `./2026-11-18-002-commands-agents-are-told-to-run.md`. This host is
+   Alpine.
+   - Run `apk add findutils zstd`, then show that `claude-open-tasks-list`
+     gets past `find` and that `zstd --version` works. If apk needs sudo
+     and you get a permission prompt, the user answers it; never work
+     around a denial.
+   - Install the user's bukzor-tools here (it provides `claude-path` and
+     `claude-search`; see main `922d325`), following its own install
+     instructions. Then show that `claude-jsonl-path` prints a slug.
+   - Clone `private.meta-reasoning-corpus` to the path that the dangling
+     `~/.claude/{sessions,todo}.kb` symlinks expect, and show those links
+     now resolve. It is private: clone it, never publish anything from it.
 
 Commits push main (and svelte, if anything shared changes), then `git -C ~
 pull --ff-only`. Until item 1 lands, use unit 001's ssh workaround.
@@ -42,6 +55,11 @@ pull --ff-only`. Until item 1 lands, use unit 001's ssh workaround.
 `~`; this handoff file.
 
 ## Steps
+
+- [~] 1 GitHub ssh: drop the pin (or the file); push; pull `~`; prove `ssh -T`
+- [ ] 2 Nix: port `env.d/400-nix.sh` if it works here; prove login PATH
+- [ ] 3 `init.templateDir`: identify git-localhost-store; install or record
+- [ ] 4 `pnpm add -g prettier`; prove `prettier-markdown`
 
 ## Decisions
 
