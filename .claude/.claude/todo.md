@@ -71,3 +71,6 @@ queue in its `.claude/todo.md`, design kb moved there from
       "Kept model as Fable 5"). Routing analysis (findings doc,
       "Amendments") says: default opus, fable by deliberate switch or in
       lean workers.
+- [ ] `~/router-debug` moved to `~/claude/router-debug` (reunify fold unit 004): rename
+      `~/.claude/projects/-home-bukzor-router-debug/` to `-home-bukzor-claude-router-debug`
+      so its transcripts follow? User's call (2026-11-10).
