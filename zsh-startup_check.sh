@@ -37,8 +37,11 @@ mkdir -p "$tmphome/.cargo"
 # not depend on.
 # must match the same zsh binary the -lc/-i invocations below resolve
 # (PATH=/usr/bin:/bin) -- this host has two: homebrew's ($VENDOR=pc) and
-# apt's system one ($VENDOR=debian), and they disagree.
-vendor_ostype=$(env -i PATH=/usr/bin:/bin zsh -c 'print -r -- "$VENDOR-$OSTYPE"')
+# apt's system one ($VENDOR=debian), and they disagree. Under $tmphome, so
+# .zshenv runs first: env.d/010-ostype.sh rewrites zsh's $OSTYPE (linux-gnu
+# -> linux); the bare built-in names a file zkbd never looks up, and its
+# wizard then blocks on CI's pty.
+vendor_ostype=$(env -i HOME="$tmphome" PATH=/usr/bin:/bin zsh --no-globalrcs -c 'print -r -- "$VENDOR-$OSTYPE"')
 mkdir -p "$tmphome/.zkbd"
 cp "$repo/.zkbd/xterm-256color-debian-linux-gnu" "$tmphome/.zkbd/xterm-$vendor_ostype"
 
