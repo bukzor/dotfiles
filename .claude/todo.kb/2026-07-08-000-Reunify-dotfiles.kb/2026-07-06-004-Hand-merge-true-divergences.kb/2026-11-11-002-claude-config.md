@@ -57,10 +57,12 @@ handoff file.
   and its scripted WebFetch steps.
 - `CLAUDE.md`, plainly superseded on svelte: Prime Directive, Response
   Framework (Response Protocol, Commitment, `must-read.kb/when/user-
-  instructions-are-inconsistent…`); `.d` dirs (`.kb/`); Domain Context
-  Files (`must-read.kb`); bulk-ops tooling (`bulk-edits.md`,
-  `llm-subtask`); Bash and newline rules (`bash-conventions.md`,
-  `Edit.md`); no removal commentary (`comments-target-a-cold-reader`);
+  instructions-are-inconsistent…`); token efficiency ("every token must
+  repay all its costs"; `.kb/` for `.d` dirs); Domain Context Files
+  (`must-read.kb`); bulk-ops tooling (`bulk-edits.md`, `llm-subtask`);
+  Bash rules (`cd` in a subshell: `before/running-ANY-Bash-commands.md`;
+  exit codes: `bash-conventions.md`'s errexit); newline rule (`Edit.md`);
+  no removal commentary (`comments-target-a-cold-reader`);
   TodoWrite → TODO.md (denied; agents mark `[x]`); `alert`
   (`preferredNotifChannel`).
 
