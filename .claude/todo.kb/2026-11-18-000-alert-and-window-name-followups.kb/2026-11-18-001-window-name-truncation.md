@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ~/.claude/todo.kb/2026-11-18-000-alert-and-window-name-followups.kb/CLAUDE.md
@@ -41,8 +41,29 @@ there.
 
 ## Steps
 
+- [x] Three-branch format: undeclared -> command; `✳ ` title -> mark + body
+      trimmed to 23; else trimmed to 24 as before.
+- [x] Verify on isolated server (`-L wn`), titles set by OSC 2.
+- [x] Narrow-width test; comment in `.tmux.conf`.
+
 ## Decisions
+
+- Body budget 23 after the mark, so a claude name is still 24 columns total.
+- Third branch keeps the old `s/✳ /MARK/` substitution unchanged, so non-claude
+  names resolve exactly as before.
+- Keep 24: see Final report.
 
 ## Open Questions
 
+- Below ~70 columns the status-right (~40 cols) squeezes the window list
+  regardless of name budget. A shorter status-right is out of scope here.
+
 ## Final report
+
+Results (80 cols): short claude -> `MARKshort`; long claude ->
+`MARK…conversation title here`; 24-char body -> `MARK…` trimmed; long
+non-claude -> `…le /home/bukzor/some/dir`; empty and hostname -> command
+(`sleep`). Narrow: at 80 cols the current window fits and the list scrolls; at
+60 the current name is clipped by status-right. Result lives in the
+`.tmux.conf` comment above `automatic-rename-format`. `bin/alert` untouched.
+Caveat: `select-pane -T` does not trigger a rename; only real OSC 2 does.
