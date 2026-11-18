@@ -17,7 +17,8 @@ tries four transports in order until one succeeds: `notify-send`
 added 2026-11-18, `86c7bda`), `notify_hterm` (OSC 777 written to each
 tmux client's tty), then the terminal bell. `notify_hterm` succeeds
 whenever a writable client tty exists, whether or not the terminal
-renders OSC 777 (Windows Terminal rendering it: untested), so it can mask the bell on
+renders OSC 777 (Windows Terminal silently drops it -- tested 2026-11-18),
+so it masks the bell on
 any non-hterm terminal. `alert-slack` is deliberately excluded from the
 fallback chain -- leaving the machine is a decision, not a fallback
 (commit `d47ccda`).
