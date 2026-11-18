@@ -54,7 +54,7 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [ignores: `private-dotfiles/`, untracked noise; `.gitmodules` for the private gitlinks](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-004-ignores-and-gitmodules.md)
 - [x] [host fixes: ssh pin, Nix, `init.templateDir`, prettier, rust-analyzer](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-005-buck-win10-host-fixes.md)
 - [x] [`claude-tokens-cost` prices; `breakdown.md` frontmatter](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-006-claude-tokens-prices-and-breakdown.md) — [!DRAFT] keep main-only `breakdown.md` (works now, merges clean)
-- [ ] [pre-merge follow-ups: dead vim autoloads, `<C-K>`, penguin's key name, gcloud-private, pnpm, junk in `~`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-007-pre-merge-followups.md)
+- [x] [pre-merge follow-ups: dead vim autoloads, `<C-K>`, penguin's key name, gcloud-private, pnpm, junk in `~`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-007-pre-merge-followups.md)
 - [ ] [the merge, and buck-win10's `~` taking it](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-008-merge-and-buck-win10-pull.md)
 - [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)

@@ -32,8 +32,8 @@ out of scope.
    paths that exist only on main. Spot-check that they survived. Push main.
 3. **Pull into `~`.** The fast-forward will refuse over the four
    untracked-but-incoming paths that the ignores unit listed (`.aws/`,
-   `.azure/`, `package.json`, and `.ssh/id_ed25519.pub` if unit 007's
-   rename hasn't covered it). For each:
+   `.azure/`, `package.json`, and `.ssh/id_ed25519.pub` is resolved by unit
+   007). For each:
    - **`.aws` and `.azure`** are symlinks into Windows here, and svelte
      tracks a `.gitignore` inside each. Pick a layout where `git status` is
      clean and the AWS and Azure CLIs still read the Windows-side files.
@@ -43,6 +43,11 @@ out of scope.
    - **`package.json`:** diff it against svelte's. Move the local copy to
      `~/trash/` and record what differed.
    Then pull, and rerun the parent's smoke test on this host.
+
+   Also (unit 007's Open Question; tentative judgment, user 2026-11-18): this
+   host's `~/.ssh/id_rsa.pub` (`worki@buck-win10`) is a real file that the
+   new `/id_*.pub` rule hides. Track it on main as
+   `.ssh/id_rsa.pub.worki.buck-win10`, and make the plain name a link to it.
 
 Record the merge commit and the pre-pull commit in your Final report, and
 the rollback for each.
