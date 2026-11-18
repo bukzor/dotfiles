@@ -1,0 +1,17 @@
+# Ignore everything in .local/share by default
+*
+
+# Opt-in this .gitignore file itself
+!.gitignore
+
+# Opt-in vendored apenwarr minimal/do (public domain; see redo/README.md)
+!redo/
+!redo/**
+
+# Opt-in the health checks and repairs run by monit (see ~/.config/monit/)
+!health/
+!health/**
+
+# Opt-in macOS compatibility shims for the Claude binary (see claude-bin/README.md)
+!claude-bin/
+!claude-bin/**
