@@ -35,6 +35,7 @@ bak/
 # transient history
 *.sw[a-p]
 .bash_history
+.ash_history
 .zsh_history
 .zcompdump*
 .python_history*
@@ -69,6 +70,10 @@ package/
 .goenv
 .dropbox
 .dropbox-dist
+# Nix installer and nix-channel state
+/.nix-profile
+/.nix-channels
+/.nix-defexpr/
 .local/*
 
 # Opt-in .local/share (controlled by .local/share/.gitignore)
@@ -139,6 +144,8 @@ ntuser.ini
 .wslconfig
 .git-for-windows-updater
 _viminfo
+# WSL: symlink to the Windows profile
+/winhome
 
 # ---------------------------------------------------------------------------
 # Windows shell / user-data folders — bulk content, not VCS
