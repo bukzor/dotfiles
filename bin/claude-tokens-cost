@@ -10,29 +10,54 @@ plus their cost. Subscription usage is priced as if it had gone through the
 API -- these are notional API-equivalent dollars, not a bill.
 
 Every rate here is a multiple of the model's base input price, so the table
-carries one number per model plus its cache-hit multiplier. Verified against
-the published table and, independently, by recovering each rate from
-ccusage's own totals: all five models in use reproduce to four decimals.
+carries one number per model plus its cache-hit multiplier. Source: the
+published table, https://platform.claude.com/docs/en/about-claude/pricing
+(fetched 2026-11-18). The original five entries were also verified
+independently, by recovering each rate from ccusage's own totals: all five
+reproduce to four decimals.
+
+A model missing from PRICES costs `nan`, with a warning on stderr, so one new
+model neither blocks the report nor silently reads as free.
 
 Usage: claude-tokens | claude-tokens-cost | claude-tokens-histogram -b cost_usd
 """
 
+import math
 import sys
+from collections import Counter
 from collections.abc import Iterator, Mapping, Sequence
 
 # model -> (base input $/Mtok, cache-hit multiplier)
 #
-# Fable 5.1 is the one model whose cache hits are not 0.1x base -- they are
-# 0.025x. Missing that overstates its cache reads fourfold, which for this
-# workload is most of its bill.
+# Cache hits are 0.1x base except where noted. Missing a lower multiplier
+# overstates that model's cache reads by 2-4x, which for this workload is
+# most of its bill.
 PRICES = {
+    "claude-fable-5-2": (8.0, 0.025),
+    "claude-mythos-5-2": (8.0, 0.025),
+    "claude-fable-5-1": (10.0, 0.025),
+    "claude-mythos-5-1": (10.0, 0.025),
+    "claude-fable-5": (10.0, 0.1),
+    "claude-mythos-5": (10.0, 0.1),
+    "claude-opus-5-5": (4.0, 0.05),
     "claude-opus-5": (5.0, 0.1),
     "claude-opus-4-8": (5.0, 0.1),
+    "claude-opus-4-7": (5.0, 0.1),
+    "claude-opus-4-6": (5.0, 0.1),
+    "claude-opus-4-5-20251101": (5.0, 0.1),
+    "claude-opus-4-1-20250805": (15.0, 0.1),
+    "claude-opus-4-20250514": (15.0, 0.1),
+    "claude-sonnet-5-5": (2.0, 0.05),
     "claude-sonnet-5": (2.0, 0.1),
-    "claude-fable-5": (10.0, 0.1),
-    "claude-fable-5-1": (10.0, 0.025),
+    "claude-sonnet-4-6": (3.0, 0.1),
+    "claude-sonnet-4-5-20250929": (3.0, 0.1),
+    "claude-sonnet-4-20250514": (3.0, 0.1),
+    "claude-haiku-5-5": (0.1, 0.1),
     "claude-haiku-4-5-20251001": (1.0, 0.1),
 }
+# model -> (prompt-token threshold, base input $/Mtok for a prompt over it).
+# The prompt counts input, cache writes and cache reads alike.
+LONG_PROMPT = {"claude-haiku-5-5": (100_000, 0.5)}
 # Multipliers on the base input price, fixed across models.
 OUTPUT = 5.0
 CACHE_WRITE_5M = 1.25
@@ -40,14 +65,16 @@ CACHE_WRITE_1H = 2.0
 
 
 def cost_of(row: Mapping[str, str]) -> float:
-    """One request's cost in USD.
+    """One request's cost in USD; `nan` for a model missing from PRICES.
 
-    Long context is deliberately not surcharged: Claude 4.6 and later bill the
-    full 1M window at standard rates. Recovering the rates empirically found
-    the same thing -- fitting a >200k multiplier drove it to exactly 1.00.
+    Long context is not surcharged except per LONG_PROMPT: Claude 4.6 and
+    later bill the full 1M window at standard rates. Recovering the rates
+    empirically found the same thing -- fitting a >200k multiplier drove it to
+    exactly 1.00.
     """
     model = row["model"]
-    assert model in PRICES, f"no price for {model!r}; add it to PRICES"
+    if model not in PRICES:
+        return math.nan
     base, cache_hit = PRICES[model]
 
     # Producers that predate the TTL split report only the total; charging it
@@ -56,6 +83,11 @@ def cost_of(row: Mapping[str, str]) -> float:
     write_5m = int(row.get("cache_create_5m") or 0)
     if not write_1h and not write_5m:
         write_5m = int(row["cache_create"])
+
+    prompt = int(row["input"]) + write_5m + write_1h + int(row["cache_read"])
+    threshold, long_base = LONG_PROMPT.get(model, (math.inf, base))
+    if prompt > threshold:
+        base = long_base
 
     return (
         base
@@ -70,22 +102,35 @@ def cost_of(row: Mapping[str, str]) -> float:
     )
 
 
-def priced(lines: Sequence[str]) -> Iterator[str]:
+def records(lines: Sequence[str]) -> Iterator[tuple[list[str], dict[str, str]]]:
     header = lines[0].rstrip("\n").split("\t")
-    yield "\t".join((*header, "cost_usd"))
     for line in lines[1:]:
         if not line.strip():
             continue
         cells = line.rstrip("\n").split("\t")
-        yield "\t".join((*cells, f"{cost_of(dict(zip(header, cells))):.6f}"))
+        yield cells, dict(zip(header, cells))
 
 
 def main() -> None:
     lines = sys.stdin.readlines()
-    rows = list(priced(lines))
-    print("\n".join(rows))
-    total = sum(float(row.rsplit("\t", 1)[1]) for row in rows[1:])
-    print(f"${total:,.2f} over {len(rows) - 1:,} requests", file=sys.stderr)
+    print("\t".join((*lines[0].rstrip("\n").split("\t"), "cost_usd")))
+    costs: list[float] = []
+    unpriced: Counter[str] = Counter()
+    for cells, row in records(lines):
+        costs.append(cost_of(row))
+        if math.isnan(costs[-1]):
+            unpriced[row["model"]] += 1
+        print("\t".join((*cells, f"{costs[-1]:.6f}")))
+    for model, count in unpriced.items():
+        print(
+            f"warning: no price for {model!r} ({count:,} requests cost nan)",
+            file=sys.stderr,
+        )
+    total = sum(cost for cost in costs if not math.isnan(cost))
+    print(
+        f"${total:,.2f} over {len(costs) - unpriced.total():,} priced requests",
+        file=sys.stderr,
+    )
 
 
 if __name__ == "__main__":
