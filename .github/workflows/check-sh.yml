@@ -18,6 +18,11 @@ jobs:
       - name: Install shells
         run: sudo apt-get update && sudo apt-get install -y dash busybox zsh
 
+      - name: Make zsh's fpath secure
+        # the runner image leaves these group-writable, so compinit aborts
+        # with "insecure directories" (compaudit lists them)
+        run: sudo chmod g-w,o-w /usr/share/zsh /usr/share/zsh/vendor-completions
+
       - name: Run shell test matrix
         # vendored minimal/do: no redo install needed (serial, but the
         # matrix is ~2s; installing real redo cost 30s)

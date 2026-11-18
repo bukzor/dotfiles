@@ -13,13 +13,9 @@ skip_if_absent zsh
 
 tmphome=$(mktemp -d)
 trap 'rm -r "$tmphome"' EXIT
-for f in .zshenv .zprofile .zshrc .profile .bashrc .config bin; do
+for f in .zshenv .zprofile .zshrc .profile .bashrc .zsh_completion .config bin; do
   [ -e "$repo/$f" ] && ln -s "$repo/$f" "$tmphome/$f"
 done
-# .zsh_completion is copied under umask 022, not symlinked: compinit
-# refuses (prompting on the tty) an fpath dir that is group-writable by a
-# shared group, which is how CI checks the repo out.
-(umask 022 && cp -R "$repo/.zsh_completion" "$tmphome/.zsh_completion")
 # stubbed, not symlinked from $repo: .cargo is a per-machine toolchain
 # install, not repo content -- absent in a bare clone/CI checkout (unlike
 # the live homedir this repo normally lives in). .zshenv sources it
