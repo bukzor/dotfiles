@@ -19,3 +19,6 @@ what path, and did it reach a live transport."
 of which transport succeeded, precisely for this reason
 (commit `f2b773d`, rationale in
 `docs/dev/devlog/2026-09-10-001-tmux-window-naming--a-precedence-ladder--not-a-program-list.md`).
+
+The log is bounded (newest ~500-1000 lines, `ALERT_LOG_DESYNC`), so
+"after the fact" means the recent past, not all history.

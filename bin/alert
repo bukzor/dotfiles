@@ -49,17 +49,33 @@ ring_bell() {
 # A notification is gone the moment it's dismissed, and the urgent ones arrive
 # while you're looking elsewhere. The log is what's left to ask afterward: what
 # wanted me, from where, and did it actually reach me.
+#
+# Logging is best-effort: it runs after delivery, so its failure must not turn
+# a delivered alert into a failed command (callers see only the exit status).
+# Bounded: past max_bytes the file is cut to its newest keep_lines
+# lines. Append and trim share one flock, so simultaneous alerts neither lose
+# lines nor trim a half-written file; the trim is a tmp-file + rename.
 log_alert() {
   local logfile="$HOME/.local/state/alert.jsonl"
-  mkdir -p "${logfile%/*}"
-  jq -nc \
+  local max_bytes=262144 keep_lines=500 # ~250 B/line: at 256 KiB (~1000 lines) keep 500
+  mkdir -p "${logfile%/*}" || return
+  local line
+  line="$(jq -nc \
     --arg time "$(date -Is)" \
     --arg origin "$title" \
     --arg body "$body" \
     --arg transport "$1" \
     --arg pane "${TMUX_PANE:-}" \
     --arg cwd "$PWD" \
-    '$ARGS.named' >> "$logfile"
+    '$ARGS.named')" || return
+  (
+    flock 9 || exit
+    printf '%s\n' "$line" >>"$logfile" || exit
+    if (( $(stat -c %s "$logfile") > max_bytes )); then
+      tail -n "$keep_lines" "$logfile" >"$logfile.tmp" &&
+        mv "$logfile.tmp" "$logfile"
+    fi
+  ) 9>>"$logfile.lock"
 }
 
 if (( DEBUG > 0 )); then
@@ -92,4 +108,4 @@ else
 fi
 ring_bell
 
-log_alert "$transport"
+log_alert "$transport" || echo >&2 "alert: warning: could not write alert log (alert was delivered via $transport)"
