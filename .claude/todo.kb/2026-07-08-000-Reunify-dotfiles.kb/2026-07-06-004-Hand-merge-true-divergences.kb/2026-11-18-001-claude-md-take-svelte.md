@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by: []
 required-reading:
   - ./CLAUDE.md
@@ -27,8 +27,22 @@ this handoff file.
 
 ## Steps
 
+- [x] fetch both workspaces; main clean at `b1876c4` = origin/main
+- [x] write `origin/svelte-crostini:.claude/CLAUDE.md` over main's; commit, push
+
 ## Decisions
+
+None: the ruling left no judgment call.
 
 ## Open Questions
 
+None.
+
 ## Final report
+
+- main `6bfc6f4` (pushed): `.claude/CLAUDE.md` only, svelte's blob byte
+  for byte; message names svelte-crostini as counterpart. Svelte: no commit.
+- Proof: `git diff origin/main origin/svelte-crostini -- .claude/CLAUDE.md`
+  is empty.
+- No parse check applies (Markdown).
+- The switch of buck-win10's `~` to main is unblocked by this unit.
