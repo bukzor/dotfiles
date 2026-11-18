@@ -62,8 +62,16 @@ assert_eq "zsh -lc: env.d exports present (OSTYPE, via .zprofile)" \
 # rather than asserting on the raw stream.
 sq="'"
 cmd='printf "PS1=%s\n" "${PS1:+set}"; printf "compdef=%s\n" "$(( $+functions[compdef] ))"; printf "OSTYPE=%s\n" "$OSTYPE"'
-full="env -i HOME=$tmphome USER=${USER:-$(whoami)} TERM=xterm PATH=/usr/bin:/bin zsh --no-globalrcs -i -c $sq$cmd$sq"
-got_i=$(with_pty "$full" 2>&1 | tr -d '\r' | grep -E '^(PS1|compdef|OSTYPE)=')
+# timeout: in CI this zsh has hung until the job timeout; bounded, it fails
+# with its transcript instead. --foreground keeps zsh in the pty's
+# foreground process group, so its tty reads don't stop it (SIGTTIN).
+full="timeout --foreground 20 env -i HOME=$tmphome USER=${USER:-$(whoami)} TERM=xterm PATH=/usr/bin:/bin zsh --no-globalrcs -i -c $sq$cmd$sq"
+raw_i=$(with_pty "$full" 2>&1 | tr -d '\r') || :
+got_i=$(echo "$raw_i" | sed -n -E '/^(PS1|compdef|OSTYPE)=/p')
+case "$got_i" in
+  *PS1=set*) ;;
+  *) printf '%s\n' "zsh -i transcript:" "$raw_i" >&2 ;;
+esac
 
 ps1_i=$(echo "$got_i" | sed -n 's/^PS1=//p')
 assert_eq "zsh -i sets a prompt" "set" "$ps1_i"
