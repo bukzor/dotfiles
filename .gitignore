@@ -222,6 +222,7 @@ backups/
 # credentials
 /.config/stripe/
 /.config/anthropic/
+/private-dotfiles/
 # synced skill buckets (data, not config)
 /.claude/skills/synced/
 /.config/systemd/user/timers.target.wants/bukzor-tmpwatch.timer
