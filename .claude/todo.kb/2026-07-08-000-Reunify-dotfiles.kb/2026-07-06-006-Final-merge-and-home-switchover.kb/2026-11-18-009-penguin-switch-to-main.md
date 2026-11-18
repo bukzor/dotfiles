@@ -21,8 +21,15 @@ Run this on **penguin**, in its live `~` (today a `svelte-crostini`
 checkout). `buck-win10` can't reach penguin, so every penguin step is in
 this one brief and the user launches it once there.
 
-First check the blocker: `git -C ~ fetch` and `git merge-base --is-ancestor
-origin/svelte-crostini origin/main`. If it fails, stop and report.
+First check the blocker. Run `git -C ~ fetch`. Then check that main
+contains the reunify merge: `git merge-base --is-ancestor ff853dc
+origin/main`. If it doesn't, stop and report. If `origin/svelte-crostini`
+has commits that main lacks (`git log origin/main..origin/svelte-crostini`):
+- **They touch only `.claude/todo.kb/`** (handoff records): merge them into
+  main with an ordinary merge, in a scratch clone or penguin's main clone,
+  and push.
+- **Anything else** (real penguin work): merge it the same way, and list it
+  in your report.
 
 1. **Scratch:** in `~/repo/scratch` (unit 004/005's Open Questions), find
    out whether `b45a792` holds work that isn't on `bukzor/scratch`. If it
