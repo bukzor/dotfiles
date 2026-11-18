@@ -12,13 +12,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]  # no macOS: its runs stay queued (unit 012)
+        os: [ubuntu-22.04, windows-2022, macos-latest]
         rev:
           - stable  # 8.2 in 22.04 (jammy)
           - nightly
         include:
           - os: ubuntu-22.04
             install-rg: sudo apt-get update && sudo apt-get install -y ripgrep
+
+          - os: macos-latest
+            install-rg: brew install ripgrep
 
 
           - os: windows-2022
