@@ -19,6 +19,23 @@ Factor the items into three kinds:
   disagree. A batch of accumulated opens wants the full sweep:
   `Skill(review-open-questions)`.
 
+## The ask has a price
+
+A stipulation that survives the factoring still has to pay for itself.
+"Waiting for you" and "needs your ruling" spend the user's attention,
+which is budgeted and sometimes empty, and they stall whatever depends
+on the answer. Before asking, be able to say what the ruling would
+change and what it costs to wait, and what the user has said this
+sitting about their capacity. When the ask does not pay: act under
+your own authority and file the decision as agent-standing with the
+veto open, or park it as a todo the user can take up at will. Work
+left blocked on the user when it need not be is the mistake.
+
+> [!@bukzor] 2026-11-18, sensatim: "file claims under your own authority
+> without blocking / waiting when you don't need to is a mistake"; "I
+> want agents to consider cost/benefit of 'waiting for you' or 'needs
+> your ruling' human-asks."
+
 ## Preconditions, not steps
 
 - **Artifact in hand.** A question about a thing is composed with the
