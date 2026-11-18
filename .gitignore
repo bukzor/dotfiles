@@ -233,3 +233,5 @@ backups/
 # synced skill buckets (data, not config)
 /.claude/skills/synced/
 /.config/systemd/user/timers.target.wants/bukzor-tmpwatch.timer
+# boon (Deadlock tool): downloaded game-data cache and install state
+/.boon/
