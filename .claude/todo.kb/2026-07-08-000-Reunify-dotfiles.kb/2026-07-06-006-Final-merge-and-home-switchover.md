@@ -56,8 +56,11 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 - [x] [`claude-tokens-cost` prices; `breakdown.md` frontmatter](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-006-claude-tokens-prices-and-breakdown.md) — [!DRAFT] keep main-only `breakdown.md` (works now, merges clean)
 - [x] [pre-merge follow-ups: dead vim autoloads, `<C-K>`, penguin's key name, gcloud-private, pnpm, junk in `~`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-007-pre-merge-followups.md)
 - [x] [the merge, and buck-win10's `~` taking it](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-008-merge-and-buck-win10-pull.md)
-- [ ] [`claude` on fresh-shell PATH; CI hang; small main defects](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-011-claude-on-path-ci-and-defects.md)
+- [x] [`claude` on fresh-shell PATH; CI hang; small main defects](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-011-claude-on-path-ci-and-defects.md)
 - [x] [buck-win10 post-merge: Windows-home checkout, pnpm 10, orphans, CI](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-010-buck-win10-post-merge-cleanup.md)
+- [ ] [Check Vim / Check Neovim: retired `macos-12`, `~/lib/ci` paths](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-012-check-vim-nvim-workflows.md)
+- [ ] [!DRAFT] 2026-11-18: keep `installMethod: native` (as penguin); once no session runs it,
+      trash the pnpm and `~/prefix/npm-global` copies of `claude` (unit 011 OQ 2)
 - [ ] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md); coordinator: merge svelte-crostini into main after each plan commit, so 009's ancestor check passes
 - [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
