@@ -34,7 +34,7 @@ checks stand in for the "unit tests first" item below:
 Wave 1 reviewed 2026-11-18: main ↔ svelte at 5 conflicts, exactly the held
 files. Wave 2 applies the user's rulings on 002/003's Open Questions.
 
-- [ ] wave 2: [mason `PATH=append` + rust_analyzer settings: still needed?](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-000-mason-and-rust-analyzer-history.md)
+- [x] wave 2: [mason `PATH=append` + rust_analyzer settings: still needed?](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-000-mason-and-rust-analyzer-history.md)
       — the user questioned 003's OQ 3-4 (2026-11-18); 003's other files wait on it
 
 - [x] svelte-side drift since 2026-07-13 (unit 000)
@@ -81,7 +81,7 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
       confirmed `repo/mine/`'s tracked content and `.zkbd/`'s tracked
       content are unaffected by the scheme switch.
     - [x] authored / [x] svelte (`9cb75f1`) / [x] main (`59082f3`)
-- [ ] vim: .vim/lazy-lock.json, .vim/lua/bukzor/{lsp,plugins,tree-sitter,which-key}.lua,
+- [x] vim: .vim/lazy-lock.json, .vim/lua/bukzor/{lsp,plugins,tree-sitter,which-key}.lua,
       .vim/pack/invented-here/start/diffmode/plugin/diffmode.vim
     > [!@bukzor] 2026-11-18: on the open questions left in this plan, infer
     > intent and put tentative judgments in place; the recommendations at
@@ -95,7 +95,7 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
     > dead `plug.vim`. Wave 3:
     > [vim lua](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-002-vim-lua-rulings.md),
     > [vimrc.d](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-003-vimrc-d-rulings.md).
-    - [ ] authored / [ ] svelte / [ ] main
+    - [x] authored / [x] svelte (`dc852c3`) / [x] main (`28b8631`)
 - [x] terminal: .tmux.conf — done 2026-07-13, union of real functionality
       (main's display-time/base-index/ctrl-hold binding layer,
       svelte's mouse-wheel scroll speed, pane-nav union), dead
@@ -174,7 +174,7 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
 
 ## Success Criteria
 
-- [ ] `git diff main svelte-crostini` shows only paths owned by other groups (or nothing)
+- [x] `git diff main svelte-crostini` shows only paths owned by other groups (or nothing) — merge-tree: 0 conflicts, 2026-11-18
 
 ## Notes
 
