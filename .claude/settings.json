@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$HOME\"/claude/mitmproxy/lib/claude_mitmproxy/binpatch.py"
+            "command": "f=\"$HOME\"/claude/mitmproxy/lib/claude_mitmproxy/binpatch.py; if [ -e \"$f\" ]; then exec \"$f\"; fi; printf '{\"systemMessage\": \"mitmproxy binpatch skipped: %s not found\"}\\n' \"$f\""
           }
         ]
       }
