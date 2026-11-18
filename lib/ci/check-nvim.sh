@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+# Git-bash /d/a/... paths are not valid to native nvim/plenary on Windows
+if command -v cygpath >/dev/null; then ROOT=$(cygpath -m "$ROOT"); fi
 
 echo "==> Neovim version:"
 nvim --version
