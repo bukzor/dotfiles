@@ -241,7 +241,8 @@ function M.setup_mason_tool_installer()
   require("mason-tool-installer").setup({
     ensure_installed = tools,
     auto_update = false,
-    run_on_start = true,
+    -- CI only loads the config; installing every tool outlasts its timeout.
+    run_on_start = vim.env.CI == nil,
   })
 end
 

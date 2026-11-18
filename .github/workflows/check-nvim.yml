@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]  # no macOS (queues forever), no Windows (mason installs outlast 240s): unit 012
+        os: [ubuntu-22.04, windows-2022]  # no macOS: unit 014
         rev: [stable, nightly, v0.9.5, v0.10.0]
         include:
           - os: ubuntu-22.04
