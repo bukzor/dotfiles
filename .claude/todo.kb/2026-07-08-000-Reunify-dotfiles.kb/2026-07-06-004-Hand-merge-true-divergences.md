@@ -46,17 +46,17 @@ files. Wave 2 applies the user's rulings on 002/003's Open Questions.
       invocation each; for configs, a parse/load check (git config -l, vim headless
       startup, tmux -f … validity) beats nothing
       (shape: run-once `X_check.sh`, skip-if-absent — see ../2026-07-07-000)
-- [ ] claude config: .claude/CLAUDE.md, .claude/settings.json,
+- [x] claude config: .claude/CLAUDE.md, .claude/settings.json,
       .claude/commands/curl.md, .claude/.gitignore — after the wsl-buck-win10
       fold, which carries its .claude/ additions to both sides
     - [x] `settings.json`, `.gitignore`, `commands/curl.md` (unit 002:
           svelte `d0dc11b`, main `472e485`)
-    - [ ] `CLAUDE.md`: main takes svelte's, verbatim
+    - [x] `CLAUDE.md`: main takes svelte's, verbatim
           ([unit](2026-07-06-004-Hand-merge-true-divergences.kb/2026-11-18-001-claude-md-take-svelte.md)).
           > [!@bukzor] 2026-11-18: drop all four of unit 002's main-only
           > rules. This supersedes the 2026-11-12 ruling that kept two of
           > them as kb files.
-        - [x] authored (svelte's as-is) / [x] svelte (no change) / [ ] main
+        - [x] authored (svelte's as-is) / [x] svelte (no change) / [x] main (`6bfc6f4`)
 - [x] git config: .gitconfig, .gitignore, .config/git/ignore, .config/.gitignore,
       repo/.gitignore, bin/.gitignore, .vim/.gitignore — done 2026-07-13.
       Resolved the ignore-scheme question flagged as deferred in 000/CI-

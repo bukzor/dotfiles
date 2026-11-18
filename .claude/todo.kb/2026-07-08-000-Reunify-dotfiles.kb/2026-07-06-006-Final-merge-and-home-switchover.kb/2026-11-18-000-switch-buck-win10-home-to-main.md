@@ -1,8 +1,7 @@
 ---
 managed-by: Skill(llm-subtask)
 status: open
-blocked-by:
-  - "origin/main:.claude/CLAUDE.md must equal origin/svelte-crostini's (task 004, claude config). Otherwise the switch swaps this host's live global instructions for main's stale copy"
+blocked-by: []  # main's .claude/CLAUDE.md is svelte's since 6bfc6f4
 required-reading:
   - ./CLAUDE.md
   - ../CLAUDE.md  # the merged/ branch ruling, topology
@@ -22,9 +21,6 @@ buck-win10 rows of its per-host steps, brought ahead of the merge)
 `wsl-buck-win10` is fully contained in main. Its tip `fa3f7c7` is an ancestor
 of `origin/main`. Main is not yet merged with svelte-crostini; that doesn't
 block this host.
-
-First check the blocker. If it doesn't hold, stop and report it as an Open
-Question.
 
 1. **Preflight, before touching `~`:**
    - Record the pre-switch commit.
