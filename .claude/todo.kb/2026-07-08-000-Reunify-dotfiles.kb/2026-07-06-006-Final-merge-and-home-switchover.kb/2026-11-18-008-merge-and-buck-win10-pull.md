@@ -53,7 +53,8 @@ Record the merge commit and the pre-pull commit in your Final report, and
 the rollback for each.
 
 **Scope (only these):** the merge commit and the check script in
-`dotfiles--main`; moves and symlinks in `~` for the paths above; `git pull`
+`dotfiles--main`; `.ssh/id_rsa.pub.worki.buck-win10` on main; moves and
+symlinks in `~` for the paths above; `git pull`
 in `~`; this handoff file.
 
 ## Steps
