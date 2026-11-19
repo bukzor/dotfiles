@@ -1,0 +1,28 @@
+#!/bin/bash
+# One-time (one UAC prompt): register the Windows task that restarts dwm.exe.
+# WSL interop is non-elevated and can't kill dwm.exe; a task registered with
+# /rl highest can, and our non-elevated `schtasks.exe /run` may start it
+# without a prompt. The task never triggers itself (/sc once in the past) --
+# ./run decides when. Winlogon respawns dwm.exe within seconds.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+TASK=dwm-restart
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+# conhost --headless: no console window flashes on the desktop.
+sudo.exe schtasks.exe /create /f /tn "$TASK" /rl highest /it \
+  /sc once /sd 01/01/2000 /st 00:00 \
+  /tr 'conhost.exe --headless taskkill.exe /F /IM dwm.exe'
+schtasks.exe /query /tn "$TASK" /v /fo list

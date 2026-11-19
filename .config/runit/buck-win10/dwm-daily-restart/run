@@ -1,0 +1,37 @@
+#!/bin/bash
+# runit service: restart dwm.exe once it is a day old, but only while VRAM is
+# uncontended. DWM leaks ~100-200 MB VRAM/day on the RX 5600 XT; restarting it
+# idle is a one-second black flash, but restarting it while a game fills VRAM
+# hung the GPU on 2026-11-18 (~/.claude/sessions.kb/buck-win10.kb/
+# deadlock-game-crashes.kb/deadlock-crash-2026-11-18/). The kill itself is the
+# elevated Windows task from ./install-windows-task; WSL can't kill dwm.exe.
+set -euo pipefail
+exec >>/home/bukzor/.local/state/dwm-daily-restart.log 2>&1
+
+PS=/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
+MAX_AGE_MIN=$((24 * 60))
+MAX_OTHER_MB=2048  # idle desktop ~400-900; Deadlock alone ~5000+
+INTERVAL=600
+PROBE=$(iconv -f UTF-8 -t UTF-16LE dwm-probe.ps1 | base64 -w0)  # cwd: service dir
+
+log() { echo "$(date -Is) $*"; }
+probe() { chpst -u bukzor "$PS" -NoProfile -NonInteractive -EncodedCommand "$PROBE" | tr -d '\r'; }
+
+while true; do
+  if ! out=$(probe); then
+    log "probe failed: $out"
+  else
+    read -r age dwm other <<<"$out"
+    if (( age >= MAX_AGE_MIN )); then
+      if (( other >= MAX_OTHER_MB )); then
+        log "deferred: dwm age=${age}m dwm=${dwm}MB others=${other}MB (contended)"
+      else
+        log "restarting: dwm age=${age}m dwm=${dwm}MB others=${other}MB"
+        chpst -u bukzor /mnt/c/Windows/System32/schtasks.exe /run /tn dwm-restart
+        sleep 15
+        log "after: $(probe)"
+      fi
+    fi
+  fi
+  sleep "$INTERVAL"
+done
