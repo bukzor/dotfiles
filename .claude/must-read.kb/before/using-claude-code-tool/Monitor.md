@@ -64,10 +64,10 @@ one notification, so multiline output from one event groups naturally.
 ## Lifecycle
 
 Runs in the same shell environment as Bash. Exit ends the watch (exit code
-reported); timeout kills it (default 300s, max 1h). `persistent: true` runs
-until TaskStop or session end -- session-length watches only (PR monitoring,
-log tails). NB: TaskStop is denied in user settings; without it a persistent
-monitor cannot be cancelled early.
+reported); timeout kills it (default 300s, max 30 min). There is no
+persistent mode: a session-length watch (PR monitoring, log tails) is re-armed
+at each expiry notice. NB: TaskStop is denied in user settings, so a watch
+runs to exit or timeout.
 
 ## ws source
 
