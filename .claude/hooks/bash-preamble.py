@@ -118,23 +118,37 @@ set -x
 {MARKER}"""
 
 
+def hook_output(tool_input, deny_prefixes, ask_prefixes):
+    """PreToolUse response: the wrapped command plus every other tool_input
+    field unchanged -- updatedInput replaces the input wholesale, so any field
+    omitted here (run_in_background, timeout, ...) is silently dropped.
+
+    >>> out = hook_output(
+    ...     {"command": "echo hi", "run_in_background": True, "timeout": 5},
+    ...     [], [],
+    ... )["hookSpecificOutput"]
+    >>> out["permissionDecision"]
+    'allow'
+    >>> updated = out["updatedInput"]
+    >>> updated["command"] == wrap_command("echo hi")
+    True
+    >>> {k: v for k, v in updated.items() if k != "command"}
+    {'run_in_background': True, 'timeout': 5}
+    """
+    cmd = tool_input["command"]
+    return {
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": check_permission(cmd, deny_prefixes, ask_prefixes),
+            "updatedInput": {**tool_input, "command": wrap_command(cmd)},
+        }
+    }
+
+
 def main():
     input = json.load(sys.stdin)
-    cmd = input["tool_input"]["command"]
-
     deny_prefixes, ask_prefixes = load_permission_prefixes()
-    permission = check_permission(cmd, deny_prefixes, ask_prefixes)
-
-    json.dump(
-        {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": permission,
-                "updatedInput": {"command": wrap_command(cmd)},
-            }
-        },
-        sys.stdout,
-    )
+    json.dump(hook_output(input["tool_input"], deny_prefixes, ask_prefixes), sys.stdout)
 
 
 if __name__ == "__main__":
