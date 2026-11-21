@@ -126,3 +126,10 @@ Please read and consider slotting them.
       factoring was "the region is search; search defaults to match"). The
       authority is yours, so it would enter as `[!@bukzor]` -- the agent's
       offer, awaiting your word on whether it earns standing text.
+
+- [ ] If nvim's tsc results go stale again (they keep the first results and
+      stop updating, even while typing): don't close that nvim. Run
+      `:LspDebug` there, type an error, leave insert mode, then have
+      `~/.local/state/nvim/lsp.log` read for that moment. Last seen
+      2026-11-20 in my-own-shadertoy; five `:LspRestart`s in one nvim didn't
+      clear it but a new nvim did, so the stale state lives in nvim, not tsc.
