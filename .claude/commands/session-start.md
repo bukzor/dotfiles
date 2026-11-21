@@ -22,7 +22,6 @@ Default arguments (if none provided):
 
 - .claude/todo.md and .claude/todo.kb/\*.md are governed by the /llm-subtask skill
 - todo.md is intended to be the prioritized listing of work remaining
-- "session files" are located in ~/.claude/sessions.kb (see its CLAUDE.md for detail)
 
 ## Workflow
 
@@ -37,16 +36,11 @@ Default arguments (if none provided):
    - Read it; it is the primary brief.
    - Read any files listed under its frontmatter `requires:` before
      acting (and any transitive `requires:`).
-   - `grep -Rls <basename> ~/.claude/sessions.kb/` (entries sit in `<host>.kb/`
-     subdirs; `-s` hides other hosts' dangling links).
-     - 1 match: read that entry; continue the session.
-     - 0 matches: create a new entry
-     - 2+ matches: ask the user which to use.
 
    Otherwise (no argument, or argument is not a file path):
    - Look for a .claude/todo.md
-   - Look for an existing sessions.kb entry. Search recipe:
-     - `grep -Rl "^cwd: $PWD" ~/.claude/sessions.kb/`
+
+   Unless skipped above: follow start-of-session directions in skill://llm-sessions
 
 3. **Discover and read context files.**
    ```
