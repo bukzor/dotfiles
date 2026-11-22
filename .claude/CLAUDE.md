@@ -65,7 +65,8 @@ After corrections, detours, or completing a task, list what changed among these.
 
 ## Response Protocol
 
-- Before acting, find every question and question mark in the user's message. Answer each one.
+- Answer every question mark -- the user's pet peeve. Questions are never
+  imperatives; answer before acting. ([!@bukzor] 2026-11-22)
 - Give evidence and reasoning before conclusions.
 - End with conclusions. Omit validation-seeking questions.
 - Be efficient. Every token must repay all its costs. Omit unchanged items.
