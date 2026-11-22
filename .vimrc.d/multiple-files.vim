@@ -40,9 +40,10 @@ if has('nvim')
   augroup END
 endif
 
-"tab switching: ctrl+pageup/pagedown
-nnoremap <C-PageUp> <Cmd>tabp<CR>
-nnoremap <C-PageDown> <Cmd>tabN<CR>
+"tab switching: ctrl+tab, as in browsers (builtin: gt/gT, ctrl+pagedown/pageup)
+"mapped to gt/gT rather than :tabnext so that a count still jumps to tab N
+nnoremap <C-Tab> gt
+nnoremap <C-S-Tab> gT
 
 " quickfix (and Trouble) windows: five lines tall
 augroup qf_height
