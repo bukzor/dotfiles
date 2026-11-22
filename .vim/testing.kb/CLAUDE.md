@@ -50,3 +50,10 @@ mechanically, plus the date and outcome of its most recent run. Use these to:
 
 For partial results, document precisely which step failed and the suspected
 cause, so the next runner can target only the broken part.
+
+## Headless traps
+
+- `OptionSet` does not fire during startup, which is when `-c` and `-S`
+  commands run. Run checks that set options from `call timer_start(0, ...)`.
+- `vim -es` skips the vimrc and sets `compatible`, so plugins with line
+  continuations error out. Load the real config with `vim -Nu ~/.vimrc -es`.

@@ -2,6 +2,21 @@
 
 For Python in `github.com/bukzor/` repos, also read `~/.claude/reference.kb/python/tdd.md`.
 
+## Is the test worth it?
+
+Weigh this before writing a test, and when deciding to keep or delete one.
+
+> [!@bukzor] 2026-11-22: "some benefit" is not the bar -- a test needs a good
+> ratio of benefit to cost.
+>
+> - Benefits: it catches a break early, between prototype acceptance and
+>   commit (we move fast, so without it breaks land before anyone notices);
+>   and its failure pinpoints the broken unit, where a break noticed in use
+>   leaves the whole codebase suspect.
+> - Costs: initial implementation (zero for an existing test); maintenance,
+>   very roughly 1 per LOC; CI time; local pre-commit time, rated 2-10x CI
+>   time.
+
 When changing tests or tested code:
 
 ## Red-Green Cycle

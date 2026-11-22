@@ -57,3 +57,7 @@ Newest wins on conflict.
 `testing.kb/` holds reusable manual-test recipes plus their last-known results.
 Re-run a recipe before assuming a surface still works; update its `last-tested`
 and `result` after running.
+
+`nvim-each SNIPPET` (in `~/bin`) runs Ex commands in every running nvim -- e.g.
+`source` a changed file so bukzor can try it live before accepting it. Its
+`--help` says which snippets need explicit permission.
