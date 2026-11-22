@@ -40,6 +40,6 @@ jobs:
       - name: Install dependencies
         run: ${{ matrix.install-rg }}
 
-      - name: Run acceptance tests
+      - name: Run config tests
         shell: bash
-        run: ./lib/ci/check-nvim.sh
+        run: ./bin/vim-config-test nvim
