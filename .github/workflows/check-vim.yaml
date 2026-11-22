@@ -12,9 +12,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-latest]
+        # supported: Vim >= 8.2.3995 (oldest current Ubuntu LTS), Linux and
+        # macOS; no Windows -- see
+        # docs/dev/adr/2026-11-22-000-vim-and-nvim-support-floor.md
+        os: [ubuntu-22.04, macos-latest]
         rev:
-          - stable  # 8.2 in 22.04 (jammy)
+          - stable  # on ubuntu-22.04: apt's 8.2.3995, the supported floor
           - nightly
         exclude:
           # macOS runners schedule slowly here (one job at a time): stable only
@@ -25,10 +28,6 @@ jobs:
 
           - os: macos-latest
             install-rg: brew install ripgrep
-
-
-          - os: windows-2022
-            install-rg: choco install ripgrep
 
     steps:
       - uses: actions/checkout@v4

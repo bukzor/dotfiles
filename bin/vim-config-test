@@ -13,7 +13,7 @@ flag='let g:config_under_test = 1'
 (( $# )) || set -- nvim vim
 for editor; do
   version="$("$editor" --version)"
-  printf '==> %s\n' "${version%%$'\n'*}"
+  printf '%s\n' "$version" | sed -n 's/^/==> /; 1p; /Included patches/p'
   case "$version" in
     NVIM*)
       XDG_CONFIG_HOME="$root/.config" "$editor" --headless --cmd "$flag" -S "$runner"

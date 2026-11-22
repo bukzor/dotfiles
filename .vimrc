@@ -1,3 +1,5 @@
+" supports Vim >= 8.2.3995 and the latest stable nvim; see
+" docs/dev/adr/2026-11-22-000-vim-and-nvim-support-floor.md
 if exists("$VIMDEBUG")
   set verbose=2
 endif
