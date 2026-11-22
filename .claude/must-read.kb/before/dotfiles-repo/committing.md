@@ -13,6 +13,5 @@ end, which is when those commits are made.
 > whose local `main` is stale.
 
 > [!DRAFT] agent-authored 2026-11-22, vetoable: edits made live under `~`
-> during the session are carried into the clone at session end -- after a
-> `pull --ff-only`, confirm each file's base matches `git -C ~ show HEAD:PATH`,
-> copy it over, review the clone's diff, commit there, push.
+> land on dotfiles `main` at session end, without overwriting anything `main`
+> gained in the meantime.
