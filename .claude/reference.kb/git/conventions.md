@@ -43,6 +43,11 @@ Ordinary `push` is not caution-gated at `git-caution: solo|personal`: push
 freely, don't ask. Only the force variants consult the caution table in
 `commit.md`. Leaving verified work unpushed is the state that costs something.
 
+> [!@bukzor] 2026-11-22: at `git-caution: personal`, keep the remote up to
+> date -- push each commit once it is stable. While still iterating on it
+> (amends, fixups, squashes ahead), a push is churn: every later rewrite
+> costs a force-push.
+
 For commits, see `~/.claude/reference.kb/git/commit.md` — always use `git commit-staged`.
 
 ### Index Hygiene
