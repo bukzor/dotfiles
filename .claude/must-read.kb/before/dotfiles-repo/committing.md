@@ -12,6 +12,5 @@ end, which is when those commits are made.
 > `~/repo/github.com/bukzor/dotfiles--main` (a `gh repo clone`), not in `~`,
 > whose local `main` is stale.
 
-> [!DRAFT] agent-authored 2026-11-22, vetoable: edits made live under `~`
-> land on dotfiles `main` at session end, without overwriting anything `main`
-> gained in the meantime.
+> [!@bukzor] 2026-11-22: edits made live under `~` land on dotfiles `main` at
+> session end, without overwriting anything `main` gained in the meantime.
