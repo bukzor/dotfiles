@@ -113,6 +113,23 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
       restart) — fixed by polling the same status files from tmux's
       status-right instead; see
       `docs/dev/adr/2026-09-10-001-tmux-status-bar-cron-alerting.md`.
+- [ ] Alpine homebrew follow-ups (buck-win10, 2026-11-23; brew now runs under
+      `~/prefix/homebrew-ruby`, see `setup/alpine/homebrew-ruby.sh`):
+  - [ ] On or after 2027-02-23, delete the two `delete-by` directories:
+        `/home/linuxbrew/.linuxbrew/stray-brew-clone.delete-by=2027-02-23/`
+        and `~/trash/ruby26.delete-by=2027-02-23/` (each has a
+        `WHY-DELETE.md`).
+  - [ ] Carry `bin/brew`, `Brewfile`, `.config/sh/env.d/300-homebrew.sh` and
+        `setup/alpine/` to svelte-crostini, or confirm that branch is folding
+        into main (reunify todo kept these files identical).
+  - [ ] nvim's treesitter parser builds fail: the config needs a
+        `tree-sitter` CLI. Likely `brew 'tree-sitter-cli'` in `Brewfile`.
+  - [ ] `bin/brew` runs `brew-handle-gnubin` after installs; with the GNU
+        stand-ins gone from `Brewfile`, check whether it still does anything.
+  - [ ] `setup/alpine/homebrew.sh` on a fresh Alpine host is untested: there,
+        `bin/brew` runs the official installer, which may not support musl.
+  - [ ] `must-read.kb/when/surveying-the-homedir-for-an-artifact-type.md`
+        points at `~/claude/homedir-archeology/`, absent on buck-win10.
 
 ## Later
 
