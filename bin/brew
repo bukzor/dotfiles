@@ -1,6 +1,10 @@
 #!/bin/bash
 set -eu
 
+if [ -f /etc/alpine-release ]; then
+  trap '[ $? = 0 ] || echo "brew: on Alpine, see ~/setup/alpine/homebrew.sh" >&2' EXIT
+fi
+
 BREWDIR=/opt/homebrew
 BREW=$BREWDIR/bin/brew
 # The installer uses /opt/homebrew on macOS and this prefix on Linux.
