@@ -10,23 +10,14 @@ brew 'lld'   # LLVM linker, required by g++ wrapper (~/bin/alternatives/ld -> ll
 
 # unix basics
 brew 'git'
-brew 'gnupg'
 brew 'socat'
-brew 'stdman'
 brew 'tmux'
 brew 'wget'
 brew 'diffstat'
 brew 'rsync'
 
-# python basics
-brew 'virtualenv'
-brew 'tox'
-brew 'python@3.10'
-brew 'python@3.11'
-
 # unix super-handy
 brew 'direnv'
-brew 'dotenv-linter'
 brew 'jq'
 # tier 2: brew 'yq'
 # tier 2: brew 'graphviz'
@@ -44,10 +35,7 @@ brew 'zsh-completions'
 # tier 4: brew 'fish'
 
 # opensource prerequisites
-brew 'go'
-brew 'rbenv'
 brew 'luarocks'  # required by several nvim plugins
-brew 'typescript'
 brew 'rustup-init'
 # tier 3: brew 'pnpm'
 # tier 4: brew 'gradle'
