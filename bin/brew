@@ -29,9 +29,9 @@ fi
 BEFORE="$BREWDIR/.before"
 touch "$BEFORE"
 
-# Alpine's homebrew runs under a locally built ruby (setup/alpine/ruby26.sh).
+# Alpine's homebrew runs under a locally built ruby (setup/alpine/homebrew-ruby.sh).
 # Elsewhere the directory is absent, and PATH lookup skips it.
-PATH="$HOME/prefix/ruby26/bin:$PATH" \
+PATH="$HOME/prefix/homebrew-ruby/bin:$PATH" \
   $BREW "$@"
 
 if [ "$BREWDIR/opt" -nt "$BEFORE" ] || [ "$BREWDIR/Cellar" -nt "$BEFORE" ]; then
