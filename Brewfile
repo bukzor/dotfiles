@@ -1,15 +1,7 @@
-tap "homebrew/command-not-found"
-
 # unix core
-brew 'less'
-brew 'watch'
 brew 'tree'
 brew 'psgrep'
-brew 'pstree'
 brew 'pv'
-brew 'findutils'
-brew 'gnu-sed'
-brew 'diffutils'
 
 # common build deps
 brew 'llvm'  # provides clang/clang++ compiler for ~/bin/alternatives/g++ wrapper
@@ -22,7 +14,6 @@ brew 'gnupg'
 brew 'socat'
 brew 'stdman'
 brew 'tmux'
-brew 'util-linux'
 brew 'wget'
 brew 'diffstat'
 brew 'rsync'
@@ -30,11 +21,8 @@ brew 'rsync'
 # python basics
 brew 'virtualenv'
 brew 'tox'
-brew 'python@3.8'
-brew 'python@3.9'
 brew 'python@3.10'
 brew 'python@3.11'
-brew 'proctools'
 
 # unix super-handy
 brew 'direnv'
@@ -59,7 +47,6 @@ brew 'zsh-completions'
 brew 'go'
 brew 'rbenv'
 brew 'luarocks'  # required by several nvim plugins
-brew 'virtualenv'
 brew 'typescript'
 brew 'rustup-init'
 # tier 3: brew 'pnpm'
@@ -68,23 +55,8 @@ brew 'rustup-init'
 # tier 4: brew 'openjdk'
 # tier 5: brew 'helm'
 
-# terraform stuffs
-brew 'tfenv'   # provides `terraform`
-brew 'terraform-docs'
-brew 'tflint'
-brew 'tfsec'
-# tier 2: brew 'tfupdate'
-# tier 2: brew 'terrascan'
-
 ## not 100% sure:
 #brew tldr
 #brew httpie
 #brew libfaketime
 #brew slackcat
-
-cask '1password-cli'
-cask 'chromedriver'
-cask 'docker'
-cask 'google-cloud-sdk'
-
-cask 'homebrew/cask-fonts/font-inconsolata-nerd-font'
