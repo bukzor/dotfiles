@@ -3,24 +3,18 @@ set -eu
 
 BREWDIR=/opt/homebrew
 BREW=$BREWDIR/bin/brew
-if ! [ -d "$BREWDIR" ]; then
+# The installer uses /opt/homebrew on macOS and this prefix on Linux.
+linuxbrew=/home/linuxbrew/.linuxbrew
+if ! [ -d "$BREWDIR" ] && ! [ -d "$linuxbrew" ]; then
   if yesno "Homebrew is missing. Install homebrew?"; then
-    set +eu
-    eval "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    set -eu
-    linuxbrew=/home/linuxbrew/.linuxbrew
-    if [ -d "$BREWDIR" ]; then
-      : all\'s swell
-    elif [ -d "$linuxbrew" ]; then
-      sudo ln -sf "$linuxbrew" -T "$BREWDIR"
-    else
-      echo 'Where'\''s homebrew?' >&2
-      exit 1
-    fi
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   else
     echo 'Homebrew not installed.' >&2
     exit 1
   fi
+fi
+if ! [ -d "$BREWDIR" ] && [ -d "$linuxbrew" ]; then
+  sudo ln -sf "$linuxbrew" -T "$BREWDIR"
 fi
 
 if ! [ -d "$BREWDIR" ]; then
