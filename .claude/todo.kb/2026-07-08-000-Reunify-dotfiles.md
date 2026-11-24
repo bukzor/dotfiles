@@ -27,7 +27,7 @@ drift since 2026-07-13 that main never received (both listed in 004).
 - [x] [2026-07-06-002-Stale-seed-adjudication.md](2026-07-08-000-Reunify-dotfiles.kb/2026-07-06-002-Stale-seed-adjudication.md) — done 2026-07-11; only 2/9 files were actually stale-seed (took main's side); the other 7 turned out genuinely mixed and moved to 004 with findings attached
 - [x] [2026-07-06-003-Main-only-path-triage.md](2026-07-08-000-Reunify-dotfiles.kb/2026-07-06-003-Main-only-path-triage.md) — done 2026-07-12; keep-by-default, 5 tooling/convention-breaking paths deleted, `bukzor.readline` ported into svelte's `lib/pythonpath/bukzor/`. Main-only paths are deliberately kept (304 as of 2026-11-10).
 - [x] [2026-07-06-005-Port-zsh-config-into-config-sh-structure.md](2026-07-08-000-Reunify-dotfiles.kb/2026-07-06-005-Port-zsh-config-into-config-sh-structure.md) — done 2026-07-12; svelte `0881278`, main `8efa600`. `.sh_lib` kept — `bin/gcpenv` depends on it, follow-up filed in the task file
-- [ ] on penguin: rename the main clone to `~/repo/github.com/bukzor/dotfiles--main` (the workspace name the agreements use)
+- [ ] on penguin: trash the main clone once `~` is on main (unit 009 step 5; [!@bukzor] 2026-11-24, the clone is obsolete)
 - [x] [2026-11-10-000-Fold-wsl-buck-win10-into-main.md](2026-07-08-000-Reunify-dotfiles.kb/2026-11-10-000-Fold-wsl-buck-win10-into-main.md) — done 2026-11-10; main `30895e0` merge, `.claude/` reconciled to svelte (`937c97d`)
 - [ ] [2026-07-06-004-Hand-merge-true-divergences.md](2026-07-08-000-Reunify-dotfiles.kb/2026-07-06-004-Hand-merge-true-divergences.md)
 - [ ] [2026-07-06-006-Final-merge-and-home-switchover.md](2026-07-08-000-Reunify-dotfiles.kb/2026-07-06-006-Final-merge-and-home-switchover.md) — strictly last

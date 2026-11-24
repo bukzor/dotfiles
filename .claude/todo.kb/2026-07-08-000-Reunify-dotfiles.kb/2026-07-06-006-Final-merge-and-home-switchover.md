@@ -77,8 +77,9 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
 - [ ] penguin, after pulling: `ln -s id_ed25519.pub.bukzor.chromebook ~/.ssh/id_ed25519.pub`
       (pulling unit 007's rename deletes penguin's plain `id_ed25519.pub`)
-- [ ] [!DRAFT] keep `dotfiles--main` on buck-win10 until 006 closes: units
-      editing live `~` would expose half-finished edits to every session
+- [x] buck-win10's `dotfiles--main` moved to `~/trash/` 2026-11-24 ([!@bukzor]:
+      `~` on main is the working copy; the clone is obsolete). Superseded the
+      [!DRAFT] that kept it until 006 closed.
 
 ## Success Criteria
 

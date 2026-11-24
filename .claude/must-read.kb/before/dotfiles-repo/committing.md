@@ -8,9 +8,10 @@ end, which is when those commits are made.
 > [!@bukzor] 2026-11-22: commits to dotfiles `main` are held till session end;
 > before that, each iteration's commit is pure churn.
 
-> [!@bukzor] 2026-11-22: work on dotfiles `main` happens in
-> `~/repo/github.com/bukzor/dotfiles--main` (a `gh repo clone`), not in `~`,
-> whose local `main` is stale.
+> [!@bukzor] 2026-11-24: "`main` is the working branch in `~` ... that
+> working copy is cutting-edge, and it's dotfiles--main that's obsolete".
+> Commit in `~`. (Supersedes 2026-11-22's "work on `main` happens in
+> `dotfiles--main`", made on penguin while its `~` was svelte-crostini.)
 
 > [!@bukzor] 2026-11-22: edits made live under `~` land on dotfiles `main` at
 > session end, without overwriting anything `main` gained in the meantime.

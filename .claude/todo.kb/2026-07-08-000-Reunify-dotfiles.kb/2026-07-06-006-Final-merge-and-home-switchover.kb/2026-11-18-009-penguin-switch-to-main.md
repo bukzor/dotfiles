@@ -30,6 +30,13 @@ has commits that main lacks (`git log origin/main..origin/svelte-crostini`):
   and push.
 - **Anything else** (real penguin work): merge it the same way, and list it
   in your report.
+- **Except:** svelte's root `CLAUDE.md` says (2026-11-22) that main work
+  happens in a `dotfiles--main` clone, not in `~`. That was true only while
+  `~` was on svelte-crostini. [!@bukzor] 2026-11-24: "`main` is the working
+  branch in `~` ... that working copy is cutting-edge, and it's
+  dotfiles--main that's obsolete". Leave that paragraph out of the merge
+  result; `.claude/must-read.kb/before/dotfiles-repo/committing.md` on main
+  carries the current rule.
 
 1. **Scratch:** in `~/repo/scratch` (unit 004/005's Open Questions), find
    out whether `b45a792` holds work that isn't on `bukzor/scratch`. If it
@@ -46,9 +53,10 @@ has commits that main lacks (`git log origin/main..origin/svelte-crostini`):
    renamed the tracked key).
 4. **Rename:** rename `svelte-crostini` to `merged/svelte-crostini`, locally
    and on origin, as buck-win10 did for its branch.
-5. **Workspace names:** rename penguin's main clone to
-   `~/repo/github.com/bukzor/dotfiles--main` (plan item), or delete it if
-   it is clean and fully pushed, since `~` is main now.
+5. **Main clone:** once `~` is on main, penguin's main clone is obsolete
+   ([!@bukzor] 2026-11-24, see the merge note above). If it is clean and
+   fully pushed, move it to `~/trash/`; if not, push what it holds first
+   and list it in your report.
 6. **Smoke test** (the parent's list, plus kitty and nvim, which buck-win10
    couldn't run): new login shell, `bash -i`, `zsh -i`, vim, nvim (a
    `:checkhealth` excerpt, `:Lazy` sync, which also writes the new
