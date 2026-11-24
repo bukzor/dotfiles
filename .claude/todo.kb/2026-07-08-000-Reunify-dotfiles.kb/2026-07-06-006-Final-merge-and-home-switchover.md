@@ -44,6 +44,10 @@ every host, retire svelte-crostini and wsl-buck-win10.
 - [ ] once no host's `~` checks it out: rename svelte-crostini and
       wsl-buck-win10 to `merged/…`, locally and on origin (rule in
       [CLAUDE.md](CLAUDE.md); origin's default branch is already main)
+- [ ] user ruling: origin's `ci-vim-config-tests` (2 WIP commits atop main
+      `d377f4b`, 2026-11-22, "scratch branch for CI"; no session or todo names
+      it) — merge, rename `merged/…`, or delete. Blocks "no branches carrying
+      unique content". Found 2026-11-24.
 - [x] `arch-svelte` (2022, one unique commit) archived as tag
       `archive/arch-svelte`, branch deleted — 2026-11-10
 
