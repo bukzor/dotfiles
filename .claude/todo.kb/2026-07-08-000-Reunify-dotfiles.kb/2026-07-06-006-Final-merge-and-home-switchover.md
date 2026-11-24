@@ -48,6 +48,10 @@ every host, retire svelte-crostini and wsl-buck-win10.
       `d377f4b`, 2026-11-22, "scratch branch for CI"; no session or todo names
       it) — merge, rename `merged/…`, or delete. Blocks "no branches carrying
       unique content". Found 2026-11-24.
+- [ ] user ruling: two 2026-11-22 `[!@bukzor]` rules disagree, and 009's merge
+      lands both on main — svelte `CLAUDE.md` (`87583f8`): "push each commit
+      once it's made"; main `.claude/must-read.kb/before/dotfiles-repo/committing.md`:
+      dotfiles commits are held till session end. Which wins? Found 2026-11-24.
 - [x] `arch-svelte` (2022, one unique commit) archived as tag
       `archive/arch-svelte`, branch deleted — 2026-11-10
 
