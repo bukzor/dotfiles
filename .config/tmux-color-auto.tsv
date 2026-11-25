@@ -1,7 +1,7 @@
 session	status-style
-claude	bold,fg=white,bg=colour92
-infra	bold,fg=white,bg=colour130
-meta	bold,fg=white,bg=colour25
-mitmproxy	bold,fg=white,bg=colour30
-shadertoy	bold,fg=white,bg=colour124
-vim	bold,fg=white,bg=colour28
+claude	fg=default,bg=brightred
+infra	reverse,fg=brightblue,bg=default
+meta	fg=default,bg=white
+mitmproxy	reverse,fg=white,bg=default
+shadertoy	reverse,fg=brightcyan,bg=default
+vim	reverse,fg=brightred,bg=default
