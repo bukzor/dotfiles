@@ -1,68 +1,52 @@
-#!/usr/bin/env python3
-from __future__ import annotations
+#!/bin/bash
+# Give a tmux session a status-bar color no other session shows. The search
+# starts from a palette slot hashed from host and session name, so a session
+# keeps its color across restarts whenever that color is free.
+#
+# usage: tmux-color-auto [SESSION]   (default: the current session)
+# ~/.tmux.conf runs this from its session-created and session-renamed hooks.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
 
-from bukzor.sh import sh
+onerror() {
+  error="$?"
+  echo >&2 "tmux-color-auto: ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
 
-TMUX_COLOR = [
-    "black",
-    "red",
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-    "default",
-    "inv",
-]
+# Dark backgrounds that carry bold white text.
+PALETTE=(124 28 25 130 92 30 88 22 18 94 54 23)
 
-Color = tuple[str, str | tuple[str, ...]]
-ColorPair = tuple[Color, Color]
+if (( DEBUG > 0 )); then
+  set -x
+fi
 
-TMUX_COLORS: tuple[ColorPair, ...] = (
-    # bg, fg
-    (("*", "*"), ("*", "fg")),
-    (("*", "bg"), ("*", "*")),
-    (("*", "fg"), ("*", "*")),
-    (("*", "*"), ("*", "bg")),
-    (("*", "*"), ("bright", ("red", "green", "yellow"))),
-    (("dark", "black"), ("light", ("*", "-black"))),
-    (("dark", "red"), ("light", ("*", "-black", "-red"))),
+target=()
+if (( $# )); then
+  target=(-t "=$1:")
+fi
+info=$(tmux display-message -p "${target[@]}" '#{session_id} #{host} #{session_name}')
+id=${info%% *}
+seed=${info#* }
+
+# A session without a color of its own shows the global one, so it counts.
+used=$(
+  tmux list-sessions -f "#{!=:#{session_id},$id}" -F '#{status-style}' |
+    sed -n 's/.*bg=colour\([0-9]*\).*/\1/p'
 )
 
+n=${#PALETTE[@]}
+hash=$(sha256sum <<< "$seed")
+start=$(( 16#${hash:0:8} % n ))
+color=${PALETTE[start]}  # if every color is taken, share the hashed one
+for (( i = 0; i < n; i++ )); do
+  c=${PALETTE[(start + i) % n]}
+  if ! grep -qx "$c" <<< "$used"; then
+    color=$c
+    break
+  fi
+done
 
-def tmux_color_auto_select(session_name: str) -> tuple[int, int, bool]:
-    bg = int(sh.line(("roll", "0", "7", "bg", session_name)))
-    fg = int(sh.line(("roll", "0", "7", "fg", session_name)))
-    bright = bool(sh.line(("roll", "0", "1", "bright", session_name)))
-    return bg, fg, bright
-
-
-def tmux_color_auto_cmd(session_name: str) -> tuple[str, ...]:
-    bg, fg, bright = tmux_color_auto_select(session_name)
-    bg = TMUX_COLOR[bg]
-    fg = TMUX_COLOR[fg]
-    fg = f"bright{fg}" if bright else fg
-
-    return ("tmux", "-q", "set", "-s", "status-style", f"bold,fg={fg},bg={bg}")
-
-
-def tmux_color_auto(session_name: str):
-    return sh.run(tmux_color_auto_cmd(session_name))
-
-
-def main():
-    from sys import argv
-
-    try:
-        session_name = argv[1]
-    except IndexError:
-        session_name = sh.line(
-            ("tmux", "display-message", "-p", "#{session_name}")
-        )
-
-    return tmux_color_auto(session_name)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+tmux set -t "$id" status-style "bold,fg=white,bg=colour$color"

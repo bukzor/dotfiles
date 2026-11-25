@@ -1,10 +1,24 @@
 #!/bin/bash
 # Because i can never remember the proper tmux command.
-if [[ $1 ]]; then
+#
+# usage: tmux-color [-t SESSION | -g] [BG [FG [STYLE]]]
+#   Colors the status bar of the current session (or SESSION; -g: the global
+#   default, which sessions without their own color inherit).
+#   With no colors, shows the palette and the current value.
+scope=()
+while [[ "${1:-}" == -* ]]; do
+  case "$1" in
+    -t) scope+=(-t "=$2:"); shift 2 ;;
+    -g) scope+=(-g); shift ;;
+    *) echo >&2 "tmux-color: unknown flag: $1"; exit 2 ;;
+  esac
+done
+
+if [[ "${1:-}" ]]; then
   BG="$1"
   shift 1
 
-  if [[ $1 ]]; then
+  if [[ "${1:-}" ]]; then
       FG="$1"
   elif [[ "$BG" -le 15 ]]; then
       FG="bg"
@@ -34,12 +48,12 @@ if [[ $1 ]]; then
   case "$FG" in [0-9]*) FG=colour"$FG"; esac
 
   set -x
-  tmux -q set -s status-style "$style,fg=$FG,bg=$BG"
+  tmux set "${scope[@]}" status-style "$style,fg=$FG,bg=$BG"
 else
   set -x
   : show color options
   colortest256
 
-  : show current value
-  tmux show -s status-style
+  : show current value, '*' marks one inherited from the global default
+  tmux show -A "${scope[@]}" status-style
 fi
