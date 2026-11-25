@@ -6,5 +6,5 @@ if [ "$__NORECUR" = "$myname" ]; then
 else
   export __NORECUR="$myname"
 fi
-source ~/.sh_lib/functions.d/"$myname".sh
+. ~/.sh_lib/functions.d/"$myname".sh
 "$myname" "$@"
