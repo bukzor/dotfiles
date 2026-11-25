@@ -5,6 +5,7 @@ usage:
   tmux-color-auto [SESSION]                 color SESSION (default: the current one)
   tmux-color-auto --if-uncolored [SESSION]  same, unless it has a color of its own
   tmux-color-auto --save [SESSION]          make SESSION's current color its sticky one
+  tmux-color-auto --seed TEXT [SESSION]     re-roll SESSION's color with TEXT; save it
 
 A session gets its saved color, from $XDG_CONFIG_HOME/tmux-color-auto.tsv
 (default ~/.config), which the dotfiles repo carries across hosts. Lacking
@@ -21,18 +22,18 @@ from collections.abc import Mapping
 from pathlib import Path
 
 COLUMNS = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
-# colortest's rows, without its bold variants: bold doesn't tell sessions apart.
-# Terminal-theme colors, so they look native in any theme.
+# colortest's rows that color the whole bar, without their bold variants: bold
+# doesn't tell sessions apart, and a bar left the terminal's background reads
+# as missing. Terminal-theme colors, so they look native in any theme.
 ROWS = (
-    "fg={},bg=default",
-    "fg=bright{},bg=default",
     "fg=default,bg={}",
     "reverse,fg={},bg=default",
     "fg=default,bg=bright{}",
     "reverse,fg=bright{},bg=default",
 )
-# (row, column) cells seen unreadable, in hterm's dark theme.
-VETOED = frozenset({(0, 0), (4, 2), (4, 3), (5, 7)})
+# (row, column) cells that leave the bar black, or were seen unreadable in
+# hterm's dark theme.
+VETOED = frozenset({(0, 0), (1, 0), (2, 2), (2, 3), (3, 7)})
 HEADER = ("session", "status-style")
 
 
@@ -49,12 +50,14 @@ def render_saved(saved: Mapping[str, str]) -> str:
     return "".join(f"{name}\t{style}\n" for name, style in rows)
 
 
-def pick_style(name: str, saved: Mapping[str, str]) -> str:
-    """The color for an unsaved name: a function of the name and saved alone.
+def pick_style(name: str, saved: Mapping[str, str], seed: str = "") -> str:
+    """The color rolled for name and seed: a function of those and of the
+    colors saved for other names, alone.
 
     Every cell claimed: shares the rolled one.
     """
-    digest = hashlib.sha256(name.encode()).digest()
+    key = f"{name}\0{seed}" if seed else name
+    digest = hashlib.sha256(key.encode()).digest()
     row = int.from_bytes(digest[:8]) % len(ROWS)
     columns = [c for c in range(len(COLUMNS)) if (row, c) not in VETOED]
     column = columns[int.from_bytes(digest[8:16]) % len(columns)]
@@ -66,7 +69,7 @@ def pick_style(name: str, saved: Mapping[str, str]) -> str:
     ]
     start = cells.index((row, column))
     styles = [ROWS[r].format(COLUMNS[c]) for r, c in cells[start:] + cells[:start]]
-    claimed = set(saved.values())
+    claimed = {style for other, style in saved.items() if other != name}
     return next((style for style in styles if style not in claimed), styles[0])
 
 
@@ -94,7 +97,12 @@ def save_saved(path: Path, saved: Mapping[str, str]) -> None:
 def main(argv: list[str]) -> int:
     mode = argv[0] if argv[:1] and argv[0].startswith("-") else ""
     args = argv[1:] if mode else argv
-    if mode not in ("", "--if-uncolored", "--save") or len(args) > 1:
+    seed, args = (args[0], args[1:]) if mode == "--seed" and args else ("", args)
+    if (
+        mode not in ("", "--if-uncolored", "--save", "--seed")
+        or len(args) > 1
+        or (mode == "--seed" and not seed)
+    ):
         print(__doc__, file=sys.stderr)
         return 2
 
@@ -114,6 +122,11 @@ def main(argv: list[str]) -> int:
             file=sys.stderr,
         )
         return 1
+    elif mode == "--seed":
+        style = pick_style(name, saved, seed)
+        proc_tmux("set-option", "-t", f"={name}:", "status-style", style)
+        save_saved(path, {**saved, name: style})
+        return 0
     elif mode == "--if-uncolored" and own:
         return 0
     else:
