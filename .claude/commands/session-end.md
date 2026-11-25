@@ -59,17 +59,7 @@ Steps:
   2. Classify each item — see [Disposition](#disposition) below.
   3. Confirm choices with user if <90% certainty.
   4. Execute **now** items; then `subtask save` (handles todo.md + todo.kb) and stage any sessions.kb entries.
-- Update `~/.claude/sessions.kb/` (see `sessions.kb/CLAUDE.md` for what belongs):
-  1. If unsure whether an entry already corresponds to this session,
-     try to find one. Search recipes:
-     - `grep -Rl "$CLAUDE_CODE_SESSION_ID" ~/.claude/sessions.kb/`
-     - `grep -Rl "^cwd: $PWD" ~/.claude/sessions.kb/`
-  2. If an entry corresponds: update it with what was completed and
-     the current state of its follow-ups.
-  3. Propose new sibling entries for any follow-up work surfaced
-     this session (one entry per distinct line of work). Follow
-     `~/.claude/sessions.kb/.template.md` — substitute the
-     `$(...)` placeholders.
+- Follow end-of-session directions in skill://llm-sessions
 - Review diff before committing (see `before/git/commit.md`)
 - If confident, rectify. Otherwise, ask.
 - After changes, re-check the key questions.

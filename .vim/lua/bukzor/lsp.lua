@@ -186,6 +186,41 @@ end
 
 function M.setup_lspconfig()
   vim.cmd(":runtime plugin/lspconfig.lua") -- surely there's a better way?
+  M.define_lsp_aliases()
+  M.define_lsp_debug()
+end
+
+-- :LspDebug -- every setting wanted when diagnosing an LSP misbehaving in a
+-- live session. Run it before reproducing; it lasts until nvim exits.
+function M.define_lsp_debug()
+  vim.api.nvim_create_user_command("LspDebug", function()
+    vim.lsp.log.set_level("debug")
+    vim.notify("LSP debug logging on: " .. vim.lsp.log.get_filename())
+  end, { nargs = 0, desc = "Turn on LSP debug settings for this session." })
+end
+
+-- nvim >= 0.11.2 ships a builtin `:lsp`, which makes nvim-lspconfig's
+-- plugin/lspconfig.lua return early -- so the old :Lsp* commands vanished.
+-- Re-create them as aliases (finger-savers), unless something defines them.
+function M.define_lsp_aliases()
+  local aliases = {
+    LspInfo = { "checkhealth vim.lsp", nargs = 0 },
+    LspStart = { "lsp enable", nargs = "*" },
+    LspStop = { "lsp stop", nargs = "*" },
+    LspRestart = { "lsp restart", nargs = "*" },
+  }
+  for name, spec in pairs(aliases) do
+    if vim.fn.exists(":" .. name) == 0 then
+      vim.api.nvim_create_user_command(name, function(info)
+        vim.cmd(vim.trim(spec[1] .. " " .. info.args))
+      end, { nargs = spec.nargs, desc = "Alias to `:" .. spec[1] .. "`" })
+    end
+  end
+  if vim.fn.exists(":LspLog") == 0 then
+    vim.api.nvim_create_user_command("LspLog", function()
+      vim.cmd("tabnew " .. vim.fn.fnameescape(vim.lsp.log.get_filename()))
+    end, { desc = "Open the Nvim LSP client log." })
+  end
 end
 
 function M.on_attach_lspconfig(client, bufnr)

@@ -70,3 +70,10 @@ that), "don't poll the output file", and the `@name` notification warning
 (2.1.309) -- a real side effect on someone else, which nothing else in the
 config covers. Haiku's long form (2.1.287) gained only the foreground
 qualifier.
+
+2.1.330 (opus harness) documented that with `run_in_background`, `timeout` is
+how long the command may run (default 600000, max 7200000) before it is
+stopped and you are re-invoked -- folded into the stub's `timeout` line, since
+the foreground "max 600000" there was otherwise wrong for background work. It
+also dropped the "do not poll its output file" sentence; the stub keeps its
+own copy.
