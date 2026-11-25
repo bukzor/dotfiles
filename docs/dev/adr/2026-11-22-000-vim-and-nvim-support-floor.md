@@ -55,7 +55,8 @@ docker images, GKE nodes.
 
 **Neutral:**
 - Distro versions above (Vim and glibc per release) are from package records,
-  not re-verified here.
+  not re-verified here -- except ubuntu-22.04's Vim, confirmed 8.2.3995 (plus
+  security backports) by the CI job's `Included patches` line.
 
 ## Related
 
