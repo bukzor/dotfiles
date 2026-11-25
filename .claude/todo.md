@@ -130,6 +130,24 @@ Scope: `~` generally. For `~/.claude` scope, see `~/.claude/.claude/todo.md`.
         `bin/brew` runs the official installer, which may not support musl.
   - [ ] `must-read.kb/when/surveying-the-homedir-for-an-artifact-type.md`
         points at `~/claude/homedir-archeology/`, absent on buck-win10.
+- [ ] tmux session colors (`bin/tmux-color-auto`, 2026-11-25): owner
+      rulings and checks left open
+  - [ ] Rule: `~/.config/tmux-color-auto.tsv` still saves six names' old
+        256-colour colors. The live sessions show grid picks from a demo
+        run against an empty config, so a restart or rename brings the old
+        colors back. Keep the rows, or delete them to adopt the grid picks?
+        (`tmux-color-auto --seed TEXT` re-rolls one session and saves it.)
+  - [ ] Rule: delete `bin/tmux_color_auto_config.py`? It's an abandoned draft
+        of allow/deny color rules (it uses a `Color` that is never defined),
+        nothing calls it, and the grid covers its purpose. Recommendation:
+        delete it.
+  - [ ] In Windows Terminal, look at the grid (`colortest`, the
+        bar-filling rows) and add any unreadable cells to `VETOED`. The
+        current vetoes are hterm's.
+  - [ ] Check whether hterm draws a reverse row the same as the
+        background row above it: compare a `reverse,fg=brightred` session
+        with a `bg=brightred` one. If they match, drop the reverse `ROWS`,
+        which leaves about 13 distinct cells instead of 27.
 
 ## Later
 
