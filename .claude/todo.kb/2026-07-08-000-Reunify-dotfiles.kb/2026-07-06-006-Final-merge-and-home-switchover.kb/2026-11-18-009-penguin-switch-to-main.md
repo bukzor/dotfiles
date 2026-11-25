@@ -1,6 +1,6 @@
 ---
 managed-by: Skill(llm-subtask)
-status: open
+status: done
 blocked-by:
   - ./2026-11-18-008-merge-and-buck-win10-pull.md  # main must contain svelte-crostini
 required-reading:
@@ -73,8 +73,73 @@ submodule, penguin's dotfiles clones, `~/trash/`, this handoff file.
 
 ## Steps
 
+- [x] blocker: `ff853dc` in origin/main; 10 svelte-only commits merged
+- [x] scratch: 2 unpushed 2023 commits → `bukzor/scratch` branch `penguin-wgpu-2023-07`; submodule synced (now ssh)
+- [x] uncommitted state: carried across the checkout (Decisions)
+- [x] switch: `~` on `main`; ssh `.pub` symlink made
+- [x] rename: `merged/svelte-crostini`, local and origin, upstream set
+- [x] main clones trashed
+- [x] smoke test
+
 ## Decisions
+
+- Merge `CLAUDE.md`: kept main's copy, so svelte's whole "Branches" section
+  is gone, the push paragraph included. Main's "git policy: push once stable;
+  hold dotfiles commits till session end" commit already moved that rule
+  into `git/conventions.md`, and `~`'s working copy had dropped both. So the
+  006 push-vs-hold item may be moot: both texts come from that one commit,
+  and both call commits made while iterating churn.
+- `bash-preamble.py` conflict: both sides had the same fix; took svelte's
+  doctested `hook_output` (doctests pass).
+- Step 2: no stash (user rule: never `git stash`), and no commit of peers'
+  work. A peer edited `~` at 13:05 and 13:09, minutes before the switch.
+  `checkout -m` carried every edit across. The 3 files main also changed
+  were each merged ahead of time with `git merge-file`, all clean, and they
+  matched afterwards. Backups: `~/trash/switch-to-main/dirty-backup/`.
+- `~/.local/share/nvim` was a 1.1G real dir (mason, tree-sitters), and main
+  tracks that path as a symlink to `../../.vim/data`. I moved it aside,
+  checked out, and moved its contents into `~/.vim/data/` (ignored on main).
+- Untracked `.claude/must-read.kb/before/dotfiles-repo/committing.md` was
+  main's file minus its 2026-11-24 superseding ruling, and it blocked the
+  checkout. Moved to `~/trash/switch-to-main/untracked-stale/`.
+- Trashed both main clones: `dotfiles--main` and `dotfiles--main-reunify`
+  (869 behind). Both were clean, with nothing unpushed. Their git dirs stay
+  in git-localhost-store, because `dotfiles--ci-vim-config-tests` is a
+  worktree of `dotfiles--main`'s store (verified working after the move).
+- Out of scope, fixed (one word): `.sh_lib/functions-cli.sh` used `source`
+  under `#!/bin/sh`. Penguin's `/bin/sh` is dash, so `has` and `bootstamp`
+  failed. Now `.`; passes under dash, busybox sh, and bash.
 
 ## Open Questions
 
+1. Check sh on main has been red since 2026-11-22:
+   `mechanical-fast-forwards_check.sh` (`Brewfile` differs from svelte).
+   It has no skip-if-absent guard, so with `origin/svelte-crostini` gone it
+   now errors instead. Recommend deleting it: its header says it lasts until
+   006. Also delete `final-merge_check.sh`, which now always skips, and the
+   `fetch-depth` comment in `check-sh.yml`.
+2. `~` still carries peers' uncommitted WIP (vim config tests, skill-uri,
+   tmux-color, pnpm config, conventions.md). It belongs to its sessions, so
+   006's "`git status` clean" waits on them. Some of it mirrors
+   `ci-vim-config-tests` (006's open ruling).
+3. The general clone `~/repo/github.com/bukzor/dotfiles` sits on a local
+   `svelte-crostini` whose upstream is gone. It also has `orphan-recovery`
+   and `pre-swap` branches. Leave it, or rename the branch to `merged/…`?
+
 ## Final report
+
+- Pre-switch commit `d321e1f`. Merge `f490451` (parents `99a8bf8`, `d321e1f`)
+  pushed to main; `origin/svelte-crostini` is an ancestor of origin/main.
+- Checkout: 323 adds, 28 modifications, 0 deletions. The only ignored file
+  it clobbered was `.local/share/nvim` (handled above). Lists are in
+  `~/trash/switch-to-main/`.
+- Renamed to `merged/svelte-crostini` at `d321e1f`. The push started
+  svelte's old CI; I cancelled all 3 runs. Pruned the 3 other clones.
+- Smoke (`~/trash/switch-to-main/smoke-*.txt`), clean `env -i`: login bash,
+  `bash -i`, `zsh -il`, vim (0 errors), tmux `-L`, `has`, `bootstamp` (after
+  the fix): pass. nvim: `:Lazy! sync` updated 7 plugins, lockfile committed.
+  `:checkhealth` showed zsh treesitter query errors, fixed by a zsh parser
+  update. Its `$TERM` error comes from the headless run. kitty: not
+  installed on penguin, not run. Login shells under `env -i` print a
+  systemd user-bus warning; none when `XDG_RUNTIME_DIR` is set.
+- Main's Check Vim, Check Neovim, and Lint Lua: green on `f490451`.
