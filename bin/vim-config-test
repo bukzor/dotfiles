@@ -1,0 +1,26 @@
+#!/bin/bash
+# usage: vim-config-test [EDITOR...]   (default: nvim vim)
+#
+# Load the vim/nvim config of the dotfiles tree this script lives in, headless,
+# and run its Test_* functions (lib/vim-config-test.vim). Exit nonzero on the
+# first editor with a failure.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+runner="$root/lib/vim-config-test.vim"
+flag='let g:config_under_test = 1'
+
+(( $# )) || set -- nvim vim
+for editor; do
+  version="$("$editor" --version)"
+  printf '%s\n' "$version" | sed -n 's/^/==> /; 1p; /Included patches/p'
+  case "$version" in
+    NVIM*)
+      XDG_CONFIG_HOME="$root/.config" "$editor" --headless --cmd "$flag" -S "$runner"
+      ;;
+    *)
+      "$editor" -Nu "$root/.vimrc" -i NONE -es --cmd "$flag" \
+        --cmd "set runtimepath^=$root/.vim packpath^=$root/.vim" -S "$runner" </dev/null
+      ;;
+  esac
+done
