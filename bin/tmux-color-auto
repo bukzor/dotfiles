@@ -1,52 +1,106 @@
-#!/bin/bash
-# Give a tmux session a status-bar color no other session shows. The search
-# starts from a palette slot hashed from host and session name, so a session
-# keeps its color across restarts whenever that color is free.
-#
-# usage: tmux-color-auto [SESSION]   (default: the current session)
-# ~/.tmux.conf runs this from its session-created and session-renamed hooks.
-set -euo pipefail
-shopt -s failglob
-export DEBUG="${DEBUG:-0}"
+#!/usr/bin/env python3
+"""Sticky tmux status-bar colors, one per session name.
 
-onerror() {
-  error="$?"
-  echo >&2 "tmux-color-auto: ERROR($error)"
-  exit "$error"
-}
-trap onerror ERR
+usage:
+  tmux-color-auto [SESSION]         color SESSION (default: the current one)
+  tmux-color-auto --save [SESSION]  make SESSION's current color its sticky one
+
+A session gets its saved color, from $XDG_CONFIG_HOME/tmux-color-auto.tsv
+(default ~/.config), which the dotfiles repo carries across hosts. Lacking
+one, it gets a color that depends only on its name and that file: the first
+palette color, from a slot hashed from the name, that no saved name claims.
+"""
+
+import hashlib
+import os
+import re
+import subprocess
+import sys
+from collections.abc import Mapping
+from pathlib import Path
 
 # Dark backgrounds that carry bold white text.
-PALETTE=(124 28 25 130 92 30 88 22 18 94 54 23)
+PALETTE = (124, 28, 25, 130, 92, 30, 88, 22, 18, 94, 54, 23)
+HEADER = ("session", "status-style")
 
-if (( DEBUG > 0 )); then
-  set -x
-fi
 
-target=()
-if (( $# )); then
-  target=(-t "=$1:")
-fi
-info=$(tmux display-message -p "${target[@]}" '#{session_id} #{host} #{session_name}')
-id=${info%% *}
-seed=${info#* }
+def parse_saved(text: str) -> dict[str, str]:
+    lines = text.splitlines()
+    assert tuple(lines[0].split("\t")) == HEADER, lines[0]
+    rows = [line.split("\t") for line in lines[1:] if line]
+    assert all(len(row) == 2 for row in rows), rows
+    return dict(rows)
 
-# A session without a color of its own shows the global one, so it counts.
-used=$(
-  tmux list-sessions -f "#{!=:#{session_id},$id}" -F '#{status-style}' |
-    sed -n 's/.*bg=colour\([0-9]*\).*/\1/p'
-)
 
-n=${#PALETTE[@]}
-hash=$(sha256sum <<< "$seed")
-start=$(( 16#${hash:0:8} % n ))
-color=${PALETTE[start]}  # if every color is taken, share the hashed one
-for (( i = 0; i < n; i++ )); do
-  c=${PALETTE[(start + i) % n]}
-  if ! grep -qx "$c" <<< "$used"; then
-    color=$c
-    break
-  fi
-done
+def render_saved(saved: Mapping[str, str]) -> str:
+    rows = [HEADER, *sorted(saved.items())]
+    return "".join(f"{name}\t{style}\n" for name, style in rows)
 
-tmux set -t "$id" status-style "bold,fg=white,bg=colour$color"
+
+def pick_style(name: str, saved: Mapping[str, str]) -> str:
+    """The color for an unsaved name: a function of the name and saved alone.
+
+    Every palette color claimed: shares the hashed one.
+    """
+    claimed = {
+        int(m[1])
+        for style in saved.values()
+        if (m := re.search(r"bg=colour(\d+)", style))
+    }
+    start = int(hashlib.sha256(name.encode()).hexdigest()[:8], 16) % len(PALETTE)
+    ring = PALETTE[start:] + PALETTE[:start]
+    color = next((c for c in ring if c not in claimed), ring[0])
+    return f"bold,fg=white,bg=colour{color}"
+
+
+def proc_tmux(*args: str) -> str:
+    result = subprocess.run(
+        ("tmux", *args), check=True, stdout=subprocess.PIPE, text=True
+    )
+    return result.stdout.rstrip("\n")
+
+
+def load_saved(path: Path) -> dict[str, str]:
+    try:
+        text = path.read_text()
+    except FileNotFoundError:
+        return {}
+    return parse_saved(text)
+
+
+def save_saved(path: Path, saved: Mapping[str, str]) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(render_saved(saved))
+    tmp.replace(path)
+
+
+def main(argv: list[str]) -> int:
+    save = argv[:1] == ["--save"]
+    args = argv[1:] if save else argv
+    if len(args) > 1 or any(arg.startswith("-") for arg in args):
+        print(__doc__, file=sys.stderr)
+        return 2
+
+    target = ("-t", f"={args[0]}:") if args else ()
+    name = proc_tmux("display-message", "-p", *target, "#{session_name}")
+    config = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    path = config / "tmux-color-auto.tsv"
+    saved = load_saved(path)
+
+    if not save:
+        style = saved.get(name) or pick_style(name, saved)
+        proc_tmux("set-option", "-t", f"={name}:", "status-style", style)
+        return 0
+    elif style := proc_tmux("show-options", "-t", f"={name}:", "-v", "status-style"):
+        save_saved(path, {**saved, name: style})
+        return 0
+    else:
+        print(
+            f"tmux-color-auto: session {name!r} has no color of its own",
+            file=sys.stderr,
+        )
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

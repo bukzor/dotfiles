@@ -1,0 +1,7 @@
+session	status-style
+claude	bold,fg=white,bg=colour92
+infra	bold,fg=white,bg=colour130
+meta	bold,fg=white,bg=colour25
+mitmproxy	bold,fg=white,bg=colour30
+shadertoy	bold,fg=white,bg=colour124
+vim	bold,fg=white,bg=colour28

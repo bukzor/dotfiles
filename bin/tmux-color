@@ -3,12 +3,14 @@
 #
 # usage: tmux-color [-t SESSION | -g] [BG [FG [STYLE]]]
 #   Colors the status bar of the current session (or SESSION; -g: the global
-#   default, which sessions without their own color inherit).
+#   default, which sessions without their own color inherit). A session's
+#   color sticks to its name, on every host: see tmux-color-auto.
 #   With no colors, shows the palette and the current value.
 scope=()
+session=()
 while [[ "${1:-}" == -* ]]; do
   case "$1" in
-    -t) scope+=(-t "=$2:"); shift 2 ;;
+    -t) scope+=(-t "=$2:"); session=("$2"); shift 2 ;;
     -g) scope+=(-g); shift ;;
     *) echo >&2 "tmux-color: unknown flag: $1"; exit 2 ;;
   esac
@@ -49,6 +51,9 @@ if [[ "${1:-}" ]]; then
 
   set -x
   tmux set "${scope[@]}" status-style "$style,fg=$FG,bg=$BG"
+  if [[ "${scope[*]:-}" != -g ]]; then
+    "$HOME/bin/tmux-color-auto" --save "${session[@]}"
+  fi
 else
   set -x
   : show color options
