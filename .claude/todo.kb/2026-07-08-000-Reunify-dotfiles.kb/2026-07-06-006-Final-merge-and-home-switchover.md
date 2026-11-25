@@ -32,26 +32,29 @@ every host, retire svelte-crostini and wsl-buck-win10.
       spot-check resurrected main-only survivors)
 - [x] push main
 - [x] buck-win10, brought ahead of the merge: [switch `~` to main, retire `wsl-buck-win10`](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-000-switch-buck-win10-home-to-main.md) — done 2026-11-18 (pre-switch `fa3f7c7`); open questions there
-- [ ] per host (penguin, buck-win10), in live `~`: note the pre-switch commit id,
-      fetch, `git checkout main`, working-tree diff review
-- [ ] smoke test on each host: new login shell, bash -i, zsh -i, vim, tmux,
+- [x] per host (penguin, buck-win10), in live `~`: note the pre-switch commit id,
+      fetch, `git checkout main`, working-tree diff review — buck-win10
+      `fa3f7c7` (unit 000), penguin `d321e1f` (unit 009)
+- [x] smoke test on each host: new login shell, bash -i, zsh -i, vim, tmux,
       and `~/bin/has` + `~/bin/bootstamp` (they need `.sh_lib/functions-cli.sh`,
       which only main carries)
 - [x] [!DRAFT] 2026-11-18: moot. `check-sh.yml` already has `fetch-depth: 0`, and
       `final-merge_check.sh` skips once svelte-crostini is renamed (unit 008). Was:
       CI: `fetch-depth: 0` (the deferred 2026-07-07-000 item), if the merge-tree
       check runs in CI
-- [ ] once no host's `~` checks it out: rename svelte-crostini and
+- [x] once no host's `~` checks it out: rename svelte-crostini and
       wsl-buck-win10 to `merged/…`, locally and on origin (rule in
       [CLAUDE.md](CLAUDE.md); origin's default branch is already main)
-- [ ] user ruling: origin's `ci-vim-config-tests` (2 WIP commits atop main
-      `d377f4b`, 2026-11-22, "scratch branch for CI"; no session or todo names
-      it) — merge, rename `merged/…`, or delete. Blocks "no branches carrying
-      unique content". Found 2026-11-24.
-- [ ] user ruling: two 2026-11-22 `[!@bukzor]` rules disagree, and 009's merge
-      lands both on main — svelte `CLAUDE.md` (`87583f8`): "push each commit
-      once it's made"; main `.claude/must-read.kb/before/dotfiles-repo/committing.md`:
-      dotfiles commits are held till session end. Which wins? Found 2026-11-24.
+- [x] origin's `ci-vim-config-tests` (2 WIP commits atop main `d377f4b`,
+      2026-11-22): merged into main 2026-11-25, renamed `merged/…`.
+      > [!@bukzor] 2026-11-25: it and the same work uncommitted in `~` are
+      > a merge conflict; resolve it, keeping the more developed side.
+
+      `~` held the branch's first commit exactly, so the branch won every
+      path; `~`'s copies are in `~/trash/ci-vim-config-tests-merge/`.
+- [x] two 2026-11-22 `[!@bukzor]` push/hold rules seemed to disagree. Closed
+      by the user 2026-11-25 ([!@bukzor]): both come from the same commit,
+      and `git/conventions.md` holds the rule: push each commit once stable.
 - [x] `arch-svelte` (2022, one unique commit) archived as tag
       `archive/arch-svelte`, branch deleted — 2026-11-10
 
@@ -76,10 +79,13 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
       > [!@bukzor] 2026-11-18: leave them (in place, untracked, not ignored).
 - [ ] [!DRAFT] 2026-11-18: keep `installMethod: native` (as penguin); once no session runs it,
       trash the pnpm and `~/prefix/npm-global` copies of `claude` (unit 011 OQ 2)
-- [ ] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md); coordinator: merge svelte-crostini into main after each plan commit, so 009's ancestor check passes
-- [ ] penguin, before its switch: check scratch `b45a792` for unpushed work,
+- [x] [penguin: everything, in one sitting](2026-07-06-006-Final-merge-and-home-switchover.kb/2026-11-18-009-penguin-switch-to-main.md) — 2026-11-25; report reviewed, claims checked against the repos
+  - [x] its OQ1: [!@bukzor] 2026-11-25 delete `mechanical-fast-forwards_check.sh`,
+        `final-merge_check.sh`, and `check-sh.yml`'s `fetch-depth: 0` (it served only them)
+  - [x] its OQ3: [!@bukzor] 2026-11-25 the general clone's `svelte-crostini` renamed `merged/svelte-crostini`
+- [x] penguin, before its switch: check scratch `b45a792` for unpushed work,
       push it to `bukzor/scratch`, then `git submodule sync repo/scratch` (unit 004/005)
-- [ ] penguin, after pulling: `ln -s id_ed25519.pub.bukzor.chromebook ~/.ssh/id_ed25519.pub`
+- [x] penguin, after pulling: `ln -s id_ed25519.pub.bukzor.chromebook ~/.ssh/id_ed25519.pub`
       (pulling unit 007's rename deletes penguin's plain `id_ed25519.pub`)
 - [x] buck-win10's `dotfiles--main` moved to `~/trash/` 2026-11-24 ([!@bukzor]:
       `~` on main is the working copy; the clone is obsolete). Superseded the
@@ -87,8 +93,8 @@ Fallout from buck-win10's switch (units 2026-11-18-000/001/002):
 
 ## Success Criteria
 
-- [ ] every host's `~` is on main; `git -C ~ status` clean; all daily tools work
-- [ ] one lineage; no branches carrying unique content
+- [ ] every host's `~` is on main (done); `git -C ~ status` clean (waits on peers' WIP); all daily tools work
+- [x] one lineage; no branches carrying unique content (origin: `main` + `merged/*`)
 
 ## Notes
 
