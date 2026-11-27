@@ -1,0 +1,26 @@
+#!/bin/bash
+# open - macOS-style `open` for WSL: files and directories go to wslview,
+# URLs to wslbrowse (wslview mishandles URLs on this WSL build; see
+# ~/bin/wslbrowse). ~/bin/wsl-only/ is on PATH only under WSL
+# (~/.config/sh/env.d/wsl.sh), so macOS keeps its own /usr/bin/open.
+set -euo pipefail
+shopt -s failglob
+export DEBUG="${DEBUG:-0}"
+
+onerror() {
+  error="$?"
+  echo >&2 "ERROR($error)"
+  exit "$error"
+}
+trap onerror ERR
+
+if (( DEBUG > 0 )); then
+  set -x
+fi
+
+for target in "$@"; do
+  case "$target" in
+    *://* | mailto:*) wslbrowse "$target" ;;
+    *) wslview "$target" ;;
+  esac
+done
